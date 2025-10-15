@@ -1,0 +1,16 @@
+$primary: #ff6f61; // Màu cam san hô
+$light: #f3f3f3;
+$body-bg: $light;
+$font-family-sans-serif: "Helvetica Neue", Helvetica, Arial, sans-serif;
+$font-family-base: $font-family-sans-serif;
+@import "bootstrap/scss/bootstrap";
+.my-custom-header {
+  color: $primary;
+  padding: 20px;
+  text-align: center;
+}
+
+.btn-primary {
+  border-radius: 50px;
+  font-weight: bold;
+}
