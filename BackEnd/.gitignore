@@ -1,0 +1,27 @@
+# Dependencies
+/node_modules
+
+# Biến môi trường và khóa bảo mật
+.env
+.env.local
+.env.development
+.env.production
+# Nếu bạn dùng file config/secrets khác
+secrets.json
+
+# Build artifacts
+/dist
+/build
+/tmp
+
+# Log files
+*.log
+npm-debug.log*
+
+# Thư mục/File của hệ điều hành và IDE
+.DS_Store
+*.seed
+*.sql
+*.sqlite
+.vscode/
+.idea/
