@@ -15,6 +15,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
+import "../Layout.scss";
 
 // Dữ liệu mock
 const revenueData = [
