@@ -1,0 +1,53 @@
+.order-detail-page {
+  background: #f9fbff;
+  min-height: 100vh;
+
+  h2 {
+    font-weight: 700;
+  }
+
+  .card {
+    border-radius: 12px;
+    border: none;
+  }
+
+  .product-table {
+    background: #fff;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 3px 10px rgba(13, 110, 253, 0.1);
+
+    th {
+      background-color: #0d6efd;
+      color: #fff;
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.9rem;
+    }
+
+    td {
+      font-weight: 500;
+      color: #333;
+    }
+
+    .product-img {
+      width: 60px;
+      height: 60px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+  }
+
+  .progress {
+    height: 1.2rem;
+    font-weight: 600;
+  }
+
+  .btn-outline-secondary {
+    border-color: #ccc;
+    color: #555;
+    &:hover {
+      background-color: #f8f9fa;
+    }
+  }
+}

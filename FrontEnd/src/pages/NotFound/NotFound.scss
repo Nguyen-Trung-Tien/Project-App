@@ -1,0 +1,30 @@
+.notfound-page {
+  min-height: 100vh;
+  background-color: #f8f9fa;
+  color: #333;
+  padding: 2rem;
+
+  .icon-warning {
+    font-size: 4rem;
+    color: #dc3545; // màu đỏ cảnh báo
+  }
+
+  h1 {
+    font-size: 5rem;
+    font-weight: 700;
+  }
+
+  p {
+    max-width: 480px;
+    margin: 0 auto;
+  }
+
+  .btn {
+    border-radius: 30px;
+    transition: 0.3s;
+    &:hover {
+      background-color: #0d6efd;
+      transform: scale(1.05);
+    }
+  }
+}

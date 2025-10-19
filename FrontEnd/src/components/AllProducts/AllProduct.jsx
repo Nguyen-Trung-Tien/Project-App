@@ -61,8 +61,8 @@ const AllProducts = () => {
       <Container>
         <h2 className="section-title text-center mb-4">Tất cả sản phẩm</h2>
         <Row className="g-4 justify-content-center">
-          {products.map((p) => (
-            <Col key={p.id} md={3} sm={6} xs={12}>
+          {products.map((p, index) => (
+            <Col key={`${p.id}-${index}`} md={3} sm={6} xs={12}>
               <ProductCard product={p} />
             </Col>
           ))}

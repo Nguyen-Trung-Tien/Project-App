@@ -1,13 +1,12 @@
 import React from "react";
 import { Container, Row, Col, Form, Button, Card } from "react-bootstrap";
-import "./LoginPage.scss";
+import "./RegisterPage.scss";
 import { useNavigate } from "react-router";
 
-const LoginPage = () => {
-  const handleSubmit = (e) => {
+const RegisterPage = () => {
+  const handleRegister = (e) => {
     e.preventDefault();
-    //  Gọi API đăng nhập ở đây
-    console.log("Đăng nhập...");
+    console.log("Đăng ký...");
   };
 
   const navigate = useNavigate();
@@ -16,21 +15,31 @@ const LoginPage = () => {
     navigate("/");
   };
   return (
-    <div className="login-page">
+    <div className="register-page">
       <Container className="d-flex justify-content-center align-items-center vh-100">
         <Row className="w-100 justify-content-center">
-          <Col md={5}>
-            <Card className="login-card shadow-lg border-0">
+          <Col md={6} lg={5}>
+            <Card className="register-card shadow-lg border-0">
               <Card.Body>
                 <h3 className="text-center mb-4 fw-bold text-primary">
-                  Đăng nhập
+                  Tạo tài khoản
                 </h3>
-                <Form onSubmit={handleSubmit}>
+
+                <Form onSubmit={handleRegister}>
+                  <Form.Group controlId="username" className="mb-3">
+                    <Form.Label>Họ và tên</Form.Label>
+                    <Form.Control
+                      type="text"
+                      placeholder="Nhập họ và tên"
+                      required
+                    />
+                  </Form.Group>
+
                   <Form.Group controlId="email" className="mb-3">
                     <Form.Label>Email</Form.Label>
                     <Form.Control
                       type="email"
-                      placeholder="Nhập email của bạn"
+                      placeholder="Nhập email"
                       required
                     />
                   </Form.Group>
@@ -44,26 +53,28 @@ const LoginPage = () => {
                     />
                   </Form.Group>
 
-                  <div className="d-flex justify-content-between align-items-center mb-3">
-                    <Form.Check type="checkbox" label="Ghi nhớ tôi" />
-                    <a href="#" className="text-decoration-none text-primary">
-                      Quên mật khẩu?
-                    </a>
-                  </div>
+                  <Form.Group controlId="confirmPassword" className="mb-3">
+                    <Form.Label>Xác nhận mật khẩu</Form.Label>
+                    <Form.Control
+                      type="password"
+                      placeholder="Nhập lại mật khẩu"
+                      required
+                    />
+                  </Form.Group>
 
                   <Button
                     variant="primary"
                     type="submit"
                     className="w-100 rounded-pill py-2 fw-semibold"
                   >
-                    Đăng nhập
+                    Đăng ký
                   </Button>
                 </Form>
 
                 <p className="text-center mt-4 mb-0 text-muted">
-                  Chưa có tài khoản?{" "}
-                  <a href="/register" className="text-primary fw-semibold">
-                    Đăng ký ngay
+                  Đã có tài khoản?{" "}
+                  <a href="/login" className="text-primary fw-semibold">
+                    Đăng nhập ngay
                   </a>
                 </p>
               </Card.Body>
@@ -84,4 +95,4 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage;
+export default RegisterPage;

@@ -1,0 +1,56 @@
+.profile-page {
+  background: #f9fbff;
+  min-height: 100vh;
+
+  h2 {
+    font-weight: 700;
+  }
+
+  .profile-card {
+    border-radius: 15px;
+    background: #fff;
+    transition: all 0.3s ease;
+
+    &:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 10px 25px rgba(13, 110, 253, 0.15);
+    }
+
+    .avatar-wrapper {
+      width: 120px;
+      height: 120px;
+      margin: 0 auto;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 3px solid #0d6efd;
+      box-shadow: 0 0 10px rgba(13, 110, 253, 0.3);
+    }
+
+    .avatar {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+
+  .profile-info {
+    background: #fff;
+    border-radius: 15px;
+
+    label {
+      font-weight: 500;
+      color: #444;
+    }
+
+    input[disabled] {
+      background-color: #f8f9fa;
+      cursor: not-allowed;
+    }
+
+    .btn {
+      border-radius: 999px;
+      padding: 0.5rem 1.5rem;
+      font-weight: 500;
+    }
+  }
+}
