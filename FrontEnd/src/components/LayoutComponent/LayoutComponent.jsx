@@ -6,7 +6,7 @@ const LayoutComponent = ({ children, isShowHeader, isShowFooter }) => {
     <>
       {isShowHeader && <Header />}
       <main>{children}</main>
-      {isShowFooter && <Header />}
+      {isShowFooter && <Footer />}
     </>
   );
 };

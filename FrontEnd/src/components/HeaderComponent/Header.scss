@@ -1,0 +1,112 @@
+.header {
+  background: #ffffffcc; // trắng trong suốt nhẹ
+  backdrop-filter: blur(10px);
+  padding: 0.4rem 0;
+  transition: all 0.3s ease;
+  font-family: "Poppins", sans-serif;
+  z-index: 999;
+
+  .header__brand {
+    font-weight: 700;
+    font-size: 1.4rem;
+    color: #0d6efd !important;
+    letter-spacing: 0.5px;
+
+    .brand-highlight {
+      color: #dc3545; // chữ E màu đỏ nhấn thương hiệu
+    }
+  }
+
+  .header__nav .header__link {
+    color: #333 !important;
+    margin-right: 0.8rem;
+    font-weight: 500;
+    transition: color 0.3s ease;
+
+    &:hover {
+      color: #0d6efd !important;
+      text-shadow: 0 0 5px rgba(13, 110, 253, 0.4);
+    }
+  }
+
+  .header__dropdown .dropdown-menu {
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border: none;
+  }
+
+  /* Search box VIP */
+  .header__search {
+    display: flex;
+    align-items: center;
+    margin: 0 auto;
+    min-width: 500px;
+
+    .header__search-box {
+      position: relative;
+      flex: 1;
+
+      .search-icon {
+        position: absolute;
+        top: 50%;
+        left: 10px;
+        transform: translateY(-50%);
+        color: #777;
+      }
+
+      .header__search-input {
+        width: 100%;
+        border-radius: 999px;
+        padding: 0.35rem 0.75rem 0.35rem 2rem;
+        font-size: 0.9rem;
+        border: 1px solid #ddd;
+        transition: all 0.3s ease;
+
+        &:focus {
+          border-color: #0d6efd;
+          box-shadow: 0 0 6px rgba(13, 110, 253, 0.3);
+        }
+      }
+    }
+
+    .header__search-btn {
+      margin-left: 8px;
+      padding: 0.3rem 0.9rem;
+      font-size: 0.85rem;
+      border-radius: 999px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+
+      &:hover {
+        transform: scale(1.05);
+        box-shadow: 0 2px 6px rgba(13, 110, 253, 0.3);
+      }
+    }
+  }
+
+  /* Action icons */
+  .header__actions {
+    display: flex;
+    align-items: center;
+    margin-left: 1rem;
+
+    .header__icon-link {
+      display: flex;
+      align-items: center;
+      color: #333 !important;
+      font-weight: 500;
+      font-size: 0.9rem;
+      margin-left: 1rem;
+      transition: all 0.3s ease;
+
+      svg {
+        margin-right: 5px;
+      }
+
+      &:hover {
+        color: #0d6efd !important;
+        transform: translateY(-1px);
+      }
+    }
+  }
+}

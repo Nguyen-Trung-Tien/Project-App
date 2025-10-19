@@ -2,7 +2,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import Footer from "./components/FooterComponent/Footer";
 import Header from "./components/HeaderComponent/Header";
 import Dashboard from "./pages/Dashboard";
-import HomePage from "./pages/HomePage";
+import HomePage from "./pages/HomePage/HomePage";
 import LoginPage from "./pages/LoginPage/LoginPage";
 import PrivateRoute from "./routes/PrivateRoute";
 import PublicRoute from "./routes/PublicRoute";
