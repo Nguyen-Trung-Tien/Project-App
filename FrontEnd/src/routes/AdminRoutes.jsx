@@ -8,6 +8,7 @@ import UserManage from "../Admin/pages/UserManage";
 import Categories from "../Admin/pages/Categories";
 import Settings from "../Admin/pages/Settings";
 import AdminLogin from "../Admin/pages/Login";
+import Revenue from "../Admin/pages/Revenue";
 
 const AdminRoutes = () => {
   return (
@@ -19,6 +20,7 @@ const AdminRoutes = () => {
         <Route path="orders" element={<OrderManage />} />
         <Route path="products" element={<ProductManage />} />
         <Route path="users" element={<UserManage />} />
+        <Route path="revenue" element={<Revenue />} />
         <Route path="categories" element={<Categories />} />
         <Route path="settings" element={<Settings />} />
       </Route>

@@ -3,6 +3,7 @@ import { Row, Col, Container } from "react-bootstrap";
 import StatsCard from "../components/StatsCard";
 import ChartCard from "../components/ChartCard";
 import { FaBox, FaShoppingCart, FaDollarSign, FaUsers } from "react-icons/fa";
+import { Link } from "react-router-dom";
 
 const Dashboard = () => {
   const stats = [
@@ -12,6 +13,7 @@ const Dashboard = () => {
       icon: <FaBox size={24} />,
       change: "+8%",
       isIncrease: true,
+      link: "/admin/products",
     },
     {
       title: "Đơn hàng hôm nay",
@@ -19,6 +21,7 @@ const Dashboard = () => {
       icon: <FaShoppingCart size={24} />,
       change: "+5%",
       isIncrease: true,
+      link: "/admin/orders",
     },
     {
       title: "Doanh thu",
@@ -26,6 +29,7 @@ const Dashboard = () => {
       icon: <FaDollarSign size={24} />,
       change: "-3%",
       isIncrease: false,
+      link: "/admin/revenue",
     },
     {
       title: "Người dùng",
@@ -33,6 +37,7 @@ const Dashboard = () => {
       icon: <FaUsers size={24} />,
       change: "+2%",
       isIncrease: true,
+      link: "/admin/users",
     },
   ];
 
@@ -42,16 +47,16 @@ const Dashboard = () => {
         <Container fluid className="p-4">
           <h3 className="mb-4 fw-bold">📊 Thống kê tổng quan</h3>
 
-          {/* Các thẻ thống kê */}
           <Row>
             {stats.map((item, i) => (
               <Col key={i} md={3} sm={6} className="mb-4">
-                <StatsCard {...item} />
+                <Link to={item.link} style={{ textDecoration: "none" }}>
+                  <StatsCard {...item} />
+                </Link>
               </Col>
             ))}
           </Row>
 
-          {/* Biểu đồ */}
           <Row className="mt-4">
             <Col md={12}>
               <ChartCard />

@@ -9,7 +9,9 @@ import {
   FiLayers,
   FiSettings,
   FiLogOut,
+  FiBarChart,
 } from "react-icons/fi";
+
 import "../Layout.scss";
 
 const Sidebar = () => {
@@ -26,6 +28,11 @@ const Sidebar = () => {
     { to: "/admin/products", icon: <FiBox size={18} />, label: "Sản phẩm" },
     { to: "/admin/users", icon: <FiUsers size={18} />, label: "Người dùng" },
     {
+      to: "/admin/revenue",
+      icon: <FiBarChart size={18} />,
+      label: "Doanh thu",
+    },
+    {
       to: "/admin/categories",
       icon: <FiLayers size={18} />,
       label: "Danh mục",
@@ -39,9 +46,10 @@ const Sidebar = () => {
   };
 
   return (
-    <div className="sidebar bg-dark text-white p-3 vh-100 d-flex flex-column justify-content-between">
+    <div className="sidebar d-flex flex-column justify-content-between">
+      {/* Header */}
       <div>
-        <h5 className="fw-bold mb-4 text-center">🛠️ Admin Panel</h5>
+        <h5 className="fw-bold mb-4 text-center text-dark">🛠️ Admin Panel</h5>
         <Nav className="flex-column">
           {menuItems.map((item, i) => (
             <Nav.Link
@@ -59,11 +67,9 @@ const Sidebar = () => {
         </Nav>
       </div>
 
-      {/* Logout */}
-      <div className="mt-3">
+      <div>
         <Button
-          variant="outline-light"
-          className="w-100 d-flex align-items-center justify-content-center"
+          className="btn-logout mt-3 w-100 d-flex align-items-center justify-content-center"
           onClick={handleLogout}
         >
           <FiLogOut className="me-2" /> Đăng xuất

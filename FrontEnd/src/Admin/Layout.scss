@@ -79,34 +79,53 @@
   }
 }
 .sidebar {
-  background-color: #1e1e2d;
-  min-width: 220px;
-  transition: all 0.3s ease;
+  width: 240px;
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  background-color: #f8f9fa;
+  color: #212529;
+  padding: 1.5rem 1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border-right: 1px solid #dee2e6;
 
   .sidebar-link {
-    color: #cfcfcf !important;
-    font-weight: 500;
-    transition: all 0.2s;
+    color: #495057;
+    text-decoration: none;
+    padding: 0.6rem 1rem;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    transition: all 0.2s ease;
 
-    &:hover {
-      background-color: #2d2d44;
-      color: #fff !important;
+    &:hover,
+    &.active {
+      background-color: #e9ecef;
+      color: #0d6efd;
     }
 
-    &.active {
-      background-color: #0d6efd;
-      color: #fff !important;
-      font-weight: 600;
-      box-shadow: 0 3px 6px rgba(13, 110, 253, 0.4);
+    span {
+      font-weight: 500;
     }
   }
 
-  button {
-    border-radius: 12px;
+  .btn-logout {
+    background-color: #fff;
+    color: #212529;
+    border: 1px solid #ced4da;
+    padding: 0.5rem;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background-color: #e9ecef;
+      color: #0d6efd;
+    }
   }
 }
 
-/* Responsive (ẩn text, chỉ hiện icon khi hẹp) */
 @media (max-width: 992px) {
   .sidebar {
     min-width: 80px;
@@ -209,4 +228,8 @@
 
 button {
   border-radius: 12px;
+}
+
+.recharts-wrapper *:focus {
+  outline: none;
 }

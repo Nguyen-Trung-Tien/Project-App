@@ -27,7 +27,6 @@ const UserRoutes = () => {
         <Route path="*" element={<NotFound />} />
       </Route>
 
-      {/* Private routes (yêu cầu đăng nhập) */}
       <Route element={<PrivateRoute />}>
         <Route path="/cart" element={<CartPage />} />
         <Route path="/checkout" element={<CheckoutPage />} />

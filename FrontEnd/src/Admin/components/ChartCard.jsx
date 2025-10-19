@@ -9,7 +9,7 @@ import {
   ResponsiveContainer,
   CartesianGrid,
 } from "recharts";
-
+import "./Layout.scss";
 const ChartCard = () => {
   // Dữ liệu mẫu
   const dataWeek = [
