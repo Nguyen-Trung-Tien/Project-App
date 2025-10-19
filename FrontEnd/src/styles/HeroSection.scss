@@ -1,5 +1,5 @@
 .hero-section {
-  height: 65vh; // giảm chiều cao xuống cho gọn
+  height: 55vh;
   display: flex;
   align-items: center;
   justify-content: flex-start;
@@ -13,7 +13,7 @@
   position: relative;
   overflow: hidden;
   border-radius: 1rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
 
   // overlay sáng nhẹ phía dưới
   &::after {

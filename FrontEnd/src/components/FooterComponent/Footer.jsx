@@ -12,9 +12,9 @@ import "./Footer.scss";
 
 const Footer = () => {
   return (
-    <footer className="footer mt-5 pt-5 pb-3">
+    <footer className="footer mt-2 pt-2 pb-3">
       <Container>
-        <Row className="gy-4">
+        <Row className="gy-2">
           {/* Cột 1 */}
           <Col md={3} sm={6}>
             <h5 className="footer__title">E-Store</h5>
@@ -77,7 +77,7 @@ const Footer = () => {
               </li>
             </ul>
 
-            <div className="footer__social mt-3">
+            <div className="footer__social mt-2">
               <a href="#">
                 <Facebook />
               </a>
@@ -90,12 +90,6 @@ const Footer = () => {
             </div>
           </Col>
         </Row>
-
-        <hr className="footer__divider" />
-
-        <p className="text-center footer__copyright">
-          © 2025 <strong>E-Store</strong>. All rights reserved.
-        </p>
       </Container>
     </footer>
   );
