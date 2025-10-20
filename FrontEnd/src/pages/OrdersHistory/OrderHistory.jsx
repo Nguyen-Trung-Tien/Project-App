@@ -53,7 +53,7 @@ const OrderHistory = () => {
   };
 
   return (
-    <div className="order-history-page py-5">
+    <div className="order-history-page py-2">
       <Container>
         <h2 className="text-center mb-4">Lịch sử đơn hàng</h2>
 

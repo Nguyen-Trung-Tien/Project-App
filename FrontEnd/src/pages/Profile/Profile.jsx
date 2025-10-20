@@ -26,7 +26,7 @@ const Profile = () => {
   };
 
   return (
-    <div className="profile-page py-5">
+    <div className="profile-page py-2">
       <Container>
         <h2 className="text-center text-primary mb-4">Hồ sơ cá nhân</h2>
 

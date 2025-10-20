@@ -106,7 +106,7 @@ const OrderDetail = () => {
   if (!order) return <p className="text-center mt-5">Đang tải dữ liệu...</p>;
 
   return (
-    <div className="order-detail-page py-5">
+    <div className="order-detail-page py-2">
       <Container>
         <Button
           variant="outline-secondary"
@@ -116,11 +116,11 @@ const OrderDetail = () => {
           ← Quay lại Lịch sử đơn hàng
         </Button>
 
-        <h2 className="mb-4 text-center text-primary">
+        <h2 className="mb-2 text-center text-primary">
           Chi tiết đơn hàng #{order.id}
         </h2>
 
-        <Card className="mb-4 shadow-sm">
+        <Card className="mb-2 shadow-sm">
           <Card.Body>
             <Row>
               <Col md={6}>

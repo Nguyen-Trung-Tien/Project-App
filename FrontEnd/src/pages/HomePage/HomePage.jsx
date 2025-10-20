@@ -4,12 +4,16 @@ import HeroSection from "../../components/HomePageComponent/HeroSection";
 import CategorySection from "../../components/HomePageComponent/CategorySection";
 import ProductSection from "../../components/HomePageComponent/ProductSection";
 import AllProducts from "../../components/AllProducts/AllProduct";
+import Brands from "../../components/BrandsComponent/Brands";
 
 const HomePage = () => {
   return (
     <div className="homepage">
       <div>
         <HeroSection />
+      </div>
+      <div>
+        <Brands />
       </div>
       <div>
         <CategorySection />
