@@ -36,7 +36,7 @@ module.exports = (sequelize, DataTypes) => {
       sequelize,
       modelName: "Cart",
       tableName: "Carts",
-      timestamps: true, // 🔹 thêm rõ ràng
+      timestamps: true,
     }
   );
 

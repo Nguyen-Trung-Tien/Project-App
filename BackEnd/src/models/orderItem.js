@@ -48,7 +48,7 @@ module.exports = (sequelize, DataTypes) => {
       sequelize,
       modelName: "OrderItem",
       tableName: "OrderItems",
-      timestamps: true, // tự động tạo createdAt và updatedAt
+      timestamps: true,
     }
   );
 
