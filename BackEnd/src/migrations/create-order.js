@@ -12,7 +12,7 @@ module.exports = {
       userId: {
         type: Sequelize.INTEGER,
         allowNull: true,
-        // references: { model: "Users", key: "id" }, // 🔹 Thêm references
+        // references: { model: "Users", key: "id" },
         onUpdate: "CASCADE",
         onDelete: "SET NULL",
       },
@@ -24,12 +24,20 @@ module.exports = {
       status: {
         type: Sequelize.ENUM(
           "pending",
+          "confirmed", // khách xác nhận đơn
           "processing",
           "shipped",
           "delivered",
-          "cancelled"
+          "cancelled" // khách hủy đơn
         ),
         defaultValue: "pending",
+      },
+      confirmationHistory: {
+        type: Sequelize.JSON,
+        allowNull: true,
+        defaultValue: [],
+        comment: "Lịch sử xác nhận/hủy đơn hàng",
+        // Ví dụ: [{status: 'confirmed', date: '2025-10-20T10:00:00'}, ...]
       },
       shippingAddress: {
         type: Sequelize.TEXT,

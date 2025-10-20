@@ -30,15 +30,25 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         defaultValue: 0,
       },
+      // Trạng thái đơn hàng
       status: {
         type: DataTypes.ENUM(
-          "pending",
+          "pending", // chờ xử lý
+          "confirmed", // khách xác nhận
           "processing",
           "shipped",
           "delivered",
-          "cancelled"
+          "cancelled" // khách hủy
         ),
         defaultValue: "pending",
+      },
+      // Lịch sử xác nhận/hủy đơn hàng
+      confirmationHistory: {
+        type: DataTypes.JSON,
+        allowNull: true,
+        defaultValue: [],
+        comment:
+          "Lưu lịch sử hành động xác nhận/hủy đơn của khách. Ví dụ: [{status:'confirmed', date:'2025-10-20T10:00:00'}]",
       },
       shippingAddress: {
         type: DataTypes.TEXT,
@@ -58,6 +68,10 @@ module.exports = (sequelize, DataTypes) => {
       },
       deliveredAt: {
         type: DataTypes.DATE,
+        allowNull: true,
+      },
+      note: {
+        type: DataTypes.TEXT,
         allowNull: true,
       },
     },

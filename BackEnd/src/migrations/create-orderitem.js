@@ -12,14 +12,14 @@ module.exports = {
       orderId: {
         type: Sequelize.INTEGER,
         allowNull: false,
-        // references: { model: "Orders", key: "id" }, // 🔹 Khóa ngoại
+        // references: { model: "Orders", key: "id" },
         onUpdate: "CASCADE",
         onDelete: "CASCADE",
       },
       productId: {
         type: Sequelize.INTEGER,
         allowNull: false,
-        // references: { model: "Products", key: "id" }, // 🔹 Khóa ngoại
+        // references: { model: "Products", key: "id" },
         onUpdate: "CASCADE",
         onDelete: "SET NULL",
       },
@@ -28,6 +28,22 @@ module.exports = {
       subtotal: { type: Sequelize.DECIMAL(10, 2), allowNull: false },
       productName: { type: Sequelize.STRING, allowNull: false },
       image: { type: Sequelize.STRING, allowNull: true },
+
+      // ----------- Trả hàng -----------
+      returnStatus: {
+        type: Sequelize.ENUM(
+          "none", // chưa yêu cầu trả
+          "requested", // khách yêu cầu trả
+          "approved", // admin chấp nhận
+          "rejected", // admin từ chối
+          "completed" // hoàn tất trả hàng
+        ),
+        defaultValue: "none",
+      },
+      returnReason: { type: Sequelize.TEXT, allowNull: true },
+      returnRequestedAt: { type: Sequelize.DATE, allowNull: true },
+      returnProcessedAt: { type: Sequelize.DATE, allowNull: true },
+
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE,

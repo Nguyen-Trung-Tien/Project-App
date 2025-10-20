@@ -9,7 +9,6 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: "orderId",
         as: "order",
         onDelete: "CASCADE",
-        onUpdate: "CASCADE",
       });
 
       // Mỗi OrderItem thuộc về 1 Product
@@ -17,32 +16,41 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: "productId",
         as: "product",
         onDelete: "SET NULL",
-        onUpdate: "CASCADE",
       });
     }
   }
 
   OrderItem.init(
     {
-      orderId: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        references: { model: "Orders", key: "id" },
-        onDelete: "CASCADE",
-        onUpdate: "CASCADE",
-      },
-      productId: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        references: { model: "Products", key: "id" },
-        onDelete: "SET NULL",
-        onUpdate: "CASCADE",
-      },
       quantity: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 1 },
       price: { type: DataTypes.DECIMAL(10, 2), allowNull: false },
       subtotal: { type: DataTypes.DECIMAL(10, 2), allowNull: false },
       productName: { type: DataTypes.STRING, allowNull: false },
       image: { type: DataTypes.STRING, allowNull: true },
+
+      // --------- Trả hàng ---------
+      returnStatus: {
+        type: DataTypes.ENUM(
+          "none", // chưa yêu cầu trả
+          "requested", // khách yêu cầu trả
+          "approved", // admin chấp nhận
+          "rejected", // admin từ chối
+          "completed" // hoàn tất trả hàng
+        ),
+        defaultValue: "none",
+      },
+      returnReason: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+      },
+      returnRequestedAt: {
+        type: DataTypes.DATE,
+        allowNull: true,
+      },
+      returnProcessedAt: {
+        type: DataTypes.DATE,
+        allowNull: true,
+      },
     },
     {
       sequelize,
