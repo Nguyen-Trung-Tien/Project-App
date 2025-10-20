@@ -11,7 +11,6 @@ import {
   FiLogOut,
   FiBarChart,
 } from "react-icons/fi";
-
 import "../Layout.scss";
 
 const Sidebar = () => {
@@ -19,25 +18,13 @@ const Sidebar = () => {
   const navigate = useNavigate();
 
   const menuItems = [
-    { to: "/admin/dashboard", icon: <FiHome size={18} />, label: "Dashboard" },
-    {
-      to: "/admin/orders",
-      icon: <FiShoppingCart size={18} />,
-      label: "Đơn hàng",
-    },
-    { to: "/admin/products", icon: <FiBox size={18} />, label: "Sản phẩm" },
-    { to: "/admin/users", icon: <FiUsers size={18} />, label: "Người dùng" },
-    {
-      to: "/admin/revenue",
-      icon: <FiBarChart size={18} />,
-      label: "Doanh thu",
-    },
-    {
-      to: "/admin/categories",
-      icon: <FiLayers size={18} />,
-      label: "Danh mục",
-    },
-    { to: "/admin/settings", icon: <FiSettings size={18} />, label: "Cài đặt" },
+    { to: "/admin/dashboard", icon: <FiHome />, label: "Dashboard" },
+    { to: "/admin/orders", icon: <FiShoppingCart />, label: "Đơn hàng" },
+    { to: "/admin/products", icon: <FiBox />, label: "Sản phẩm" },
+    { to: "/admin/users", icon: <FiUsers />, label: "Người dùng" },
+    { to: "/admin/revenue", icon: <FiBarChart />, label: "Doanh thu" },
+    { to: "/admin/categories", icon: <FiLayers />, label: "Danh mục" },
+    { to: "/admin/settings", icon: <FiSettings />, label: "Cài đặt" },
   ];
 
   const handleLogout = () => {
@@ -46,33 +33,46 @@ const Sidebar = () => {
   };
 
   return (
-    <div className="sidebar d-flex flex-column justify-content-between">
-      {/* Header */}
-      <div>
-        <h5 className="fw-bold mb-4 text-center text-dark">🛠️ Admin Panel</h5>
-        <Nav className="flex-column">
-          {menuItems.map((item, i) => (
+    <div className="sidebar d-flex flex-column justify-content-between p-3 shadow-sm">
+      {/* Logo / Header */}
+      <div className="sidebar-header mb-4 text-center">
+        <h5 className="fw-bold text-primary mb-1">🛠️ Admin Panel</h5>
+        <small className="text-muted">Quản lý hệ thống</small>
+      </div>
+
+      {/* Menu */}
+      <Nav className="flex-column">
+        {menuItems.map((item, i) => {
+          const active = location.pathname === item.to;
+          return (
             <Nav.Link
               as={Link}
               key={i}
               to={item.to}
-              className={`sidebar-link d-flex align-items-center mb-2 px-3 py-2 rounded-3 ${
-                location.pathname === item.to ? "active" : ""
+              className={`sidebar-link d-flex align-items-center gap-2 px-3 py-2 mb-2 rounded-3 ${
+                active ? "active" : ""
               }`}
             >
-              {item.icon}
-              <span className="ms-2">{item.label}</span>
+              <span
+                className={`icon ${active ? "text-light" : "text-secondary"}`}
+              >
+                {item.icon}
+              </span>
+              <span className="fw-semibold">{item.label}</span>
             </Nav.Link>
-          ))}
-        </Nav>
-      </div>
+          );
+        })}
+      </Nav>
 
-      <div>
+      {/* Logout */}
+      <div className="mt-auto">
         <Button
-          className="btn-logout mt-3 w-100 d-flex align-items-center justify-content-center"
+          variant="outline-danger"
+          className="w-100 d-flex align-items-center justify-content-center rounded-3 py-2"
           onClick={handleLogout}
         >
-          <FiLogOut className="me-2" /> Đăng xuất
+          <FiLogOut className="me-2" />
+          Đăng xuất
         </Button>
       </div>
     </div>

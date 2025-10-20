@@ -1,53 +1,33 @@
 .register-page {
+  background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
   min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(135deg, #e3f2fd, #f3e5f5);
-  background-image: url("/images/bg-pattern.svg");
-  background-size: cover;
-  background-repeat: no-repeat;
 
   .register-card {
+    border-radius: 20px;
+    overflow: hidden;
     background: #fff;
-    border-radius: 1rem;
-    padding: 2rem;
-    transition: all 0.4s ease;
+    transition: all 0.3s ease;
+    padding: 25px 30px;
 
     &:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 10px 25px rgba(13, 110, 253, 0.2);
+      transform: translateY(-5px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
     }
 
     h3 {
-      font-size: 1.8rem;
+      color: #0d6efd;
     }
 
-    label {
-      font-weight: 500;
-      color: #333;
+    .form-label {
+      font-weight: 600;
+      color: #495057;
     }
 
-    .btn-outline-secondary {
-      background-color: #f8f9fa;
-      color: #333;
-      border: 1px solid #bbb;
-      font-weight: 500;
-      transition: all 0.3s ease;
-
-      &:hover {
-        background-color: #e9ecef;
-        color: #000;
-        transform: translateY(-1px);
-        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
-      }
-    }
-
-    input {
-      border-radius: 8px;
-      border: 1px solid #ddd;
-      padding: 0.55rem 0.75rem;
-      transition: border-color 0.3s;
+    .form-control {
+      border-radius: 12px;
+      padding: 10px 14px;
+      border: 1px solid #ced4da;
+      transition: all 0.2s ease;
 
       &:focus {
         border-color: #0d6efd;
@@ -55,22 +35,16 @@
       }
     }
 
-    .btn-primary {
-      background: linear-gradient(135deg, #0d6efd, #3b82f6);
-      border: none;
-      transition: all 0.3s ease;
-
-      &:hover {
-        background: linear-gradient(135deg, #3b82f6, #0d6efd);
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(13, 110, 253, 0.3);
-      }
+    button[type="submit"] {
+      font-size: 1rem;
+      letter-spacing: 0.3px;
     }
 
     a {
-      transition: color 0.3s ease;
+      text-decoration: none;
+
       &:hover {
-        color: #6610f2;
+        text-decoration: underline;
       }
     }
   }

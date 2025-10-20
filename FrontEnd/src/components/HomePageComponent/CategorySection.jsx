@@ -11,8 +11,8 @@ const CategorySection = () => {
   ];
 
   return (
-    <Container className="categories my-5">
-      <h2 className="section-title text-center mb-4">Danh mục nổi bật</h2>
+    <Container className="categories my-2">
+      <h2 className="section-title text-center mb-2">Danh mục nổi bật</h2>
       <Row className="g-4 justify-content-center">
         {categories.map((item, index) => (
           <Col md={4} sm={6} xs={12} key={index}>

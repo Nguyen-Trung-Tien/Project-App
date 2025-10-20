@@ -1,11 +1,41 @@
 const express = require("express");
+const dotenv = require("dotenv");
+const routes = require("./routers");
+const connectDB = require("./config/connectDB");
+const cookieParser = require("cookie-parser");
+const cors = require("cors");
+
+dotenv.config();
+
 const app = express();
-const port = 3000;
 
-app.get("/", (req, res) => {
-  res.send("Hello World!");
-});
+const corsOptions = {
+  origin: "http://localhost:5173",
+  credentials: true,
+};
+app.use(cors(corsOptions));
 
+app.use(cookieParser());
+
+app.use(
+  express.json({
+    limit: "10mb",
+  })
+);
+app.use(
+  express.urlencoded({
+    limit: "10mb",
+    extended: true,
+  })
+);
+
+app.use(express.static("public"));
+
+routes(app);
+
+connectDB();
+
+const port = process.env.PORT || 8080;
 app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`);
+  console.log("Connect success!", port);
 });

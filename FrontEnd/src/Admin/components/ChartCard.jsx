@@ -53,10 +53,26 @@ const ChartCard = () => {
   };
 
   return (
-    <Card className="shadow-sm border-0 rounded-4">
+    <Card className="chart-card shadow-sm border-0">
       <Card.Body>
+        <p className="text-muted mb-3">
+          Tổng doanh thu:{" "}
+          <strong className="text-success">
+            {dataMap[type]
+              .reduce((acc, cur) => acc + cur.value, 0)
+              .toLocaleString()}{" "}
+            triệu ₫
+          </strong>
+        </p>
         <div className="d-flex justify-content-between align-items-center mb-3">
-          <h5 className="fw-bold mb-0">📈 Biểu đồ doanh thu</h5>
+          <h5 className="fw-bold mb-0 text-primary">
+            📊 Doanh thu{" "}
+            {type === "week"
+              ? "tuần này"
+              : type === "month"
+              ? "tháng này"
+              : "năm nay"}
+          </h5>
 
           <ButtonGroup>
             <Button
@@ -89,14 +105,20 @@ const ChartCard = () => {
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="name" />
               <YAxis />
-              <Tooltip />
+              <Tooltip
+                formatter={(value) => [
+                  `${value.toLocaleString()} triệu ₫`,
+                  "Doanh thu",
+                ]}
+                labelStyle={{ fontWeight: 600 }}
+              />
               <Line
                 type="monotone"
                 dataKey="value"
                 stroke="#0d6efd"
                 strokeWidth={3}
                 dot={{ r: 4 }}
-                activeDot={{ r: 6 }}
+                activeDot={{ r: 7 }}
               />
             </LineChart>
           </ResponsiveContainer>

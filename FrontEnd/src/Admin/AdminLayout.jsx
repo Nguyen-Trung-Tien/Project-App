@@ -1,24 +1,26 @@
-import React from "react";
+import React, { useState } from "react";
 import { Container } from "react-bootstrap";
 import { Outlet } from "react-router-dom";
 import HeaderAdmin from "../Admin/components/HeaderAdmin";
 import Sidebar from "./components/Sidebar";
+import "./Layout.scss";
 
 const AdminLayout = () => {
-  return (
-    <div className="admin-layout bg-light" style={{ minHeight: "100vh" }}>
-      <Sidebar />
+  const [collapsed, setCollapsed] = useState(false);
 
-      <div
-        className="admin-main-content"
-        style={{
-          marginLeft: "240px",
-          minHeight: "100vh",
-          overflowY: "auto",
-        }}
-      >
-        <HeaderAdmin />
-        <Container fluid className="p-4">
+  const toggleSidebar = () => setCollapsed(!collapsed);
+
+  return (
+    <div
+      className={`admin-layout bg-light d-flex ${collapsed ? "collapsed" : ""}`}
+    >
+      {/* Sidebar */}
+      <Sidebar collapsed={collapsed} />
+
+      {/* Nội dung chính */}
+      <div className="admin-main flex-grow-1 d-flex flex-column">
+        <HeaderAdmin toggleSidebar={toggleSidebar} />
+        <Container fluid className="p-4 flex-grow-1">
           <Outlet />
         </Container>
       </div>

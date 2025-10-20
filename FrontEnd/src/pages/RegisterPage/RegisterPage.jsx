@@ -6,7 +6,17 @@ import { useNavigate } from "react-router";
 const RegisterPage = () => {
   const handleRegister = (e) => {
     e.preventDefault();
-    console.log("Đăng ký...");
+    const form = e.target;
+    const password = form.password.value;
+    const confirmPassword = form.confirmPassword.value;
+
+    if (password !== confirmPassword) {
+      alert("❌ Mật khẩu xác nhận không khớp!");
+      return;
+    }
+
+    alert("✅ Đăng ký thành công!");
+    console.log("Đăng ký tài khoản mới...");
   };
 
   const navigate = useNavigate();
@@ -78,7 +88,8 @@ const RegisterPage = () => {
                   </a>
                 </p>
               </Card.Body>
-              <div className="text-center mt-3">
+
+              <Card.Footer className="bg-white border-0 text-center pb-4">
                 <Button
                   variant="outline-secondary"
                   onClick={handleBack}
@@ -86,7 +97,7 @@ const RegisterPage = () => {
                 >
                   ← Quay lại trang chủ
                 </Button>
-              </div>
+              </Card.Footer>
             </Card>
           </Col>
         </Row>

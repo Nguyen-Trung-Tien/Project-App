@@ -32,9 +32,21 @@ const CheckoutPage = () => {
   return (
     <div className="checkout-page">
       <Container>
+        <nav aria-label="breadcrumb" className="mb-3">
+          <ol className="breadcrumb">
+            <li className="breadcrumb-item">
+              <Link to="/">Trang chủ</Link>
+            </li>
+            <li className="breadcrumb-item">
+              <Link to="/cart">Giỏ hàng</Link>
+            </li>
+            <li className="breadcrumb-item active">Thanh toán</li>
+          </ol>
+        </nav>
         <h2 className="text-center mb-4 fw-bold text-primary">
           💳 Chi tiết thanh toán
         </h2>
+
         <Row>
           {/* Form thông tin giao hàng */}
           <Col lg={8}>
@@ -133,7 +145,17 @@ const CheckoutPage = () => {
               <p className="fw-semibold d-flex justify-content-between">
                 Phí vận chuyển: <span className="text-success">Miễn phí</span>
               </p>
+
+              <Form.Control
+                type="text"
+                placeholder="Nhập mã giảm giá"
+                className="mb-2"
+              />
+              <Button variant="outline-primary" size="sm">
+                Áp dụng
+              </Button>
               <hr />
+
               <h5 className="fw-bold d-flex justify-content-between text-primary">
                 Tổng cộng: <span>{total.toLocaleString()}₫</span>
               </h5>

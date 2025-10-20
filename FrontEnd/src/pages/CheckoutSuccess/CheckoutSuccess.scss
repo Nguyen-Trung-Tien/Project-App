@@ -1,64 +1,65 @@
 .checkout-success-page {
+  background-color: #f8f9fa;
   min-height: 100vh;
   display: flex;
   align-items: center;
-  justify-content: center;
-  background: linear-gradient(135deg, #f3f8ff, #e6eeff);
-  color: #333;
 
   .success-icon {
     color: #28a745;
-    animation: scaleUp 0.8s ease forwards;
+    animation: bounceIn 0.8s ease;
   }
 
   h2 {
     font-weight: 700;
-    color: #0d6efd;
+    color: #333;
+  }
+
+  p {
+    font-size: 1rem;
+    color: #666;
   }
 
   .order-info {
     background: #fff;
-    border-radius: 12px;
-    padding: 1rem 2rem;
     display: inline-block;
-    margin-top: 1rem;
-    box-shadow: 0 4px 15px rgba(13, 110, 253, 0.15);
+    padding: 15px 30px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    margin-top: 10px;
 
     h6 {
-      margin-bottom: 0.3rem;
+      font-weight: 600;
       color: #555;
     }
 
     .order-code {
+      font-size: 1.2rem;
       font-weight: 700;
-      color: #0d6efd;
+      color: #007bff;
       letter-spacing: 1px;
     }
   }
 
-  .btn {
-    border-radius: 999px;
-    font-weight: 600;
-    transition: all 0.3s ease;
-
-    &.btn-outline-secondary:hover {
-      background-color: #f8f9fa;
-    }
-
-    &:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(13, 110, 253, 0.3);
-    }
+  button {
+    border-radius: 50px;
+    font-weight: 500;
+    min-width: 180px;
   }
 
-  @keyframes scaleUp {
-    from {
-      transform: scale(0.6);
+  @keyframes bounceIn {
+    0% {
+      transform: scale(0.3);
       opacity: 0;
     }
-    to {
-      transform: scale(1);
+    50% {
+      transform: scale(1.05);
       opacity: 1;
+    }
+    70% {
+      transform: scale(0.9);
+    }
+    100% {
+      transform: scale(1);
     }
   }
 }

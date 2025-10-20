@@ -1,114 +1,83 @@
 .hero-section {
-  height: 55vh;
+  position: relative;
+  height: 80vh;
+  width: 100%;
+  background: linear-gradient(rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.45)),
+    url("../../assets/hero-bg.jpg") center/cover no-repeat;
   display: flex;
   align-items: center;
-  justify-content: flex-start;
-  color: #fff;
-  background: linear-gradient(
-      120deg,
-      rgba(13, 110, 253, 0.85),
-      rgba(102, 16, 242, 0.7)
-    ),
-    url("/images/banner.jpg") center/cover no-repeat;
-  position: relative;
+  justify-content: center;
+  text-align: center;
   overflow: hidden;
-  border-radius: 1rem;
-  margin-bottom: 1rem;
-
-  // overlay sáng nhẹ phía dưới
-  &::after {
-    content: "";
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 120px;
-    background: linear-gradient(to top, rgba(0, 0, 0, 0.4), transparent);
-  }
 
   .hero-content {
-    position: relative;
+    max-width: 700px;
     z-index: 2;
-    max-width: 500px;
-    padding: 0 2rem;
-    animation: fadeInUp 1s ease forwards;
+    padding: 0 1rem;
 
     h1 {
-      font-size: 2.5rem;
+      font-size: 3rem;
       font-weight: 800;
-      line-height: 1.3;
-      letter-spacing: 0.5px;
+      color: #fff;
 
       span {
-        color: #ffc107;
+        color: #0d6efd; // Màu chủ đạo thương hiệu
       }
     }
 
     p {
-      font-size: 1.05rem;
-      margin-top: 1rem;
-      opacity: 0.95;
-      line-height: 1.6;
+      font-size: 1.2rem;
+      margin: 1rem 0 2rem;
+      color: #f1f1f1;
     }
 
     .hero-btn {
-      margin-top: 1.5rem;
-      padding: 0.6rem 1.5rem;
-      border-radius: 999px;
+      font-size: 1.1rem;
       font-weight: 600;
-      letter-spacing: 0.4px;
+      padding: 0.6rem 1.5rem;
+      border-radius: 30px;
       transition: all 0.3s ease;
-      background-color: #ffc107;
-      color: #000;
-      border: none;
 
       &:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 6px 16px rgba(255, 193, 7, 0.45);
+        background-color: #ff6b00;
+        border-color: #ff6b00;
+        transform: translateY(-2px);
       }
     }
   }
 
-  // Responsive
-  @media (max-width: 992px) {
-    height: 55vh;
+  // Hiệu ứng overlay chuyển động nhẹ
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -50%;
+    width: 200%;
+    height: 100%;
+    background: radial-gradient(rgba(255, 255, 255, 0.05), transparent 70%);
+    animation: moveOverlay 12s infinite linear;
+  }
+
+  @keyframes moveOverlay {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-25%);
+    }
+  }
+
+  @media (max-width: 768px) {
+    height: 60vh;
 
     .hero-content {
       h1 {
-        font-size: 2rem;
+        font-size: 2.2rem;
       }
+
       p {
-        font-size: 0.95rem;
+        font-size: 1rem;
       }
     }
-  }
-
-  @media (max-width: 576px) {
-    height: 50vh;
-    justify-content: center;
-    text-align: center;
-
-    .hero-content {
-      padding: 0 1rem;
-
-      h1 {
-        font-size: 1.8rem;
-      }
-      p {
-        font-size: 0.9rem;
-      }
-    }
-  }
-}
-
-// Hiệu ứng fade-up mượt
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
   }
 }

@@ -1,53 +1,84 @@
 .order-detail-page {
-  background: #f9fbff;
+  background-color: #f8f9fa;
   min-height: 100vh;
 
   h2 {
     font-weight: 700;
+    letter-spacing: 0.5px;
   }
 
   .card {
-    border-radius: 12px;
+    border-radius: 16px;
     border: none;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+    }
   }
 
   .product-table {
     background: #fff;
     border-radius: 10px;
     overflow: hidden;
-    box-shadow: 0 3px 10px rgba(13, 110, 253, 0.1);
 
     th {
       background-color: #0d6efd;
       color: #fff;
-      font-weight: 600;
       text-transform: uppercase;
+      font-weight: 600;
       font-size: 0.9rem;
+      letter-spacing: 0.3px;
     }
 
     td {
-      font-weight: 500;
-      color: #333;
+      vertical-align: middle;
+      font-size: 0.95rem;
     }
 
     .product-img {
       width: 60px;
       height: 60px;
+      border-radius: 10px;
       object-fit: cover;
-      border-radius: 8px;
+      border: 1px solid #dee2e6;
+    }
+
+    tr:hover {
+      background-color: #f1f9ff;
     }
   }
 
   .progress {
-    height: 1.2rem;
-    font-weight: 600;
+    height: 20px;
+    border-radius: 50px;
+    background-color: #e9ecef;
+
+    .progress-bar {
+      font-weight: 600;
+    }
   }
 
-  .btn-outline-secondary {
-    border-color: #ccc;
-    color: #555;
+  .btn {
+    border-radius: 30px;
+    padding: 8px 20px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+
     &:hover {
-      background-color: #f8f9fa;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 10px rgba(108, 117, 125, 0.3);
+    }
+  }
+
+  @media (max-width: 768px) {
+    .product-img {
+      width: 50px;
+      height: 50px;
+    }
+    h2 {
+      font-size: 1.5rem;
     }
   }
 }

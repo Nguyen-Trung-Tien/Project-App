@@ -5,18 +5,21 @@ import "../Layout.scss";
 
 const StatsCard = ({ title, value, icon, change, isIncrease }) => {
   return (
-    <Card className="text-center shadow-sm border-0 rounded-4 stats-card">
+    <Card className="stats-card text-center border-0 shadow-sm rounded-4 p-2">
       <Card.Body>
-        <div className="d-flex justify-content-center align-items-center mb-2">
-          <div className="me-2 text-primary">{icon}</div>
+        {/* Header */}
+        <div className="d-flex justify-content-center align-items-center gap-2 mb-2">
+          <span className="icon-wrapper text-primary fs-4">{icon}</span>
           <h6 className="text-muted fw-semibold mb-0">{title}</h6>
         </div>
 
-        <h3 className="fw-bold mb-1">{value}</h3>
+        {/* Value */}
+        <h3 className="fw-bold text-dark mb-1">{value}</h3>
 
+        {/* Change indicator */}
         {change && (
           <small
-            className={`d-flex justify-content-center align-items-center ${
+            className={`fw-semibold d-flex justify-content-center align-items-center ${
               isIncrease ? "text-success" : "text-danger"
             }`}
           >

@@ -1,30 +1,66 @@
 .notfound-page {
   min-height: 100vh;
-  background-color: #f8f9fa;
+  background: linear-gradient(135deg, #f8f9fa, #e9ecef);
   color: #333;
-  padding: 2rem;
+  text-align: center;
+  padding: 60px 20px;
+  animation: fadeIn 0.8s ease-in-out;
 
   .icon-warning {
-    font-size: 4rem;
-    color: #dc3545; // màu đỏ cảnh báo
+    font-size: 80px;
+    color: #dc3545;
+    animation: pulse 1.5s infinite ease-in-out;
   }
 
   h1 {
-    font-size: 5rem;
-    font-weight: 700;
+    font-size: 96px;
+    font-weight: 800;
+    color: #dc3545;
+    margin-bottom: 10px;
+  }
+
+  h4 {
+    font-weight: 600;
   }
 
   p {
-    max-width: 480px;
-    margin: 0 auto;
+    font-size: 1.1rem;
+    max-width: 500px;
+    margin: 0 auto 25px;
+    color: #6c757d;
   }
 
   .btn {
     border-radius: 30px;
-    transition: 0.3s;
+    font-weight: 500;
+    transition: all 0.3s ease;
+
     &:hover {
-      background-color: #0d6efd;
-      transform: scale(1.05);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 123, 255, 0.25);
+    }
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes pulse {
+    0%,
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+    50% {
+      transform: scale(1.1);
+      opacity: 0.8;
     }
   }
 }

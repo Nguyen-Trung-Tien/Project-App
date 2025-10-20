@@ -22,6 +22,7 @@ const Profile = () => {
   const handleSave = () => {
     setUser(formData);
     setIsEditing(false);
+    alert("✅ Thông tin cá nhân đã được cập nhật thành công!");
   };
 
   return (
@@ -34,9 +35,35 @@ const Profile = () => {
             <Card className="profile-card shadow-sm text-center p-3">
               <div className="avatar-wrapper">
                 <img src={user.avatar} alt="Avatar" className="avatar" />
+                {isEditing && (
+                  <Form.Group controlId="formAvatar" className="mt-3">
+                    <Form.Label className="small text-muted">
+                      Thay ảnh đại diện
+                    </Form.Label>
+                    <Form.Control
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files[0];
+                        if (file) {
+                          const reader = new FileReader();
+                          reader.onloadend = () => {
+                            setFormData((prev) => ({
+                              ...prev,
+                              avatar: reader.result,
+                            }));
+                          };
+                          reader.readAsDataURL(file);
+                        }
+                      }}
+                    />
+                  </Form.Group>
+                )}
               </div>
+
               <h4 className="mt-3">{user.name}</h4>
               <p className="text-muted">{user.email}</p>
+
               <Button
                 variant="outline-primary"
                 size="sm"

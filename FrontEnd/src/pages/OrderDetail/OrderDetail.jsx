@@ -17,6 +17,23 @@ const OrderDetail = () => {
   const navigate = useNavigate();
   const [order, setOrder] = useState(null);
 
+  const getProgressVariant = (status) => {
+    switch (status) {
+      case "pending":
+        return "warning";
+      case "confirmed":
+        return "info";
+      case "shipping":
+        return "primary";
+      case "delivered":
+        return "success";
+      case "cancelled":
+        return "danger";
+      default:
+        return "secondary";
+    }
+  };
+
   useEffect(() => {
     // Giả lập dữ liệu API đơn hàng
     const fakeOrder = {
@@ -135,6 +152,7 @@ const OrderDetail = () => {
                 <ProgressBar
                   now={getProgress(order.status)}
                   label={`${getProgress(order.status)}%`}
+                  variant={getProgressVariant(order.status)}
                   className="mt-3"
                 />
               </Col>

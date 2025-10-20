@@ -1,5 +1,6 @@
 .footer {
-  background: #f8f9fa;
+  background-color: #f8f9fa;
+  border-top: 1px solid #e5e5e5;
   color: #333;
   font-size: 0.95rem;
 
@@ -7,29 +8,33 @@
     font-size: 1.4rem;
     font-weight: 700;
     color: #0d6efd;
+    margin-bottom: 0.5rem;
   }
 
   .footer__desc {
-    color: #666;
-    margin-top: 0.5rem;
+    color: #555;
+    line-height: 1.6;
   }
 
   .footer__subtitle {
     font-weight: 600;
-    margin-bottom: 0.75rem;
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+    color: #222;
   }
 
   .footer__links {
     list-style: none;
     padding: 0;
+    margin: 0;
 
     li {
-      margin-bottom: 0.4rem;
+      margin-bottom: 0.3rem;
 
       a {
-        text-decoration: none;
         color: #555;
-        transition: color 0.3s ease;
+        text-decoration: none;
+        transition: color 0.2s ease;
 
         &:hover {
           color: #0d6efd;
@@ -41,42 +46,54 @@
   .footer__contact {
     list-style: none;
     padding: 0;
+    margin: 0;
 
     li {
+      margin-bottom: 0.4rem;
       display: flex;
       align-items: center;
-      gap: 8px;
       color: #555;
-      margin-bottom: 0.4rem;
 
       .icon {
         color: #0d6efd;
+        margin-right: 0.5rem;
       }
     }
   }
 
   .footer__social {
     a {
-      display: inline-block;
-      margin-right: 12px;
-      font-size: 1.2rem;
-      color: #555;
-      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      margin-right: 0.5rem;
+      color: #fff;
+      background-color: #0d6efd;
+      border-radius: 50%;
+      transition: background-color 0.2s ease;
 
       &:hover {
-        color: #0d6efd;
-        transform: scale(1.1);
+        background-color: #ff6b00;
+      }
+
+      svg {
+        font-size: 1rem;
       }
     }
   }
 
-  .footer__divider {
-    border-color: #ddd;
-    margin: 1.5rem 0;
-  }
+  // Responsive
+  @media (max-width: 768px) {
+    text-align: center;
 
-  .footer__copyright {
-    font-size: 0.9rem;
-    color: #777;
+    .footer__social {
+      justify-content: center;
+    }
+
+    .footer__contact li {
+      justify-content: center;
+    }
   }
 }

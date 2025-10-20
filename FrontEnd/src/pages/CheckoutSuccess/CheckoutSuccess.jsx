@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Container, Button } from "react-bootstrap";
 import { CheckCircleFill, HouseDoor, Receipt } from "react-bootstrap-icons";
 import { useNavigate } from "react-router-dom";
@@ -6,7 +6,11 @@ import "./CheckoutSuccess.scss";
 
 const CheckoutSuccess = () => {
   const navigate = useNavigate();
-
+  // navigate(`/checkout-success/${orderId}`);
+  useEffect(() => {
+    const timer = setTimeout(() => navigate("/orders"), 5000);
+    return () => clearTimeout(timer);
+  }, []);
   return (
     <div className="checkout-success-page">
       <Container className="text-center py-5">

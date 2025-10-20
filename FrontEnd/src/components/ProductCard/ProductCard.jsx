@@ -3,15 +3,19 @@ import { Card, Button } from "react-bootstrap";
 import "./ProductCard.scss";
 
 const ProductCard = ({ product }) => {
+  const { title, price, image } = product;
+
   return (
     <Card className="product-card shadow-sm">
-      <Card.Img variant="top" src={product.image} alt={product.title} />
-      <Card.Body>
-        <Card.Title className="product-card__title">{product.title}</Card.Title>
+      <div className="product-card__img">
+        <Card.Img variant="top" src={image} alt={title} />
+      </div>
+      <Card.Body className="text-center">
+        <Card.Title className="product-card__title">{title}</Card.Title>
         <Card.Text className="product-card__price">
-          {product.price.toLocaleString()}₫
+          {price.toLocaleString("vi-VN")}₫
         </Card.Text>
-        <Button variant="outline-primary" size="sm">
+        <Button variant="primary" className="w-100">
           Thêm vào giỏ
         </Button>
       </Card.Body>

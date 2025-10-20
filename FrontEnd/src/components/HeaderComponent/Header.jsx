@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Navbar,
   Nav,
@@ -9,13 +9,18 @@ import {
   Button,
   Badge,
 } from "react-bootstrap";
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import { Cart, PersonCircle, Search } from "react-bootstrap-icons";
 import "./Header.scss";
 
 function Header() {
   const cartItemCount = 3;
+  const [keyword, setKeyword] = useState("");
 
+  const handleSearch = (e) => {
+    e.preventDefault();
+    Navigate(`/search?q=${keyword}`);
+  };
   return (
     <Navbar expand="lg" sticky="top" className="header shadow-sm">
       <Container>
@@ -63,6 +68,7 @@ function Header() {
                 placeholder="Tìm kiếm sản phẩm..."
                 className="header__search-input"
                 aria-label="Search"
+                onChange={(e) => handleSearch(e)}
               />
             </div>
             <Button variant="primary" className="header__search-btn">

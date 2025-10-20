@@ -30,7 +30,7 @@ const LoginPage = () => {
                     <Form.Label>Email</Form.Label>
                     <Form.Control
                       type="email"
-                      placeholder="Nhập email của bạn"
+                      placeholder="Nhập email"
                       required
                     />
                   </Form.Group>

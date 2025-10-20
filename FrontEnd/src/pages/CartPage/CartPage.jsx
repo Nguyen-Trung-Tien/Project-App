@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Container, Row, Col, Table, Button, Form } from "react-bootstrap";
 import { Trash, ArrowLeftCircle } from "react-bootstrap-icons";
 import { Link, useNavigate } from "react-router-dom";
@@ -6,7 +6,8 @@ import "./CartPage.scss";
 
 const CartPage = () => {
   const navigate = useNavigate();
-  const cartItems = [
+
+  const initialCart = [
     {
       id: 1,
       name: "iPhone 15 Pro",
@@ -22,7 +23,11 @@ const CartPage = () => {
       image: "/images/product-2.jpg",
     },
   ];
+  const [cartItems, setCartItems] = useState(initialCart);
 
+  const handleRemove = (id) => {
+    setCartItems(cartItems.filter((item) => item.id !== id));
+  };
   const total = cartItems.reduce((acc, item) => acc + item.price * item.qty, 0);
 
   const handleCheckOut = () => {
@@ -83,7 +88,11 @@ const CartPage = () => {
                       </td>
                       <td>{(item.price * item.qty).toLocaleString()}₫</td>
                       <td>
-                        <Button variant="outline-danger" size="sm">
+                        <Button
+                          variant="outline-danger"
+                          size="sm"
+                          onClick={() => handleRemove(item.id)}
+                        >
                           <Trash />
                         </Button>
                       </td>

@@ -17,7 +17,6 @@ import {
 } from "recharts";
 import "../Layout.scss";
 
-// Dữ liệu mock
 const revenueData = [
   { day: "Mon", revenue: 1200000 },
   { day: "Tue", revenue: 900000 },
