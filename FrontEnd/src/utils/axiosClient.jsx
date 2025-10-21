@@ -10,15 +10,23 @@ let failedQueue = [];
 
 const processQueue = (error, token = null) => {
   failedQueue.forEach((prom) => {
-    if (error) {
-      prom.reject(error);
-    } else {
-      prom.resolve(token);
-    }
+    if (error) prom.reject(error);
+    else prom.resolve(token);
   });
   failedQueue = [];
 };
 
+// ✅ Thêm interceptor request
+axiosClient.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem("accessToken");
+    if (token) config.headers.Authorization = `Bearer ${token}`;
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+// ✅ Giữ nguyên phần refresh
 axiosClient.interceptors.response.use(
   (response) => response,
   async (error) => {
@@ -43,6 +51,7 @@ axiosClient.interceptors.response.use(
         const response = await axiosClient.post("/user/refresh-token");
         const newAccessToken = response.data.data.accessToken;
 
+        localStorage.setItem("accessToken", newAccessToken);
         originalRequest.headers["Authorization"] = `Bearer ${newAccessToken}`;
 
         processQueue(null, newAccessToken);

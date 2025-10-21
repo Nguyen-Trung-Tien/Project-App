@@ -3,7 +3,7 @@ require("dotenv").config();
 
 // Tạo Access Token
 const generateAccessToken = (payload) => {
-  return jwt.sign(payload, process.env.JWT_ACCESS_SECRET, { expiresIn: "15m" });
+  return jwt.sign(payload, process.env.JWT_ACCESS_SECRET, { expiresIn: "15s" });
 };
 
 // Tạo Refresh Token

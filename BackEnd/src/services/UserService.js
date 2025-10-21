@@ -54,7 +54,6 @@ const handleUserLogin = async (email, password) => {
     if (!user) {
       return { errCode: 1, errMessage: "User not found!" };
     }
-
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       return { errCode: 2, errMessage: "Wrong password!" };
@@ -95,16 +94,13 @@ const getAllUsers = async () => {
 const updateUser = async (userId, data) => {
   try {
     const user = await db.User.findByPk(userId);
-    if (!user) return { errCode: 1, errMessage: "User not found" };
-
+    if (!user) return { errCode: 1, errMessage: "User not found" }
     const fields = ["username", "email", "phone", "address", "avatar"];
     fields.forEach((field) => {
       if (data[field] !== undefined) user[field] = data[field];
     });
-
     await user.save();
     const { password, ...userData } = user.toJSON();
-
     return { errCode: 0, errMessage: "User updated", data: userData };
   } catch (err) {
     console.error(err);
