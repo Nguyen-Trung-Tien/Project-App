@@ -35,7 +35,8 @@ export const getUserApi = async (userId, token) => {
 
 export const updateUserApi = async (userId, data, token) => {
   try {
-    const res = await axiosClient.put(`/user/update-user`, data, {
+    const payload = { id: userId, ...data };
+    const res = await axiosClient.put(`/user/update-user`, payload, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -43,5 +44,34 @@ export const updateUserApi = async (userId, data, token) => {
     return res.data;
   } catch (err) {
     console.error("Update User API error:", err);
+    throw err;
+  }
+};
+
+export const getAllUsersApi = async (token) => {
+  try {
+    const res = await axiosClient.get("/user/get-all-user", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return res.data;
+  } catch (err) {
+    console.error("Get All Users API error:", err);
+    throw err;
+  }
+};
+
+export const deleteUserApi = async (userId, token) => {
+  try {
+    const res = await axiosClient.delete(`/user/delete/${userId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return res.data;
+  } catch (err) {
+    console.error("Delete User API error:", err);
+    throw err;
   }
 };

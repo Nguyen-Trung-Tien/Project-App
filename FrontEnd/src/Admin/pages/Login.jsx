@@ -10,27 +10,69 @@ import {
 } from "react-bootstrap";
 import { FiLock, FiMail } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
-import "../Layout.scss";
+import { useDispatch } from "react-redux";
+import { toast } from "react-toastify";
+import { loginUser } from "../../api/userApi";
+import { setUser } from "../../redux/userSlice";
 
 const AdminLogin = () => {
-  const navigate = useNavigate();
-  const [formData, setFormData] = useState({ email: "", password: "" });
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  const getAvatarBase64 = (avatar) => {
+    if (!avatar || !avatar.data) return "/default-avatar.png";
+    const binary = new Uint8Array(avatar.data).reduce(
+      (acc, byte) => acc + String.fromCharCode(byte),
+      ""
+    );
+    return `data:image/png;base64,${btoa(binary)}`;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
+    setLoading(true);
 
-    // Giả lập đăng nhập (sau này thay bằng gọi API thật)
-    if (formData.email === "admin@shop.com" && formData.password === "123456") {
-      localStorage.setItem("admin_token", "fake_jwt_token_123");
+    try {
+      const response = await loginUser(email, password);
+
+      if (response.errCode !== 0 || !response.data) {
+        setError(response.errMessage || "Đăng nhập thất bại!");
+        return;
+      }
+
+      const { user, accessToken, refreshToken } = response.data;
+
+      if (user.role !== "admin") {
+        setError("Tài khoản này không có quyền quản trị!");
+        toast.error("Bạn không có quyền admin!");
+        return;
+      }
+
+      const minimalUser = {
+        id: user.id,
+        email: user.email,
+        username: user.username,
+        role: user.role,
+        avatar: getAvatarBase64(user.avatar),
+      };
+
+      dispatch(
+        setUser({ user: minimalUser, token: accessToken, refreshToken })
+      );
+
+      toast.success("Đăng nhập thành công!");
       navigate("/admin/dashboard");
-    } else {
-      setError("Email hoặc mật khẩu không đúng!");
+    } catch (err) {
+      console.error("Login error:", err);
+      setError("Có lỗi xảy ra. Vui lòng thử lại!");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -57,10 +99,9 @@ const AdminLogin = () => {
                       </span>
                       <Form.Control
                         type="email"
-                        name="email"
                         placeholder="Nhập email"
-                        value={formData.email}
-                        onChange={handleChange}
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
                         required
                       />
                     </div>
@@ -74,10 +115,9 @@ const AdminLogin = () => {
                       </span>
                       <Form.Control
                         type="password"
-                        name="password"
                         placeholder="Nhập mật khẩu"
-                        value={formData.password}
-                        onChange={handleChange}
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
                         required
                       />
                     </div>
@@ -87,8 +127,9 @@ const AdminLogin = () => {
                     type="submit"
                     variant="primary"
                     className="w-100 py-2 fw-semibold"
+                    disabled={loading}
                   >
-                    Đăng nhập
+                    {loading ? "Đang đăng nhập..." : "Đăng nhập"}
                   </Button>
                 </Form>
 

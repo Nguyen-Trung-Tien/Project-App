@@ -1,4 +1,4 @@
-const UserService = require("../services/userService");
+const UserService = require("../services/UserService");
 
 const handleCreateNewUser = async (req, res) => {
   try {
@@ -30,6 +30,7 @@ const handleLogin = async (req, res) => {
     res.cookie("refreshToken", result.data.refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
@@ -94,7 +95,6 @@ const handleUpdateUser = async (req, res) => {
     }
 
     const data = req.body;
-
     const result = await UserService.updateUser(userId, data);
 
     if (result.errCode !== 0) {
@@ -145,6 +145,20 @@ const handleGetUserById = async (req, res) => {
       .json({ errCode: -1, errMessage: "Internal server error" });
   }
 };
+
+const handleDeleteUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await UserService.deleteUser(id);
+
+    return res.status(200).json(result);
+  } catch (e) {
+    console.error("Error in handleDeleteUser:", e);
+    return res
+      .status(500)
+      .json({ errCode: -1, errMessage: "Internal server error" });
+  }
+};
 module.exports = {
   handleCreateNewUser,
   handleLogin,
@@ -152,4 +166,5 @@ module.exports = {
   handleUpdateUser,
   handleGetAllUsers,
   handleGetUserById,
+  handleDeleteUser,
 };

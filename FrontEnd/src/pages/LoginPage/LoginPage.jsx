@@ -40,16 +40,18 @@ const LoginPage = () => {
       const response = await loginUser(email, password);
 
       if (response.errCode === 0 && response.data) {
-        const { user, accessToken } = response.data;
+        const { user, accessToken, refreshToken } = response.data;
 
         const minimalUser = {
           id: user.id,
           email: user.email,
-          name: user.name,
+          role: user.role,
           avatar: getAvatarBase64(user.avatar),
         };
 
-        dispatch(setUser({ user: minimalUser, token: accessToken }));
+        dispatch(
+          setUser({ user: minimalUser, token: accessToken, refreshToken })
+        );
 
         toast.success("Đăng nhập thành công!");
         navigate("/");

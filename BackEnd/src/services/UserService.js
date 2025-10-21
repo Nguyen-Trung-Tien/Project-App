@@ -50,7 +50,9 @@ const createNewUser = async (data) => {
 
 const handleUserLogin = async (email, password) => {
   try {
-    const user = await db.User.findOne({ where: { email } });
+    const user = await db.User.findOne({
+      where: { email },
+    });
     if (!user) {
       return { errCode: 1, errMessage: "User not found!" };
     }
@@ -94,8 +96,8 @@ const getAllUsers = async () => {
 const updateUser = async (userId, data) => {
   try {
     const user = await db.User.findByPk(userId);
-    if (!user) return { errCode: 1, errMessage: "User not found" }
-    const fields = ["username", "email", "phone", "address", "avatar"];
+    if (!user) return { errCode: 1, errMessage: "User not found" };
+    const fields = ["username", "email", "phone", "address", "avatar", "role"];
     fields.forEach((field) => {
       if (data[field] !== undefined) user[field] = data[field];
     });
@@ -124,6 +126,23 @@ const getUserById = async (userId) => {
     throw e;
   }
 };
+
+const deleteUser = async (userId) => {
+  try {
+    const user = await db.User.findByPk(userId);
+
+    if (!user) {
+      return { errCode: 1, errMessage: "User not found" };
+    }
+
+    await user.destroy();
+
+    return { errCode: 0, errMessage: "User deleted successfully" };
+  } catch (e) {
+    console.error("Error deleting user:", e);
+    throw e;
+  }
+};
 module.exports = {
   createNewUser,
   handleUserLogin,
@@ -132,4 +151,5 @@ module.exports = {
   updateUser,
   getAllUsers,
   getUserById,
+  deleteUser,
 };
