@@ -19,7 +19,6 @@ const authenticateToken = (req, res, next) => {
   next();
 };
 
-// Phân quyền theo role
 const authorizeRole = (roles) => {
   return (req, res, next) => {
     if (!roles.includes(req.user.role)) {

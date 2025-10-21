@@ -4,7 +4,7 @@
   "description": "",
   "main": "service.js",
   "scripts": {
-    "start": "node src/service.js",
+    "start": "nodemon src/service.js",
     "dev": "nodemon src/service.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
