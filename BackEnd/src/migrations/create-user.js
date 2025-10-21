@@ -35,7 +35,7 @@ module.exports = {
         defaultValue: "customer",
       },
       avatar: {
-        type: Sequelize.STRING,
+        type: Sequelize.BLOB("long"),
         allowNull: true,
       },
       isActive: {

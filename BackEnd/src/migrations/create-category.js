@@ -24,7 +24,7 @@ module.exports = {
         allowNull: true,
       },
       image: {
-        type: Sequelize.STRING,
+        type: Sequelize.BLOB("long"),
         allowNull: true,
       },
       parentId: {

@@ -27,7 +27,7 @@ module.exports = {
       price: { type: Sequelize.DECIMAL(10, 2), allowNull: false },
       subtotal: { type: Sequelize.DECIMAL(10, 2), allowNull: false },
       productName: { type: Sequelize.STRING, allowNull: false },
-      image: { type: Sequelize.STRING, allowNull: true },
+      image: { type: Sequelize.BLOB("long"), allowNull: true },
 
       // ----------- Trả hàng -----------
       returnStatus: {

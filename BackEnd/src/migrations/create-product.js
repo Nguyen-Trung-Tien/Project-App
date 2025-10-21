@@ -25,7 +25,7 @@ module.exports = {
         defaultValue: 0,
       },
       image: {
-        type: Sequelize.STRING,
+        type: Sequelize.BLOB("long"),
         allowNull: true,
       },
       categoryId: {

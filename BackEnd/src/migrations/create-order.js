@@ -37,7 +37,6 @@ module.exports = {
         allowNull: true,
         defaultValue: [],
         comment: "Lịch sử xác nhận/hủy đơn hàng",
-        // Ví dụ: [{status: 'confirmed', date: '2025-10-20T10:00:00'}, ...]
       },
       shippingAddress: {
         type: Sequelize.TEXT,

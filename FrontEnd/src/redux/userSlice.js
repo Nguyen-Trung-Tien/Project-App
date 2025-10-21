@@ -32,6 +32,9 @@ const userSlice = createSlice({
       localStorage.setItem("user", JSON.stringify(action.payload.user));
       localStorage.setItem("accessToken", action.payload.token);
     },
+    updateUser: (state, action) => {
+      state.user = { ...state.user, ...action.payload };
+    },
     removeUser: (state) => {
       state.user = null;
       state.token = null;
@@ -41,5 +44,5 @@ const userSlice = createSlice({
   },
 });
 
-export const { setUser, removeUser } = userSlice.actions;
+export const { setUser, removeUser, updateUser } = userSlice.actions;
 export default userSlice.reducer;

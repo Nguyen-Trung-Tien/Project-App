@@ -54,8 +54,12 @@ function Header() {
                 title={user.username || user.email}
                 id="user-dropdown"
               >
-                <NavDropdown.Item>Thông tin cá nhân</NavDropdown.Item>
-                <NavDropdown.Item>Đơn mua</NavDropdown.Item>
+                <NavDropdown.Item onClick={() => navigate("/profile")}>
+                  Thông tin cá nhân
+                </NavDropdown.Item>
+                <NavDropdown.Item onClick={() => navigate("/orders")}>
+                  Đơn mua
+                </NavDropdown.Item>
                 <NavDropdown.Item onClick={handleLogout}>
                   Đăng xuất
                 </NavDropdown.Item>

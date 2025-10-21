@@ -43,7 +43,7 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.ENUM("customer", "admin"),
         defaultValue: "customer",
       },
-      avatar: { type: DataTypes.STRING, allowNull: true },
+      avatar: { type: DataTypes.BLOB("long"), allowNull: true },
       isActive: { type: DataTypes.BOOLEAN, defaultValue: true },
     },
     {

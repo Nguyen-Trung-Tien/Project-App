@@ -19,3 +19,29 @@ export const registerUser = async (data) => {
     throw err;
   }
 };
+
+export const getUserApi = async (userId, token) => {
+  try {
+    const res = await axiosClient.get(`/user/get-user/${userId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return res.data;
+  } catch (err) {
+    console.error("Get User API error:", err);
+  }
+};
+
+export const updateUserApi = async (userId, data, token) => {
+  try {
+    const res = await axiosClient.put(`/user/update-user`, data, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return res.data;
+  } catch (err) {
+    console.error("Update User API error:", err);
+  }
+};
