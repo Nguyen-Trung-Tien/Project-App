@@ -16,8 +16,6 @@ import "./Header.scss";
 function Header() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-
-  // Redux state
   const user = useSelector((state) => state.user.user);
   const cartItemCount = useSelector((state) => state.cart?.items?.length || 0);
 
@@ -61,12 +59,9 @@ function Header() {
                 title={
                   <div className="d-flex align-items-center">
                     <Image
-                      src={user.avatar || "/default-avatar.png"} // avatar từ API hoặc mặc định
-                      roundedCircle
-                      width={30}
-                      height={30}
-                      className="me-2"
+                      src={user?.avatar || "/images/avatar-default.png"}
                       alt="avatar"
+                      className="me-2 header__avatar"
                     />
                     <span>{user.name || user.email}</span>
                   </div>

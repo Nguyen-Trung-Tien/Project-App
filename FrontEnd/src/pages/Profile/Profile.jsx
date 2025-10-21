@@ -1,11 +1,20 @@
 import React, { useState, useEffect } from "react";
-import { Container, Row, Col, Card, Button, Form } from "react-bootstrap";
+import {
+  Container,
+  Row,
+  Col,
+  Card,
+  Button,
+  Form,
+  Spinner,
+} from "react-bootstrap";
 import { useSelector, useDispatch } from "react-redux";
 import "./Profile.scss";
 import { updateUser } from "../../redux/userSlice";
 import { getUserApi } from "../../api/userApi";
 import { toast } from "react-toastify";
 import axiosClient from "../../utils/axiosClient";
+import Loading from "../../components/Loading/Loading";
 
 const Profile = () => {
   const dispatch = useDispatch();
@@ -21,33 +30,42 @@ const Profile = () => {
     avatar: "",
   });
   const [isEditing, setIsEditing] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const bufferToBase64 = (buffer) => {
     if (!buffer) return null;
     const bytes = new Uint8Array(buffer.data || buffer);
     let binary = "";
     bytes.forEach((b) => (binary += String.fromCharCode(b)));
-    return `data:image/jpeg;base64,${window.btoa(binary)}`;
+    return `data:image/png;base64,${window.btoa(binary)}`;
   };
-
   useEffect(() => {
     const fetchUser = async () => {
       if (!user?.id || !token) return;
+      setLoading(true);
       try {
         const res = await getUserApi(user.id, token);
         if (res && res.errCode === 0) {
+          const data = res.data;
           setFormData({
-            ...res.data,
-            avatar: bufferToBase64(res.data.avatar),
+            username: data.username || "",
+            email: data.email || "",
+            phone: data.phone || "",
+            address: data.address || "",
+            avatar: data.avatarUrl
+              ? data.avatarUrl
+              : bufferToBase64(data.avatar),
           });
         }
       } catch (err) {
-        console.error("Get User API error:", err);
+        console.log(err);
         toast.error("Không thể tải thông tin người dùng");
+      } finally {
+        setLoading(false);
       }
     };
     fetchUser();
-  }, [user, token]);
+  }, [user?.id, token]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -56,6 +74,7 @@ const Profile = () => {
 
   const handleSave = async () => {
     if (!user?.id || !token) return;
+    setLoading(true);
 
     try {
       const fd = new FormData();
@@ -74,16 +93,23 @@ const Profile = () => {
       });
 
       if (res.data.errCode === 0) {
-        const minimalUser = {
-          id: res.data.data.id,
-          username: res.data.data.username,
-          email: res.data.data.email,
-          phone: res.data.data.phone,
-          address: res.data.data.address,
-          avatarUrl: res.data.data.avatarUrl,
-        };
+        const updated = res.data.data;
+        const avatarSrc = updated.avatarUrl
+          ? updated.avatarUrl
+          : bufferToBase64(updated.avatar);
 
-        dispatch(updateUser(minimalUser));
+        dispatch(
+          updateUser({
+            id: updated.id,
+            username: updated.username,
+            email: updated.email,
+            phone: updated.phone,
+            address: updated.address,
+            avatar: avatarSrc,
+          })
+        );
+
+        setFormData((prev) => ({ ...prev, avatar: avatarSrc }));
         setIsEditing(false);
         setAvatarFile(null);
         toast.success("Cập nhật thành công!");
@@ -91,132 +117,120 @@ const Profile = () => {
         toast.error(res.data.errMessage || "Lỗi server");
       }
     } catch (err) {
-      console.error("Update User API error:", err);
-      toast.error("Lỗi server, vui lòng thử lại!");
+      console.log(err);
+      toast.error("Không thể cập nhật. Vui lòng thử lại!");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="profile-page py-2">
-      <Container>
-        <h2 className="text-center text-primary mb-4">Hồ sơ cá nhân</h2>
+    <>
+      {loading && <Loading />}
+      <div className="profile-page py-4">
+        <Container>
+          <h2 className="text-center text-primary fw-bold mb-4">
+            Hồ sơ cá nhân
+          </h2>
 
-        <Row className="justify-content-center">
-          <Col md={4}>
-            <Card className="profile-card shadow-sm text-center p-3">
-              <div className="avatar-wrapper">
-                <img
-                  src={formData.avatar || "/images/avatar-default.png"}
-                  alt="Avatar"
-                  className="avatar"
-                />
-                {isEditing && (
-                  <Form.Group controlId="formAvatar" className="mt-3">
-                    <Form.Label className="small text-muted">
-                      Thay ảnh đại diện
-                    </Form.Label>
-                    <Form.Control
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => {
-                        const file = e.target.files[0];
-                        if (!file) return;
-
-                        setAvatarFile(file);
-                        setFormData((prev) => ({
-                          ...prev,
-                          avatar: URL.createObjectURL(file), // preview
-                        }));
-                      }}
-                    />
-                  </Form.Group>
-                )}
-              </div>
-
-              <h4 className="mt-3">{formData.username || ""}</h4>
-              <p className="text-muted">{formData.email || ""}</p>
-
-              <Button
-                variant="outline-primary"
-                size="sm"
-                onClick={() => setIsEditing(!isEditing)}
-              >
-                {isEditing ? "Hủy chỉnh sửa" : "Chỉnh sửa thông tin"}
-              </Button>
-            </Card>
-          </Col>
-
-          <Col md={7}>
-            <Card className="shadow-sm p-4 profile-info">
-              <h5 className="mb-3 text-secondary fw-bold">Thông tin cá nhân</h5>
-              <Form>
-                <Row>
-                  <Col md={6}>
-                    <Form.Group className="mb-3">
-                      <Form.Label>Họ và tên</Form.Label>
+          <Row className="justify-content-center g-4">
+            <Col md={4}>
+              <Card className="profile-card text-center shadow-sm p-4">
+                <div className="avatar-container">
+                  <img
+                    src={formData.avatar || "/images/avatar-default.png"}
+                    alt="Avatar"
+                    className="avatar-preview"
+                  />
+                  {isEditing && (
+                    <div className="avatar-overlay">
                       <Form.Control
-                        type="text"
-                        name="username"
-                        value={formData.username || ""}
-                        onChange={handleChange}
-                        disabled={!isEditing}
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files[0];
+                          if (!file) return;
+                          setAvatarFile(file);
+                          setFormData((prev) => ({
+                            ...prev,
+                            avatar: URL.createObjectURL(file),
+                          }));
+                        }}
                       />
-                    </Form.Group>
-                  </Col>
+                    </div>
+                  )}
+                </div>
 
-                  <Col md={6}>
-                    <Form.Group className="mb-3">
-                      <Form.Label>Email</Form.Label>
-                      <Form.Control
-                        type="email"
-                        name="email"
-                        value={formData.email || ""}
-                        onChange={handleChange}
-                        disabled={!isEditing}
-                      />
-                    </Form.Group>
-                  </Col>
+                <h4 className="mt-3 mb-1 fw-bold">{formData.username}</h4>
+                <p className="text-muted small">{formData.email}</p>
 
-                  <Col md={6}>
-                    <Form.Group className="mb-3">
-                      <Form.Label>Số điện thoại</Form.Label>
-                      <Form.Control
-                        type="text"
-                        name="phone"
-                        value={formData.phone || ""}
-                        onChange={handleChange}
-                        disabled={!isEditing}
-                      />
-                    </Form.Group>
-                  </Col>
+                <Button
+                  variant={isEditing ? "outline-danger" : "outline-primary"}
+                  className="rounded-pill mt-2"
+                  onClick={() => setIsEditing(!isEditing)}
+                >
+                  {isEditing ? "Hủy chỉnh sửa" : "Chỉnh sửa thông tin"}
+                </Button>
+              </Card>
+            </Col>
 
-                  <Col md={6}>
-                    <Form.Group className="mb-3">
-                      <Form.Label>Địa chỉ</Form.Label>
-                      <Form.Control
-                        type="text"
-                        name="address"
-                        value={formData.address || ""}
-                        onChange={handleChange}
-                        disabled={!isEditing}
-                      />
-                    </Form.Group>
-                  </Col>
-                </Row>
+            <Col md={7}>
+              <Card className="profile-info shadow-sm p-4">
+                <h5 className="text-secondary fw-bold mb-3">
+                  Thông tin cá nhân
+                </h5>
+                <Form>
+                  <Row>
+                    {["username", "email", "phone", "address"].map(
+                      (field, i) => (
+                        <Col md={i < 2 ? 6 : 12} key={field}>
+                          <Form.Group className="mb-3">
+                            <Form.Label className="fw-semibold">
+                              {field === "username"
+                                ? "Họ và tên"
+                                : field === "email"
+                                ? "Email"
+                                : field === "phone"
+                                ? "Số điện thoại"
+                                : "Địa chỉ"}
+                            </Form.Label>
+                            <Form.Control
+                              type={field === "email" ? "email" : "text"}
+                              name={field}
+                              value={formData[field] || ""}
+                              onChange={handleChange}
+                              disabled={!isEditing}
+                              className="form-control-custom"
+                            />
+                          </Form.Group>
+                        </Col>
+                      )
+                    )}
+                  </Row>
 
-                {isEditing && (
-                  <div className="text-end">
-                    <Button variant="primary" onClick={handleSave}>
-                      Lưu thay đổi
-                    </Button>
-                  </div>
-                )}
-              </Form>
-            </Card>
-          </Col>
-        </Row>
-      </Container>
-    </div>
+                  {isEditing && (
+                    <div className="text-end">
+                      <Button
+                        variant="primary"
+                        className="px-4 rounded-pill"
+                        onClick={handleSave}
+                        disabled={loading}
+                      >
+                        {loading ? (
+                          <Spinner animation="border" size="sm" />
+                        ) : (
+                          "💾 Lưu thay đổi"
+                        )}
+                      </Button>
+                    </div>
+                  )}
+                </Form>
+              </Card>
+            </Col>
+          </Row>
+        </Container>
+      </div>
+    </>
   );
 };
 
