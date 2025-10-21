@@ -15,7 +15,7 @@ const authenticateToken = (req, res, next) => {
       .status(403)
       .json({ errCode: 2, errMessage: "Invalid or expired token" });
 
-  req.user = decoded; // Lưu thông tin user vào request
+  req.user = decoded;
   next();
 };
 

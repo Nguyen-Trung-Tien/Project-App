@@ -22,7 +22,25 @@ const handleLogin = async (req, res) => {
     }
 
     const result = await UserService.handleUserLogin(email, password);
-    return res.status(200).json(result);
+
+    if (result.errCode !== 0) {
+      return res.status(401).json(result);
+    }
+
+    res.cookie("refreshToken", result.data.refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 ngày
+    });
+
+    return res.status(200).json({
+      errCode: 0,
+      errMessage: "Login successful",
+      data: {
+        user: result.data.user,
+        accessToken: result.data.accessToken,
+      },
+    });
   } catch (e) {
     console.error(e);
     return res
@@ -33,22 +51,21 @@ const handleLogin = async (req, res) => {
 
 const handleRefreshToken = (req, res) => {
   try {
-    const { refreshToken } = req.body;
+    const refreshToken = req.cookies?.refreshToken;
     if (!refreshToken) {
       return res
         .status(400)
         .json({ errCode: 1, errMessage: "Refresh token is required" });
     }
 
-    const decoded = verifyRefreshToken(refreshToken);
+    const decoded = UserService.verifyRefreshToken(refreshToken);
     if (!decoded) {
       return res
         .status(403)
         .json({ errCode: 2, errMessage: "Invalid or expired refresh token" });
     }
 
-    // Tạo access token mới
-    const accessToken = generateAccessToken({
+    const accessToken = UserService.generateAccessToken({
       id: decoded.id,
       email: decoded.email,
       role: decoded.role,
@@ -57,7 +74,7 @@ const handleRefreshToken = (req, res) => {
     return res.status(200).json({
       errCode: 0,
       errMessage: "Access token refreshed successfully",
-      accessToken,
+      data: { accessToken },
     });
   } catch (e) {
     console.error(e);
