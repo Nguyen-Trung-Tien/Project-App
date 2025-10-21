@@ -1,25 +1,33 @@
 import { createSlice } from "@reduxjs/toolkit";
 
-let userFromStorage = null;
-let tokenFromStorage = null;
-
-try {
-  const storedUser = localStorage.getItem("user");
-  const storedToken = localStorage.getItem("accessToken");
-  if (storedUser && storedToken) {
-    userFromStorage = JSON.parse(storedUser);
-    tokenFromStorage = storedToken;
+const loadFromStorage = (key) => {
+  try {
+    const data = localStorage.getItem(key);
+    return data ? JSON.parse(data) : null;
+  } catch (e) {
+    console.warn(`Failed to parse localStorage item ${key}`, e);
+    localStorage.removeItem(key);
+    return null;
   }
-} catch (e) {
-  console.log(e);
-  console.warn("Invalid user/token in localStorage, clearing it.");
-  localStorage.removeItem("user");
-  localStorage.removeItem("accessToken");
-}
+};
 
 const initialState = {
-  user: userFromStorage,
-  token: tokenFromStorage,
+  user: loadFromStorage("user"),
+  token: localStorage.getItem("accessToken") || null,
+};
+
+const saveToStorage = (key, value) => {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch (e) {
+    if (e.name === "QuotaExceededError") {
+      console.warn("localStorage full. Clearing old data.");
+      localStorage.clear();
+      localStorage.setItem(key, JSON.stringify(value));
+    } else {
+      console.error(`Failed to save ${key} to localStorage`, e);
+    }
+  }
 };
 
 const userSlice = createSlice({
@@ -27,14 +35,37 @@ const userSlice = createSlice({
   initialState,
   reducers: {
     setUser: (state, action) => {
-      state.user = action.payload.user;
-      state.token = action.payload.token;
-      localStorage.setItem("user", JSON.stringify(action.payload.user));
-      localStorage.setItem("accessToken", action.payload.token);
+      const { user, token } = action.payload;
+
+      const minimalUser = {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        avatar: user.avatar || "/default-avatar.png",
+      };
+
+      state.user = minimalUser;
+      state.token = token;
+
+      saveToStorage("user", minimalUser);
+      try {
+        localStorage.setItem("accessToken", token);
+      } catch (e) {
+        if (e.name === "QuotaExceededError") {
+          localStorage.clear();
+          localStorage.setItem("user", JSON.stringify(minimalUser));
+          localStorage.setItem("accessToken", token);
+        } else {
+          throw e;
+        }
+      }
     },
+
     updateUser: (state, action) => {
       state.user = { ...state.user, ...action.payload };
+      saveToStorage("user", state.user);
     },
+
     removeUser: (state) => {
       state.user = null;
       state.token = null;

@@ -1,5 +1,12 @@
 import React from "react";
-import { Navbar, Nav, Container, NavDropdown, Badge } from "react-bootstrap";
+import {
+  Navbar,
+  Nav,
+  Container,
+  NavDropdown,
+  Badge,
+  Image,
+} from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
 import { Cart, PersonCircle } from "react-bootstrap-icons";
 import { useSelector, useDispatch } from "react-redux";
@@ -51,7 +58,19 @@ function Header() {
 
             {user ? (
               <NavDropdown
-                title={user.username || user.email}
+                title={
+                  <div className="d-flex align-items-center">
+                    <Image
+                      src={user.avatar || "/default-avatar.png"} // avatar từ API hoặc mặc định
+                      roundedCircle
+                      width={30}
+                      height={30}
+                      className="me-2"
+                      alt="avatar"
+                    />
+                    <span>{user.name || user.email}</span>
+                  </div>
+                }
                 id="user-dropdown"
               >
                 <NavDropdown.Item onClick={() => navigate("/profile")}>

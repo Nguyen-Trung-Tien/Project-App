@@ -18,14 +18,13 @@ const Profile = () => {
     email: "",
     phone: "",
     address: "",
-    avatar: "", // URL cho preview
+    avatar: "",
   });
   const [isEditing, setIsEditing] = useState(false);
 
-  // Convert ArrayBuffer từ backend BLOB sang Base64 để hiển thị
   const bufferToBase64 = (buffer) => {
     if (!buffer) return null;
-    const bytes = new Uint8Array(buffer.data || buffer); // nếu trả về {data: [...]}
+    const bytes = new Uint8Array(buffer.data || buffer);
     let binary = "";
     bytes.forEach((b) => (binary += String.fromCharCode(b)));
     return `data:image/jpeg;base64,${window.btoa(binary)}`;
@@ -75,9 +74,18 @@ const Profile = () => {
       });
 
       if (res.data.errCode === 0) {
-        dispatch(updateUser(res.data.data));
+        const minimalUser = {
+          id: res.data.data.id,
+          username: res.data.data.username,
+          email: res.data.data.email,
+          phone: res.data.data.phone,
+          address: res.data.data.address,
+          avatarUrl: res.data.data.avatarUrl,
+        };
+
+        dispatch(updateUser(minimalUser));
         setIsEditing(false);
-        setAvatarFile(null); // reset file sau khi lưu
+        setAvatarFile(null);
         toast.success("Cập nhật thành công!");
       } else {
         toast.error(res.data.errMessage || "Lỗi server");

@@ -18,42 +18,51 @@ import { toast } from "react-toastify";
 const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
+  const getAvatarBase64 = (avatar) => {
+    if (!avatar || !avatar.data) return "/default-avatar.png";
+
+    const binary = new Uint8Array(avatar.data).reduce(
+      (acc, byte) => acc + String.fromCharCode(byte),
+      ""
+    );
+    return `data:image/png;base64,${btoa(binary)}`;
+  };
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
     setLoading(true);
 
     try {
-      const data = await loginUser(email, password);
+      const response = await loginUser(email, password);
 
-      if (data.errCode === 0) {
-        dispatch(
-          setUser({
-            user: data.data.user,
-            token: data.data.accessToken,
-          })
-        );
-        toast.success(" Đăng nhập thành công!");
+      if (response.errCode === 0 && response.data) {
+        const { user, accessToken } = response.data;
 
+        const minimalUser = {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          avatar: getAvatarBase64(user.avatar),
+        };
+
+        dispatch(setUser({ user: minimalUser, token: accessToken }));
+
+        toast.success("Đăng nhập thành công!");
         navigate("/");
       } else {
-        setError(data.errMessage);
+        toast.error(response.errMessage || "Đăng nhập thất bại!");
       }
     } catch (err) {
-      console.error(err);
-      toast.error("Lỗi đăng nhập!");
+      console.error("Login error:", err);
+      toast.error("Có lỗi xảy ra. Vui lòng thử lại!");
     } finally {
       setLoading(false);
     }
   };
-
-  const handleBack = () => navigate("/");
 
   return (
     <div className="login-page">
@@ -65,6 +74,7 @@ const LoginPage = () => {
                 <h3 className="text-center mb-4 fw-bold text-primary">
                   Đăng nhập
                 </h3>
+
                 <Form onSubmit={handleSubmit}>
                   <Form.Group controlId="email" className="mb-3">
                     <Form.Label>Email</Form.Label>
@@ -107,10 +117,6 @@ const LoginPage = () => {
                       "Đăng nhập"
                     )}
                   </Button>
-
-                  {error && (
-                    <div className="text-danger text-center mt-2">{error}</div>
-                  )}
                 </Form>
 
                 <p className="text-center mt-4 mb-0 text-muted">
@@ -120,10 +126,11 @@ const LoginPage = () => {
                   </a>
                 </p>
               </Card.Body>
-              <div className="text-center mt-3">
+
+              <div className="text-center mt-3 mb-3">
                 <Button
                   variant="outline-secondary"
-                  onClick={handleBack}
+                  onClick={() => navigate("/")}
                   className="rounded-pill px-3 py-1"
                 >
                   ← Quay lại trang chủ
