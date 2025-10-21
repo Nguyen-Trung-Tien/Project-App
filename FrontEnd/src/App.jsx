@@ -1,38 +1,53 @@
-import { Navigate, Routes, Route, useLocation } from "react-router-dom";
-import Header from "./components/HeaderComponent/Header";
-import Footer from "./components/FooterComponent/Footer";
+import React from "react";
+import { Routes, Route, Navigate } from "react-router-dom";
+import LayoutComponent from "./components/LayoutComponent/LayoutComponent";
 import UserRoutes from "./routes/UserRoutes";
 import AdminRoutes from "./routes/AdminRoutes";
+import LoginPage from "./pages/LoginPage/LoginPage";
+import RegisterPage from "./pages/RegisterPage/RegisterPage";
 
-function App() {
-  const location = useLocation();
-
-  const hideHeaderRoutes = [
-    "/login",
-    "/register",
-    "/admin",
-    "/admin/dashboard",
-    "/admin/orders",
-    "/admin/products",
-    "/admin/users",
-  ];
-  const shouldHideHeader = hideHeaderRoutes.some((path) =>
-    location.pathname.startsWith(path)
-  );
-
+const App = () => {
   return (
-    <>
-      {!shouldHideHeader && <Header />}
+    <Routes>
+      <Route
+        path="/login"
+        element={
+          <LayoutComponent isShowHeader={false} isShowFooter={false}>
+            <LoginPage />
+          </LayoutComponent>
+        }
+      />
 
-      <Routes>
-        <Route path="/*" element={<UserRoutes />} />
-        <Route path="/admin/*" element={<AdminRoutes />} />
-        <Route path="*" element={<Navigate to="/" />} />
-      </Routes>
+      <Route
+        path="/register"
+        element={
+          <LayoutComponent isShowHeader={false} isShowFooter={false}>
+            <RegisterPage />
+          </LayoutComponent>
+        }
+      />
 
-      {!shouldHideHeader && <Footer />}
-    </>
+      <Route
+        path="/*"
+        element={
+          <LayoutComponent isShowHeader={true} isShowFooter={true}>
+            <UserRoutes />
+          </LayoutComponent>
+        }
+      />
+
+      <Route
+        path="/admin/*"
+        element={
+          <LayoutComponent isShowHeader={false} isShowFooter={false}>
+            <AdminRoutes />
+          </LayoutComponent>
+        }
+      />
+
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   );
-}
+};
 
 export default App;

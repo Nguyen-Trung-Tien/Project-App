@@ -1,29 +1,51 @@
-import React from "react";
+import React, { useState } from "react";
 import { Container, Row, Col, Form, Button, Card } from "react-bootstrap";
 import "./RegisterPage.scss";
 import { useNavigate } from "react-router";
+import { registerUser } from "../../api/userApi";
+import { toast } from "react-toastify";
 
 const RegisterPage = () => {
-  const handleRegister = (e) => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
+
+  const handleRegister = async (e) => {
     e.preventDefault();
+    setError("");
+    setLoading(true);
+
     const form = e.target;
+    const username = form.username.value;
+    const email = form.email.value;
     const password = form.password.value;
     const confirmPassword = form.confirmPassword.value;
 
     if (password !== confirmPassword) {
-      alert("❌ Mật khẩu xác nhận không khớp!");
+      setError(" Mật khẩu xác nhận không khớp!");
+      setLoading(false);
       return;
     }
+    try {
+      const data = await registerUser({ username, email, password });
 
-    alert("✅ Đăng ký thành công!");
-    console.log("Đăng ký tài khoản mới...");
+      if (data.errCode === 0) {
+        toast.success("Tạo tài khoản thành công!");
+        navigate("/login");
+      } else {
+        toast.error("Đăng ký thất bại!");
+        setError(data.errMessage || "Đăng ký thất bại!");
+      }
+    } catch (err) {
+      console.error(err);
+      setError("Có lỗi xảy ra, vui lòng thử lại!");
+    }
   };
-
-  const navigate = useNavigate();
 
   const handleBack = () => {
     navigate("/");
   };
+
   return (
     <div className="register-page">
       <Container className="d-flex justify-content-center align-items-center vh-100">
@@ -72,12 +94,15 @@ const RegisterPage = () => {
                     />
                   </Form.Group>
 
+                  {error && <div className="text-danger mb-2">{error}</div>}
+
                   <Button
                     variant="primary"
                     type="submit"
                     className="w-100 rounded-pill py-2 fw-semibold"
+                    disabled={loading}
                   >
-                    Đăng ký
+                    {loading ? "Đang đăng ký..." : "Đăng ký"}
                   </Button>
                 </Form>
 

@@ -1,12 +1,10 @@
 import axios from "axios";
 
-// Tạo instance Axios
 const axiosClient = axios.create({
-  baseURL: "http://localhost:5000/api", // sửa thành URL backend của bạn
-  withCredentials: true, // quan trọng để gửi cookie (refresh token)
+  baseURL: "http://localhost:8080/api/v1",
+  withCredentials: true,
 });
 
-// Flag để tránh gọi nhiều lần refresh token cùng lúc
 let isRefreshing = false;
 let failedQueue = [];
 
@@ -42,7 +40,7 @@ axiosClient.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        const response = await axiosClient.post("/refresh-token");
+        const response = await axiosClient.post("/user/refresh-token");
         const newAccessToken = response.data.data.accessToken;
 
         originalRequest.headers["Authorization"] = `Bearer ${newAccessToken}`;

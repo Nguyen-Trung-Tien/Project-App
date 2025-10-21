@@ -1,26 +1,24 @@
-import React, { useState } from "react";
-import {
-  Navbar,
-  Nav,
-  Container,
-  NavDropdown,
-  Form,
-  FormControl,
-  Button,
-  Badge,
-} from "react-bootstrap";
-import { Link, Navigate } from "react-router-dom";
-import { Cart, PersonCircle, Search } from "react-bootstrap-icons";
+import React from "react";
+import { Navbar, Nav, Container, NavDropdown, Badge } from "react-bootstrap";
+import { Link, useNavigate } from "react-router-dom";
+import { Cart, PersonCircle } from "react-bootstrap-icons";
+import { useSelector, useDispatch } from "react-redux";
+import { removeUser } from "../../redux/userSlice";
 import "./Header.scss";
 
 function Header() {
-  const cartItemCount = 3;
-  const [keyword, setKeyword] = useState("");
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
 
-  const handleSearch = (e) => {
-    e.preventDefault();
-    Navigate(`/search?q=${keyword}`);
+  // Redux state
+  const user = useSelector((state) => state.user.user);
+  const cartItemCount = useSelector((state) => state.cart?.items?.length || 0);
+
+  const handleLogout = () => {
+    dispatch(removeUser());
+    navigate("/login");
   };
+
   return (
     <Navbar expand="lg" sticky="top" className="header shadow-sm">
       <Container>
@@ -35,46 +33,10 @@ function Header() {
               Trang chủ
             </Nav.Link>
 
-            <NavDropdown
-              title="Sản phẩm"
-              id="products-dropdown"
-              className="header__dropdown"
-            >
-              <NavDropdown.Item as={Link} to="/category/dien-thoai">
-                Điện thoại
-              </NavDropdown.Item>
-              <NavDropdown.Item as={Link} to="/category/laptop">
-                Laptop
-              </NavDropdown.Item>
-              <NavDropdown.Item as={Link} to="/category/phu-kien">
-                Phụ kiện
-              </NavDropdown.Item>
-              <NavDropdown.Divider />
-              <NavDropdown.Item as={Link} to="/products">
-                Tất cả sản phẩm
-              </NavDropdown.Item>
-            </NavDropdown>
-
             <Nav.Link as={Link} to="/about" className="header__link">
               Giới thiệu
             </Nav.Link>
           </Nav>
-
-          <Form className="header__search">
-            <div className="header__search-box">
-              <Search className="search-icon" />
-              <FormControl
-                type="search"
-                placeholder="Tìm kiếm sản phẩm..."
-                className="header__search-input"
-                aria-label="Search"
-                onChange={(e) => handleSearch(e)}
-              />
-            </div>
-            <Button variant="primary" className="header__search-btn">
-              Tìm kiếm
-            </Button>
-          </Form>
 
           <Nav className="header__actions">
             <Nav.Link as={Link} to="/cart" className="header__icon-link">
@@ -86,10 +48,24 @@ function Header() {
                 </Badge>
               )}
             </Nav.Link>
-            <Nav.Link as={Link} to="/login" className="header__icon-link">
-              <PersonCircle size={18} />
-              <span>Đăng nhập</span>
-            </Nav.Link>
+
+            {user ? (
+              <NavDropdown
+                title={user.username || user.email}
+                id="user-dropdown"
+              >
+                <NavDropdown.Item>Thông tin cá nhân</NavDropdown.Item>
+                <NavDropdown.Item>Đơn mua</NavDropdown.Item>
+                <NavDropdown.Item onClick={handleLogout}>
+                  Đăng xuất
+                </NavDropdown.Item>
+              </NavDropdown>
+            ) : (
+              <Nav.Link as={Link} to="/login" className="header__icon-link">
+                <PersonCircle size={18} />
+                <span>Đăng nhập</span>
+              </Nav.Link>
+            )}
           </Nav>
         </Navbar.Collapse>
       </Container>

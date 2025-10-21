@@ -1,7 +1,11 @@
 import React from "react";
 import Header from "../HeaderComponent/Header";
 import Footer from "../FooterComponent/Footer";
-const LayoutComponent = ({ children, isShowHeader, isShowFooter }) => {
+const LayoutComponent = ({
+  children,
+  isShowHeader = true,
+  isShowFooter = true,
+}) => {
   return (
     <>
       {isShowHeader && <Header />}
