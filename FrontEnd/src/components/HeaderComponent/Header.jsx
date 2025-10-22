@@ -19,7 +19,7 @@ function Header() {
   const navigate = useNavigate();
   const user = useSelector((state) => state.user.user);
   const cartItemCount = useSelector((state) => state.cart?.items?.length || 0);
-
+  const avatarUrl = user?.avatar || "/default-avatar.png";
   const handleLogout = async () => {
     try {
       await logoutUserApi();
@@ -29,14 +29,6 @@ function Header() {
       console.error("Logout error:", err);
     }
   };
-
-  // Safely determine avatar URL, excluding base64
-  const avatarUrl =
-    user?.avatar && typeof user.avatar === "string" && user.avatar.trim() !== ""
-      ? user.avatar.startsWith("data:image")
-        ? "/default-avatar.png"
-        : user.avatar
-      : "/default-avatar.png";
 
   return (
     <Navbar expand="lg" sticky="top" className="header shadow-sm">

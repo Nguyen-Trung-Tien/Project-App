@@ -46,7 +46,13 @@ const userSlice = createSlice({
     },
 
     updateUser: (state, action) => {
-      state.user = { ...state.user, ...action.payload };
+      const safeAvatar =
+        action.payload.avatar && typeof action.payload.avatar === "string"
+          ? action.payload.avatar
+          : state.user?.avatar || "/default-avatar.png";
+
+      state.user = { ...state.user, ...action.payload, avatar: safeAvatar };
+
       saveToStorage("user", state.user);
     },
 

@@ -48,7 +48,7 @@ const Profile = () => {
             email: data.email || "",
             phone: data.phone || "",
             address: data.address || "",
-            avatar: data.avatar || null, // avatar URL từ server
+            avatar: data.avatar || null,
           });
         }
       } catch (err) {
@@ -69,15 +69,13 @@ const Profile = () => {
   const handleAvatarChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    setAvatarFile(file);
 
     const reader = new FileReader();
     reader.onloadend = () => {
-      setFormData((prev) => ({ ...prev, avatar: reader.result })); // preview base64
+      setFormData((prev) => ({ ...prev, avatar: reader.result })); // base64
     };
     reader.readAsDataURL(file);
   };
-
   const handleSave = async () => {
     if (!user?.id || !token) return;
     setLoading(true);
@@ -95,9 +93,15 @@ const Profile = () => {
       const res = await updateUserApi(payload, token);
 
       if (res.errCode === 0) {
-        dispatch(updateUser(res.data));
-        setIsEditing(false);
         toast.success("Cập nhật thành công!");
+
+        const userRes = await getUserApi(user.id, token);
+        if (userRes.errCode === 0) {
+          dispatch(updateUser(userRes.data));
+          setFormData((prev) => ({ ...prev, ...userRes.data }));
+        }
+
+        setIsEditing(false);
       } else {
         toast.error(res.errMessage || "Lỗi server");
       }
