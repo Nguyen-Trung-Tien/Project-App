@@ -123,12 +123,12 @@ const UserManage = ({ token }) => {
     try {
       console.log("Updating user:", JSON.stringify(userData));
 
-      const res = await updateUserApi(userData, token); // chỉ gửi payload JSON + token
+      const res = await updateUserApi(userData, token);
 
       if (res.errCode === 0) {
         toast.success("Cập nhật thành công!");
-        fetchUsers(); // load lại danh sách
-        handleCloseModal(); // đóng modal
+        fetchUsers();
+        handleCloseModal();
       } else {
         toast.error(res.errMessage || "Có lỗi xảy ra khi cập nhật");
       }
@@ -138,7 +138,6 @@ const UserManage = ({ token }) => {
     }
   };
 
-  // Form submit handler
   const handleSave = (e) => {
     e.preventDefault();
     const form = e.target;
@@ -168,21 +167,24 @@ const UserManage = ({ token }) => {
     }
   };
 
-  // Toggle user status
   const toggleStatus = async (id) => {
     const user = users.find((u) => u.id === id);
     if (!user) return;
 
     try {
-      const updatedData = { isActive: user.status !== "active" };
-      const res = await updateUserApi(id, updatedData, token);
+      const isActive = user.status === "active";
+
+      const updatedData = {
+        id,
+        isActive: !isActive,
+      };
+
+      const res = await updateUserApi(updatedData, token);
 
       if (res.errCode === 0) {
         setUsers((prev) =>
           prev.map((u) =>
-            u.id === id
-              ? { ...u, status: u.status === "active" ? "blocked" : "active" }
-              : u
+            u.id === id ? { ...u, status: !isActive ? "active" : "blocked" } : u
           )
         );
         toast.success("Cập nhật trạng thái thành công!");
@@ -190,7 +192,7 @@ const UserManage = ({ token }) => {
         toast.error(res.errMessage || "Lỗi khi cập nhật trạng thái");
       }
     } catch (err) {
-      console.error(err);
+      console.error("Toggle status error:", err.response?.data || err.message);
       toast.error("Lỗi khi cập nhật trạng thái");
     }
   };
