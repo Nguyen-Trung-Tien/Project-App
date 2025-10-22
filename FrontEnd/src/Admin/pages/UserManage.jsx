@@ -26,6 +26,7 @@ const UserManage = ({ token }) => {
   const [editUser, setEditUser] = useState(null);
   const [loading, setLoading] = useState(false);
 
+  // Fetch users from API
   const fetchUsers = async () => {
     setLoading(true);
     try {
@@ -39,15 +40,15 @@ const UserManage = ({ token }) => {
           address: u.address || "",
           role: u.role,
           status: u.isActive ? "active" : "blocked",
-          avatar: null,
+          avatar: u.avatar ? u.avatar.toString("base64") : null,
         }));
         setUsers(mappedUsers);
       } else {
         toast.error(res.errMessage || "Lỗi khi tải người dùng");
       }
     } catch (err) {
-      toast.error("Lỗi khi kết nối API");
       console.error(err);
+      toast.error("Lỗi khi kết nối API");
     } finally {
       setLoading(false);
     }
@@ -63,6 +64,7 @@ const UserManage = ({ token }) => {
       u.email.toLowerCase().includes(search.toLowerCase())
   );
 
+  // Modal control
   const handleShowModal = (user = null) => {
     setEditUser(user);
     setShowModal(true);
@@ -72,6 +74,7 @@ const UserManage = ({ token }) => {
     setEditUser(null);
   };
 
+  // Create new user
   const handleCreateUser = async (form) => {
     const userData = {
       username: form.username.value.trim(),
@@ -101,13 +104,16 @@ const UserManage = ({ token }) => {
     }
   };
 
+  // Update existing user
   const handleUpdateUser = async (form, editUserId) => {
     const userData = {
+      id: editUserId, // gắn ID vào payload
       username: form.username.value.trim(),
       email: form.email.value.trim(),
       phone: form.phone.value.trim(),
       address: form.address.value.trim(),
       role: form.role.value,
+      avatar: form.avatar?.value || null,
     };
 
     if (!userData.username || !userData.email) {
@@ -115,21 +121,24 @@ const UserManage = ({ token }) => {
     }
 
     try {
-      const res = await updateUserApi(editUserId, userData, token);
+      console.log("Updating user:", JSON.stringify(userData));
+
+      const res = await updateUserApi(userData, token); // chỉ gửi payload JSON + token
+
       if (res.errCode === 0) {
         toast.success("Cập nhật thành công!");
-        fetchUsers();
-        handleCloseModal();
+        fetchUsers(); // load lại danh sách
+        handleCloseModal(); // đóng modal
       } else {
-        toast.error(res.errMessage || "Có lỗi xảy ra");
+        toast.error(res.errMessage || "Có lỗi xảy ra khi cập nhật");
       }
     } catch (err) {
-      console.error(err);
-      toast.error("Lỗi khi gọi API");
+      console.error("Update user error:", err.response?.data || err.message);
+      toast.error("Lỗi khi gọi API cập nhật người dùng");
     }
   };
 
-  // Hàm dùng trong Form submit
+  // Form submit handler
   const handleSave = (e) => {
     e.preventDefault();
     const form = e.target;
@@ -141,6 +150,7 @@ const UserManage = ({ token }) => {
     }
   };
 
+  // Delete user
   const handleDelete = async (id) => {
     if (!window.confirm("Bạn có chắc muốn xóa người dùng này?")) return;
 
@@ -153,18 +163,20 @@ const UserManage = ({ token }) => {
         toast.error(res.errMessage || "Lỗi khi xóa user");
       }
     } catch (err) {
-      toast.error("Lỗi khi xóa user");
       console.error(err);
+      toast.error("Lỗi khi xóa user");
     }
   };
 
+  // Toggle user status
   const toggleStatus = async (id) => {
     const user = users.find((u) => u.id === id);
     if (!user) return;
 
     try {
-      const updatedData = { ...user, isActive: user.status !== "active" };
+      const updatedData = { isActive: user.status !== "active" };
       const res = await updateUserApi(id, updatedData, token);
+
       if (res.errCode === 0) {
         setUsers((prev) =>
           prev.map((u) =>
@@ -300,7 +312,7 @@ const UserManage = ({ token }) => {
         </Card.Body>
       </Card>
 
-      {/* Modal thêm/sửa */}
+      {/* Modal Thêm / Sửa */}
       <Modal show={showModal} onHide={handleCloseModal} centered>
         <Modal.Header closeButton>
           <Modal.Title>

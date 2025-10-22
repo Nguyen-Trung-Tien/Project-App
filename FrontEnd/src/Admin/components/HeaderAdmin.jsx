@@ -15,10 +15,10 @@ import {
   BoxArrowRight,
 } from "react-bootstrap-icons";
 import "../Layout.scss";
-import { logoutUserApi } from "../../api/userApi";
 import { removeUser } from "../../redux/userSlice";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router";
+import { logoutUserApi } from "../../api/userApi";
 
 const HeaderAdmin = () => {
   const dispatch = useDispatch();
@@ -29,7 +29,7 @@ const HeaderAdmin = () => {
       localStorage.removeItem("accessToken");
       localStorage.removeItem("user");
       dispatch(removeUser());
-      navigate("/login");
+      navigate("/admin/login-admin");
     } catch (err) {
       console.error("Logout error:", err);
     }
@@ -94,7 +94,6 @@ const HeaderAdmin = () => {
                 <PersonCircle className="me-2" /> Hồ sơ
               </Dropdown.Item>
               <Dropdown.Item
-                href="/admin/login-admin"
                 className="text-danger"
                 onClick={() => handleLogout()}
               >
