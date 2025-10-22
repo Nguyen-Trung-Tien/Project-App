@@ -75,3 +75,15 @@ export const deleteUserApi = async (userId, token) => {
     throw err;
   }
 };
+
+export const logoutUserApi = async () => {
+  try {
+    const res = await axiosClient.post(`/user/logout`, null, {
+      withCredentials: true,
+    });
+    return res.data;
+  } catch (err) {
+    console.error("Delete User API error:", err);
+    throw err;
+  }
+};

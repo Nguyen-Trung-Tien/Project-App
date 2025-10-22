@@ -15,20 +15,35 @@ import {
   BoxArrowRight,
 } from "react-bootstrap-icons";
 import "../Layout.scss";
+import { logoutUserApi } from "../../api/userApi";
+import { removeUser } from "../../redux/userSlice";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router";
 
 const HeaderAdmin = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const handleLogout = async () => {
+    try {
+      await logoutUserApi();
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("user");
+      dispatch(removeUser());
+      navigate("/login");
+    } catch (err) {
+      console.error("Logout error:", err);
+    }
+  };
   return (
     <Navbar bg="white" expand="lg" className="shadow-sm px-3 sticky-top">
       <Container
         fluid
         className="d-flex justify-content-between align-items-center"
       >
-        {/* Logo */}
         <Navbar.Brand className="fw-bold text-primary fs-4">
           🧭 Admin Dashboard
         </Navbar.Brand>
 
-        {/* Thanh tìm kiếm */}
         <Form
           className="d-none d-md-flex align-items-center"
           style={{ maxWidth: "400px", width: "100%" }}
@@ -45,9 +60,7 @@ const HeaderAdmin = () => {
           </div>
         </Form>
 
-        {/* Khu vực phải */}
         <div className="d-flex align-items-center gap-3">
-          {/* Nút thông báo */}
           <Button
             variant="outline-primary"
             className="rounded-circle p-2 position-relative"
@@ -61,7 +74,6 @@ const HeaderAdmin = () => {
             </span>
           </Button>
 
-          {/* Dropdown tài khoản */}
           <Dropdown align="end">
             <Dropdown.Toggle
               variant="outline-secondary"
@@ -81,7 +93,11 @@ const HeaderAdmin = () => {
               <Dropdown.Item href="#/profile">
                 <PersonCircle className="me-2" /> Hồ sơ
               </Dropdown.Item>
-              <Dropdown.Item href="#/logout" className="text-danger">
+              <Dropdown.Item
+                href="/admin/login-admin"
+                className="text-danger"
+                onClick={() => handleLogout()}
+              >
                 <BoxArrowRight className="me-2" /> Đăng xuất
               </Dropdown.Item>
             </Dropdown.Menu>

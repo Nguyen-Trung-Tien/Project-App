@@ -88,4 +88,6 @@ router.delete(
   UserController.handleDeleteUser
 );
 
+router.post("/logout", UserController.handleLogout);
+
 module.exports = router;

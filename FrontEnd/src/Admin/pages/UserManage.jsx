@@ -26,7 +26,6 @@ const UserManage = ({ token }) => {
   const [editUser, setEditUser] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  // Lấy danh sách user từ API
   const fetchUsers = async () => {
     setLoading(true);
     try {
@@ -64,7 +63,6 @@ const UserManage = ({ token }) => {
       u.email.toLowerCase().includes(search.toLowerCase())
   );
 
-  // Mở/đóng modal
   const handleShowModal = (user = null) => {
     setEditUser(user);
     setShowModal(true);
@@ -81,7 +79,7 @@ const UserManage = ({ token }) => {
       phone: form.phone.value.trim(),
       address: form.address.value.trim(),
       role: form.role.value,
-      password: "123456", // mặc định khi tạo mới
+      password: "123456",
     };
 
     if (!userData.username || !userData.email) {
@@ -277,13 +275,15 @@ const UserManage = ({ token }) => {
                       >
                         ✏️
                       </Button>{" "}
-                      <Button
-                        variant="outline-danger"
-                        size="sm"
-                        onClick={() => handleDelete(u.id)}
-                      >
-                        🗑️
-                      </Button>{" "}
+                      {u.role !== "admin" && (
+                        <Button
+                          variant="outline-danger"
+                          size="sm"
+                          onClick={() => handleDelete(u.id)}
+                        >
+                          🗑️
+                        </Button>
+                      )}{" "}
                       <Button
                         variant="outline-info"
                         size="sm"

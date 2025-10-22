@@ -1,4 +1,6 @@
 import axios from "axios";
+import { updateToken, removeUser } from "../redux/userSlice";
+import { store } from "../redux/store";
 
 const axiosClient = axios.create({
   baseURL: "http://localhost:8080/api/v1",
@@ -25,7 +27,6 @@ axiosClient.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// ✅ Giữ nguyên phần refresh
 axiosClient.interceptors.response.use(
   (response) => response,
   async (error) => {
@@ -51,12 +52,16 @@ axiosClient.interceptors.response.use(
         const newAccessToken = response.data.data.accessToken;
 
         localStorage.setItem("accessToken", newAccessToken);
+
+        store.dispatch(updateToken(newAccessToken));
+
         originalRequest.headers["Authorization"] = `Bearer ${newAccessToken}`;
 
         processQueue(null, newAccessToken);
         return axiosClient(originalRequest);
       } catch (err) {
         processQueue(err, null);
+        store.dispatch(removeUser());
         return Promise.reject(err);
       } finally {
         isRefreshing = false;

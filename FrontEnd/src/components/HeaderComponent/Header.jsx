@@ -12,16 +12,24 @@ import { Cart, PersonCircle } from "react-bootstrap-icons";
 import { useSelector, useDispatch } from "react-redux";
 import { removeUser } from "../../redux/userSlice";
 import "./Header.scss";
+import { logoutUserApi } from "../../api/userApi";
 
 function Header() {
-  const navigate = useNavigate();
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const user = useSelector((state) => state.user.user);
   const cartItemCount = useSelector((state) => state.cart?.items?.length || 0);
 
-  const handleLogout = () => {
-    dispatch(removeUser());
-    navigate("/login");
+  const handleLogout = async () => {
+    try {
+      await logoutUserApi();
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("user");
+      dispatch(removeUser());
+      navigate("/login");
+    } catch (err) {
+      console.error("Logout error:", err);
+    }
   };
 
   return (
@@ -55,29 +63,45 @@ function Header() {
             </Nav.Link>
 
             {user ? (
-              <NavDropdown
-                title={
-                  <div className="d-flex align-items-center">
-                    <Image
-                      src={user?.avatar || "/images/avatar-default.png"}
-                      alt="avatar"
-                      className="me-2 header__avatar"
-                    />
-                    <span>{user.name || user.email}</span>
-                  </div>
-                }
-                id="user-dropdown"
-              >
-                <NavDropdown.Item onClick={() => navigate("/profile")}>
-                  Thông tin cá nhân
-                </NavDropdown.Item>
-                <NavDropdown.Item onClick={() => navigate("/orders")}>
-                  Đơn mua
-                </NavDropdown.Item>
-                <NavDropdown.Item onClick={handleLogout}>
-                  Đăng xuất
-                </NavDropdown.Item>
-              </NavDropdown>
+              <>
+                {user.role === "admin" && (
+                  <NavDropdown title="Quản lý hệ thống" id="admin-dropdown">
+                    <NavDropdown.Item as={Link} to="/admin/dashboard">
+                      Dashboard
+                    </NavDropdown.Item>
+                    <NavDropdown.Item as={Link} to="/admin/users">
+                      Quản lý người dùng
+                    </NavDropdown.Item>
+                    <NavDropdown.Item as={Link} to="/admin/orders">
+                      Quản lý đơn hàng
+                    </NavDropdown.Item>
+                  </NavDropdown>
+                )}
+
+                <NavDropdown
+                  title={
+                    <div className="d-flex align-items-center">
+                      <Image
+                        src={user?.avatar || "/images/avatar-default.png"}
+                        alt="avatar"
+                        className="me-2 header__avatar"
+                      />
+                      <span>{user.name || user.email}</span>
+                    </div>
+                  }
+                  id="user-dropdown"
+                >
+                  <NavDropdown.Item onClick={() => navigate("/profile")}>
+                    Thông tin cá nhân
+                  </NavDropdown.Item>
+                  <NavDropdown.Item onClick={() => navigate("/orders")}>
+                    Đơn mua
+                  </NavDropdown.Item>
+                  <NavDropdown.Item onClick={handleLogout}>
+                    Đăng xuất
+                  </NavDropdown.Item>
+                </NavDropdown>
+              </>
             ) : (
               <Nav.Link as={Link} to="/login" className="header__icon-link">
                 <PersonCircle size={18} />

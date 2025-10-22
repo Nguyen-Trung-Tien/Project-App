@@ -12,11 +12,14 @@ import {
   FiBarChart,
 } from "react-icons/fi";
 import "../Layout.scss";
+import { useDispatch } from "react-redux";
+import { logoutUserApi } from "../../api/userApi";
+import { removeUser } from "../../redux/userSlice";
 
 const Sidebar = () => {
   const location = useLocation();
   const navigate = useNavigate();
-
+  const dispatch = useDispatch();
   const menuItems = [
     { to: "/admin/dashboard", icon: <FiHome />, label: "Dashboard" },
     { to: "/admin/orders", icon: <FiShoppingCart />, label: "Đơn hàng" },
@@ -27,20 +30,24 @@ const Sidebar = () => {
     { to: "/admin/settings", icon: <FiSettings />, label: "Cài đặt" },
   ];
 
-  const handleLogout = () => {
-    localStorage.removeItem("admin_token");
-    navigate("/admin/login-admin");
+  const handleLogout = async () => {
+    try {
+      await logoutUserApi();
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("user");
+      dispatch(removeUser());
+      navigate("/admin/login-admin");
+    } catch (err) {
+      console.error("Logout error:", err);
+    }
   };
-
   return (
     <div className="sidebar d-flex flex-column justify-content-between p-3 shadow-sm">
-      {/* Logo / Header */}
       <div className="sidebar-header mb-4 text-center">
         <h5 className="fw-bold text-primary mb-1">🛠️ Admin Panel</h5>
         <small className="text-muted">Quản lý hệ thống</small>
       </div>
 
-      {/* Menu */}
       <Nav className="flex-column">
         {menuItems.map((item, i) => {
           const active = location.pathname === item.to;

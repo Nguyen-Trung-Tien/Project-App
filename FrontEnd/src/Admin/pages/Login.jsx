@@ -133,10 +133,14 @@ const AdminLogin = () => {
                   </Button>
                 </Form>
 
-                <div className="text-center mt-3">
-                  <small className="text-muted">
-                    © 2025 My Online Shop. All rights reserved.
-                  </small>
+                <div className="text-center mt-3 mb-3">
+                  <Button
+                    variant="outline-secondary"
+                    onClick={() => navigate("/")}
+                    className="rounded-pill px-3 py-1"
+                  >
+                    ← Quay lại trang chủ
+                  </Button>
                 </div>
               </Card.Body>
             </Card>

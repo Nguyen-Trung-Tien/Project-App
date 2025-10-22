@@ -1,58 +1,36 @@
 import React, { useEffect, useState } from "react";
 import { Navigate, Outlet } from "react-router-dom";
-import { useSelector, useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
 import { jwtDecode } from "jwt-decode";
-import axiosClient from "../utils/axiosClient";
-import { updateToken, removeUser } from "../redux/userSlice";
 
 const PrivateRoute = ({ requiredRole }) => {
   const user = useSelector((state) => state.user.user);
   const token = useSelector((state) => state.user.token);
-  const dispatch = useDispatch();
 
   const [checking, setChecking] = useState(true);
   const [valid, setValid] = useState(false);
 
   useEffect(() => {
-    const verifyToken = async () => {
-      try {
-        if (!user || !token) {
-          setValid(false);
-          return;
-        }
+    const verifyToken = () => {
+      if (!user || !token) {
+        setValid(false);
+        setChecking(false);
+        return;
+      }
 
+      try {
         const decoded = jwtDecode(token);
         const isExpired = decoded.exp < Date.now() / 1000;
 
         if (requiredRole && user.role !== requiredRole) {
           setValid(false);
-          return;
-        }
-
-        if (!isExpired) {
+        } else if (!isExpired) {
           setValid(true);
         } else {
-          const res = await axiosClient.post(
-            "/user/refresh-token",
-            {},
-            {
-              headers: { Authorization: `Bearer ${token}` },
-            }
-          );
-          const newToken = res.data?.data?.accessToken;
-
-          if (newToken) {
-            localStorage.setItem("accessToken", newToken);
-            dispatch(updateToken(newToken));
-            setValid(true);
-          } else {
-            dispatch(removeUser());
-            setValid(false);
-          }
+          setValid(true);
         }
       } catch (err) {
-        console.error("Token verify error:", err);
-        dispatch(removeUser());
+        console.error("Token decode error:", err);
         setValid(false);
       } finally {
         setChecking(false);
@@ -60,7 +38,7 @@ const PrivateRoute = ({ requiredRole }) => {
     };
 
     verifyToken();
-  }, [user, token, dispatch, requiredRole]);
+  }, [user, token, requiredRole]);
 
   if (checking) {
     return (

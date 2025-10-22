@@ -159,6 +159,28 @@ const handleDeleteUser = async (req, res) => {
       .json({ errCode: -1, errMessage: "Internal server error" });
   }
 };
+
+const handleLogout = async (req, res) => {
+  try {
+    res.clearCookie("refreshToken", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "Strict",
+    });
+
+    return res.status(200).json({
+      errCode: 0,
+      errMessage: "Logout thành công",
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({
+      errCode: -1,
+      errMessage: "Internal server error",
+    });
+  }
+};
+
 module.exports = {
   handleCreateNewUser,
   handleLogin,
@@ -167,4 +189,5 @@ module.exports = {
   handleGetAllUsers,
   handleGetUserById,
   handleDeleteUser,
+  handleLogout,
 };
