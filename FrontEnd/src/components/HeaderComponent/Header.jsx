@@ -66,11 +66,20 @@ function Header() {
                     <NavDropdown.Item as={Link} to="/admin/dashboard">
                       Dashboard
                     </NavDropdown.Item>
-                    <NavDropdown.Item as={Link} to="/admin/users">
-                      Quản lý người dùng
-                    </NavDropdown.Item>
                     <NavDropdown.Item as={Link} to="/admin/orders">
                       Quản lý đơn hàng
+                    </NavDropdown.Item>
+                    <NavDropdown.Item as={Link} to="/admin/products">
+                      Quản lý sản phẩm
+                    </NavDropdown.Item>
+                    <NavDropdown.Item as={Link} to="/admin/products">
+                      Quản lý người dùng
+                    </NavDropdown.Item>
+                    <NavDropdown.Item as={Link} to="/admin/users">
+                      Quản lý danh mục
+                    </NavDropdown.Item>
+                    <NavDropdown.Item as={Link} to="/admin/revenue">
+                      Quản lý báo cáo
                     </NavDropdown.Item>
                   </NavDropdown>
                 )}

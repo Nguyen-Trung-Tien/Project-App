@@ -14,6 +14,7 @@ import Loading from "../../components/Loading/Loading";
 
 const OrderManage = () => {
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
 
   const [orders, setOrders] = useState([
     {
@@ -62,82 +63,86 @@ const OrderManage = () => {
   const formatCurrency = (value) => value.toLocaleString("vi-VN") + " ₫";
 
   const formatDate = (dateStr) => new Date(dateStr).toLocaleDateString("vi-VN");
-  <Loading></Loading>;
+
   return (
-    <div>
-      <h3 className="mb-4">📦 Quản lý đơn hàng</h3>
+    <>
+      {loading && <Loading />}
+      <div>
+        <h3 className="mb-4">📦 Quản lý đơn hàng</h3>
 
-      <Card className="shadow-sm">
-        <Card.Body>
-          <Row className="mb-3">
-            <Col md={4}>
-              <h5>Tổng đơn hàng: {orders.length}</h5>
-            </Col>
-          </Row>
+        <Card className="shadow-sm">
+          <Card.Body>
+            <Row className="mb-3">
+              <Col md={4}>
+                <h5>Tổng đơn hàng: {orders.length}</h5>
+              </Col>
+            </Row>
 
-          <Table
-            striped
-            bordered
-            hover
-            responsive
-            className="align-middle text-center"
-          >
-            <thead className="table-light">
-              <tr>
-                <th>Mã đơn</th>
-                <th className="text-start">Khách hàng</th>
-                <th>Ngày đặt</th>
-                <th>Tổng tiền</th>
-                <th>Trạng thái</th>
-                <th>Thao tác</th>
-              </tr>
-            </thead>
-            <tbody>
-              {orders.map((order) => (
-                <tr key={order.id}>
-                  <td>{order.id}</td>
-                  <td className="text-start">{order.customer}</td>
-                  <td>{formatDate(order.date)}</td>
-                  <td>{formatCurrency(order.total)}</td>
-                  <td>{getStatusBadge(order.status)}</td>
-                  <td>
-                    <div className="d-flex justify-content-center gap-2">
-                      <Dropdown container="body">
-                        <Dropdown.Toggle variant="outline-primary" size="sm">
-                          <i className="bi bi-pencil-square me-1"></i> Cập nhật
-                        </Dropdown.Toggle>
-
-                        <Dropdown.Menu>
-                          {Object.keys(statusMap).map((key) => (
-                            <Dropdown.Item
-                              key={key}
-                              onClick={() => updateStatus(order.id, key)}
-                              className={
-                                key === "canceled" ? "text-danger" : ""
-                              }
-                            >
-                              {statusMap[key].label}
-                            </Dropdown.Item>
-                          ))}
-                        </Dropdown.Menu>
-                      </Dropdown>
-
-                      <Button
-                        variant="outline-secondary"
-                        size="sm"
-                        onClick={() => navigate(`/orders/${order.id}`)}
-                      >
-                        <i className="bi bi-eye me-1"></i> Chi tiết
-                      </Button>
-                    </div>
-                  </td>
+            <Table
+              striped
+              bordered
+              hover
+              responsive
+              className="align-middle text-center"
+            >
+              <thead className="table-light">
+                <tr>
+                  <th>Mã đơn</th>
+                  <th className="text-start">Khách hàng</th>
+                  <th>Ngày đặt</th>
+                  <th>Tổng tiền</th>
+                  <th>Trạng thái</th>
+                  <th>Thao tác</th>
                 </tr>
-              ))}
-            </tbody>
-          </Table>
-        </Card.Body>
-      </Card>
-    </div>
+              </thead>
+              <tbody>
+                {orders.map((order) => (
+                  <tr key={order.id}>
+                    <td>{order.id}</td>
+                    <td className="text-start">{order.customer}</td>
+                    <td>{formatDate(order.date)}</td>
+                    <td>{formatCurrency(order.total)}</td>
+                    <td>{getStatusBadge(order.status)}</td>
+                    <td>
+                      <div className="d-flex justify-content-center gap-2">
+                        <Dropdown container="body">
+                          <Dropdown.Toggle variant="outline-primary" size="sm">
+                            <i className="bi bi-pencil-square me-1"></i> Cập
+                            nhật
+                          </Dropdown.Toggle>
+
+                          <Dropdown.Menu>
+                            {Object.keys(statusMap).map((key) => (
+                              <Dropdown.Item
+                                key={key}
+                                onClick={() => updateStatus(order.id, key)}
+                                className={
+                                  key === "canceled" ? "text-danger" : ""
+                                }
+                              >
+                                {statusMap[key].label}
+                              </Dropdown.Item>
+                            ))}
+                          </Dropdown.Menu>
+                        </Dropdown>
+
+                        <Button
+                          variant="outline-secondary"
+                          size="sm"
+                          onClick={() => navigate(`/orders/${order.id}`)}
+                        >
+                          <i className="bi bi-eye me-1"></i> Chi tiết
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          </Card.Body>
+        </Card>
+      </div>
+    </>
   );
 };
 

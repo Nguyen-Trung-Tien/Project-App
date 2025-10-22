@@ -7,7 +7,7 @@ const Loading = ({ message = "Đang tải dữ liệu..." }) => {
     <div className="loading-overlay">
       <motion.div
         className="loading-card"
-        initial={{ opacity: 0, scale: 0.9 }}
+        initial={{ opacity: 0, scale: 0.5 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.4 }}
       >

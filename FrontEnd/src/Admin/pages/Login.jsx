@@ -14,6 +14,7 @@ import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 import { loginUser } from "../../api/userApi";
 import { setUser } from "../../redux/userSlice";
+import Loading from "../../components/Loading/Loading";
 
 const AdminLogin = () => {
   const [email, setEmail] = useState("");
@@ -77,62 +78,64 @@ const AdminLogin = () => {
   };
 
   return (
-    <div className="login-page d-flex align-items-center justify-content-center vh-100 bg-light">
-      <Container>
-        <Row className="justify-content-center">
-          <Col md={5}>
-            <Card className="shadow-lg border-0 rounded-4 p-4">
-              <Card.Body>
-                <h3 className="text-center fw-bold mb-3">🔐 Admin Login</h3>
-                <p className="text-center text-muted mb-4">
-                  Đăng nhập để truy cập bảng quản trị
-                </p>
+    <>
+      {loading && <Loading />}
+      <div className="login-page d-flex align-items-center justify-content-center vh-100 bg-light">
+        <Container>
+          <Row className="justify-content-center">
+            <Col md={5}>
+              <Card className="shadow-lg border-0 rounded-4 p-4">
+                <Card.Body>
+                  <h3 className="text-center fw-bold mb-3">🔐 Admin Login</h3>
+                  <p className="text-center text-muted mb-4">
+                    Đăng nhập để truy cập bảng quản trị
+                  </p>
 
-                {error && <Alert variant="danger">{error}</Alert>}
+                  {error && <Alert variant="danger">{error}</Alert>}
 
-                <Form onSubmit={handleSubmit}>
-                  <Form.Group className="mb-3">
-                    <Form.Label>Email</Form.Label>
-                    <div className="input-group">
-                      <span className="input-group-text bg-white">
-                        <FiMail />
-                      </span>
-                      <Form.Control
-                        type="email"
-                        placeholder="Nhập email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                      />
-                    </div>
-                  </Form.Group>
+                  <Form onSubmit={handleSubmit}>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Email</Form.Label>
+                      <div className="input-group">
+                        <span className="input-group-text bg-white">
+                          <FiMail />
+                        </span>
+                        <Form.Control
+                          type="email"
+                          placeholder="Nhập email"
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          required
+                        />
+                      </div>
+                    </Form.Group>
 
-                  <Form.Group className="mb-3">
-                    <Form.Label>Mật khẩu</Form.Label>
-                    <div className="input-group">
-                      <span className="input-group-text bg-white">
-                        <FiLock />
-                      </span>
-                      <Form.Control
-                        type="password"
-                        placeholder="Nhập mật khẩu"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                      />
-                    </div>
-                  </Form.Group>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Mật khẩu</Form.Label>
+                      <div className="input-group">
+                        <span className="input-group-text bg-white">
+                          <FiLock />
+                        </span>
+                        <Form.Control
+                          type="password"
+                          placeholder="Nhập mật khẩu"
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          required
+                        />
+                      </div>
+                    </Form.Group>
 
-                  <Button
-                    type="submit"
-                    variant="primary"
-                    className="w-100 py-2 fw-semibold"
-                    disabled={loading}
-                  >
-                    {loading ? "Đang đăng nhập..." : "Đăng nhập"}
-                  </Button>
-                </Form>
-
+                    <Button
+                      type="submit"
+                      variant="primary"
+                      className="w-100 py-2 fw-semibold"
+                      disabled={loading}
+                    >
+                      {loading ? "Đang đăng nhập..." : "Đăng nhập"}
+                    </Button>
+                  </Form>
+                </Card.Body>
                 <div className="text-center mt-3 mb-3">
                   <Button
                     variant="outline-secondary"
@@ -142,12 +145,12 @@ const AdminLogin = () => {
                     ← Quay lại trang chủ
                   </Button>
                 </div>
-              </Card.Body>
-            </Card>
-          </Col>
-        </Row>
-      </Container>
-    </div>
+              </Card>
+            </Col>
+          </Row>
+        </Container>
+      </div>
+    </>
   );
 };
 

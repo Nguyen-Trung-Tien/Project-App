@@ -27,7 +27,6 @@ const UserManage = ({ token }) => {
   const [editUser, setEditUser] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  // Fetch users from API
   const fetchUsers = async () => {
     setLoading(true);
     try {
@@ -200,7 +199,7 @@ const UserManage = ({ token }) => {
 
   return (
     <>
-      {loading && <Loading />};
+      {loading && <Loading />}
       <div className="user-manage">
         <h3 className="mb-4">👥 Quản lý người dùng</h3>
         <Card className="shadow-sm">
@@ -221,7 +220,6 @@ const UserManage = ({ token }) => {
                 </Button>
               </Col>
             </Row>
-            :
             <Table
               bordered
               hover

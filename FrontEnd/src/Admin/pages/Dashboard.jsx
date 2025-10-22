@@ -1,11 +1,14 @@
-import React from "react";
+import React, { useState } from "react";
 import { Row, Col, Container } from "react-bootstrap";
 import StatsCard from "../components/StatsCard";
 import ChartCard from "../components/ChartCard";
 import { FaBox, FaShoppingCart, FaDollarSign, FaUsers } from "react-icons/fa";
 import { Link } from "react-router-dom";
+import Loading from "../../components/Loading/Loading";
 
 const Dashboard = () => {
+  const [loading, setLoading] = useState(false);
+
   const stats = [
     {
       title: "Tổng sản phẩm",
@@ -42,29 +45,33 @@ const Dashboard = () => {
   ];
 
   return (
-    <div className="admin-layout d-flex">
-      <div className="main-content flex-grow-1">
-        <Container fluid className="p-4">
-          <h3 className="mb-4 fw-bold">📊 Thống kê tổng quan</h3>
+    <>
+      {loading && <Loading />}
 
-          <Row>
-            {stats.map((item, i) => (
-              <Col key={i} md={3} sm={6} className="mb-4">
-                <Link to={item.link} style={{ textDecoration: "none" }}>
-                  <StatsCard {...item} />
-                </Link>
+      <div className="admin-layout d-flex">
+        <div className="main-content flex-grow-1">
+          <Container fluid className="p-4">
+            <h3 className="mb-4 fw-bold">📊 Thống kê tổng quan</h3>
+
+            <Row>
+              {stats.map((item, i) => (
+                <Col key={i} md={3} sm={6} className="mb-4">
+                  <Link to={item.link} style={{ textDecoration: "none" }}>
+                    <StatsCard {...item} />
+                  </Link>
+                </Col>
+              ))}
+            </Row>
+
+            <Row className="mt-4">
+              <Col md={12}>
+                <ChartCard />
               </Col>
-            ))}
-          </Row>
-
-          <Row className="mt-4">
-            <Col md={12}>
-              <ChartCard />
-            </Col>
-          </Row>
-        </Container>
+            </Row>
+          </Container>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 
