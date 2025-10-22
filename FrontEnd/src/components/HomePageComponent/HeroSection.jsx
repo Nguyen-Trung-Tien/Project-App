@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 const HeroSection = () => {
   const navigate = useNavigate();
   const handleGetAllProduct = () => {
-    navigate("/products");
+    navigate("/product-list");
   };
   return (
     <section className="hero-section text-center text-light d-flex flex-column justify-content-center align-items-center">

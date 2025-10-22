@@ -8,13 +8,13 @@ import CheckoutPage from "../pages/CheckoutPage/CheckoutPage";
 import CheckoutSuccess from "../pages/CheckoutSuccess/CheckoutSuccess";
 import Profile from "../pages/Profile/Profile";
 import NotFound from "../pages/NotFound/NotFound";
-import AllProducts from "../components/AllProducts/AllProduct";
 import ProductDetailPage from "../pages/ProductDetailPage/ProductDetailPage";
 import OrderHistory from "../pages/OrdersHistory/OrderHistory";
 import OrderPage from "../pages/OrderPage/OrderPage";
 import OrderDetail from "../pages/OrderDetail/OrderDetail";
 import PrivateRoute from "./PrivateRoute";
 import AboutPage from "../pages/AboutPage/AboutPage";
+import ProductListPage from "../pages/ProductListPage/ProductListPage";
 
 const UserRoutes = () => {
   return (
@@ -29,14 +29,14 @@ const UserRoutes = () => {
         <Route path="checkout-success" element={<CheckoutSuccess />} />
         <Route path="order-history" element={<OrderHistory />} />
         <Route path="orders" element={<OrderPage />} />
-        <Route path="orders-detail" element={<OrderDetail />} />
+        <Route path="orders-detail/:id" element={<OrderDetail />} />
         <Route path="profile" element={<Profile />} />
       </Route>
       <Route index element={<HomePage />} />
-      <Route path="products" element={<AllProducts />} />
-      <Route path="product-detail" element={<ProductDetailPage />} />
-      <Route path="about" element={<AboutPage />} />
+      <Route path="product-detail/:id" element={<ProductDetailPage />} />
+      <Route path="product-list" element={<ProductListPage />} />
 
+      <Route path="about" element={<AboutPage />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );

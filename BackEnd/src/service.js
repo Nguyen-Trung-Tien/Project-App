@@ -2,6 +2,7 @@ const express = require("express");
 const dotenv = require("dotenv");
 const routes = require("./routers");
 const connectDB = require("./config/connectDB");
+const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
 
@@ -17,8 +18,8 @@ app.use(
 );
 
 // Body parser
-app.use(express.json({ limit: "10mb" }));
-app.use(express.urlencoded({ limit: "10mb", extended: true }));
+app.use(bodyParser.json({ limit: "10mb" }));
+app.use(bodyParser.urlencoded({ limit: "10mb", extended: true }));
 // Cookie
 app.use(cookieParser());
 

@@ -1,25 +1,59 @@
-import React from "react";
-import { Container, Row, Col, Button } from "react-bootstrap";
+import React, { useEffect, useState } from "react";
+import { Container, Row, Col, Button, Spinner } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
 import "../../styles/CategorySection.scss";
-import image from "../../assets/Product.jpg";
+import { getAllCategoryApi } from "../../api/categoryApi";
 
 const CategorySection = () => {
-  const categories = [
-    { title: "Điện thoại", img: image },
-    { title: "Laptop", img: image },
-    { title: "Phụ kiện", img: image },
-  ];
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const res = await getAllCategoryApi();
+        if (res.errCode === 0) {
+          setCategories(res.data);
+        }
+      } catch (error) {
+        console.error("Lỗi khi tải danh mục:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCategories();
+  }, []);
+
+  const handleCategoryClick = (id) => {
+    navigate(`/product-list?category=${id}`);
+  };
+
+  if (loading) {
+    return (
+      <div className="text-center py-5">
+        <Spinner animation="border" />
+      </div>
+    );
+  }
 
   return (
-    <Container className="categories my-2">
-      <h2 className="section-title text-center mb-2">Danh mục nổi bật</h2>
+    <Container className="categories my-4">
+      <h2 className="section-title text-center mb-4">Danh mục nổi bật</h2>
       <Row className="g-4 justify-content-center">
-        {categories.map((item, index) => (
-          <Col md={4} sm={6} xs={12} key={index}>
-            <div className="category-card">
-              <img src={item.img} alt={item.title} />
-              <div className="overlay">
-                <h5>{item.title}</h5>
+        {categories.map((item) => (
+          <Col md={4} sm={6} xs={12} key={item.id}>
+            <div
+              className="category-card position-relative"
+              onClick={() => handleCategoryClick(item.id)}
+            >
+              <img
+                src={item.image || "/images/default-category.jpg"}
+                alt={item.name}
+                className="img-fluid rounded"
+              />
+              <div className="overlay d-flex flex-column align-items-center justify-content-center">
+                <h5 className="text-white fw-bold mb-2">{item.name}</h5>
                 <Button variant="light" size="sm">
                   Xem ngay
                 </Button>

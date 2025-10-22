@@ -1,35 +1,38 @@
-import React from "react";
-import { Container, Row, Col, Card, Button } from "react-bootstrap";
+import React, { useEffect, useState } from "react";
+import { Container, Row, Col, Card, Button, Spinner } from "react-bootstrap";
 import "../../styles/ProductSection.scss";
-import productImg from "../../assets/Product.jpg";
+import { getAllProductApi } from "../../api/productApi";
 
 const ProductSection = () => {
-  const products = [
-    {
-      id: 1,
-      title: "iPhone 15 Pro Max",
-      price: 32990000,
-      img: productImg,
-    },
-    {
-      id: 2,
-      title: "MacBook Air M3 2024",
-      price: 28990000,
-      img: productImg,
-    },
-    {
-      id: 3,
-      title: "Tai nghe AirPods Pro 2",
-      price: 5290000,
-      img: productImg,
-    },
-    {
-      id: 4,
-      title: "Apple Watch Series 10",
-      price: 11990000,
-      img: productImg,
-    },
-  ];
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const res = await getAllProductApi();
+        if (res?.errCode === 0) {
+          // 🔹 Lọc ra 4 sản phẩm đầu tiên hoặc nổi bật
+          const featured = res.products?.filter((p) => p.isActive)?.slice(0, 4);
+          setProducts(featured);
+        }
+      } catch (error) {
+        console.error("Lỗi tải sản phẩm:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="text-center py-5">
+        <Spinner animation="border" variant="primary" />
+      </div>
+    );
+  }
 
   return (
     <section className="products py-5">
@@ -41,11 +44,25 @@ const ProductSection = () => {
           {products.map((item) => (
             <Col lg={3} md={4} sm={6} xs={12} key={item.id}>
               <Card className="product-card shadow-sm">
-                <Card.Img variant="top" src={item.img} alt={item.title} />
+                <Card.Img
+                  variant="top"
+                  src={
+                    item.image
+                      ? `data:image/jpeg;base64,${item.image}`
+                      : "/default-product.jpg"
+                  }
+                  alt={item.name}
+                />
                 <Card.Body>
-                  <h5 className="mb-2">{item.title}</h5>
-                  <p className="price">{item.price.toLocaleString("vi-VN")}₫</p>
-                  <Button variant="primary" size="sm" className="rounded-pill">
+                  <h5 className="mb-2">{item.name}</h5>
+                  <p className="price">
+                    {Number(item.price).toLocaleString("vi-VN")}₫
+                  </p>
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    className="rounded-pill w-100"
+                  >
                     <i className="bi bi-cart-plus me-2"></i>
                     Thêm vào giỏ
                   </Button>

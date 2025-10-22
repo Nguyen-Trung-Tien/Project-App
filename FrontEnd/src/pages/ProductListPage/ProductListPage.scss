@@ -1,0 +1,23 @@
+.product-list-page {
+  .page-title {
+    font-size: 1.8rem;
+    color: #222;
+  }
+
+  .category-filter {
+    border-radius: 8px;
+    padding: 0.6rem;
+    border: 1px solid #ccc;
+    transition: all 0.2s ease;
+
+    &:focus {
+      border-color: #007bff;
+      box-shadow: 0 0 0 0.15rem rgba(0, 123, 255, 0.25);
+    }
+  }
+
+  .row {
+    margin-left: 0;
+    margin-right: 0;
+  }
+}
