@@ -81,26 +81,21 @@ const handleUserLogin = async (email, password) => {
   }
 };
 
-const getAllUsers = async () => {
-  try {
-    const users = await db.User.findAll({
-      attributes: { exclude: ["password"] },
-    });
-
-    return { errCode: 0, errMessage: "OK", data: users };
-  } catch (e) {
-    console.error(e);
-    throw e;
-  }
-};
 const updateUser = async (userId, data) => {
   try {
     const user = await db.User.findByPk(userId);
     if (!user) return { errCode: 1, errMessage: "User not found" };
-    const fields = ["username", "email", "phone", "address", "avatar", "role"];
+
+    const fields = ["username", "email", "phone", "address", "role"];
     fields.forEach((field) => {
       if (data[field] !== undefined) user[field] = data[field];
     });
+
+    if (data.avatar) {
+      const base64Data = data.avatar.split(",")[1];
+      user.avatar = Buffer.from(base64Data, "base64");
+    }
+
     await user.save();
     const { password, ...userData } = user.toJSON();
     return { errCode: 0, errMessage: "User updated", data: userData };
@@ -116,11 +111,34 @@ const getUserById = async (userId) => {
       attributes: { exclude: ["password"] },
     });
 
-    if (!user) {
-      return { errCode: 1, errMessage: "User not found" };
-    }
+    if (!user) return { errCode: 1, errMessage: "User not found" };
 
-    return { errCode: 0, errMessage: "OK", data: user };
+    const userData = user.toJSON();
+    userData.avatar = userData.avatar
+      ? `data:image/png;base64,${userData.avatar.toString("base64")}`
+      : null;
+
+    return { errCode: 0, errMessage: "OK", data: userData };
+  } catch (e) {
+    console.error(e);
+    return { errCode: 2, errMessage: "Server error" };
+  }
+};
+
+const getAllUsers = async () => {
+  try {
+    const users = await db.User.findAll({
+      attributes: { exclude: ["password"] },
+    });
+    const data = users.map((user) => {
+      const u = user.toJSON();
+      u.avatar = u.avatar
+        ? `data:image/png;base64,${u.avatar.toString("base64")}`
+        : null;
+      return u;
+    });
+
+    return { errCode: 0, errMessage: "OK", data };
   } catch (e) {
     console.error(e);
     throw e;

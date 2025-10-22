@@ -87,23 +87,31 @@ const handleRefreshToken = (req, res) => {
 
 const handleUpdateUser = async (req, res) => {
   try {
-    const userId = req.body.id;
-    if (!userId) {
+    const { id, username, email, phone, address, role, avatar } = req.body;
+
+    if (!id) {
       return res
         .status(400)
         .json({ errCode: 1, errMessage: "User ID is required" });
     }
 
-    const data = req.body;
-    const result = await UserService.updateUser(userId, data);
+    const updateData = {};
+    if (username) updateData.username = username.trim();
+    if (email) updateData.email = email.trim();
+    if (phone) updateData.phone = phone.trim();
+    if (address) updateData.address = address.trim();
+    if (role) updateData.role = role;
+    if (avatar) updateData.avatar = avatar;
+
+    const result = await UserService.updateUser(id, updateData);
 
     if (result.errCode !== 0) {
       return res.status(400).json(result);
     }
 
     return res.status(200).json(result);
-  } catch (e) {
-    console.error(e);
+  } catch (err) {
+    console.error("Error in handleUpdateUser:", err);
     return res
       .status(500)
       .json({ errCode: -1, errMessage: "Internal server error" });

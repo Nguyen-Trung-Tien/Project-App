@@ -1,3 +1,4 @@
+// Profile.jsx
 import React, { useState, useEffect } from "react";
 import {
   Container,
@@ -7,14 +8,15 @@ import {
   Button,
   Form,
   Spinner,
+  Image,
+  Modal,
 } from "react-bootstrap";
 import { useSelector, useDispatch } from "react-redux";
-import "./Profile.scss";
 import { updateUser } from "../../redux/userSlice";
-import { getUserApi } from "../../api/userApi";
+import { getUserApi, updateUserApi } from "../../api/userApi";
 import { toast } from "react-toastify";
-import axiosClient from "../../utils/axiosClient";
 import Loading from "../../components/Loading/Loading";
+import "./Profile.scss";
 
 const Profile = () => {
   const dispatch = useDispatch();
@@ -27,18 +29,12 @@ const Profile = () => {
     email: "",
     phone: "",
     address: "",
-    avatar: "",
+    avatar: null,
   });
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [showAvatarModal, setShowAvatarModal] = useState(false);
 
-  const bufferToBase64 = (buffer) => {
-    if (!buffer) return null;
-    const bytes = new Uint8Array(buffer.data || buffer);
-    let binary = "";
-    bytes.forEach((b) => (binary += String.fromCharCode(b)));
-    return `data:image/png;base64,${window.btoa(binary)}`;
-  };
   useEffect(() => {
     const fetchUser = async () => {
       if (!user?.id || !token) return;
@@ -52,13 +48,11 @@ const Profile = () => {
             email: data.email || "",
             phone: data.phone || "",
             address: data.address || "",
-            avatar: data.avatarUrl
-              ? data.avatarUrl
-              : bufferToBase64(data.avatar),
+            avatar: data.avatar || null, // avatar URL từ server
           });
         }
       } catch (err) {
-        console.log(err);
+        console.error(err);
         toast.error("Không thể tải thông tin người dùng");
       } finally {
         setLoading(false);
@@ -72,52 +66,43 @@ const Profile = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleAvatarChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setAvatarFile(file);
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setFormData((prev) => ({ ...prev, avatar: reader.result })); // preview base64
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handleSave = async () => {
     if (!user?.id || !token) return;
     setLoading(true);
 
     try {
-      const fd = new FormData();
-      fd.append("id", user.id);
-      fd.append("username", formData.username);
-      fd.append("email", formData.email);
-      fd.append("phone", formData.phone);
-      fd.append("address", formData.address);
-      if (avatarFile) fd.append("avatar", avatarFile);
+      const payload = {
+        id: user.id,
+        username: formData.username,
+        email: formData.email,
+        phone: formData.phone,
+        address: formData.address,
+        avatar: formData.avatar,
+      };
 
-      const res = await axiosClient.put("/user/update-user", fd, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const res = await updateUserApi(payload, token);
 
-      if (res.data.errCode === 0) {
-        const updated = res.data.data;
-        const avatarSrc = updated.avatarUrl
-          ? updated.avatarUrl
-          : bufferToBase64(updated.avatar);
-
-        dispatch(
-          updateUser({
-            id: updated.id,
-            username: updated.username,
-            email: updated.email,
-            phone: updated.phone,
-            address: updated.address,
-            avatar: avatarSrc,
-          })
-        );
-
-        setFormData((prev) => ({ ...prev, avatar: avatarSrc }));
+      if (res.errCode === 0) {
+        dispatch(updateUser(res.data));
         setIsEditing(false);
-        setAvatarFile(null);
         toast.success("Cập nhật thành công!");
       } else {
-        toast.error(res.data.errMessage || "Lỗi server");
+        toast.error(res.errMessage || "Lỗi server");
       }
     } catch (err) {
-      console.log(err);
+      console.error(err);
       toast.error("Không thể cập nhật. Vui lòng thử lại!");
     } finally {
       setLoading(false);
@@ -136,34 +121,37 @@ const Profile = () => {
           <Row className="justify-content-center g-4">
             <Col md={4}>
               <Card className="profile-card text-center shadow-sm p-4">
-                <div className="avatar-container">
-                  <img
+                <div className="avatar-container position-relative mb-3">
+                  <Image
                     src={formData.avatar || "/images/avatar-default.png"}
+                    roundedCircle
+                    width={120}
+                    height={120}
                     alt="Avatar"
-                    className="avatar-preview"
+                    style={{ cursor: "pointer" }}
+                    onClick={() => setShowAvatarModal(true)}
                   />
                   {isEditing && (
-                    <div className="avatar-overlay">
+                    <div className="avatar-overlay position-absolute top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center">
                       <Form.Control
                         type="file"
                         accept="image/*"
-                        onChange={(e) => {
-                          const file = e.target.files[0];
-                          if (!file) return;
-                          setAvatarFile(file);
-                          setFormData((prev) => ({
-                            ...prev,
-                            avatar: URL.createObjectURL(file),
-                          }));
+                        onChange={handleAvatarChange}
+                        style={{
+                          opacity: 0,
+                          width: "100%",
+                          height: "100%",
+                          cursor: "pointer",
                         }}
                       />
+                      <span className="text-white fw-bold position-absolute">
+                        Thay đổi ảnh
+                      </span>
                     </div>
                   )}
                 </div>
-
                 <h4 className="mt-3 mb-1 fw-bold">{formData.username}</h4>
                 <p className="text-muted small">{formData.email}</p>
-
                 <Button
                   variant={isEditing ? "outline-danger" : "outline-primary"}
                   className="rounded-pill mt-2"
@@ -200,14 +188,12 @@ const Profile = () => {
                               value={formData[field] || ""}
                               onChange={handleChange}
                               disabled={!isEditing}
-                              className="form-control-custom"
                             />
                           </Form.Group>
                         </Col>
                       )
                     )}
                   </Row>
-
                   {isEditing && (
                     <div className="text-end">
                       <Button
@@ -229,6 +215,29 @@ const Profile = () => {
             </Col>
           </Row>
         </Container>
+
+        <Modal
+          show={showAvatarModal}
+          onHide={() => setShowAvatarModal(false)}
+          centered
+        >
+          <Modal.Body className="text-center">
+            <Image
+              src={formData.avatar || "/images/avatar-default.png"}
+              rounded
+              fluid
+              alt="Avatar Preview"
+            />
+          </Modal.Body>
+          <Modal.Footer>
+            <Button
+              variant="secondary"
+              onClick={() => setShowAvatarModal(false)}
+            >
+              Đóng
+            </Button>
+          </Modal.Footer>
+        </Modal>
       </div>
     </>
   );

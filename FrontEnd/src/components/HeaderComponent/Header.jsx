@@ -23,14 +23,20 @@ function Header() {
   const handleLogout = async () => {
     try {
       await logoutUserApi();
-      localStorage.removeItem("accessToken");
-      localStorage.removeItem("user");
       dispatch(removeUser());
       navigate("/login");
     } catch (err) {
       console.error("Logout error:", err);
     }
   };
+
+  // Safely determine avatar URL, excluding base64
+  const avatarUrl =
+    user?.avatar && typeof user.avatar === "string" && user.avatar.trim() !== ""
+      ? user.avatar.startsWith("data:image")
+        ? "/default-avatar.png"
+        : user.avatar
+      : "/default-avatar.png";
 
   return (
     <Navbar expand="lg" sticky="top" className="header shadow-sm">
@@ -45,7 +51,6 @@ function Header() {
             <Nav.Link as={Link} to="/" className="header__link">
               Trang chủ
             </Nav.Link>
-
             <Nav.Link as={Link} to="/about" className="header__link">
               Giới thiệu
             </Nav.Link>
@@ -82,11 +87,11 @@ function Header() {
                   title={
                     <div className="d-flex align-items-center">
                       <Image
-                        src={user?.avatar || "/images/avatar-default.png"}
+                        src={avatarUrl}
                         alt="avatar"
                         className="me-2 header__avatar"
                       />
-                      <span>{user.name || user.email}</span>
+                      <span>{user.username || user.email}</span>
                     </div>
                   }
                   id="user-dropdown"

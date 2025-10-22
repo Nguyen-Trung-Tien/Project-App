@@ -33,12 +33,12 @@ export const getUserApi = async (userId, token) => {
   }
 };
 
-export const updateUserApi = async (userId, data, token) => {
+export const updateUserApi = async (data, token) => {
   try {
-    const payload = { id: userId, ...data };
-    const res = await axiosClient.put(`/user/update-user`, payload, {
+    const res = await axiosClient.put(`/user/update-user`, data, {
       headers: {
         Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
       },
     });
     return res.data;
