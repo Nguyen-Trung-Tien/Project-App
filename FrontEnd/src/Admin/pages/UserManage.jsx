@@ -18,6 +18,7 @@ import {
   registerUser,
   updateUserApi,
 } from "../../api/userApi";
+import Loading from "../../components/Loading/Loading";
 
 const UserManage = ({ token }) => {
   const [users, setUsers] = useState([]);
@@ -198,33 +199,29 @@ const UserManage = ({ token }) => {
   };
 
   return (
-    <div className="user-manage">
-      <h3 className="mb-4">👥 Quản lý người dùng</h3>
-
-      <Card className="shadow-sm">
-        <Card.Body>
-          <Row className="align-items-center mb-3">
-            <Col md={6}>
-              <InputGroup>
-                <Form.Control
-                  placeholder="Tìm kiếm người dùng..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                />
-              </InputGroup>
-            </Col>
-            <Col md={6} className="text-end">
-              <Button variant="primary" onClick={() => handleShowModal()}>
-                ➕ Thêm người dùng
-              </Button>
-            </Col>
-          </Row>
-
-          {loading ? (
-            <div className="text-center py-5">
-              <Spinner animation="border" />
-            </div>
-          ) : (
+    <>
+      {loading && <Loading />};
+      <div className="user-manage">
+        <h3 className="mb-4">👥 Quản lý người dùng</h3>
+        <Card className="shadow-sm">
+          <Card.Body>
+            <Row className="align-items-center mb-3">
+              <Col md={6}>
+                <InputGroup>
+                  <Form.Control
+                    placeholder="Tìm kiếm người dùng..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                  />
+                </InputGroup>
+              </Col>
+              <Col md={6} className="text-end">
+                <Button variant="primary" onClick={() => handleShowModal()}>
+                  ➕ Thêm người dùng
+                </Button>
+              </Col>
+            </Row>
+            :
             <Table
               bordered
               hover
@@ -310,74 +307,73 @@ const UserManage = ({ token }) => {
                 ))}
               </tbody>
             </Table>
-          )}
-        </Card.Body>
-      </Card>
+          </Card.Body>
+        </Card>
 
-      {/* Modal Thêm / Sửa */}
-      <Modal show={showModal} onHide={handleCloseModal} centered>
-        <Modal.Header closeButton>
-          <Modal.Title>
-            {editUser ? "Chỉnh sửa người dùng" : "Thêm người dùng mới"}
-          </Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <Form onSubmit={handleSave}>
-            <Form.Group className="mb-3">
-              <Form.Label>Họ tên</Form.Label>
-              <Form.Control
-                name="username"
-                defaultValue={editUser?.name || ""}
-                required
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Email</Form.Label>
-              <Form.Control
-                type="email"
-                name="email"
-                defaultValue={editUser?.email || ""}
-                required
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Phone</Form.Label>
-              <Form.Control
-                type="text"
-                name="phone"
-                defaultValue={editUser?.phone || ""}
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Address</Form.Label>
-              <Form.Control
-                type="text"
-                name="address"
-                defaultValue={editUser?.address || ""}
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Vai trò</Form.Label>
-              <Form.Select
-                name="role"
-                defaultValue={editUser?.role || "customer"}
-              >
-                <option value="customer">Customer</option>
-                <option value="admin">Admin</option>
-              </Form.Select>
-            </Form.Group>
-            <div className="text-end">
-              <Button variant="secondary" onClick={handleCloseModal}>
-                Hủy
-              </Button>{" "}
-              <Button variant="primary" type="submit">
-                Lưu
-              </Button>
-            </div>
-          </Form>
-        </Modal.Body>
-      </Modal>
-    </div>
+        <Modal show={showModal} onHide={handleCloseModal} centered>
+          <Modal.Header closeButton>
+            <Modal.Title>
+              {editUser ? "Chỉnh sửa người dùng" : "Thêm người dùng mới"}
+            </Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <Form onSubmit={handleSave}>
+              <Form.Group className="mb-3">
+                <Form.Label>Họ tên</Form.Label>
+                <Form.Control
+                  name="username"
+                  defaultValue={editUser?.name || ""}
+                  required
+                />
+              </Form.Group>
+              <Form.Group className="mb-3">
+                <Form.Label>Email</Form.Label>
+                <Form.Control
+                  type="email"
+                  name="email"
+                  defaultValue={editUser?.email || ""}
+                  required
+                />
+              </Form.Group>
+              <Form.Group className="mb-3">
+                <Form.Label>Phone</Form.Label>
+                <Form.Control
+                  type="text"
+                  name="phone"
+                  defaultValue={editUser?.phone || ""}
+                />
+              </Form.Group>
+              <Form.Group className="mb-3">
+                <Form.Label>Address</Form.Label>
+                <Form.Control
+                  type="text"
+                  name="address"
+                  defaultValue={editUser?.address || ""}
+                />
+              </Form.Group>
+              <Form.Group className="mb-3">
+                <Form.Label>Vai trò</Form.Label>
+                <Form.Select
+                  name="role"
+                  defaultValue={editUser?.role || "customer"}
+                >
+                  <option value="customer">Customer</option>
+                  <option value="admin">Admin</option>
+                </Form.Select>
+              </Form.Group>
+              <div className="text-end">
+                <Button variant="secondary" onClick={handleCloseModal}>
+                  Hủy
+                </Button>{" "}
+                <Button variant="primary" type="submit">
+                  Lưu
+                </Button>
+              </div>
+            </Form>
+          </Modal.Body>
+        </Modal>
+      </div>
+    </>
   );
 };
 

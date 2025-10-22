@@ -16,13 +16,15 @@ import {
 } from "react-bootstrap-icons";
 import "../Layout.scss";
 import { removeUser } from "../../redux/userSlice";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router";
 import { logoutUserApi } from "../../api/userApi";
 
 const HeaderAdmin = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const user = useSelector((state) => state.user.user);
+  const avatarUrl = user?.avatar || "/default-avatar.png";
   const handleLogout = async () => {
     try {
       await logoutUserApi();
@@ -34,6 +36,7 @@ const HeaderAdmin = () => {
       console.error("Logout error:", err);
     }
   };
+
   return (
     <Navbar bg="white" expand="lg" className="shadow-sm px-3 sticky-top">
       <Container
@@ -61,6 +64,15 @@ const HeaderAdmin = () => {
         </Form>
 
         <div className="d-flex align-items-center gap-3">
+          {/* Nút Home */}
+          <Button
+            variant="outline-primary"
+            onClick={() => navigate("/")}
+            className="d-flex align-items-center gap-1"
+          >
+            🏠 Home
+          </Button>
+
           <Button
             variant="outline-primary"
             className="rounded-circle p-2 position-relative"
@@ -80,7 +92,7 @@ const HeaderAdmin = () => {
               className="d-flex align-items-center gap-2"
             >
               <Image
-                src="/images/avatar-default.png"
+                src={avatarUrl}
                 alt="Admin Avatar"
                 roundedCircle
                 width={32}
@@ -90,7 +102,7 @@ const HeaderAdmin = () => {
             </Dropdown.Toggle>
 
             <Dropdown.Menu>
-              <Dropdown.Item href="#/profile">
+              <Dropdown.Item onClick={() => navigate("/profile")}>
                 <PersonCircle className="me-2" /> Hồ sơ
               </Dropdown.Item>
               <Dropdown.Item

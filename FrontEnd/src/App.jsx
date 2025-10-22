@@ -1,4 +1,3 @@
-import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import LayoutComponent from "./components/LayoutComponent/LayoutComponent";
 import UserRoutes from "./routes/UserRoutes";
@@ -11,7 +10,6 @@ const App = () => {
   return (
     <>
       <Routes>
-        {/* User login/register */}
         <Route
           path="/login"
           element={

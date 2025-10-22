@@ -14,6 +14,7 @@ import OrderHistory from "../pages/OrdersHistory/OrderHistory";
 import OrderPage from "../pages/OrderPage/OrderPage";
 import OrderDetail from "../pages/OrderDetail/OrderDetail";
 import PrivateRoute from "./PrivateRoute";
+import AboutPage from "../pages/AboutPage/AboutPage";
 
 const UserRoutes = () => {
   return (
@@ -22,7 +23,6 @@ const UserRoutes = () => {
         <Route path="login" element={<LoginPage />} />
         <Route path="register" element={<RegisterPage />} />
       </Route>
-
       <Route element={<PrivateRoute />}>
         <Route path="cart" element={<CartPage />} />
         <Route path="checkout" element={<CheckoutPage />} />
@@ -32,10 +32,11 @@ const UserRoutes = () => {
         <Route path="orders-detail" element={<OrderDetail />} />
         <Route path="profile" element={<Profile />} />
       </Route>
-
       <Route index element={<HomePage />} />
       <Route path="products" element={<AllProducts />} />
       <Route path="product-detail" element={<ProductDetailPage />} />
+      <Route path="about" element={<AboutPage />} />
+
       <Route path="*" element={<NotFound />} />
     </Routes>
   );

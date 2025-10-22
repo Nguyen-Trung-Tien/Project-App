@@ -8,9 +8,13 @@ import {
   Col,
   Card,
 } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
 import "../Layout.scss";
+import Loading from "../../components/Loading/Loading";
 
 const OrderManage = () => {
+  const navigate = useNavigate();
+
   const [orders, setOrders] = useState([
     {
       id: "DH001",
@@ -35,19 +39,16 @@ const OrderManage = () => {
     },
   ]);
 
+  const statusMap = {
+    pending: { label: "Chờ xử lý", variant: "warning" },
+    shipping: { label: "Đang giao", variant: "info" },
+    completed: { label: "Hoàn tất", variant: "success" },
+    canceled: { label: "Đã hủy", variant: "danger" },
+  };
+
   const getStatusBadge = (status) => {
-    switch (status) {
-      case "pending":
-        return <Badge bg="warning">Chờ xử lý</Badge>;
-      case "shipping":
-        return <Badge bg="info">Đang giao</Badge>;
-      case "completed":
-        return <Badge bg="success">Hoàn tất</Badge>;
-      case "canceled":
-        return <Badge bg="danger">Đã hủy</Badge>;
-      default:
-        return <Badge bg="secondary">{status}</Badge>;
-    }
+    const info = statusMap[status] || { label: status, variant: "secondary" };
+    return <Badge bg={info.variant}>{info.label}</Badge>;
   };
 
   const updateStatus = (id, newStatus) => {
@@ -58,6 +59,10 @@ const OrderManage = () => {
     );
   };
 
+  const formatCurrency = (value) => value.toLocaleString("vi-VN") + " ₫";
+
+  const formatDate = (dateStr) => new Date(dateStr).toLocaleDateString("vi-VN");
+  <Loading></Loading>;
   return (
     <div>
       <h3 className="mb-4">📦 Quản lý đơn hàng</h3>
@@ -70,11 +75,17 @@ const OrderManage = () => {
             </Col>
           </Row>
 
-          <Table striped bordered hover responsive>
+          <Table
+            striped
+            bordered
+            hover
+            responsive
+            className="align-middle text-center"
+          >
             <thead className="table-light">
               <tr>
                 <th>Mã đơn</th>
-                <th>Khách hàng</th>
+                <th className="text-start">Khách hàng</th>
                 <th>Ngày đặt</th>
                 <th>Tổng tiền</th>
                 <th>Trạng thái</th>
@@ -82,55 +93,43 @@ const OrderManage = () => {
               </tr>
             </thead>
             <tbody>
-              {orders.map((o) => (
-                <tr key={o.id}>
-                  <td>{o.id}</td>
-                  <td>{o.customer}</td>
-                  <td>{o.date}</td>
-                  <td>{o.total.toLocaleString()} ₫</td>
-                  <td>{getStatusBadge(o.status)}</td>
+              {orders.map((order) => (
+                <tr key={order.id}>
+                  <td>{order.id}</td>
+                  <td className="text-start">{order.customer}</td>
+                  <td>{formatDate(order.date)}</td>
+                  <td>{formatCurrency(order.total)}</td>
+                  <td>{getStatusBadge(order.status)}</td>
                   <td>
-                    <Dropdown>
-                      <Dropdown.Toggle
-                        variant="outline-primary"
+                    <div className="d-flex justify-content-center gap-2">
+                      <Dropdown container="body">
+                        <Dropdown.Toggle variant="outline-primary" size="sm">
+                          <i className="bi bi-pencil-square me-1"></i> Cập nhật
+                        </Dropdown.Toggle>
+
+                        <Dropdown.Menu>
+                          {Object.keys(statusMap).map((key) => (
+                            <Dropdown.Item
+                              key={key}
+                              onClick={() => updateStatus(order.id, key)}
+                              className={
+                                key === "canceled" ? "text-danger" : ""
+                              }
+                            >
+                              {statusMap[key].label}
+                            </Dropdown.Item>
+                          ))}
+                        </Dropdown.Menu>
+                      </Dropdown>
+
+                      <Button
+                        variant="outline-secondary"
                         size="sm"
-                        id={`dropdown-${o.id}`}
+                        onClick={() => navigate(`/orders/${order.id}`)}
                       >
-                        Cập nhật
-                      </Dropdown.Toggle>
-
-                      <Dropdown.Menu>
-                        <Dropdown.Item
-                          onClick={() => updateStatus(o.id, "pending")}
-                        >
-                          Chờ xử lý
-                        </Dropdown.Item>
-                        <Dropdown.Item
-                          onClick={() => updateStatus(o.id, "shipping")}
-                        >
-                          Đang giao
-                        </Dropdown.Item>
-                        <Dropdown.Item
-                          onClick={() => updateStatus(o.id, "completed")}
-                        >
-                          Hoàn tất
-                        </Dropdown.Item>
-                        <Dropdown.Item
-                          className="text-danger"
-                          onClick={() => updateStatus(o.id, "canceled")}
-                        >
-                          Hủy đơn
-                        </Dropdown.Item>
-                      </Dropdown.Menu>
-                    </Dropdown>
-
-                    <Button
-                      variant="outline-secondary"
-                      size="sm"
-                      className="ms-2"
-                    >
-                      Chi tiết
-                    </Button>
+                        <i className="bi bi-eye me-1"></i> Chi tiết
+                      </Button>
+                    </div>
                   </td>
                 </tr>
               ))}
