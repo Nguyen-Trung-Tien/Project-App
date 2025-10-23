@@ -59,10 +59,17 @@ const deleteProduct = async (id) => {
   }
 };
 
+const getProductsByCategory = async (categoryId) => {
+  const query = { include: [{ model: db.Category, as: "category" }] };
+  if (categoryId) query.where = { categoryId };
+  const products = await db.Product.findAll(query);
+  return { errCode: 0, products };
+};
 module.exports = {
   createProduct,
   getAllProducts,
   getProductById,
   updateProduct,
   deleteProduct,
+  getProductsByCategory,
 };

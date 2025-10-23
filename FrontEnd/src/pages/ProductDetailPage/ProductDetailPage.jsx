@@ -18,17 +18,20 @@ import {
 } from "react-bootstrap-icons";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
-import { getProductByIdApi } from "../../api/productApi";
+import {
+  getProductByIdApi,
+  getProductsByCategoryApi,
+} from "../../api/productApi";
 import { addCart, getAllCarts, createCart } from "../../api/cartApi";
 import imgPro from "../../assets/Product.jpg";
+import { createReviewApi, getReviewsByProductApi } from "../../api/reviewApi";
 
 import "./ProductDetailPage.scss";
-import { createReviewApi, getReviewsByProductApi } from "../../api/reviewApi";
+import ProductCard from "../../components/ProductCard/ProductCard";
 
 const ProductDetailPage = () => {
   const user = useSelector((state) => state.user.user);
   const userId = user?.id;
-
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -39,6 +42,8 @@ const ProductDetailPage = () => {
 
   const [reviews, setReviews] = useState([]);
   const [newReview, setNewReview] = useState({ rating: 5, comment: "" });
+
+  const [suggestedProducts, setSuggestedProducts] = useState([]);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -54,8 +59,12 @@ const ProductDetailPage = () => {
     };
     fetchProduct();
   }, [id]);
+
   useEffect(() => {
-    if (product?.id) fetchReviews();
+    if (product?.id) {
+      fetchReviews();
+      fetchSuggestedProducts();
+    }
   }, [product]);
 
   const fetchReviews = async () => {
@@ -66,6 +75,20 @@ const ProductDetailPage = () => {
       console.error(err);
     }
   };
+
+  const fetchSuggestedProducts = async () => {
+    if (!product?.categoryId) return;
+    try {
+      const res = await getProductsByCategoryApi(product.categoryId);
+      if (res?.errCode === 0) {
+        const filtered = res.products.filter((p) => p.id !== product.id);
+        setSuggestedProducts(filtered);
+      }
+    } catch (err) {
+      console.error("Lỗi lấy sản phẩm gợi ý:", err);
+    }
+  };
+
   const handleSubmitReview = async () => {
     if (!newReview.comment.trim()) return;
     try {
@@ -81,7 +104,7 @@ const ProductDetailPage = () => {
         fetchReviews();
         toast.success("Gửi đánh giá thành công!");
       } else {
-        toast.error(res?.errMessage || "Gửi đánh giá thất bại!");
+        toast.warning("Đăng nhập để đánh giá!");
       }
     } catch (err) {
       console.error(err);
@@ -90,9 +113,10 @@ const ProductDetailPage = () => {
   };
 
   const handleAddToCart = async () => {
-    if (!userId)
-      return toast.warn("Bạn cần đăng nhập để thêm sản phẩm vào giỏ hàng!");
-
+    if (!userId) {
+      toast.warn("Bạn cần đăng nhập để thêm sản phẩm vào giỏ hàng!");
+      return;
+    }
     try {
       setAddingCart(true);
       const cartsRes = await getAllCarts();
@@ -191,15 +215,24 @@ const ProductDetailPage = () => {
           <Col md={6}>
             <h2 className="fw-bold mb-2">{product.name}</h2>
             <p className="text-muted mb-1">{product.brand || "Không rõ"}</p>
+
             <h3 className="text-danger fw-semibold mb-3">
               {Number(product.price).toLocaleString("vi-VN")} ₫
             </h3>
+
+            {product.discount > 0 && (
+              <p className="text-warning fw-semibold mb-3">
+                Giảm giá: {product.discount}%
+              </p>
+            )}
+
             <p className="text-secondary mb-4">{product.description}</p>
 
             <ul className="list-unstyled mb-4">
               <li>
                 <strong>Danh mục:</strong>{" "}
-                {product.category?.name || "Chưa phân loại"}
+                {product.category?.name || "Chưa phân loại"} (ID:{" "}
+                {product.categoryId})
               </li>
               <li>
                 <strong>Tình trạng:</strong>{" "}
@@ -244,7 +277,6 @@ const ProductDetailPage = () => {
             </div>
           </Col>
         </Row>
-
         <div className="reviews-section mt-5 pt-4 border-top">
           <h4 className="fw-bold mb-3">Đánh giá sản phẩm</h4>
 
@@ -321,6 +353,19 @@ const ProductDetailPage = () => {
             <p>Chưa có đánh giá nào cho sản phẩm này.</p>
           )}
         </div>
+
+        {suggestedProducts.length > 0 && (
+          <div className="suggested-products mt-5 pt-4 border-top">
+            <h4 className="fw-bold mb-3">Sản phẩm gợi ý</h4>
+            <Row className="g-4">
+              {suggestedProducts.map((p) => (
+                <Col key={p.id} md={3} sm={6} xs={12}>
+                  <ProductCard product={p} />
+                </Col>
+              ))}
+            </Row>
+          </div>
+        )}
       </Container>
     </div>
   );

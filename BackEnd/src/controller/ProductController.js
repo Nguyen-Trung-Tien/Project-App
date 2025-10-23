@@ -72,6 +72,21 @@ const handleDeleteProduct = async (req, res) => {
     });
   }
 };
+const getProductsByCategory = async (req, res) => {
+  const { categoryId } = req.query;
+  if (!categoryId)
+    return res
+      .status(400)
+      .json({ errCode: 1, errMessage: "categoryId is required" });
+
+  try {
+    const result = await ProductService.getProductsByCategory(categoryId);
+    return res.json(result);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ errCode: 1, errMessage: error.message });
+  }
+};
 
 module.exports = {
   handleCreateProduct,
@@ -79,4 +94,5 @@ module.exports = {
   handleGetProductById,
   handleUpdateProduct,
   handleDeleteProduct,
+  getProductsByCategory,
 };

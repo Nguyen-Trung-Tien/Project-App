@@ -7,5 +7,5 @@ router.get("/get-all-product", ProductController.handleGetAllProducts);
 router.get("/get-product/:id", ProductController.handleGetProductById);
 router.put("/update-product/:id", ProductController.handleUpdateProduct);
 router.delete("/delete-product/:id", ProductController.handleDeleteProduct);
-
+router.get("/product-by-category", ProductController.getProductsByCategory);
 module.exports = router;

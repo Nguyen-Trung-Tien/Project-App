@@ -9,8 +9,6 @@ import "./AllProducts.scss";
 const AllProducts = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  // Lấy userId từ Redux để truyền vào ProductCard nếu cần
   const user = useSelector((state) => state.user.user);
   const userId = user?.id;
 

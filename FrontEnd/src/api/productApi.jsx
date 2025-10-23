@@ -55,3 +55,15 @@ export const deleteProductApi = async (id) => {
     throw err;
   }
 };
+
+export const getProductsByCategoryApi = async (categoryId) => {
+  try {
+    const res = await API.get(
+      `/product/product-by-category?categoryId=${categoryId}`
+    );
+    return res.data;
+  } catch (error) {
+    console.error(`Error getting products by category ${categoryId}:`, error);
+    throw error;
+  }
+};

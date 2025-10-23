@@ -12,7 +12,6 @@ const ProductCard = ({ product }) => {
   const { id, name, price, discount, stock, image, isActive } = product;
   const [loading, setLoading] = useState(false);
 
-  // Lấy userId từ Redux
   const user = useSelector((state) => state.user.user);
   const userId = user?.id;
 
