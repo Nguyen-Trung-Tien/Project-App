@@ -20,9 +20,7 @@ import {
   updateProductApi,
 } from "../../api/productApi";
 import { getAllCategoryApi } from "../../api/categoryApi";
-import imgPro from "../../assets/Product.jpg";
-import axios from "axios";
-
+import { decodeImage, getImage } from "../../utils/decodeImage";
 const ProductManage = () => {
   const [loading, setLoading] = useState(false);
   const [products, setProducts] = useState([]);
@@ -42,11 +40,7 @@ const ProductManage = () => {
     image: "",
   });
   const [imagePreview, setImagePreview] = useState(null);
-  const decodeImage = (bufferObj) => {
-    if (!bufferObj || !bufferObj.data) return imgPro;
-    const uint8Array = new Uint8Array(bufferObj.data);
-    return new TextDecoder().decode(uint8Array);
-  };
+
   const fetchCategories = async () => {
     try {
       const res = await getAllCategoryApi();
@@ -90,7 +84,8 @@ const ProductManage = () => {
         isActive: product.isActive ?? true,
         image: product.image || null,
       });
-      setImagePreview(getImageUrl(product.image));
+      setImagePreview(getImage(product.image));
+
       setEditProduct(product);
     } else {
       setFormData({
@@ -142,21 +137,9 @@ const ProductManage = () => {
 
       let res;
       if (editProduct) {
-        res = await axios.put(
-          `http://localhost:8080/api/v1/product/update-product/${editProduct.id}`,
-          data,
-          {
-            headers: { "Content-Type": "multipart/form-data" },
-          }
-        );
+        res = await updateProductApi(editProduct.id, data);
       } else {
-        res = await axios.post(
-          "http://localhost:8080/api/v1/product/create-new-product",
-          data,
-          {
-            headers: { "Content-Type": "multipart/form-data" },
-          }
-        );
+        res = await createProductApi(data);
       }
 
       if (res.data.errCode === 0) {

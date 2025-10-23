@@ -25,9 +25,9 @@ import {
 import { addCart, getAllCarts, createCart } from "../../api/cartApi";
 import { createReviewApi, getReviewsByProductApi } from "../../api/reviewApi";
 import ProductCard from "../../components/ProductCard/ProductCard";
-import imgPro from "../../assets/Product.jpg";
 
 import "./ProductDetailPage.scss";
+import { getImage } from "../../utils/decodeImage";
 
 const ProductDetailPage = () => {
   const user = useSelector((state) => state.user.user);
@@ -42,46 +42,6 @@ const ProductDetailPage = () => {
   const [reviews, setReviews] = useState([]);
   const [newReview, setNewReview] = useState({ rating: 5, comment: "" });
   const [suggestedProducts, setSuggestedProducts] = useState([]);
-
-  // Helper chuyển Buffer -> Base64
-  const bufferToBase64 = (bufferObj) => {
-    if (!bufferObj?.data) return null;
-    const binary = bufferObj.data.reduce(
-      (acc, byte) => acc + String.fromCharCode(byte),
-      ""
-    );
-    return btoa(binary);
-  };
-
-  const getImage = (image) => {
-    if (!image) return imgPro;
-
-    // Nếu ảnh đã là URL string
-    if (typeof image === "string") return image;
-
-    // Nếu ảnh ở dạng Buffer (Sequelize)
-    if (image?.data && Array.isArray(image.data)) {
-      try {
-        const decoded = new TextDecoder().decode(new Uint8Array(image.data));
-        // Nếu kết quả là URL (Cloudinary chẳng hạn)
-        if (decoded.startsWith("http")) return decoded;
-
-        // Nếu dữ liệu thực sự là ảnh binary thì chuyển base64
-        const base64String = btoa(
-          new Uint8Array(image.data).reduce(
-            (data, byte) => data + String.fromCharCode(byte),
-            ""
-          )
-        );
-        return `data:image/jpeg;base64,${base64String}`;
-      } catch (error) {
-        console.error("Error decoding image:", error);
-        return imgPro;
-      }
-    }
-
-    return imgPro;
-  };
 
   useEffect(() => {
     const fetchProduct = async () => {

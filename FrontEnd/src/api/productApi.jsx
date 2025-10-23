@@ -23,12 +23,15 @@ export const getProductByIdApi = async (id) => {
     return res.data;
   } catch (err) {
     console.error("Get product by ID API error:", err);
+    throw err;
   }
 };
 
 export const createProductApi = async (data) => {
   try {
-    const res = await API.post(`/product/create-new-product`, data);
+    const res = await API.post(`/product/create-new-product`, data, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
     return res.data;
   } catch (err) {
     console.error("Create product API error:", err);
@@ -38,7 +41,9 @@ export const createProductApi = async (data) => {
 
 export const updateProductApi = async (id, data) => {
   try {
-    const res = await API.put(`/product/update-product/${id}`, data);
+    const res = await API.put(`s/product/update-product/${id}`, data, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
     return res.data;
   } catch (err) {
     console.error("Update product API error:", err);

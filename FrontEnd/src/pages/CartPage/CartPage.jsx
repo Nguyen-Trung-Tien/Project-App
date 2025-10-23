@@ -17,7 +17,6 @@ import {
   removeCartItem,
 } from "../../redux/cartSlice";
 import { toast } from "react-toastify";
-import imgPro from "../../assets/Product.jpg";
 
 import {
   getAllCartItems,
@@ -25,20 +24,21 @@ import {
   updateCartItem as updateCartItemApi,
 } from "../../api/cartApi";
 import "./CartPage.scss";
+import { getImage } from "../../utils/decodeImage";
 
 const CartPage = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const cartItems = useSelector((state) => state.cart.cartItems);
   const [loading, setLoading] = useState(true);
-  const [selectedItems, setSelectedItems] = useState([]); // Lưu id các sản phẩm được tick
+  const [selectedItems, setSelectedItems] = useState([]);
 
   const fetchCart = async () => {
     try {
       setLoading(true);
       const res = await getAllCartItems();
       dispatch(setCartItems(res.data || []));
-      setSelectedItems(res.data?.map((item) => item.id) || []); // mặc định tick tất cả
+      setSelectedItems(res.data?.map((item) => item.id) || []);
     } catch (err) {
       console.error("Error fetching cart:", err);
     } finally {
@@ -79,31 +79,6 @@ const CartPage = () => {
     );
   };
 
-  const getImage = (image) => {
-    if (!image) return imgPro;
-
-    if (typeof image === "string") return image;
-
-    if (image?.data && Array.isArray(image.data)) {
-      try {
-        const decoded = new TextDecoder().decode(new Uint8Array(image.data));
-        if (decoded.startsWith("http")) return decoded;
-
-        const base64String = btoa(
-          new Uint8Array(image.data).reduce(
-            (data, byte) => data + String.fromCharCode(byte),
-            ""
-          )
-        );
-        return `data:image/jpeg;base64,${base64String}`;
-      } catch (error) {
-        console.error("Error decoding image:", error);
-        return imgPro;
-      }
-    }
-
-    return imgPro;
-  };
   const total = cartItems
     .filter((item) => selectedItems.includes(item.id))
     .reduce((acc, item) => {
