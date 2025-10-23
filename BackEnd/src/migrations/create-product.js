@@ -1,4 +1,5 @@
 "use strict";
+
 module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.createTable("Products", {
@@ -7,6 +8,11 @@ module.exports = {
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER,
+      },
+      sku: {
+        type: Sequelize.STRING,
+        allowNull: true, // allowNull true như model
+        unique: true,
       },
       name: {
         type: Sequelize.STRING,
@@ -24,6 +30,14 @@ module.exports = {
         type: Sequelize.INTEGER,
         defaultValue: 0,
       },
+      discount: {
+        type: Sequelize.DECIMAL(5, 2),
+        defaultValue: 0.0,
+      },
+      isActive: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: true,
+      },
       image: {
         type: Sequelize.BLOB("long"),
         allowNull: true,
@@ -31,7 +45,7 @@ module.exports = {
       categoryId: {
         type: Sequelize.INTEGER,
         allowNull: true,
-        // references: { model: "Categories", key: "id" }, // 🔹 Khóa ngoại
+        // references: { model: "Categories", key: "id" },
         onUpdate: "CASCADE",
         onDelete: "SET NULL",
       },
@@ -49,6 +63,7 @@ module.exports = {
       },
     });
   },
+
   async down(queryInterface, Sequelize) {
     await queryInterface.dropTable("Products");
   },

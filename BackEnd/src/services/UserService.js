@@ -38,7 +38,6 @@ const createNewUser = async (data) => {
       avatar: data.avatar || null,
       isActive: true,
     });
-
     return { errCode: 0, errMessage: "User created successfully!" };
   } catch (error) {
     return {
@@ -60,14 +59,10 @@ const handleUserLogin = async (email, password) => {
     if (!isPasswordValid) {
       return { errCode: 2, errMessage: "Wrong password!" };
     }
-
     const payload = { id: user.id, email: user.email, role: user.role };
-
     const accessToken = generateAccessToken(payload);
     const refreshToken = generateRefreshToken(payload);
-
     const { password: _, ...userData } = user.toJSON();
-
     return {
       errCode: 0,
       errMessage: "OK",
@@ -90,12 +85,10 @@ const updateUser = async (userId, data) => {
     fields.forEach((field) => {
       if (data[field] !== undefined) user[field] = data[field];
     });
-
     if (data.avatar) {
       const base64Data = data.avatar.split(",")[1];
       user.avatar = Buffer.from(base64Data, "base64");
     }
-
     await user.save();
     const { password, ...userData } = user.toJSON();
     return { errCode: 0, errMessage: "User updated", data: userData };
@@ -110,9 +103,7 @@ const getUserById = async (userId) => {
     const user = await db.User.findByPk(userId, {
       attributes: { exclude: ["password"] },
     });
-
     if (!user) return { errCode: 1, errMessage: "User not found" };
-
     const userData = user.toJSON();
     userData.avatar = userData.avatar
       ? `data:image/png;base64,${userData.avatar.toString("base64")}`
@@ -137,7 +128,6 @@ const getAllUsers = async () => {
         : null;
       return u;
     });
-
     return { errCode: 0, errMessage: "OK", data };
   } catch (e) {
     console.error(e);
@@ -148,13 +138,10 @@ const getAllUsers = async () => {
 const deleteUser = async (userId) => {
   try {
     const user = await db.User.findByPk(userId);
-
     if (!user) {
       return { errCode: 1, errMessage: "User not found" };
     }
-
     await user.destroy();
-
     return { errCode: 0, errMessage: "User deleted successfully" };
   } catch (e) {
     console.error("Error deleting user:", e);

@@ -10,7 +10,10 @@ exports.handleGetReviewsByProduct = async (req, res) => {
     return res.status(200).json(data);
   } catch (e) {
     console.error(e);
-    return res.status(500).json({ errCode: -1, errMessage: "Lỗi server" });
+    return res.status(500).json({
+      errCode: -1,
+      errMessage: "Error from server",
+    });
   }
 };
 
@@ -20,6 +23,9 @@ exports.handleCreateReview = async (req, res) => {
     return res.status(200).json(data);
   } catch (e) {
     console.error(e);
-    return res.status(500).json({ errCode: -1, errMessage: "Lỗi server" });
+    return res.status(500).json({
+      errCode: -1,
+      errMessage: "Error from server",
+    });
   }
 };

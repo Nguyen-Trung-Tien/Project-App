@@ -28,7 +28,7 @@ const getCategoryById = async (id) => {
       return { errCode: 1, errMessage: "Không tìm thấy danh mục này" };
     return { errCode: 0, data: category };
   } catch (error) {
-    console.error("❌ CategoryService getCategoryById error:", error);
+    console.error("CategoryService getCategoryById error:", error);
     return { errCode: 1, errMessage: "Lỗi khi lấy danh mục" };
   }
 };
@@ -43,7 +43,7 @@ const createCategory = async (data) => {
     await db.Category.create({ name, slug, description, parentId, image });
     return { errCode: 0, message: "Tạo danh mục thành công" };
   } catch (error) {
-    console.error("❌ CategoryService createCategory error:", error);
+    console.error("CategoryService createCategory error:", error);
     return { errCode: 1, errMessage: "Lỗi khi tạo danh mục" };
   }
 };
@@ -56,7 +56,7 @@ const updateCategory = async (id, data) => {
     await category.update(data);
     return { errCode: 0, message: "Cập nhật thành công" };
   } catch (error) {
-    console.error("❌ CategoryService updateCategory error:", error);
+    console.error("CategoryService updateCategory error:", error);
     return { errCode: 1, errMessage: "Lỗi khi cập nhật danh mục" };
   }
 };
@@ -69,7 +69,7 @@ const deleteCategory = async (id) => {
     await category.destroy();
     return { errCode: 0, message: "Xóa thành công" };
   } catch (error) {
-    console.error("❌ CategoryService deleteCategory error:", error);
+    console.error("CategoryService deleteCategory error:", error);
     return { errCode: 1, errMessage: "Lỗi khi xóa danh mục" };
   }
 };

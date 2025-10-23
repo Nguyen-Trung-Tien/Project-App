@@ -6,9 +6,10 @@ const handleCreateNewUser = async (req, res) => {
     return res.status(200).json(message);
   } catch (e) {
     console.error(e);
-    return res
-      .status(500)
-      .json({ errCode: -1, errMessage: "Internal server error" });
+    return res.status(500).json({
+      errCode: -1,
+      errMessage: "Internal server error",
+    });
   }
 };
 
@@ -16,9 +17,10 @@ const handleLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
     if (!email || !password) {
-      return res
-        .status(400)
-        .json({ errCode: 3, errMessage: "Email and password are required!" });
+      return res.status(400).json({
+        errCode: 3,
+        errMessage: "Email and password are required!",
+      });
     }
 
     const result = await UserService.handleUserLogin(email, password);
@@ -44,9 +46,10 @@ const handleLogin = async (req, res) => {
     });
   } catch (e) {
     console.error(e);
-    return res
-      .status(500)
-      .json({ errCode: -1, errMessage: "Internal server error" });
+    return res.status(500).json({
+      errCode: -1,
+      errMessage: "Internal server error",
+    });
   }
 };
 
@@ -54,16 +57,18 @@ const handleRefreshToken = (req, res) => {
   try {
     const refreshToken = req.cookies?.refreshToken;
     if (!refreshToken) {
-      return res
-        .status(400)
-        .json({ errCode: 1, errMessage: "Refresh token is required" });
+      return res.status(400).json({
+        errCode: 1,
+        errMessage: "Refresh token is required",
+      });
     }
 
     const decoded = UserService.verifyRefreshToken(refreshToken);
     if (!decoded) {
-      return res
-        .status(403)
-        .json({ errCode: 2, errMessage: "Invalid or expired refresh token" });
+      return res.status(403).json({
+        errCode: 2,
+        errMessage: "Invalid or expired refresh token",
+      });
     }
 
     const accessToken = UserService.generateAccessToken({
@@ -79,9 +84,10 @@ const handleRefreshToken = (req, res) => {
     });
   } catch (e) {
     console.error(e);
-    return res
-      .status(500)
-      .json({ errCode: -1, errMessage: "Internal server error" });
+    return res.status(500).json({
+      errCode: -1,
+      errMessage: "Internal server error",
+    });
   }
 };
 
@@ -90,9 +96,10 @@ const handleUpdateUser = async (req, res) => {
     const { id, username, email, phone, address, role, avatar } = req.body;
 
     if (!id) {
-      return res
-        .status(400)
-        .json({ errCode: 1, errMessage: "User ID is required" });
+      return res.status(400).json({
+        errCode: 1,
+        errMessage: "User ID is required",
+      });
     }
 
     const updateData = {};
@@ -112,9 +119,10 @@ const handleUpdateUser = async (req, res) => {
     return res.status(200).json(result);
   } catch (err) {
     console.error("Error in handleUpdateUser:", err);
-    return res
-      .status(500)
-      .json({ errCode: -1, errMessage: "Internal server error" });
+    return res.status(500).json({
+      errCode: -1,
+      errMessage: "Internal server error",
+    });
   }
 };
 
@@ -124,9 +132,10 @@ const handleGetAllUsers = async (req, res) => {
     return res.status(200).json(result);
   } catch (e) {
     console.error(e);
-    return res
-      .status(500)
-      .json({ errCode: -1, errMessage: "Internal server error" });
+    return res.status(500).json({
+      errCode: -1,
+      errMessage: "Internal server error",
+    });
   }
 };
 
@@ -134,9 +143,10 @@ const handleGetUserById = async (req, res) => {
   try {
     const userId = req.params.id;
     if (!userId) {
-      return res
-        .status(400)
-        .json({ errCode: 1, errMessage: "User ID is required" });
+      return res.status(400).json({
+        errCode: 1,
+        errMessage: "User ID is required",
+      });
     }
 
     const result = await UserService.getUserById(userId);
@@ -148,9 +158,10 @@ const handleGetUserById = async (req, res) => {
     return res.status(200).json(result);
   } catch (e) {
     console.error(e);
-    return res
-      .status(500)
-      .json({ errCode: -1, errMessage: "Internal server error" });
+    return res.status(500).json({
+      errCode: -1,
+      errMessage: "Internal server error",
+    });
   }
 };
 
@@ -162,9 +173,10 @@ const handleDeleteUser = async (req, res) => {
     return res.status(200).json(result);
   } catch (e) {
     console.error("Error in handleDeleteUser:", e);
-    return res
-      .status(500)
-      .json({ errCode: -1, errMessage: "Internal server error" });
+    return res.status(500).json({
+      errCode: -1,
+      errMessage: "Internal server error",
+    });
   }
 };
 

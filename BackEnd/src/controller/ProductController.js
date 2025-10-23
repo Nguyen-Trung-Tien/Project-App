@@ -7,9 +7,10 @@ const handleCreateProduct = async (req, res) => {
     return res.status(201).json(result);
   } catch (e) {
     console.error("Error in handleCreateProduct:", e);
-    return res
-      .status(500)
-      .json({ errCode: -1, errMessage: "Internal server error" });
+    return res.status(500).json({
+      errCode: -1,
+      errMessage: "Internal server error",
+    });
   }
 };
 
@@ -20,9 +21,10 @@ const handleGetAllProducts = async (req, res) => {
     return res.status(200).json(result);
   } catch (e) {
     console.error("Error in handleGetAllProducts:", e);
-    return res
-      .status(500)
-      .json({ errCode: -1, errMessage: "Internal server error" });
+    return res.status(500).json({
+      errCode: -1,
+      errMessage: "Internal server error",
+    });
   }
 };
 
@@ -34,9 +36,10 @@ const handleGetProductById = async (req, res) => {
     return res.status(status).json(result);
   } catch (e) {
     console.error("Error in handleGetProductById:", e);
-    return res
-      .status(500)
-      .json({ errCode: -1, errMessage: "Internal server error" });
+    return res.status(500).json({
+      errCode: -1,
+      errMessage: "Internal server error",
+    });
   }
 };
 
@@ -48,9 +51,10 @@ const handleUpdateProduct = async (req, res) => {
     return res.status(status).json(result);
   } catch (e) {
     console.error("Error in handleUpdateProduct:", e);
-    return res
-      .status(500)
-      .json({ errCode: -1, errMessage: "Internal server error" });
+    return res.status(500).json({
+      errCode: -1,
+      errMessage: "Internal server error",
+    });
   }
 };
 
@@ -62,9 +66,10 @@ const handleDeleteProduct = async (req, res) => {
     return res.status(status).json(result);
   } catch (e) {
     console.error("Error in handleDeleteProduct:", e);
-    return res
-      .status(500)
-      .json({ errCode: -1, errMessage: "Internal server error" });
+    return res.status(500).json({
+      errCode: -1,
+      errMessage: "Internal server error",
+    });
   }
 };
 
