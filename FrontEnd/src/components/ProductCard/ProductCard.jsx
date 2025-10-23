@@ -15,22 +15,28 @@ const ProductCard = ({ product }) => {
   const user = useSelector((state) => state.user.user);
   const userId = user?.id;
 
-  const getImage = (img) => {
-    if (!img) return imgPro;
-    if (typeof img === "string") return img;
-    if (img.data) {
+  const getImage = (image) => {
+    if (!image) return imgPro;
+
+    if (typeof image === "string") return image;
+    if (image?.data && Array.isArray(image.data)) {
       try {
+        const decoded = new TextDecoder().decode(new Uint8Array(image.data));
+        if (decoded.startsWith("http")) return decoded;
+
         const base64String = btoa(
-          new Uint8Array(img.data).reduce(
+          new Uint8Array(image.data).reduce(
             (data, byte) => data + String.fromCharCode(byte),
             ""
           )
         );
         return `data:image/jpeg;base64,${base64String}`;
-      } catch {
+      } catch (error) {
+        console.error("Error decoding image:", error);
         return imgPro;
       }
     }
+
     return imgPro;
   };
 

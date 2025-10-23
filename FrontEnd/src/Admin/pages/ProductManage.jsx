@@ -20,12 +20,13 @@ import {
   updateProductApi,
 } from "../../api/productApi";
 import { getAllCategoryApi } from "../../api/categoryApi";
+import imgPro from "../../assets/Product.jpg";
+import axios from "axios";
 
 const ProductManage = () => {
   const [loading, setLoading] = useState(false);
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
-
   const [showModal, setShowModal] = useState(false);
   const [editProduct, setEditProduct] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -38,16 +39,18 @@ const ProductManage = () => {
     stock: "",
     categoryId: "",
     isActive: true,
-    image: null,
+    image: "",
   });
   const [imagePreview, setImagePreview] = useState(null);
-
+  const decodeImage = (bufferObj) => {
+    if (!bufferObj || !bufferObj.data) return imgPro;
+    const uint8Array = new Uint8Array(bufferObj.data);
+    return new TextDecoder().decode(uint8Array);
+  };
   const fetchCategories = async () => {
     try {
       const res = await getAllCategoryApi();
-      if (res.errCode === 0 && Array.isArray(res.data)) {
-        setCategories(res.data);
-      }
+      if (res.errCode === 0 && Array.isArray(res.data)) setCategories(res.data);
     } catch (err) {
       console.error("Fetch categories error:", err);
     }
@@ -57,9 +60,10 @@ const ProductManage = () => {
     setLoading(true);
     try {
       const res = await getAllProductApi();
-      if (res.errCode === 0 && Array.isArray(res.products)) {
+      if (res.errCode === 0 && Array.isArray(res.products))
         setProducts(res.products);
-      } else setProducts([]);
+      else setProducts([]);
+      console.log(res.products);
     } catch (err) {
       console.error("Fetch products error:", err);
       setProducts([]);
@@ -84,11 +88,9 @@ const ProductManage = () => {
         stock: product.stock || "",
         categoryId: product.categoryId || "",
         isActive: product.isActive ?? true,
-        image: null,
+        image: product.image || null,
       });
-      setImagePreview(
-        product.image ? `data:image/jpeg;base64,${product.image}` : null
-      );
+      setImagePreview(getImageUrl(product.image));
       setEditProduct(product);
     } else {
       setFormData({
@@ -124,33 +126,48 @@ const ProductManage = () => {
 
   const handleSave = async (e) => {
     e.preventDefault();
-
     try {
       setLoading(true);
 
       const data = new FormData();
-      for (const key in formData) {
-        if (key === "image" && formData.image)
-          data.append("image", formData.image);
-        else data.append(key, formData[key]);
-      }
+      data.append("name", formData.name);
+      data.append("sku", formData.sku);
+      data.append("description", formData.description);
+      data.append("price", formData.price);
+      data.append("discount", formData.discount);
+      data.append("stock", formData.stock);
+      data.append("categoryId", formData.categoryId);
+      data.append("isActive", formData.isActive);
+      if (formData.image) data.append("image", formData.image);
 
       let res;
       if (editProduct) {
-        res = await updateProductApi(editProduct.id, data);
+        res = await axios.put(
+          `http://localhost:8080/api/v1/product/update-product/${editProduct.id}`,
+          data,
+          {
+            headers: { "Content-Type": "multipart/form-data" },
+          }
+        );
       } else {
-        res = await createProductApi(data);
+        res = await axios.post(
+          "http://localhost:8080/api/v1/product/create-new-product",
+          data,
+          {
+            headers: { "Content-Type": "multipart/form-data" },
+          }
+        );
       }
 
-      if (res.errCode === 0) {
+      if (res.data.errCode === 0) {
         toast.success(
-          editProduct
-            ? "Cập nhật sản phẩm thành công!"
-            : "Thêm sản phẩm mới thành công!"
+          editProduct ? "Cập nhật thành công!" : "Tạo sản phẩm thành công!"
         );
         fetchProducts();
         handleCloseModal();
-      } else toast.error(res.errMessage || "Thao tác thất bại!");
+      } else {
+        toast.error(res.data.errMessage || "Thao tác thất bại!");
+      }
     } catch (err) {
       console.error(err);
       toast.error("Lỗi kết nối server!");
@@ -164,7 +181,7 @@ const ProductManage = () => {
     try {
       const res = await deleteProductApi(id);
       if (res.errCode === 0) {
-        toast.success("🗑️ Đã xóa sản phẩm!");
+        toast.success("Đã xóa sản phẩm!");
         fetchProducts();
       } else toast.error(res.errMessage);
     } catch (err) {
@@ -182,7 +199,6 @@ const ProductManage = () => {
       {loading && <Loading />}
       <div>
         <h3 className="mb-4">🛍️ Quản lý sản phẩm</h3>
-
         <Card className="shadow-sm">
           <Card.Body>
             <Row className="align-items-center mb-3">
@@ -228,19 +244,16 @@ const ProductManage = () => {
                     <tr key={p.id}>
                       <td>{p.id}</td>
                       <td>
-                        {p.image ? (
-                          <img
-                            src={`data:image/jpeg;base64,${p.image}`}
-                            alt={p.name}
-                            style={{
-                              width: 60,
-                              height: 60,
-                              objectFit: "cover",
-                            }}
-                          />
-                        ) : (
-                          <span className="text-muted">Không có</span>
-                        )}
+                        <Image
+                          src={decodeImage(p.image)}
+                          alt={p.name}
+                          rounded
+                          style={{
+                            width: "100px",
+                            height: "100px",
+                            objectFit: "cover",
+                          }}
+                        />
                       </td>
                       <td>{p.name}</td>
                       <td>{p.sku || "—"}</td>
@@ -306,7 +319,6 @@ const ProductManage = () => {
                       required
                     />
                   </Form.Group>
-
                   <Form.Group className="mb-3">
                     <Form.Label>Mã SKU</Form.Label>
                     <Form.Control
@@ -317,7 +329,6 @@ const ProductManage = () => {
                       }
                     />
                   </Form.Group>
-
                   <Form.Group className="mb-3">
                     <Form.Label>Giá (₫)</Form.Label>
                     <Form.Control
@@ -330,7 +341,6 @@ const ProductManage = () => {
                       required
                     />
                   </Form.Group>
-
                   <Form.Group className="mb-3">
                     <Form.Label>Giảm giá (%)</Form.Label>
                     <Form.Control
@@ -342,7 +352,6 @@ const ProductManage = () => {
                       }
                     />
                   </Form.Group>
-
                   <Form.Group className="mb-3">
                     <Form.Label>Danh mục</Form.Label>
                     <Form.Select
@@ -362,7 +371,6 @@ const ProductManage = () => {
                     </Form.Select>
                   </Form.Group>
                 </Col>
-
                 <Col md={6}>
                   <Form.Group className="mb-3">
                     <Form.Label>Mô tả sản phẩm</Form.Label>
@@ -379,7 +387,6 @@ const ProductManage = () => {
                       }
                     />
                   </Form.Group>
-
                   <Form.Group className="mb-3">
                     <Form.Label>Tồn kho</Form.Label>
                     <Form.Control
@@ -392,7 +399,6 @@ const ProductManage = () => {
                       required
                     />
                   </Form.Group>
-
                   <Form.Group className="mb-3">
                     <Form.Label>Ảnh sản phẩm</Form.Label>
                     <Form.Control
@@ -414,7 +420,6 @@ const ProductManage = () => {
                       </div>
                     )}
                   </Form.Group>
-
                   <Form.Group className="mb-3">
                     <Form.Check
                       type="checkbox"
@@ -427,7 +432,6 @@ const ProductManage = () => {
                   </Form.Group>
                 </Col>
               </Row>
-
               <div className="text-end">
                 <Button variant="secondary" onClick={handleCloseModal}>
                   Hủy

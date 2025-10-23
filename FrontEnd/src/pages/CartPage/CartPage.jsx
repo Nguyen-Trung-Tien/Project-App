@@ -81,20 +81,29 @@ const CartPage = () => {
 
   const getImage = (image) => {
     if (!image) return imgPro;
+
     if (typeof image === "string") return image;
-    if (image.data) {
-      const base64String = btoa(
-        new Uint8Array(image.data).reduce(
-          (data, byte) => data + String.fromCharCode(byte),
-          ""
-        )
-      );
-      return `data:image/jpeg;base64,${base64String}`;
+
+    if (image?.data && Array.isArray(image.data)) {
+      try {
+        const decoded = new TextDecoder().decode(new Uint8Array(image.data));
+        if (decoded.startsWith("http")) return decoded;
+
+        const base64String = btoa(
+          new Uint8Array(image.data).reduce(
+            (data, byte) => data + String.fromCharCode(byte),
+            ""
+          )
+        );
+        return `data:image/jpeg;base64,${base64String}`;
+      } catch (error) {
+        console.error("Error decoding image:", error);
+        return imgPro;
+      }
     }
+
     return imgPro;
   };
-
-  // Tổng thanh toán chỉ tính các sản phẩm được tick
   const total = cartItems
     .filter((item) => selectedItems.includes(item.id))
     .reduce((acc, item) => {

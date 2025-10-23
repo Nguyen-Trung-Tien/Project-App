@@ -23,11 +23,11 @@ import {
   getProductsByCategoryApi,
 } from "../../api/productApi";
 import { addCart, getAllCarts, createCart } from "../../api/cartApi";
-import imgPro from "../../assets/Product.jpg";
 import { createReviewApi, getReviewsByProductApi } from "../../api/reviewApi";
+import ProductCard from "../../components/ProductCard/ProductCard";
+import imgPro from "../../assets/Product.jpg";
 
 import "./ProductDetailPage.scss";
-import ProductCard from "../../components/ProductCard/ProductCard";
 
 const ProductDetailPage = () => {
   const user = useSelector((state) => state.user.user);
@@ -39,11 +39,49 @@ const ProductDetailPage = () => {
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(true);
   const [addingCart, setAddingCart] = useState(false);
-
   const [reviews, setReviews] = useState([]);
   const [newReview, setNewReview] = useState({ rating: 5, comment: "" });
-
   const [suggestedProducts, setSuggestedProducts] = useState([]);
+
+  // Helper chuyển Buffer -> Base64
+  const bufferToBase64 = (bufferObj) => {
+    if (!bufferObj?.data) return null;
+    const binary = bufferObj.data.reduce(
+      (acc, byte) => acc + String.fromCharCode(byte),
+      ""
+    );
+    return btoa(binary);
+  };
+
+  const getImage = (image) => {
+    if (!image) return imgPro;
+
+    // Nếu ảnh đã là URL string
+    if (typeof image === "string") return image;
+
+    // Nếu ảnh ở dạng Buffer (Sequelize)
+    if (image?.data && Array.isArray(image.data)) {
+      try {
+        const decoded = new TextDecoder().decode(new Uint8Array(image.data));
+        // Nếu kết quả là URL (Cloudinary chẳng hạn)
+        if (decoded.startsWith("http")) return decoded;
+
+        // Nếu dữ liệu thực sự là ảnh binary thì chuyển base64
+        const base64String = btoa(
+          new Uint8Array(image.data).reduce(
+            (data, byte) => data + String.fromCharCode(byte),
+            ""
+          )
+        );
+        return `data:image/jpeg;base64,${base64String}`;
+      } catch (error) {
+        console.error("Error decoding image:", error);
+        return imgPro;
+      }
+    }
+
+    return imgPro;
+  };
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -92,12 +130,7 @@ const ProductDetailPage = () => {
   const handleSubmitReview = async () => {
     if (!newReview.comment.trim()) return;
     try {
-      const payload = {
-        userId,
-        productId: product.id,
-        rating: newReview.rating,
-        comment: newReview.comment,
-      };
+      const payload = { userId, productId: product.id, ...newReview };
       const res = await createReviewApi(payload);
       if (res?.errCode === 0) {
         setNewReview({ rating: 5, comment: "" });
@@ -125,20 +158,18 @@ const ProductDetailPage = () => {
         const newCartRes = await createCart(userId);
         cart = newCartRes.data;
       }
-
       const res = await addCart({
         cartId: cart.id,
         productId: product.id,
         quantity,
       });
-
       if (res.errCode === 0) {
         toast.success(`Đã thêm "${product.name}" vào giỏ hàng`);
       } else {
         toast.error(res.errMessage || "Thêm vào giỏ hàng thất bại!");
       }
     } catch (err) {
-      console.error("Error adding cart item:", err);
+      console.error(err);
       toast.error("Lỗi khi thêm vào giỏ hàng!");
     } finally {
       setAddingCart(false);
@@ -167,23 +198,7 @@ const ProductDetailPage = () => {
       </div>
     );
 
-  let imageUrl = imgPro;
-  try {
-    if (product.image) {
-      if (typeof product.image === "string") imageUrl = product.image;
-      else if (product.image.data) {
-        const base64String = btoa(
-          new Uint8Array(product.image.data).reduce(
-            (data, byte) => data + String.fromCharCode(byte),
-            ""
-          )
-        );
-        imageUrl = `data:image/jpeg;base64,${base64String}`;
-      }
-    }
-  } catch (err) {
-    console.error("Lỗi xử lý ảnh:", err);
-  }
+  const imageUrl = getImage(product.image);
 
   return (
     <div className="product-detail-page py-5">
@@ -215,24 +230,20 @@ const ProductDetailPage = () => {
           <Col md={6}>
             <h2 className="fw-bold mb-2">{product.name}</h2>
             <p className="text-muted mb-1">{product.brand || "Không rõ"}</p>
-
             <h3 className="text-danger fw-semibold mb-3">
               {Number(product.price).toLocaleString("vi-VN")} ₫
             </h3>
-
             {product.discount > 0 && (
               <p className="text-warning fw-semibold mb-3">
                 Giảm giá: {product.discount}%
               </p>
             )}
-
             <p className="text-secondary mb-4">{product.description}</p>
 
             <ul className="list-unstyled mb-4">
               <li>
                 <strong>Danh mục:</strong>{" "}
-                {product.category?.name || "Chưa phân loại"} (ID:{" "}
-                {product.categoryId})
+                {product.category?.name || "Chưa phân loại"}
               </li>
               <li>
                 <strong>Tình trạng:</strong>{" "}
@@ -277,9 +288,9 @@ const ProductDetailPage = () => {
             </div>
           </Col>
         </Row>
+
         <div className="reviews-section mt-5 pt-4 border-top">
           <h4 className="fw-bold mb-3">Đánh giá sản phẩm</h4>
-
           <div className="review-form mb-4">
             <h6 className="mb-2">Viết đánh giá của bạn:</h6>
             <div className="d-flex align-items-center mb-2">
@@ -318,7 +329,7 @@ const ProductDetailPage = () => {
                 <div className="d-flex align-items-center mb-2">
                   {r.user?.avatar ? (
                     <img
-                      src={r.user.avatar || imgPro}
+                      src={getImage(r.user.avatar)}
                       alt={r.user.username}
                       className="rounded-circle me-2"
                       width={40}

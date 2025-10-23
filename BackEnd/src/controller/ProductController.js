@@ -1,16 +1,37 @@
 const ProductService = require("../services/ProductService");
+const cloudinary = require("cloudinary").v2;
 
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+const uploadToCloudinary = (buffer) => {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      { folder: "products" },
+      (error, result) => {
+        if (error) return reject(error);
+        resolve(result);
+      }
+    );
+    stream.end(buffer);
+  });
+};
 const handleCreateProduct = async (req, res) => {
   try {
-    const result = await ProductService.createProduct(req.body);
-    if (result.errCode !== 0) return res.status(400).json(result);
-    return res.status(201).json(result);
+    const data = { ...req.body };
+    if (req.file) {
+      const result = await uploadToCloudinary(req.file.buffer);
+      data.image = result.secure_url;
+    }
+    const product = await ProductService.createProduct(data);
+    return res.status(201).json(product);
   } catch (e) {
-    console.error("Error in handleCreateProduct:", e);
-    return res.status(500).json({
-      errCode: -1,
-      errMessage: "Internal server error",
-    });
+    console.error(e);
+    return res
+      .status(500)
+      .json({ errCode: -1, errMessage: "Internal server error" });
   }
 };
 
@@ -46,15 +67,20 @@ const handleGetProductById = async (req, res) => {
 const handleUpdateProduct = async (req, res) => {
   try {
     const { id } = req.params;
-    const result = await ProductService.updateProduct(id, req.body);
-    const status = result.errCode === 0 ? 200 : 404;
-    return res.status(status).json(result);
+    const data = { ...req.body };
+
+    if (req.file) {
+      const result = await uploadToCloudinary(req.file.buffer);
+      data.image = result.secure_url;
+    }
+
+    const product = await ProductService.updateProduct(id, data);
+    return res.status(200).json(product);
   } catch (e) {
-    console.error("Error in handleUpdateProduct:", e);
-    return res.status(500).json({
-      errCode: -1,
-      errMessage: "Internal server error",
-    });
+    console.error(e);
+    return res
+      .status(500)
+      .json({ errCode: -1, errMessage: "Internal server error" });
   }
 };
 
