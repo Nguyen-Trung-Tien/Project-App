@@ -18,7 +18,9 @@ function Header() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const user = useSelector((state) => state.user.user);
-  const cartItemCount = useSelector((state) => state.cart?.items?.length || 0);
+  const cartItemCount = useSelector((state) =>
+    state.cart.cartItems.reduce((sum, i) => sum + i.quantity, 0)
+  );
   const avatarUrl = user?.avatar || "/default-avatar.png";
   const handleLogout = async () => {
     try {

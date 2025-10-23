@@ -1,6 +1,6 @@
 const db = require("../models");
 
-exports.getReviewsByProduct = async (productId) => {
+const getReviewsByProduct = async (productId) => {
   try {
     const reviews = await db.Review.findAll({
       where: { productId, isApproved: true },
@@ -20,7 +20,7 @@ exports.getReviewsByProduct = async (productId) => {
   }
 };
 
-exports.createReview = async (data) => {
+const createReview = async (data) => {
   try {
     const newReview = await db.Review.create({
       userId: data.userId,
@@ -34,3 +34,5 @@ exports.createReview = async (data) => {
     return { errCode: 1, errMessage: "Lỗi khi tạo đánh giá" };
   }
 };
+
+module.exports = { createReview, getReviewsByProduct };

@@ -1,12 +1,9 @@
-const {
-  getReviewsByProduct,
-  createReview,
-} = require("../services/ReviewService");
+const ReviewService = require("../services/ReviewService");
 
-exports.handleGetReviewsByProduct = async (req, res) => {
+const handleGetReviewsByProduct = async (req, res) => {
   try {
     const { productId } = req.params;
-    const data = await getReviewsByProduct(productId);
+    const data = await ReviewService.getReviewsByProduct(productId);
     return res.status(200).json(data);
   } catch (e) {
     console.error(e);
@@ -17,9 +14,9 @@ exports.handleGetReviewsByProduct = async (req, res) => {
   }
 };
 
-exports.handleCreateReview = async (req, res) => {
+const handleCreateReview = async (req, res) => {
   try {
-    const data = await createReview(req.body);
+    const data = await ReviewService.createReview(req.body);
     return res.status(200).json(data);
   } catch (e) {
     console.error(e);
@@ -29,3 +26,5 @@ exports.handleCreateReview = async (req, res) => {
     });
   }
 };
+
+module.exports = { handleGetReviewsByProduct, handleCreateReview };

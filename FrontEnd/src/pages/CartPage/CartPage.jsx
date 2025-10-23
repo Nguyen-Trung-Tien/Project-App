@@ -1,38 +1,123 @@
-import React, { useState } from "react";
-import { Container, Row, Col, Table, Button, Form } from "react-bootstrap";
+import React, { useEffect, useState } from "react";
+import {
+  Container,
+  Row,
+  Col,
+  Table,
+  Button,
+  Form,
+  Spinner,
+} from "react-bootstrap";
 import { Trash, ArrowLeftCircle } from "react-bootstrap-icons";
 import { Link, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  setCartItems,
+  updateCartItemQuantity,
+  removeCartItem,
+} from "../../redux/cartSlice";
+import { toast } from "react-toastify";
+import imgPro from "../../assets/Product.jpg";
+
+import {
+  getAllCartItems,
+  removeCartItem as removeCartItemApi,
+  updateCartItem as updateCartItemApi,
+} from "../../api/cartApi";
 import "./CartPage.scss";
 
 const CartPage = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const cartItems = useSelector((state) => state.cart.cartItems);
+  const [loading, setLoading] = useState(true);
+  const [selectedItems, setSelectedItems] = useState([]); // Lưu id các sản phẩm được tick
 
-  const initialCart = [
-    {
-      id: 1,
-      name: "iPhone 15 Pro",
-      price: 32990000,
-      qty: 1,
-      image: "/images/product-1.jpg",
-    },
-    {
-      id: 2,
-      name: "MacBook Air M2",
-      price: 28990000,
-      qty: 1,
-      image: "/images/product-2.jpg",
-    },
-  ];
-  const [cartItems, setCartItems] = useState(initialCart);
-
-  const handleRemove = (id) => {
-    setCartItems(cartItems.filter((item) => item.id !== id));
+  const fetchCart = async () => {
+    try {
+      setLoading(true);
+      const res = await getAllCartItems();
+      dispatch(setCartItems(res.data || []));
+      setSelectedItems(res.data?.map((item) => item.id) || []); // mặc định tick tất cả
+    } catch (err) {
+      console.error("Error fetching cart:", err);
+    } finally {
+      setLoading(false);
+    }
   };
-  const total = cartItems.reduce((acc, item) => acc + item.price * item.qty, 0);
+
+  useEffect(() => {
+    fetchCart();
+  }, []);
+
+  const handleRemove = async (id) => {
+    try {
+      await removeCartItemApi(id);
+      dispatch(removeCartItem(id));
+      setSelectedItems((prev) => prev.filter((itemId) => itemId !== id));
+      toast.success("Đã xóa sản phẩm khỏi giỏ hàng!");
+    } catch (err) {
+      console.error(err);
+      toast.error("Xóa thất bại!");
+    }
+  };
+
+  const handleQtyChange = async (id, quantity) => {
+    if (quantity < 1) return;
+    try {
+      await updateCartItemApi(id, quantity);
+      dispatch(updateCartItemQuantity({ id, quantity }));
+    } catch (err) {
+      console.error(err);
+      toast.error("Cập nhật số lượng thất bại!");
+    }
+  };
+
+  const handleSelectItem = (id) => {
+    setSelectedItems((prev) =>
+      prev.includes(id) ? prev.filter((itemId) => itemId !== id) : [...prev, id]
+    );
+  };
+
+  const getImage = (image) => {
+    if (!image) return imgPro;
+    if (typeof image === "string") return image;
+    if (image.data) {
+      const base64String = btoa(
+        new Uint8Array(image.data).reduce(
+          (data, byte) => data + String.fromCharCode(byte),
+          ""
+        )
+      );
+      return `data:image/jpeg;base64,${base64String}`;
+    }
+    return imgPro;
+  };
+
+  // Tổng thanh toán chỉ tính các sản phẩm được tick
+  const total = cartItems
+    .filter((item) => selectedItems.includes(item.id))
+    .reduce((acc, item) => {
+      const price = item.product?.discount
+        ? (item.product.price * (100 - item.product.discount)) / 100
+        : item.product?.price || 0;
+      return acc + price * (item.quantity || 0);
+    }, 0);
 
   const handleCheckOut = () => {
-    navigate("/checkout");
+    if (selectedItems.length === 0) {
+      toast.warning("Vui lòng chọn ít nhất 1 sản phẩm để thanh toán!");
+      return;
+    }
+    navigate("/checkout", { state: { selectedIds: selectedItems } });
   };
+
+  if (loading)
+    return (
+      <div className="text-center mt-5">
+        <Spinner animation="border" />
+      </div>
+    );
 
   return (
     <div className="cart-page">
@@ -43,8 +128,7 @@ const CartPage = () => {
           <div className="text-center empty-cart">
             <p>Giỏ hàng trống.</p>
             <Link to="/" className="btn btn-primary mt-3">
-              <ArrowLeftCircle size={20} className="me-1" />
-              Tiếp tục mua sắm
+              <ArrowLeftCircle size={20} className="me-1" /> Tiếp tục mua sắm
             </Link>
           </div>
         ) : (
@@ -58,6 +142,19 @@ const CartPage = () => {
               >
                 <thead>
                   <tr>
+                    <th>
+                      <Form.Check
+                        type="checkbox"
+                        checked={selectedItems.length === cartItems.length}
+                        onChange={() =>
+                          setSelectedItems(
+                            selectedItems.length === cartItems.length
+                              ? []
+                              : cartItems.map((item) => item.id)
+                          )
+                        }
+                      />
+                    </th>
                     <th>Sản phẩm</th>
                     <th>Tên</th>
                     <th>Giá</th>
@@ -67,43 +164,73 @@ const CartPage = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {cartItems.map((item) => (
-                    <tr key={item.id}>
-                      <td>
-                        <img
-                          src={item.image}
-                          alt={item.name}
-                          className="cart-img"
-                        />
-                      </td>
-                      <td>{item.name}</td>
-                      <td>{item.price.toLocaleString()}₫</td>
-                      <td>
-                        <Form.Control
-                          type="number"
-                          min="1"
-                          value={item.qty}
-                          className="cart-qty"
-                        />
-                      </td>
-                      <td>{(item.price * item.qty).toLocaleString()}₫</td>
-                      <td>
-                        <Button
-                          variant="outline-danger"
-                          size="sm"
-                          onClick={() => handleRemove(item.id)}
-                        >
-                          <Trash />
-                        </Button>
-                      </td>
-                    </tr>
-                  ))}
+                  {cartItems.map((item) => {
+                    const price = item.product?.discount
+                      ? (item.product.price * (100 - item.product.discount)) /
+                        100
+                      : item.product?.price || 0;
+                    return (
+                      <tr key={item.id}>
+                        <td>
+                          <Form.Check
+                            type="checkbox"
+                            checked={selectedItems.includes(item.id)}
+                            onChange={() => handleSelectItem(item.id)}
+                          />
+                        </td>
+                        <td>
+                          <img
+                            src={getImage(item.product?.image)}
+                            alt={item.product?.name || "Sản phẩm"}
+                            className="cart-img"
+                          />
+                        </td>
+                        <td>{item.product?.name || "N/A"}</td>
+                        <td>
+                          {item.product?.discount > 0 ? (
+                            <>
+                              <span className="text-decoration-line-through">
+                                {(item.product.price || 0).toLocaleString()}₫
+                              </span>{" "}
+                              <span className="text-danger fw-bold">
+                                {price.toLocaleString()}₫
+                              </span>
+                            </>
+                          ) : (
+                            (item.product?.price || 0).toLocaleString() + "₫"
+                          )}
+                        </td>
+                        <td>
+                          <Form.Control
+                            type="number"
+                            min="1"
+                            value={item.quantity || 1}
+                            className="cart-qty"
+                            onChange={(e) =>
+                              handleQtyChange(item.id, Number(e.target.value))
+                            }
+                          />
+                        </td>
+                        <td>
+                          {(price * (item.quantity || 0)).toLocaleString()}₫
+                        </td>
+                        <td>
+                          <Button
+                            variant="outline-danger"
+                            size="sm"
+                            onClick={() => handleRemove(item.id)}
+                          >
+                            <Trash />
+                          </Button>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </Table>
             </Col>
-
             <Col lg={4}>
-              <div className="cart-summary shadow-sm">
+              <div className="cart-summary shadow-sm p-3">
                 <h5 className="fw-bold mb-3">Tổng thanh toán</h5>
                 <p className="mb-2">
                   Tạm tính: <span>{total.toLocaleString()}₫</span>
@@ -118,15 +245,13 @@ const CartPage = () => {
                     {total.toLocaleString()}₫
                   </span>
                 </h5>
-
                 <Button
                   variant="primary"
                   className="w-100 mt-3"
-                  onClick={() => handleCheckOut()}
+                  onClick={handleCheckOut}
                 >
                   Tiến hành thanh toán
                 </Button>
-
                 <Link to="/" className="btn btn-outline-secondary w-100 mt-2">
                   <ArrowLeftCircle size={18} className="me-1" />
                   Quay lại trang chủ

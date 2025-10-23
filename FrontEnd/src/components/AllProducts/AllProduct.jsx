@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Container, Row, Col, Spinner } from "react-bootstrap";
 import { toast } from "react-toastify";
+import { useSelector } from "react-redux";
 import ProductCard from "../../components/ProductCard/ProductCard";
 import { getAllProductApi } from "../../api/productApi";
 import "./AllProducts.scss";
@@ -8,6 +9,10 @@ import "./AllProducts.scss";
 const AllProducts = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // Lấy userId từ Redux để truyền vào ProductCard nếu cần
+  const user = useSelector((state) => state.user.user);
+  const userId = user?.id;
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -50,7 +55,7 @@ const AllProducts = () => {
           <Row className="g-4 justify-content-center">
             {products.map((product) => (
               <Col key={product.id} md={3} sm={6} xs={12}>
-                <ProductCard product={product} />
+                <ProductCard product={product} userId={userId} />
               </Col>
             ))}
           </Row>
