@@ -1,4 +1,5 @@
 "use strict";
+
 module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.createTable("Payments", {
@@ -15,24 +16,37 @@ module.exports = {
         onUpdate: "CASCADE",
         onDelete: "CASCADE",
       },
-      paymentMethod: {
-        type: Sequelize.ENUM("cod", "bank", "paypal", "momo"),
-        allowNull: false,
-      },
-      paymentStatus: {
-        type: Sequelize.ENUM("unpaid", "paid", "refunded"),
-        defaultValue: "unpaid",
-      },
-      transactionId: {
-        type: Sequelize.STRING,
+      userId: {
+        type: Sequelize.INTEGER,
         allowNull: true,
+        // references: { model: "Users", key: "id" },
+        onUpdate: "CASCADE",
+        onDelete: "SET NULL",
       },
       amount: {
         type: Sequelize.DECIMAL(10, 2),
         allowNull: false,
       },
-      paidAt: {
+      method: {
+        type: Sequelize.ENUM("cod", "bank", "paypal", "momo"),
+        allowNull: false,
+        defaultValue: "cod",
+      },
+      status: {
+        type: Sequelize.ENUM("pending", "completed", "failed", "refunded"),
+        defaultValue: "pending",
+      },
+      paymentDate: {
         type: Sequelize.DATE,
+        defaultValue: Sequelize.literal("CURRENT_TIMESTAMP"),
+      },
+      transactionId: {
+        type: Sequelize.STRING,
+        allowNull: true,
+        unique: true,
+      },
+      note: {
+        type: Sequelize.TEXT,
         allowNull: true,
       },
       createdAt: {

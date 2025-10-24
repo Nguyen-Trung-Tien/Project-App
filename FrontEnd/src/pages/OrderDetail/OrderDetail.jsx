@@ -8,14 +8,18 @@ import {
   ProgressBar,
   Button,
   Card,
+  Spinner,
 } from "react-bootstrap";
 import { useParams, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import { getOrderById } from "../../api/orderApi";
 import "./OrderDetail.scss";
 
 const OrderDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [order, setOrder] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const getProgressVariant = (status) => {
     switch (status) {
@@ -23,6 +27,7 @@ const OrderDetail = () => {
         return "warning";
       case "confirmed":
         return "info";
+      case "processing":
       case "shipping":
         return "primary";
       case "delivered":
@@ -34,45 +39,13 @@ const OrderDetail = () => {
     }
   };
 
-  useEffect(() => {
-    // Giả lập dữ liệu API đơn hàng
-    const fakeOrder = {
-      id: id,
-      date: "2025-10-18",
-      status: "shipping",
-      total: 780000,
-      customer: {
-        name: "Nguyễn Trung Tiến",
-        phone: "0912345678",
-        address: "123 Nguyễn Huệ, Quận 1, TP.HCM",
-        email: "trungtien@example.com",
-      },
-      products: [
-        {
-          id: 1,
-          name: "Áo thun ReactJS",
-          price: 250000,
-          quantity: 2,
-          image: "/images/product1.jpg",
-        },
-        {
-          id: 2,
-          name: "Mũ lập trình viên",
-          price: 280000,
-          quantity: 1,
-          image: "/images/product2.jpg",
-        },
-      ],
-    };
-    setOrder(fakeOrder);
-  }, [id]);
-
   const getProgress = (status) => {
     switch (status) {
       case "pending":
         return 25;
       case "confirmed":
         return 50;
+      case "processing":
       case "shipping":
         return 75;
       case "delivered":
@@ -92,6 +65,7 @@ const OrderDetail = () => {
         );
       case "confirmed":
         return <Badge bg="info">Đã xác nhận</Badge>;
+      case "processing":
       case "shipping":
         return <Badge bg="primary">Đang giao</Badge>;
       case "delivered":
@@ -103,7 +77,36 @@ const OrderDetail = () => {
     }
   };
 
-  if (!order) return <p className="text-center mt-5">Đang tải dữ liệu...</p>;
+  useEffect(() => {
+    const fetchOrderDetail = async () => {
+      try {
+        setLoading(true);
+        const res = await getOrderById(id);
+        if (res.errCode === 0) {
+          setOrder(res.data);
+        } else {
+          toast.error(res.errMessage || "Không tìm thấy đơn hàng");
+        }
+      } catch (error) {
+        console.error(error);
+        toast.error("Không thể tải thông tin đơn hàng!");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOrderDetail();
+  }, [id]);
+
+  if (loading)
+    return (
+      <div className="text-center mt-5">
+        <Spinner animation="border" variant="primary" />
+      </div>
+    );
+
+  if (!order)
+    return <p className="text-center mt-5">Không có dữ liệu đơn hàng</p>;
 
   return (
     <div className="order-detail-page py-2">
@@ -126,28 +129,27 @@ const OrderDetail = () => {
               <Col md={6}>
                 <h5>Thông tin người nhận</h5>
                 <p>
-                  <strong>Họ tên:</strong> {order.customer.name}
+                  <strong>Họ tên:</strong> {order.user?.username}
                 </p>
                 <p>
-                  <strong>Số điện thoại:</strong> {order.customer.phone}
+                  <strong>Email:</strong> {order.user?.email}
                 </p>
                 <p>
-                  <strong>Địa chỉ:</strong> {order.customer.address}
-                </p>
-                <p>
-                  <strong>Email:</strong> {order.customer.email}
+                  <strong>Địa chỉ:</strong> {order.shippingAddress}
                 </p>
               </Col>
               <Col md={6}>
                 <h5>Thông tin đơn hàng</h5>
                 <p>
-                  <strong>Ngày đặt:</strong> {order.date}
+                  <strong>Ngày đặt:</strong>{" "}
+                  {new Date(order.createdAt).toLocaleDateString()}
                 </p>
                 <p>
                   <strong>Trạng thái:</strong> {getBadge(order.status)}
                 </p>
                 <p>
-                  <strong>Tổng tiền:</strong> {order.total.toLocaleString()} ₫
+                  <strong>Tổng tiền:</strong>{" "}
+                  {Number(order.totalPrice).toLocaleString()} ₫
                 </p>
                 <ProgressBar
                   now={getProgress(order.status)}
@@ -172,19 +174,19 @@ const OrderDetail = () => {
             </tr>
           </thead>
           <tbody>
-            {order.products.map((item) => (
+            {order.orderItems?.map((item) => (
               <tr key={item.id} className="align-middle text-center">
                 <td>
                   <img
-                    src={item.image}
-                    alt={item.name}
+                    src={item.image || "/images/default.jpg"}
+                    alt={item.productName}
                     className="product-img"
                   />
                 </td>
-                <td>{item.name}</td>
+                <td>{item.productName}</td>
                 <td>{item.quantity}</td>
-                <td>{item.price.toLocaleString()} ₫</td>
-                <td>{(item.price * item.quantity).toLocaleString()} ₫</td>
+                <td>{Number(item.price).toLocaleString()} ₫</td>
+                <td>{(item.quantity * item.price).toLocaleString()} ₫</td>
               </tr>
             ))}
           </tbody>
@@ -194,7 +196,7 @@ const OrderDetail = () => {
           <h5>
             Tổng cộng:{" "}
             <strong className="text-danger">
-              {order.total.toLocaleString()} ₫
+              {Number(order.totalPrice).toLocaleString()} ₫
             </strong>
           </h5>
         </div>

@@ -105,9 +105,6 @@ function Header() {
                   <NavDropdown.Item onClick={() => navigate("/orders")}>
                     Đơn mua
                   </NavDropdown.Item>
-                  <NavDropdown.Item onClick={() => navigate("/orders-detail")}>
-                    Chi tiết đơn hàng
-                  </NavDropdown.Item>
                   <NavDropdown.Item onClick={() => navigate("/order-history")}>
                     Lịch sử đơn hàng
                   </NavDropdown.Item>

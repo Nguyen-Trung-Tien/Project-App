@@ -26,7 +26,7 @@ const UserRoutes = () => {
       <Route element={<PrivateRoute />}>
         <Route path="cart" element={<CartPage />} />
         <Route path="checkout" element={<CheckoutPage />} />
-        <Route path="checkout-success" element={<CheckoutSuccess />} />
+        <Route path="checkout-success/:orderId" element={<CheckoutSuccess />} />
         <Route path="order-history" element={<OrderHistory />} />
         <Route path="orders" element={<OrderPage />} />
         <Route path="orders-detail/:id" element={<OrderDetail />} />

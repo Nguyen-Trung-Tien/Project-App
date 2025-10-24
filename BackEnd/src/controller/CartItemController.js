@@ -13,9 +13,10 @@ const getCartItemById = async (req, res) => {
   try {
     const item = await cartItemService.getCartItemById(req.params.id);
     if (!item)
-      return res
-        .status(404)
-        .json({ errCode: 1, errMessage: "CartItem not found" });
+      return res.status(404).json({
+        errCode: 1,
+        errMessage: "CartItem not found",
+      });
     res.status(200).json({ errCode: 0, data: item });
   } catch (err) {
     res.status(500).json({ errCode: 1, errMessage: err.message });

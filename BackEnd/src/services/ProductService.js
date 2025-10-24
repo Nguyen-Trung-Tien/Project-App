@@ -1,4 +1,5 @@
 const db = require("../models");
+const fs = require("fs");
 
 const createProduct = async (data) => {
   try {
@@ -52,8 +53,6 @@ const getProductById = async (id) => {
     return { errCode: 1, errMessage: e.message };
   }
 };
-
-const fs = require("fs");
 
 const updateProduct = async (id, data) => {
   try {

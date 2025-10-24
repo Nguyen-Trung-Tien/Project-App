@@ -37,7 +37,7 @@ const ProductManage = () => {
     stock: "",
     categoryId: "",
     isActive: true,
-    image: "",
+    image: null,
   });
   const [imagePreview, setImagePreview] = useState(null);
 
