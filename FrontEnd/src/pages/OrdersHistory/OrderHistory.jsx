@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Container, Table, Badge, Button, Spinner } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { Eye } from "react-bootstrap-icons";
-import { getAllOrders } from "../../api/orderApi"; // gọi API thật
+import { getAllOrders } from "../../api/orderApi";
 import "./OrderHistory.scss";
 
 const OrderHistory = () => {
@@ -15,7 +15,11 @@ const OrderHistory = () => {
       try {
         setLoading(true);
         const res = await getAllOrders();
-        setOrders(res.data || []);
+        if (res?.errCode === 0) {
+          setOrders(res.data || []);
+        } else {
+          console.error("Lỗi API:", res.errMessage);
+        }
       } catch (err) {
         console.error("Lỗi khi lấy đơn hàng:", err);
       } finally {
@@ -27,16 +31,19 @@ const OrderHistory = () => {
 
   const renderStatus = (status) => {
     switch (status) {
-      case "delivered":
-        return <Badge bg="success">Đã giao</Badge>;
-      case "shipping":
-        return <Badge bg="info">Đang giao</Badge>;
       case "pending":
         return (
           <Badge bg="warning" text="dark">
             Chờ xử lý
           </Badge>
         );
+      case "confirmed":
+        return <Badge bg="info">Đã xác nhận</Badge>;
+      case "processing":
+      case "shipping":
+        return <Badge bg="primary">Đang giao</Badge>;
+      case "delivered":
+        return <Badge bg="success">Đã giao</Badge>;
       case "cancelled":
         return <Badge bg="danger">Đã hủy</Badge>;
       default:
@@ -44,10 +51,16 @@ const OrderHistory = () => {
     }
   };
 
+  const formatCurrency = (value) =>
+    parseFloat(value || 0).toLocaleString("vi-VN") + " ₫";
+
+  const formatDate = (dateStr) =>
+    dateStr ? new Date(dateStr).toLocaleDateString("vi-VN") : "-";
+
   if (loading)
     return (
       <div className="text-center mt-5">
-        <Spinner animation="border" />
+        <Spinner animation="border" variant="primary" />
       </div>
     );
 
@@ -68,6 +81,7 @@ const OrderHistory = () => {
                 <th>Mã đơn hàng</th>
                 <th>Ngày đặt</th>
                 <th>Tổng tiền</th>
+                <th>Thanh toán</th>
                 <th>Trạng thái</th>
                 <th>Hành động</th>
               </tr>
@@ -79,8 +93,9 @@ const OrderHistory = () => {
                   <td>
                     <strong>{order.id}</strong>
                   </td>
-                  <td>{new Date(order.date).toLocaleDateString()}</td>
-                  <td>{Number(order.total).toLocaleString()} ₫</td>
+                  <td>{formatDate(order.createdAt)}</td>
+                  <td>{formatCurrency(order.totalPrice)}</td>
+                  <td>{order.paymentStatus?.toUpperCase() || "-"}</td>
                   <td>{renderStatus(order.status)}</td>
                   <td>
                     <Button

@@ -39,7 +39,7 @@ export const createOrder = async (data) => {
 
 export const updateOrderStatus = async (orderId, status) => {
   try {
-    const res = await API.put(`/order/update-status-order/${orderId}`, {
+    const res = await API.put(`/order/update-status-order/${orderId}/status`, {
       status,
     });
     return res.data;

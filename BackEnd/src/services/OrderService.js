@@ -127,13 +127,14 @@ const updateOrderStatus = async (id, status) => {
     const order = await db.Order.findByPk(id);
     if (!order) return { errCode: 1, errMessage: "Order not found" };
 
+    // Lịch sử xác nhận
     const history = Array.isArray(order.confirmationHistory)
       ? order.confirmationHistory
       : [];
 
     history.push({ status, date: new Date().toISOString() });
 
-    order.status = status;
+    order.status = status; // chỉ dùng ENUM hợp lệ
     order.confirmationHistory = history;
     await order.save();
 
@@ -144,7 +145,10 @@ const updateOrderStatus = async (id, status) => {
     };
   } catch (e) {
     console.error("Error updating order status:", e);
-    throw e;
+    return {
+      errCode: -1,
+      errMessage: e.message || "Error updating order status",
+    };
   }
 };
 

@@ -9,6 +9,7 @@ import {
   Button,
   Card,
   Spinner,
+  ListGroup,
 } from "react-bootstrap";
 import { useParams, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -94,7 +95,6 @@ const OrderDetail = () => {
         setLoading(false);
       }
     };
-
     fetchOrderDetail();
   }, [id]);
 
@@ -119,11 +119,11 @@ const OrderDetail = () => {
           ← Quay lại Lịch sử đơn hàng
         </Button>
 
-        <h2 className="mb-2 text-center text-primary">
+        <h2 className="mb-3 text-center text-primary">
           Chi tiết đơn hàng #{order.id}
         </h2>
 
-        <Card className="mb-2 shadow-sm">
+        <Card className="mb-3 shadow-sm">
           <Card.Body>
             <Row>
               <Col md={6}>
@@ -137,6 +137,11 @@ const OrderDetail = () => {
                 <p>
                   <strong>Địa chỉ:</strong> {order.shippingAddress}
                 </p>
+                {order.note && (
+                  <p>
+                    <strong>Ghi chú:</strong> {order.note}
+                  </p>
+                )}
               </Col>
               <Col md={6}>
                 <h5>Thông tin đơn hàng</h5>
@@ -144,12 +149,26 @@ const OrderDetail = () => {
                   <strong>Ngày đặt:</strong>{" "}
                   {new Date(order.createdAt).toLocaleDateString()}
                 </p>
+                {order.deliveredAt && (
+                  <p>
+                    <strong>Ngày giao:</strong>{" "}
+                    {new Date(order.deliveredAt).toLocaleDateString()}
+                  </p>
+                )}
                 <p>
                   <strong>Trạng thái:</strong> {getBadge(order.status)}
                 </p>
                 <p>
+                  <strong>Phương thức thanh toán:</strong>{" "}
+                  {order.paymentMethod?.toUpperCase()}
+                </p>
+                <p>
+                  <strong>Trạng thái thanh toán:</strong>{" "}
+                  {order.paymentStatus?.toUpperCase()}
+                </p>
+                <p>
                   <strong>Tổng tiền:</strong>{" "}
-                  {Number(order.totalPrice).toLocaleString()} ₫
+                  {parseFloat(order.totalPrice).toLocaleString()} ₫
                 </p>
                 <ProgressBar
                   now={getProgress(order.status)}
@@ -161,6 +180,22 @@ const OrderDetail = () => {
             </Row>
           </Card.Body>
         </Card>
+
+        {order.confirmationHistory?.length > 0 && (
+          <Card className="mb-3 shadow-sm">
+            <Card.Body>
+              <h5>Lịch sử xác nhận</h5>
+              <ListGroup>
+                {order.confirmationHistory.map((item, idx) => (
+                  <ListGroup.Item key={idx}>
+                    {item.note || "Không có ghi chú"} -{" "}
+                    {new Date(item.date).toLocaleString()}
+                  </ListGroup.Item>
+                ))}
+              </ListGroup>
+            </Card.Body>
+          </Card>
+        )}
 
         <h4 className="mb-3">Sản phẩm trong đơn hàng</h4>
         <Table responsive bordered hover className="product-table">
@@ -174,21 +209,25 @@ const OrderDetail = () => {
             </tr>
           </thead>
           <tbody>
-            {order.orderItems?.map((item) => (
-              <tr key={item.id} className="align-middle text-center">
-                <td>
-                  <img
-                    src={item.image || "/images/default.jpg"}
-                    alt={item.productName}
-                    className="product-img"
-                  />
-                </td>
-                <td>{item.productName}</td>
-                <td>{item.quantity}</td>
-                <td>{Number(item.price).toLocaleString()} ₫</td>
-                <td>{(item.quantity * item.price).toLocaleString()} ₫</td>
-              </tr>
-            ))}
+            {order.orderItems?.map((item) => {
+              const price = parseFloat(item.price);
+              const subtotal = price * item.quantity;
+              return (
+                <tr key={item.id} className="align-middle text-center">
+                  <td>
+                    <img
+                      src={item.image || "/images/default.jpg"}
+                      alt={item.productName}
+                      className="product-img"
+                    />
+                  </td>
+                  <td>{item.productName}</td>
+                  <td>{item.quantity}</td>
+                  <td>{price.toLocaleString()} ₫</td>
+                  <td>{subtotal.toLocaleString()} ₫</td>
+                </tr>
+              );
+            })}
           </tbody>
         </Table>
 
@@ -196,7 +235,7 @@ const OrderDetail = () => {
           <h5>
             Tổng cộng:{" "}
             <strong className="text-danger">
-              {Number(order.totalPrice).toLocaleString()} ₫
+              {parseFloat(order.totalPrice).toLocaleString()} ₫
             </strong>
           </h5>
         </div>

@@ -16,7 +16,7 @@ const routes = (app) => {
   app.use("/api/v1/cart", CartRouter);
   app.use("/api/v1/cartItem", CartItemRouter);
   app.use("/api/v1/order", OrderRouter);
-  app.use("/api/v1/order", OrderItemRouter);
+  app.use("/api/v1/order-item", OrderItemRouter);
   app.use("/api/v1/payment", PaymentRouter);
 };
 module.exports = routes;
