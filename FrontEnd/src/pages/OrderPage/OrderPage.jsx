@@ -6,6 +6,7 @@ import {
   Form,
   Spinner,
   Badge,
+  Modal,
 } from "react-bootstrap";
 import { Eye } from "react-bootstrap-icons";
 import { useNavigate } from "react-router-dom";
@@ -14,7 +15,6 @@ import { getAllOrders, updateOrderStatus } from "../../api/orderApi";
 import { requestReturn } from "../../api/orderItemApi";
 import "./OrderPage.scss";
 
-// Mapping trạng thái ENUM backend
 const statusLabels = {
   pending: "Chờ xử lý",
   confirmed: "Đã xác nhận",
@@ -24,7 +24,6 @@ const statusLabels = {
   cancelled: "Đã hủy",
 };
 
-// Badge trạng thái đơn
 const StatusBadge = ({ status }) => {
   let variant = "secondary";
   switch (status) {
@@ -53,6 +52,12 @@ const OrderPage = () => {
   const [filter, setFilter] = useState("");
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+
+  // Modal trả hàng
+  const [showReturnModal, setShowReturnModal] = useState(false);
+  const [currentOrderId, setCurrentOrderId] = useState(null);
+  const [selectedItems, setSelectedItems] = useState([]);
+  const [returnReason, setReturnReason] = useState("");
 
   const fetchOrders = async () => {
     try {
@@ -94,16 +99,45 @@ const OrderPage = () => {
     }
   };
 
-  const handleRequestReturn = async (orderItemId) => {
-    const reason = prompt("Nhập lý do trả hàng:");
-    if (!reason) return;
+  const openReturnModal = (orderId) => {
+    setCurrentOrderId(orderId);
+    const order = orders.find((o) => o.id === orderId);
+    const itemsToReturn = order.orderItems
+      .filter((i) => i.returnStatus === "none")
+      .map((i) => i.id);
+    setSelectedItems(itemsToReturn);
+    setReturnReason("");
+    setShowReturnModal(true);
+  };
+
+  const handleToggleItem = (itemId) => {
+    setSelectedItems((prev) =>
+      prev.includes(itemId)
+        ? prev.filter((id) => id !== itemId)
+        : [...prev, itemId]
+    );
+  };
+
+  const handleSubmitReturn = async () => {
+    if (!returnReason.trim()) {
+      toast.warning("Vui lòng nhập lý do trả hàng");
+      return;
+    }
+    if (selectedItems.length === 0) {
+      toast.warning("Vui lòng chọn ít nhất một sản phẩm để trả");
+      return;
+    }
+
     try {
-      const res = await requestReturn(orderItemId, reason);
-      if (res?.errCode === 0) toast.success("Yêu cầu trả hàng đã gửi!");
+      for (let itemId of selectedItems) {
+        await requestReturn(itemId, returnReason);
+      }
+      toast.success("Yêu cầu trả hàng đã gửi!");
       fetchOrders();
-    } catch (error) {
+      setShowReturnModal(false);
+    } catch (err) {
+      console.error(err);
       toast.error("Lỗi khi gửi yêu cầu trả hàng");
-      console.error(error);
     }
   };
 
@@ -194,20 +228,18 @@ const OrderPage = () => {
                         </Button>
                       )}
 
-                      {order.orderItems?.map(
-                        (item) =>
-                          item.returnStatus === "none" &&
-                          order.status === "delivered" && (
-                            <Button
-                              key={item.id}
-                              size="sm"
-                              variant="warning"
-                              onClick={() => handleRequestReturn(item.id)}
-                            >
-                              Yêu cầu trả hàng
-                            </Button>
-                          )
-                      )}
+                      {order.orderItems?.some(
+                        (item) => item.returnStatus === "none"
+                      ) &&
+                        order.status === "delivered" && (
+                          <Button
+                            size="sm"
+                            variant="warning"
+                            onClick={() => openReturnModal(order.id)}
+                          >
+                            Yêu cầu trả hàng
+                          </Button>
+                        )}
                     </td>
                   </tr>
                 ))
@@ -221,6 +253,56 @@ const OrderPage = () => {
             </tbody>
           </Table>
         )}
+        <Modal
+          show={showReturnModal}
+          onHide={() => setShowReturnModal(false)}
+          centered
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>Yêu cầu trả hàng</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            {currentOrderId && (
+              <>
+                <Form.Group className="mb-3">
+                  <Form.Label>Lý do trả hàng</Form.Label>
+                  <Form.Control
+                    as="textarea"
+                    rows={3}
+                    value={returnReason}
+                    onChange={(e) => setReturnReason(e.target.value)}
+                  />
+                </Form.Group>
+                <Form.Group>
+                  <Form.Label>Chọn sản phẩm muốn trả</Form.Label>
+                  {orders
+                    .find((o) => o.id === currentOrderId)
+                    .orderItems.filter((i) => i.returnStatus === "none")
+                    .map((item) => (
+                      <Form.Check
+                        type="checkbox"
+                        key={item.id}
+                        label={`${item.productName} (Mã: ${item.id})`}
+                        checked={selectedItems.includes(item.id)}
+                        onChange={() => handleToggleItem(item.id)}
+                      />
+                    ))}
+                </Form.Group>
+              </>
+            )}
+          </Modal.Body>
+          <Modal.Footer>
+            <Button
+              variant="secondary"
+              onClick={() => setShowReturnModal(false)}
+            >
+              Hủy
+            </Button>
+            <Button variant="primary" onClick={handleSubmitReturn}>
+              Gửi yêu cầu
+            </Button>
+          </Modal.Footer>
+        </Modal>
       </Container>
     </div>
   );

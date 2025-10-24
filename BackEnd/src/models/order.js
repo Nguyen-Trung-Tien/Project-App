@@ -42,13 +42,11 @@ module.exports = (sequelize, DataTypes) => {
         ),
         defaultValue: "pending",
       },
-      // Lịch sử xác nhận/hủy đơn hàng
       confirmationHistory: {
         type: DataTypes.JSON,
         allowNull: true,
         defaultValue: [],
-        comment:
-          "Lưu lịch sử hành động xác nhận/hủy đơn của khách. Ví dụ: [{status:'confirmed', date:'2025-10-20T10:00:00'}]",
+        comment: "Lưu lịch sử hành động xác nhận/hủy đơn của khách.",
       },
       shippingAddress: {
         type: DataTypes.TEXT,

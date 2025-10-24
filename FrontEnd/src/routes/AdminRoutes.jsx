@@ -9,6 +9,7 @@ import Settings from "../Admin/pages/Settings";
 import UserManage from "../Admin/pages/UserManage";
 import PrivateRoute from "./PrivateRoute";
 import Revenue from "../Admin/pages/Revenue";
+import OrdersReturnPage from "../Admin/pages/OrdersReturnPage";
 
 const AdminRoutes = () => {
   return (
@@ -20,6 +21,7 @@ const AdminRoutes = () => {
           <Route index element={<Dashboard />} />
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="orders" element={<OrderManage />} />
+          <Route path="orders-return/:id" element={<OrdersReturnPage />} />
           <Route path="products" element={<ProductManage />} />
           <Route path="users" element={<UserManage />} />
           <Route path="revenue" element={<Revenue />} />

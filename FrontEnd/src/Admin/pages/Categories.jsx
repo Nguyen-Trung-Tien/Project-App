@@ -16,21 +16,18 @@ const Categories = () => {
   const [editingCategory, setEditingCategory] = useState(null);
   const [formData, setFormData] = useState({ name: "", description: "" });
 
-  // 🟢 Mở form thêm/sửa
   const handleShowModal = (category = null) => {
     setEditingCategory(category);
     setFormData(category || { name: "", description: "" });
     setShowModal(true);
   };
 
-  // 🔴 Đóng form
   const handleCloseModal = () => {
     setShowModal(false);
     setEditingCategory(null);
     setFormData({ name: "", description: "" });
   };
 
-  // ✏️ Lưu danh mục
   const handleSave = () => {
     if (editingCategory) {
       setCategories((prev) =>
@@ -48,7 +45,6 @@ const Categories = () => {
     handleCloseModal();
   };
 
-  // 🗑️ Xóa danh mục
   const handleDelete = (id) => {
     if (window.confirm("Bạn có chắc muốn xóa danh mục này?")) {
       setCategories((prev) => prev.filter((cat) => cat.id !== id));

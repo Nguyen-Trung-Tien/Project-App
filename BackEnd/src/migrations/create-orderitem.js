@@ -29,7 +29,6 @@ module.exports = {
       productName: { type: Sequelize.STRING, allowNull: false },
       image: { type: Sequelize.BLOB("long"), allowNull: true },
 
-      // ----------- Trả hàng -----------
       returnStatus: {
         type: Sequelize.ENUM(
           "none", // chưa yêu cầu trả

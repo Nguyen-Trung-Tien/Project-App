@@ -9,7 +9,6 @@ import {
   Button,
   Card,
   Spinner,
-  ListGroup,
 } from "react-bootstrap";
 import { useParams, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -29,7 +28,7 @@ const OrderDetail = () => {
       case "confirmed":
         return "info";
       case "processing":
-      case "shipping":
+      case "shipped":
         return "primary";
       case "delivered":
         return "success";
@@ -47,7 +46,7 @@ const OrderDetail = () => {
       case "confirmed":
         return 50;
       case "processing":
-      case "shipping":
+      case "shipped":
         return 75;
       case "delivered":
         return 100;
@@ -56,18 +55,14 @@ const OrderDetail = () => {
     }
   };
 
-  const getBadge = (status) => {
+  const getStatusBadge = (status) => {
     switch (status) {
       case "pending":
-        return (
-          <Badge bg="warning" text="dark">
-            Chờ xử lý
-          </Badge>
-        );
+        return <Badge bg="warning">Chờ xử lý</Badge>;
       case "confirmed":
         return <Badge bg="info">Đã xác nhận</Badge>;
       case "processing":
-      case "shipping":
+      case "shipped":
         return <Badge bg="primary">Đang giao</Badge>;
       case "delivered":
         return <Badge bg="success">Đã giao</Badge>;
@@ -75,6 +70,23 @@ const OrderDetail = () => {
         return <Badge bg="danger">Đã hủy</Badge>;
       default:
         return <Badge bg="secondary">Không rõ</Badge>;
+    }
+  };
+
+  const getReturnBadge = (status) => {
+    switch (status) {
+      case "none":
+        return <Badge bg="secondary">Không trả</Badge>;
+      case "requested":
+        return <Badge bg="warning">Đã yêu cầu</Badge>;
+      case "approved":
+        return <Badge bg="success">Được duyệt</Badge>;
+      case "rejected":
+        return <Badge bg="danger">Bị từ chối</Badge>;
+      case "completed":
+        return <Badge bg="primary">Hoàn tất</Badge>;
+      default:
+        return <Badge bg="secondary">{status}</Badge>;
     }
   };
 
@@ -156,7 +168,7 @@ const OrderDetail = () => {
                   </p>
                 )}
                 <p>
-                  <strong>Trạng thái:</strong> {getBadge(order.status)}
+                  <strong>Trạng thái:</strong> {getStatusBadge(order.status)}
                 </p>
                 <p>
                   <strong>Phương thức thanh toán:</strong>{" "}
@@ -181,22 +193,6 @@ const OrderDetail = () => {
           </Card.Body>
         </Card>
 
-        {order.confirmationHistory?.length > 0 && (
-          <Card className="mb-3 shadow-sm">
-            <Card.Body>
-              <h5>Lịch sử xác nhận</h5>
-              <ListGroup>
-                {order.confirmationHistory.map((item, idx) => (
-                  <ListGroup.Item key={idx}>
-                    {item.note || "Không có ghi chú"} -{" "}
-                    {new Date(item.date).toLocaleString()}
-                  </ListGroup.Item>
-                ))}
-              </ListGroup>
-            </Card.Body>
-          </Card>
-        )}
-
         <h4 className="mb-3">Sản phẩm trong đơn hàng</h4>
         <Table responsive bordered hover className="product-table">
           <thead>
@@ -206,6 +202,8 @@ const OrderDetail = () => {
               <th>Số lượng</th>
               <th>Giá</th>
               <th>Thành tiền</th>
+              <th>Trạng thái trả hàng</th>
+              <th>Lý do trả hàng</th>
             </tr>
           </thead>
           <tbody>
@@ -225,6 +223,8 @@ const OrderDetail = () => {
                   <td>{item.quantity}</td>
                   <td>{price.toLocaleString()} ₫</td>
                   <td>{subtotal.toLocaleString()} ₫</td>
+                  <td>{getReturnBadge(item.returnStatus)}</td>
+                  <td>{item.returnReason || "-"}</td>
                 </tr>
               );
             })}
