@@ -20,7 +20,7 @@ import {
   updateProductApi,
 } from "../../api/productApi";
 import { getAllCategoryApi } from "../../api/categoryApi";
-import { decodeImage, getImage } from "../../utils/decodeImage";
+import { getImage } from "../../utils/decodeImage";
 const ProductManage = () => {
   const [loading, setLoading] = useState(false);
   const [products, setProducts] = useState([]);
@@ -142,7 +142,7 @@ const ProductManage = () => {
         res = await createProductApi(data);
       }
 
-      if (res.data.errCode === 0) {
+      if (res.errCode === 0) {
         toast.success(
           editProduct ? "Cập nhật thành công!" : "Tạo sản phẩm thành công!"
         );
@@ -228,7 +228,7 @@ const ProductManage = () => {
                       <td>{p.id}</td>
                       <td>
                         <Image
-                          src={decodeImage(p.image)}
+                          src={getImage(p.image)}
                           alt={p.name}
                           rounded
                           style={{

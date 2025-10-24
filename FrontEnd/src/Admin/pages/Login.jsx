@@ -44,6 +44,7 @@ const AdminLogin = () => {
 
       if (response.errCode !== 0 || !response.data) {
         setError(response.errMessage || "Đăng nhập thất bại!");
+        toast.error(response.errMessage || "Đăng nhập thất bại!");
         return;
       }
 
@@ -54,6 +55,9 @@ const AdminLogin = () => {
         toast.error("Bạn không có quyền admin!");
         return;
       }
+
+      localStorage.setItem("accessToken", accessToken);
+      localStorage.setItem("refreshToken", refreshToken);
 
       const minimalUser = {
         id: user.id,
@@ -72,6 +76,7 @@ const AdminLogin = () => {
     } catch (err) {
       console.error("Login error:", err);
       setError("Có lỗi xảy ra. Vui lòng thử lại!");
+      toast.error("Có lỗi xảy ra. Vui lòng thử lại!");
     } finally {
       setLoading(false);
     }

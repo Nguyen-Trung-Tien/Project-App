@@ -44,7 +44,7 @@ const getProductById = async (id) => {
       errCode: 0,
       product: {
         ...product.toJSON(),
-        image: product.image || null, // image là URL
+        image: product.image || null,
       },
     };
   } catch (e) {

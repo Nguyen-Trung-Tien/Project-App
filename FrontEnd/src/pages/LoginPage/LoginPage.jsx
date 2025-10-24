@@ -40,7 +40,7 @@ const LoginPage = () => {
       const response = await loginUser(email, password);
 
       if (response.errCode === 0 && response.data) {
-        const { user, accessToken, refreshToken } = response.data;
+        const { user, accessToken } = response.data;
 
         const minimalUser = {
           id: user.id,
@@ -49,9 +49,7 @@ const LoginPage = () => {
           avatar: getAvatarBase64(user.avatar),
         };
 
-        dispatch(
-          setUser({ user: minimalUser, token: accessToken, refreshToken })
-        );
+        dispatch(setUser({ user: minimalUser, token: accessToken }));
 
         toast.success("Đăng nhập thành công!");
         navigate("/");
