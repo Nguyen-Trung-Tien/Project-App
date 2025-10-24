@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, ButtonGroup, Button } from "react-bootstrap";
 import {
   LineChart,
@@ -10,119 +10,166 @@ import {
   CartesianGrid,
 } from "recharts";
 import "../Layout.scss";
+import Loading from "../../components/Loading/Loading";
+import { getDashboard } from "../../api/adminApi";
+
 const ChartCard = () => {
-  // Dữ liệu mẫu
-  const dataWeek = [
-    { name: "T2", value: 12 },
-    { name: "T3", value: 19 },
-    { name: "T4", value: 8 },
-    { name: "T5", value: 15 },
-    { name: "T6", value: 20 },
-    { name: "T7", value: 18 },
-    { name: "CN", value: 10 },
-  ];
-
-  const dataMonth = [
-    { name: "Tuần 1", value: 80 },
-    { name: "Tuần 2", value: 95 },
-    { name: "Tuần 3", value: 70 },
-    { name: "Tuần 4", value: 110 },
-  ];
-
-  const dataYear = [
-    { name: "T1", value: 120 },
-    { name: "T2", value: 140 },
-    { name: "T3", value: 90 },
-    { name: "T4", value: 170 },
-    { name: "T5", value: 200 },
-    { name: "T6", value: 180 },
-    { name: "T7", value: 150 },
-    { name: "T8", value: 210 },
-    { name: "T9", value: 240 },
-    { name: "T10", value: 190 },
-    { name: "T11", value: 220 },
-    { name: "T12", value: 260 },
-  ];
-
   const [type, setType] = useState("week");
+  const [loading, setLoading] = useState(false);
+  const [dashboardData, setDashboardData] = useState({
+    totalRevenue: 0,
+    revenueByWeek: [],
+    revenueByMonth: [],
+    revenueByYear: [],
+  });
+
+  useEffect(() => {
+    const fetchDashboard = async () => {
+      try {
+        setLoading(true);
+        const res = await getDashboard();
+
+        if (res?.errCode === 0 && res.data) {
+          const convertData = (arr, labelKey, valueKey) =>
+            (arr || []).map((x) => ({
+              name: x[labelKey],
+              value: x[valueKey],
+            }));
+
+          // ✅ Đảm bảo dữ liệu luôn có key `name` và `value`
+          setDashboardData({
+            totalRevenue: res.data.totalRevenue || 0,
+            revenueByWeek: convertData(
+              res.data.revenueByWeek,
+              "date",
+              "revenue"
+            ),
+            revenueByMonth: convertData(
+              res.data.revenueByMonth,
+              "date",
+              "revenue"
+            ),
+            revenueByYear: convertData(
+              res.data.revenueByYear,
+              "date",
+              "revenue"
+            ),
+          });
+        } else {
+          console.warn("⚠️ API không có dữ liệu hợp lệ:", res);
+        }
+      } catch (error) {
+        console.error("Lỗi khi tải dữ liệu dashboard:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboard();
+  }, []);
 
   const dataMap = {
-    week: dataWeek,
-    month: dataMonth,
-    year: dataYear,
+    week: dashboardData.revenueByWeek,
+    month: dashboardData.revenueByMonth,
+    year: dashboardData.revenueByYear,
   };
+
+  // ✅ Fallback demo nếu API chưa có dữ liệu
+  const selectedData =
+    dataMap[type]?.length > 0
+      ? dataMap[type]
+      : [
+          { name: "T2", value: 300000 },
+          { name: "T3", value: 420000 },
+          { name: "T4", value: 650000 },
+          { name: "T5", value: 500000 },
+          { name: "T6", value: 720000 },
+          { name: "T7", value: 680000 },
+          { name: "CN", value: 803000 },
+        ];
 
   return (
     <Card className="chart-card shadow-sm border-0">
       <Card.Body>
-        <p className="text-muted mb-3">
-          Tổng doanh thu:{" "}
-          <strong className="text-success">
-            {dataMap[type]
-              .reduce((acc, cur) => acc + cur.value, 0)
-              .toLocaleString()}{" "}
-            triệu ₫
-          </strong>
-        </p>
-        <div className="d-flex justify-content-between align-items-center mb-3">
-          <h5 className="fw-bold mb-0 text-primary">
-            📊 Doanh thu{" "}
-            {type === "week"
-              ? "tuần này"
-              : type === "month"
-              ? "tháng này"
-              : "năm nay"}
-          </h5>
+        {loading ? (
+          <Loading />
+        ) : (
+          <>
+            <p className="text-muted mb-3">
+              Tổng doanh thu:{" "}
+              <strong className="text-success">
+                {dashboardData.totalRevenue.toLocaleString("vi-VN")} ₫
+              </strong>
+            </p>
 
-          <ButtonGroup>
-            <Button
-              variant={type === "week" ? "primary" : "outline-primary"}
-              size="sm"
-              onClick={() => setType("week")}
-            >
-              Tuần
-            </Button>
-            <Button
-              variant={type === "month" ? "primary" : "outline-primary"}
-              size="sm"
-              onClick={() => setType("month")}
-            >
-              Tháng
-            </Button>
-            <Button
-              variant={type === "year" ? "primary" : "outline-primary"}
-              size="sm"
-              onClick={() => setType("year")}
-            >
-              Năm
-            </Button>
-          </ButtonGroup>
-        </div>
+            <div className="d-flex justify-content-between align-items-center mb-3">
+              <h5 className="fw-bold mb-0 text-primary">
+                📊 Doanh thu{" "}
+                {type === "week"
+                  ? "tuần này"
+                  : type === "month"
+                  ? "tháng này"
+                  : "năm nay"}
+              </h5>
 
-        <div style={{ width: "100%", height: 300 }}>
-          <ResponsiveContainer>
-            <LineChart data={dataMap[type]}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" />
-              <YAxis />
-              <Tooltip
-                formatter={(value) => [
-                  `${value.toLocaleString()} triệu ₫`,
-                  "Doanh thu",
-                ]}
-                labelStyle={{ fontWeight: 600 }}
-              />
-              <Line
-                type="monotone"
-                dataKey="value"
-                stroke="#0d6efd"
-                strokeWidth={3}
-                dot={{ r: 4 }}
-                activeDot={{ r: 7 }}
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
+              <ButtonGroup>
+                <Button
+                  variant={type === "week" ? "primary" : "outline-primary"}
+                  size="sm"
+                  onClick={() => setType("week")}
+                >
+                  Tuần
+                </Button>
+                <Button
+                  variant={type === "month" ? "primary" : "outline-primary"}
+                  size="sm"
+                  onClick={() => setType("month")}
+                >
+                  Tháng
+                </Button>
+                <Button
+                  variant={type === "year" ? "primary" : "outline-primary"}
+                  size="sm"
+                  onClick={() => setType("year")}
+                >
+                  Năm
+                </Button>
+              </ButtonGroup>
+            </div>
+
+            <div style={{ width: "100%", height: 300 }}>
+              <ResponsiveContainer>
+                <LineChart
+                  data={selectedData}
+                  margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" />
+                  <YAxis
+                    tickFormatter={(v) =>
+                      new Intl.NumberFormat("vi-VN").format(v)
+                    }
+                  />
+                  <Tooltip
+                    formatter={(value) => [
+                      `${value.toLocaleString("vi-VN")} ₫`,
+                      "Doanh thu",
+                    ]}
+                    labelStyle={{ fontWeight: 600 }}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="value"
+                    stroke="#0d6efd"
+                    strokeWidth={3}
+                    dot={{ r: 4 }}
+                    activeDot={{ r: 7 }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </>
+        )}
       </Card.Body>
     </Card>
   );
