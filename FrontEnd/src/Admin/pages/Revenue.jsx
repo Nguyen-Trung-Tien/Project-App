@@ -105,7 +105,6 @@ const Revenue = () => {
           setProductsData(productArray.slice(0, 5));
         }
 
-        // 📅 Doanh thu backend
         if (dashboardRes?.errCode === 0 && Array.isArray(dashboardRes.data)) {
           const backendRevenue = dashboardRes.data.map((item) => ({
             name: item.day || item.date || "N/A",
@@ -185,7 +184,6 @@ const Revenue = () => {
               </Col>
             </Row>
 
-            {/* 🧾 Bảng chi tiết đơn hàng */}
             <Card className="shadow-sm border-0 rounded-4 p-3">
               <h5 className="mb-3">📋 Chi tiết đơn hàng</h5>
               <Table striped bordered hover responsive>

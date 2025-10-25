@@ -41,26 +41,32 @@ const CategorySection = () => {
     <Container className="categories my-4">
       <h2 className="section-title text-center mb-4">Danh mục nổi bật</h2>
       <Row className="g-4 justify-content-center">
-        {categories.map((item) => (
-          <Col md={4} sm={6} xs={12} key={item.id}>
-            <div
-              className="category-card position-relative"
-              onClick={() => handleCategoryClick(item.id)}
-            >
-              <img
-                src={item.image || "/images/default-category.jpg"}
-                alt={item.name}
-                className="img-fluid rounded"
-              />
-              <div className="overlay d-flex flex-column align-items-center justify-content-center">
-                <h5 className="text-white fw-bold mb-2">{item.name}</h5>
-                <Button variant="light" size="sm">
-                  Xem ngay
-                </Button>
+        {categories.map((item) => {
+          const imageSrc = item.image
+            ? `data:image/jpeg;base64,${item.image}`
+            : "/images/default-category.jpg";
+
+          return (
+            <Col md={4} sm={6} xs={12} key={item.id}>
+              <div
+                className="category-card position-relative"
+                onClick={() => handleCategoryClick(item.id)}
+              >
+                <img
+                  src={imageSrc}
+                  alt={item.name}
+                  className="img-fluid rounded"
+                />
+                <div className="overlay d-flex flex-column align-items-center justify-content-center">
+                  <h5 className="text-white fw-bold mb-2">{item.name}</h5>
+                  <Button variant="light" size="sm">
+                    Xem ngay
+                  </Button>
+                </div>
               </div>
-            </div>
-          </Col>
-        ))}
+            </Col>
+          );
+        })}
       </Row>
     </Container>
   );

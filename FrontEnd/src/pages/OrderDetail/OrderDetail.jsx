@@ -132,7 +132,7 @@ const OrderDetail = () => {
         </Button>
 
         <h2 className="mb-3 text-center text-primary">
-          Chi tiết đơn hàng #{order.id}
+          Chi tiết đơn hàng # {`DH${order.id}`}
         </h2>
 
         <Card className="mb-3 shadow-sm">

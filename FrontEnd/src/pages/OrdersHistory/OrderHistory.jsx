@@ -91,7 +91,7 @@ const OrderHistory = () => {
                 <tr key={order.id} className="align-middle text-center">
                   <td>{index + 1}</td>
                   <td>
-                    <strong>{order.id}</strong>
+                    <strong> {`DH${order.id}`}</strong>
                   </td>
                   <td>{formatDate(order.createdAt)}</td>
                   <td>{formatCurrency(order.totalPrice)}</td>

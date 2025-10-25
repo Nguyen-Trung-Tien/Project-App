@@ -132,7 +132,7 @@ const OrderManage = () => {
                 )}
                 {orders.map((order) => (
                   <tr key={order.id}>
-                    <td>{order.id}</td>
+                    <td>{`DH${order.id}`}</td>
                     <td className="text-start">{order.user?.username}</td>
                     <td>{formatDate(order.createdAt)}</td>
                     <td>{formatCurrency(order.totalPrice)}</td>

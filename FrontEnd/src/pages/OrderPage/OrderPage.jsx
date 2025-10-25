@@ -192,7 +192,7 @@ const OrderPage = () => {
                   <tr key={order.id} className="align-middle text-center">
                     <td>{idx + 1}</td>
                     <td>
-                      <strong>{order.id}</strong>
+                      <strong> {`DH${order.id}`}</strong>
                     </td>
                     <td>{formatDate(order.createdAt)}</td>
                     <td>{formatCurrency(order.totalPrice)}</td>

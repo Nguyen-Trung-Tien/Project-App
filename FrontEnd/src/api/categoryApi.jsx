@@ -8,11 +8,21 @@ const API = axios.create({
 });
 
 export const getAllCategoryApi = async () => {
-  try {
-    const res = await API.get("/category/get-all-category");
-    return res.data;
-  } catch (err) {
-    console.error("Get Category API error:", err);
-    throw err;
-  }
+  const res = await API.get("/category/get-all-category");
+  return res.data;
+};
+
+export const createCategoryApi = async (data) => {
+  const res = await API.post("/category/create", data);
+  return res.data;
+};
+
+export const updateCategoryApi = async (id, data) => {
+  const res = await API.put(`/category/update/${id}`, data);
+  return res.data;
+};
+
+export const deleteCategoryApi = async (id) => {
+  const res = await API.delete(`/category/delete/${id}`);
+  return res.data;
 };

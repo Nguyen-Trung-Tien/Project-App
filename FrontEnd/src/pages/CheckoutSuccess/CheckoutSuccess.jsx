@@ -29,7 +29,10 @@ const CheckoutSuccess = () => {
         <div className="order-info mt-4">
           <h6>Mã đơn hàng của bạn:</h6>
           <p className="order-code fw-bold text-primary">
-            #{orderId || `ESTORE${Math.floor(Math.random() * 1000000)}`}
+            #
+            {orderId
+              ? `DH${orderId}`
+              : `ESTORE${Math.floor(Math.random() * 1000000)}`}
           </p>
         </div>
 
