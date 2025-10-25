@@ -58,7 +58,7 @@ const OrderManage = () => {
       setLoading(true);
       const res = await getAllOrders();
       if (res?.errCode === 0) setOrders(res.data);
-      else toast.error(res?.errMessage || "Không thể tải đơn hàng");
+      else toast.error(res?.errMessage);
     } catch (err) {
       console.error(err);
       toast.error("Lỗi tải danh sách đơn hàng");
@@ -76,8 +76,8 @@ const OrderManage = () => {
       setLoadingId(orderId);
       const res = await updateOrderStatus(orderId, status);
       if (res?.errCode === 0)
-        toast.success(`✅ Cập nhật: ${statusMap[status]?.label}`);
-      else toast.error(res?.errMessage || "Cập nhật thất bại");
+        toast.success(`Cập nhật: ${statusMap[status]?.label}`);
+      else toast.error(res?.errMessage);
       await fetchOrders();
     } catch (err) {
       console.error(err);
@@ -102,8 +102,7 @@ const OrderManage = () => {
       setLoadingId(order.id);
       const res = await updatePayment(order.id, { paymentStatus: status });
       if (res?.errCode === 0) {
-        toast.success(`💰 Thanh toán: ${paymentStatusMap[status]?.label}`);
-
+        toast.success(`Thanh toán: ${paymentStatusMap[status]?.label}`);
         setOrders((prev) =>
           prev.map((o) =>
             o.id === order.id
@@ -120,7 +119,8 @@ const OrderManage = () => {
               : o
           )
         );
-      } else toast.error(res?.errMessage || "Cập nhật thất bại");
+        await fetchOrders();
+      } else toast.error(res?.errMessage);
     } catch (err) {
       console.error(err);
       toast.error("Lỗi cập nhật thanh toán");

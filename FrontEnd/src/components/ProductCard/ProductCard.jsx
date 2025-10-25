@@ -1,11 +1,5 @@
 import React, { useState } from "react";
-import {
-  Card,
-  Button,
-  Spinner,
-  OverlayTrigger,
-  Tooltip,
-} from "react-bootstrap";
+import { Card, Button, Spinner } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
@@ -17,8 +11,8 @@ const ProductCard = ({ product }) => {
   const navigate = useNavigate();
   const { id, name, price, discount, stock, image, isActive, sku, category } =
     product;
-  const [loading, setLoading] = useState(false);
 
+  const [loading, setLoading] = useState(false);
   const user = useSelector((state) => state.user.user);
   const userId = user?.id;
 
@@ -44,7 +38,17 @@ const ProductCard = ({ product }) => {
     return imgPro;
   };
 
-  const finalPrice = discount ? price * (1 - discount / 100) : Number(price);
+  const rawPrice = Number(price);
+  const rawDiscount = Number(discount);
+  const finalPrice =
+    rawDiscount > 0 ? rawPrice * (1 - rawDiscount / 100) : rawPrice;
+
+  const formatVND = (value) => {
+    return value.toLocaleString("vi-VN", {
+      style: "currency",
+      currency: "VND",
+    });
+  };
 
   const handleAddToCart = async (e) => {
     e.stopPropagation();
@@ -84,49 +88,84 @@ const ProductCard = ({ product }) => {
     <Card
       className={`product-card shadow-sm ${!isActive ? "inactive" : ""}`}
       onClick={() => navigate(`/product-detail/${id}`)}
-      style={{ cursor: "pointer" }}
     >
       <div
         className="image-wrapper shadow-sm rounded bg-white p-2"
-        style={{ maxWidth: "250px", margin: "0 auto" }}
+        style={{ flex: "0 0 200px", position: "relative" }}
       >
         <Card.Img
           variant="top"
           src={getImage(image)}
           alt={name}
-          style={{ width: "100%", height: "auto", objectFit: "contain" }}
+          style={{ width: "100%", height: "100%", objectFit: "contain" }}
         />
-        {discount > 0 && <span className="discount-badge">-{discount}%</span>}
+        {rawDiscount > 0 && (
+          <span
+            className="discount-badge"
+            style={{
+              position: "absolute",
+              top: "10px",
+              left: "10px",
+              backgroundColor: "#dc3545",
+              color: "#fff",
+              fontWeight: "bold",
+              padding: "4px 8px",
+              borderRadius: "8px",
+              fontSize: "0.8rem",
+            }}
+          >
+            -{rawDiscount}%
+          </span>
+        )}
       </div>
 
-      <Card.Body>
-        <Card.Title>{name}</Card.Title>
+      <Card.Body
+        className="text-start d-flex flex-column justify-content-between"
+        style={{ flex: "1 1 auto", padding: "0.75rem 1rem" }}
+      >
+        <div>
+          <Card.Title className="mb-2" style={{ fontWeight: 600 }}>
+            {name}
+          </Card.Title>
 
-        <div className="price-section mb-2">
-          {discount > 0 ? (
-            <>
-              <span className="old-price">
-                {Number(price).toLocaleString()}₫
-              </span>{" "}
-              <span className="final-price">
-                {finalPrice.toLocaleString()}₫
-              </span>
-            </>
-          ) : (
-            <span className="final-price">{finalPrice.toLocaleString()}₫</span>
-          )}
-        </div>
+          <div
+            className="price-section mb-2"
+            style={{ display: "flex", flexDirection: "column" }}
+          >
+            {rawDiscount > 0 ? (
+              <>
+                <div
+                  className="old-price"
+                  style={{ textDecoration: "line-through", color: "#999" }}
+                >
+                  {formatVND(rawPrice)}
+                </div>
+                <div
+                  className="final-price"
+                  style={{ color: "#d0021b", fontWeight: "bold" }}
+                >
+                  {formatVND(finalPrice)}
+                </div>
+              </>
+            ) : (
+              <div
+                className="final-price"
+                style={{ color: "#d0021b", fontWeight: "bold" }}
+              >
+                {formatVND(finalPrice)}
+              </div>
+            )}
+          </div>
 
-        <div className="mb-2">
-          <strong>Mã sản phẩm:</strong> {sku || "—"}
-        </div>
-
-        <div className="mb-2">
-          <strong>Danh mục:</strong> {category?.name || "Không có"}
-        </div>
-
-        <div className="mb-2">
-          <strong>Số lượng:</strong> {stock} sản phẩm
+          <div className="mb-1">
+            <strong>Mã sản phẩm:</strong> {sku || "—"}
+          </div>
+          <div className="mb-1">
+            <strong>Danh mục:</strong> {category?.name || "Không có"}
+          </div>
+          <div className="mb-1">
+            <strong>Số lượng:</strong> {stock} sản phẩm
+          </div>
         </div>
 
         <div className="d-grid mt-2">
@@ -134,6 +173,7 @@ const ProductCard = ({ product }) => {
             variant="primary"
             disabled={!isActive || stock < 1 || loading}
             onClick={handleAddToCart}
+            style={{ borderRadius: 50 }}
           >
             {loading ? (
               <Spinner animation="border" size="sm" />

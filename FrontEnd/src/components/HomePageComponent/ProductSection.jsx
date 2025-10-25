@@ -87,7 +87,7 @@ const ProductSection = () => {
             ✨ Sản phẩm nổi bật ✨
           </h2>
 
-          <Row className="g-4 justify-content-center">
+          <Row className="g-4 justify-content-center ">
             {products.map((product) => (
               <Col lg={3} md={4} sm={6} xs={12} key={product.id}>
                 <ProductCard

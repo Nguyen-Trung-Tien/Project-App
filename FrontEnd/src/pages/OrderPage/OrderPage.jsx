@@ -29,7 +29,7 @@ const paymentMethodLabels = {
   momo: "Momo",
   paypal: "PayPal",
   vnpay: "VNPay",
-  cod: "COD (Thanh toán khi nhận hàng)",
+  cod: "Thanh toán khi nhận hàng",
 };
 
 const paymentStatusLabels = {
@@ -65,14 +65,11 @@ const OrderPage = () => {
   const [orders, setOrders] = useState([]);
   const [filter, setFilter] = useState("");
   const [loading, setLoading] = useState(true);
-
-  // 🧾 Modal trả hàng
   const [showReturnModal, setShowReturnModal] = useState(false);
   const [currentOrder, setCurrentOrder] = useState(null);
   const [selectedItems, setSelectedItems] = useState([]);
   const [returnReason, setReturnReason] = useState("");
 
-  // 🟢 Lấy danh sách đơn hàng
   const fetchOrders = async () => {
     try {
       setLoading(true);
@@ -94,7 +91,6 @@ const OrderPage = () => {
     fetchOrders();
   }, []);
 
-  // ✅ Nhận hàng
   const handleReceiveOrder = async (orderId) => {
     try {
       const res = await updateOrderStatus(orderId, "delivered");
@@ -107,7 +103,6 @@ const OrderPage = () => {
     }
   };
 
-  // ✅ Hủy đơn
   const handleCancelOrder = async (orderId) => {
     try {
       const res = await updateOrderStatus(orderId, "cancelled");
@@ -120,7 +115,6 @@ const OrderPage = () => {
     }
   };
 
-  // ✅ Mở modal trả hàng
   const openReturnModal = (order) => {
     const items =
       order.orderItems?.filter((i) => i.returnStatus === "none") || [];
@@ -134,7 +128,6 @@ const OrderPage = () => {
     setShowReturnModal(true);
   };
 
-  // ✅ Toggle chọn sản phẩm
   const handleToggleItem = (itemId) => {
     setSelectedItems((prev) =>
       prev.includes(itemId)
@@ -143,7 +136,6 @@ const OrderPage = () => {
     );
   };
 
-  // ✅ Gửi yêu cầu trả hàng
   const handleSubmitReturn = async () => {
     if (!returnReason.trim()) {
       toast.warning("Vui lòng nhập lý do trả hàng");
@@ -170,14 +162,12 @@ const OrderPage = () => {
     }
   };
 
-  // 🧭 Lọc đơn hàng (chỉ của user hiện tại)
   const filteredOrders = orders.filter(
     (order) =>
       (!filter || order.status === filter) &&
       (!user || order.userId === user.id)
   );
 
-  // 🧮 Format
   const formatCurrency = (value) =>
     parseFloat(value || 0).toLocaleString("vi-VN") + " ₫";
   const formatDate = (dateStr) =>
@@ -295,7 +285,6 @@ const OrderPage = () => {
           </Table>
         )}
 
-        {/* 🧾 Modal trả hàng */}
         <Modal
           show={showReturnModal}
           onHide={() => setShowReturnModal(false)}

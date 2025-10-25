@@ -8,8 +8,8 @@ import "./AllProducts.scss";
 
 const AllProducts = () => {
   const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true); // loading page đầu
-  const [loadingMore, setLoadingMore] = useState(false); // loading nút xem thêm
+  const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const limit = 8;
@@ -44,12 +44,12 @@ const AllProducts = () => {
   };
 
   useEffect(() => {
-    fetchProducts(1, false); // load trang đầu
+    fetchProducts(1, false);
   }, []);
 
   const handleLoadMore = () => {
     if (page >= totalPages) return;
-    fetchProducts(page + 1, true); // load trang tiếp theo, append
+    fetchProducts(page + 1, true);
   };
 
   return (

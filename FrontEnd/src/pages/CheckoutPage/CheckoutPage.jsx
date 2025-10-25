@@ -1,29 +1,49 @@
 import React, { useEffect, useState } from "react";
-import { Container, Row, Col, Form, Button, Card } from "react-bootstrap";
+import {
+  Container,
+  Row,
+  Col,
+  Card,
+  Form,
+  Button,
+  Spinner,
+} from "react-bootstrap";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ArrowLeftCircle } from "react-bootstrap-icons";
 import { useSelector, useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 
-import "./CheckoutPage.scss";
 import { createOrder } from "../../api/orderApi";
 import { createPayment } from "../../api/paymentApi";
 import { removeCartItem } from "../../redux/cartSlice";
 import { getImage } from "../../utils/decodeImage";
+import "./CheckoutPage.scss";
 
 const CheckoutPage = () => {
-  const navigate = useNavigate();
   const location = useLocation();
+  const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const { selectedIds } = location.state || {};
   const cartItems = useSelector((state) => state.cart.cartItems);
   const user = useSelector((state) => state.user.user);
 
-  // Lọc các sản phẩm đã chọn
-  const selectedItems = cartItems.filter((item) =>
-    selectedIds?.includes(item.id)
-  );
+  const {
+    selectedIds,
+    product: singleProduct,
+    quantity: singleQuantity,
+  } = location.state || {};
+
+  // Xác định danh sách sản phẩm thanh toán
+  const isSingleProduct = !!singleProduct;
+  const selectedItems = isSingleProduct
+    ? [
+        {
+          id: singleProduct.id,
+          product: singleProduct,
+          quantity: singleQuantity,
+        },
+      ]
+    : cartItems.filter((item) => selectedIds?.includes(item.id));
 
   // Tính tổng tiền
   const total = selectedItems.reduce((acc, item) => {
@@ -96,7 +116,6 @@ const CheckoutPage = () => {
       }
 
       const orderId = orderRes.data.id;
-
       const isOnlinePayment = ["momo", "paypal", "vnpay"].includes(
         formData.paymentMethod
       );
@@ -115,9 +134,12 @@ const CheckoutPage = () => {
         return;
       }
 
-      selectedItems.forEach((item) => dispatch(removeCartItem(item.id)));
+      // Nếu mua từ giỏ hàng, remove sản phẩm khỏi Redux
+      if (!isSingleProduct) {
+        selectedItems.forEach((item) => dispatch(removeCartItem(item.id)));
+      }
 
-      toast.success("🎉 Đặt hàng thành công!");
+      toast.success("Đặt hàng thành công!");
       navigate(`/checkout-success/${orderId}`);
     } catch (error) {
       console.error("Checkout error:", error);
@@ -129,24 +151,29 @@ const CheckoutPage = () => {
     return (
       <div className="text-center mt-5">
         <h5>Không có sản phẩm nào để thanh toán!</h5>
-        <Link to="/cart" className="btn btn-primary mt-3">
-          <ArrowLeftCircle size={20} className="me-1" /> Quay lại giỏ hàng
+        <Link
+          to={isSingleProduct ? "/" : "/cart"}
+          className="btn btn-primary mt-3"
+        >
+          <ArrowLeftCircle size={20} className="me-1" /> Quay lại
         </Link>
       </div>
     );
   }
 
   return (
-    <div className="checkout-page">
+    <div className="checkout-page py-5">
       <Container>
         <nav aria-label="breadcrumb" className="mb-3">
           <ol className="breadcrumb">
             <li className="breadcrumb-item">
               <Link to="/">Trang chủ</Link>
             </li>
-            <li className="breadcrumb-item">
-              <Link to="/cart">Giỏ hàng</Link>
-            </li>
+            {!isSingleProduct && (
+              <li className="breadcrumb-item">
+                <Link to="/cart">Giỏ hàng</Link>
+              </li>
+            )}
             <li className="breadcrumb-item active">Thanh toán</li>
           </ol>
         </nav>
@@ -234,9 +261,12 @@ const CheckoutPage = () => {
               </Form>
             </Card>
 
-            <Link to="/cart" className="btn btn-outline-secondary mt-2">
+            <Link
+              to={isSingleProduct ? "/" : "/cart"}
+              className="btn btn-outline-secondary mt-2"
+            >
               <ArrowLeftCircle size={18} className="me-1" />
-              Quay lại giỏ hàng
+              Quay lại
             </Link>
           </Col>
 

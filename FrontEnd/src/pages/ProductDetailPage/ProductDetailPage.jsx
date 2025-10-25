@@ -24,9 +24,9 @@ import {
 } from "../../api/productApi";
 import { addCart, getAllCarts, createCart } from "../../api/cartApi";
 import { createReviewApi, getReviewsByProductApi } from "../../api/reviewApi";
-import ProductCard from "../../components/ProductCard/ProductCard";
 import "./ProductDetailPage.scss";
 import { getImage } from "../../utils/decodeImage";
+import ProductCard from "../../components/ProductCard/ProductCard";
 
 const ProductDetailPage = () => {
   const user = useSelector((state) => state.user.user);
@@ -101,7 +101,6 @@ const ProductDetailPage = () => {
     }
   };
 
-  // Nút xem thêm
   const handleLoadMoreSuggested = () => {
     if (suggestedPage >= suggestedTotalPages) return;
     fetchSuggestedProducts(suggestedPage + 1, true);
@@ -186,88 +185,115 @@ const ProductDetailPage = () => {
         <Link to="/" className="btn btn-outline-secondary mb-4">
           <ArrowLeft size={18} className="me-2" /> Quay lại
         </Link>
-
         <Row className="gy-4 align-items-center">
           <Col md={6} className="text-center">
-            <div
-              className="product-image-wrapper shadow-sm rounded bg-white p-3"
-              style={{ display: "inline-block" }}
-            >
+            <div className="product-image-wrapper shadow-sm rounded bg-white p-3 d-inline-block position-relative">
               <Image
                 src={imageUrl}
                 alt={product.name}
+                className="product-image"
                 fluid
-                style={{
-                  maxWidth: "400px",
-                  maxHeight: "400px",
-                  width: "100%",
-                  height: "auto",
-                }}
               />
+              {product.discount > 0 && (
+                <span className="discount-badge">
+                  -{Number(product.discount).toFixed(0)}%
+                </span>
+              )}
             </div>
           </Col>
 
           <Col md={6}>
-            <h2 className="fw-bold mb-2">{product.name}</h2>
+            <div className="product-info">
+              <h2 className="fw-bold mb-3">{product.name}</h2>
 
-            <ul className="list-unstyled mb-3">
-              <li>
-                <strong>Danh mục:</strong>{" "}
-                {product.category?.name || "Chưa phân loại"}
-              </li>
-              <li>
-                <strong>Số lượng sản phẩm:</strong>{" "}
-                {product.stock > 0 ? (
-                  <span className="text-success">{product.stock} còn hàng</span>
+              <div className="price mb-3">
+                {product.discount > 0 ? (
+                  <>
+                    <div className="original-price text-muted text-decoration-line-through">
+                      {product.price.toLocaleString("vi-VN", {
+                        style: "currency",
+                        currency: "VND",
+                      })}
+                    </div>
+                    <div className="discounted-price text-danger fw-bold">
+                      {(
+                        product.price *
+                        (1 - product.discount / 100)
+                      ).toLocaleString("vi-VN", {
+                        style: "currency",
+                        currency: "VND",
+                      })}
+                    </div>
+                  </>
                 ) : (
-                  <span className="text-danger">Hết hàng</span>
+                  <div className="current-price fw-bold">
+                    {product.price.toLocaleString("vi-VN", {
+                      style: "currency",
+                      currency: "VND",
+                    })}
+                  </div>
                 )}
-              </li>
-              {product.discount > 0 && (
+              </div>
+
+              <ul className="list-unstyled mb-3 small">
                 <li>
-                  <strong>Giảm giá:</strong>{" "}
-                  {Number(product.discount).toFixed(2)}%
+                  <strong>Danh mục:</strong>{" "}
+                  {product.category?.name || "Chưa phân loại"}
                 </li>
-              )}
-            </ul>
+                <li>
+                  <strong>Số lượng:</strong>{" "}
+                  {product.stock > 0 ? (
+                    <span className="text-success">
+                      {product.stock} còn hàng
+                    </span>
+                  ) : (
+                    <span className="text-danger">Hết hàng</span>
+                  )}
+                </li>
+              </ul>
 
-            <p className="text-secondary mb-4">{product.description}</p>
+              <p className="text-secondary mb-4" style={{ lineHeight: "1.6" }}>
+                {product.description}
+              </p>
 
-            <div className="d-flex align-items-center gap-3 mb-4">
-              <Form.Label className="fw-semibold mb-0">Số lượng:</Form.Label>
-              <Form.Control
-                type="number"
-                min={1}
-                max={product.stock}
-                value={quantity}
-                onChange={(e) => setQuantity(Number(e.target.value))}
-                style={{ width: "90px" }}
-              />
-            </div>
+              <div className="d-flex align-items-center gap-3 mb-4">
+                <Form.Label className="fw-semibold mb-0">Số lượng:</Form.Label>
+                <Form.Control
+                  type="number"
+                  min={1}
+                  max={product.stock}
+                  value={quantity}
+                  onChange={(e) => setQuantity(Number(e.target.value))}
+                  style={{ width: "100px" }}
+                />
+              </div>
 
-            <div className="d-flex gap-3 mb-4">
-              <Button
-                variant="danger"
-                size="lg"
-                className="flex-fill"
-                onClick={handleAddToCart}
-                disabled={addingCart || product.stock < 1 || !product.isActive}
-              >
-                {addingCart ? (
-                  <Spinner animation="border" size="sm" />
-                ) : (
-                  <CartPlus className="me-2" />
-                )}{" "}
-                Thêm vào giỏ hàng
-              </Button>
-              <Button
-                variant="success"
-                size="lg"
-                className="flex-fill"
-                onClick={handleBuyNow}
-              >
-                <CreditCard className="me-2" /> Mua ngay
-              </Button>
+              <div className="d-flex flex-column flex-sm-row gap-3">
+                <Button
+                  variant="danger"
+                  size="lg"
+                  className="flex-fill d-flex align-items-center justify-content-center"
+                  onClick={handleAddToCart}
+                  disabled={
+                    addingCart || product.stock < 1 || !product.isActive
+                  }
+                >
+                  {addingCart ? (
+                    <Spinner animation="border" size="sm" />
+                  ) : (
+                    <CartPlus className="me-2" />
+                  )}
+                  Thêm vào giỏ hàng
+                </Button>
+                <Button
+                  variant="success"
+                  size="lg"
+                  className="flex-fill d-flex align-items-center justify-content-center"
+                  onClick={handleBuyNow}
+                >
+                  <CreditCard className="me-2" /> Mua ngay
+                </Button>
+              </div>
             </div>
           </Col>
         </Row>
