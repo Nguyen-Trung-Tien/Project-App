@@ -1,4 +1,3 @@
-// controllers/paymentController.js
 const PaymentService = require("../services/PaymentService");
 
 const handleGetAllPayments = async (req, res) => {
@@ -39,13 +38,15 @@ const handleCreatePayment = async (req, res) => {
 
 const handleUpdatePayment = async (req, res) => {
   try {
-    const result = await PaymentService.updatePayment(req.params.id, req.body);
+    const orderId = req.params.orderId;
+    const result = await PaymentService.updatePayment(orderId, req.body);
     return res.status(200).json(result);
   } catch (e) {
     console.error(e);
-    return res
-      .status(500)
-      .json({ errCode: -1, errMessage: "Internal server error" });
+    return res.status(500).json({
+      errCode: -1,
+      errMessage: "Internal server error",
+    });
   }
 };
 

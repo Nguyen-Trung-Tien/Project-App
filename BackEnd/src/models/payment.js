@@ -4,7 +4,6 @@ const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
   class Payment extends Model {
     static associate(models) {
-      // 🔹 Một Payment thuộc về một Order
       Payment.belongsTo(models.Order, {
         foreignKey: "orderId",
         as: "order",
@@ -12,7 +11,6 @@ module.exports = (sequelize, DataTypes) => {
         onUpdate: "CASCADE",
       });
 
-      // 🔹 Một Payment thuộc về một User (người thanh toán)
       Payment.belongsTo(models.User, {
         foreignKey: "userId",
         as: "user",

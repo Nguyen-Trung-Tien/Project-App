@@ -6,6 +6,7 @@ const getAllOrders = async () => {
       include: [
         { model: db.User, as: "user", attributes: ["id", "username", "email"] },
         { model: db.OrderItem, as: "orderItems" },
+        { model: db.Payment, as: "payment" },
       ],
       order: [["createdAt", "DESC"]],
     });
@@ -27,6 +28,7 @@ const getOrderById = async (id) => {
       include: [
         { model: db.User, as: "user", attributes: ["id", "username", "email"] },
         { model: db.OrderItem, as: "orderItems" },
+        { model: db.Payment, as: "payment" },
       ],
     });
 
@@ -164,6 +166,32 @@ const deleteOrder = async (id) => {
     throw e;
   }
 };
+const updatePaymentStatus = async (id, paymentStatus) => {
+  try {
+    const order = await db.Order.findByPk(id);
+    if (!order) return { errCode: 1, errMessage: "Order not found" };
+
+    const validStatuses = ["unpaid", "paid", "refunded"];
+    if (!validStatuses.includes(paymentStatus)) {
+      return { errCode: 2, errMessage: "Invalid payment status" };
+    }
+
+    order.paymentStatus = paymentStatus;
+    await order.save();
+
+    return {
+      errCode: 0,
+      errMessage: "Payment status updated successfully",
+      data: order,
+    };
+  } catch (e) {
+    console.error("Error updating payment status:", e);
+    return {
+      errCode: -1,
+      errMessage: e.message || "Error updating payment status",
+    };
+  }
+};
 
 module.exports = {
   getAllOrders,
@@ -171,4 +199,5 @@ module.exports = {
   createOrder,
   updateOrderStatus,
   deleteOrder,
+  updatePaymentStatus,
 };

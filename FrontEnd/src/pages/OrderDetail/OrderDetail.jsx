@@ -86,7 +86,7 @@ const OrderDetail = () => {
       case "completed":
         return <Badge bg="primary">Hoàn tất</Badge>;
       default:
-        return <Badge bg="secondary">{status}</Badge>;
+        return <Badge bg="secondary">{status || "none"}</Badge>;
     }
   };
 
@@ -159,7 +159,9 @@ const OrderDetail = () => {
                 <h5>Thông tin đơn hàng</h5>
                 <p>
                   <strong>Ngày đặt:</strong>{" "}
-                  {new Date(order.createdAt).toLocaleDateString()}
+                  {new Date(
+                    order.orderDate || order.createdAt
+                  ).toLocaleDateString()}
                 </p>
                 {order.deliveredAt && (
                   <p>
@@ -208,8 +210,8 @@ const OrderDetail = () => {
           </thead>
           <tbody>
             {order.orderItems?.map((item) => {
-              const price = parseFloat(item.price);
-              const subtotal = price * item.quantity;
+              const price = parseFloat(item.price || 0);
+              const subtotal = price * (item.quantity || 0);
               return (
                 <tr key={item.id} className="align-middle text-center">
                   <td>

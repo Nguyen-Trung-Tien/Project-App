@@ -51,6 +51,14 @@ const createPayment = async (data) => {
       return { errCode: 2, errMessage: "Missing required fields" };
     }
 
+    const order = await db.Order.findByPk(orderId);
+    if (!order) {
+      return { errCode: 3, errMessage: "Order not found" };
+    }
+
+    const autoPaidMethods = ["momo", "paypal", "vnpay", "bank"];
+    const isAutoPaid = autoPaidMethods.includes(method);
+
     const payment = await db.Payment.create({
       orderId,
       userId,
@@ -58,9 +66,11 @@ const createPayment = async (data) => {
       method,
       note,
       transactionId,
-      status: "pending",
+      status: isAutoPaid ? "completed" : "pending",
     });
-
+    if (isAutoPaid) {
+      await order.update({ paymentStatus: "paid" });
+    }
     return {
       errCode: 0,
       errMessage: "Payment created successfully",
@@ -68,24 +78,63 @@ const createPayment = async (data) => {
     };
   } catch (e) {
     console.error("Error createPayment:", e);
-    throw e;
+    return { errCode: 1, errMessage: "Internal server error" };
   }
 };
 
-const updatePayment = async (id, data) => {
+const updatePayment = async (orderId, data) => {
   try {
-    const payment = await db.Payment.findByPk(id);
-    if (!payment) return { errCode: 1, errMessage: "Payment not found" };
+    const order = await db.Order.findByPk(orderId);
+    if (!order) return { errCode: 2, errMessage: "Order not found" };
 
-    await payment.update(data);
+    let payment = await db.Payment.findOne({ where: { orderId } });
+
+    const statusMap = {
+      paid: "completed",
+      refunded: "refunded",
+      unpaid: "pending",
+    };
+    const paymentStatus = statusMap[data.paymentStatus] || "pending";
+
+    if (!payment) {
+      payment = await db.Payment.create({
+        orderId,
+        userId: data.userId || order.userId,
+        amount: data.amount || order.totalPrice,
+        method: data.method || order.paymentMethod || "cod",
+        status: paymentStatus,
+        note: data.note || "",
+      });
+    } else {
+      await payment.update({
+        amount: data.amount || payment.amount,
+        method: data.method || payment.method,
+        status: paymentStatus,
+        note: data.note || payment.note,
+      });
+    }
+
+    const orderStatusMap = {
+      completed: "paid",
+      refunded: "refunded",
+      pending: "unpaid",
+    };
+    await order.update({
+      paymentStatus: orderStatusMap[paymentStatus] || "unpaid",
+    });
+
+    const updatedOrder = await db.Order.findByPk(orderId, {
+      include: [{ model: db.Payment, as: "payment" }],
+    });
+
     return {
       errCode: 0,
       errMessage: "Payment updated successfully",
-      data: payment,
+      data: updatedOrder.toJSON(),
     };
   } catch (e) {
     console.error("Error updatePayment:", e);
-    throw e;
+    return { errCode: 1, errMessage: e.message || "Lỗi cập nhật thanh toán" };
   }
 };
 

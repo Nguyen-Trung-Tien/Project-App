@@ -49,6 +49,18 @@ export const updateOrderStatus = async (orderId, status) => {
   }
 };
 
+export const updatePaymentStatus = async (orderId, paymentStatus) => {
+  try {
+    const res = await API.put(`/order/update-payment-status/${orderId}`, {
+      paymentStatus,
+    });
+    return res.data;
+  } catch (error) {
+    console.error("Error updating payment status:", error);
+    throw error;
+  }
+};
+
 export const deleteOrder = async (orderId) => {
   try {
     const res = await API.delete(`/order/delete-order/${orderId}`);

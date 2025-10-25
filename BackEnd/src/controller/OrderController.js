@@ -64,6 +64,19 @@ const handleDeleteOrder = async (req, res) => {
       .json({ errCode: -1, errMessage: "Internal server error" });
   }
 };
+const handleUpdatePaymentStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { paymentStatus } = req.body;
+    const result = await OrderService.updatePaymentStatus(id, paymentStatus);
+    return res.status(200).json(result);
+  } catch (e) {
+    console.error(e);
+    return res
+      .status(500)
+      .json({ errCode: -1, errMessage: "Internal server error" });
+  }
+};
 
 module.exports = {
   handleGetAllOrders,
@@ -71,4 +84,5 @@ module.exports = {
   handleCreateOrder,
   handleUpdateOrderStatus,
   handleDeleteOrder,
+  handleUpdatePaymentStatus,
 };

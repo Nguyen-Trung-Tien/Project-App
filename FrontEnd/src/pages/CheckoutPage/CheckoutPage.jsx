@@ -20,10 +20,12 @@ const CheckoutPage = () => {
   const cartItems = useSelector((state) => state.cart.cartItems);
   const user = useSelector((state) => state.user.user);
 
+  // Lọc các sản phẩm đã chọn
   const selectedItems = cartItems.filter((item) =>
     selectedIds?.includes(item.id)
   );
 
+  // Tính tổng tiền
   const total = selectedItems.reduce((acc, item) => {
     const price = item.product?.discount
       ? (item.product.price * (100 - item.product.discount)) / 100
@@ -32,11 +34,11 @@ const CheckoutPage = () => {
   }, 0);
 
   const [formData, setFormData] = useState({
-    username: "",
-    phone: "",
-    address: "",
-    email: "",
-    paymentMethod: "COD",
+    username: user?.username || "",
+    phone: user?.phone || "",
+    address: user?.address || "",
+    email: user?.email || "",
+    paymentMethod: "cod",
   });
 
   useEffect(() => {
@@ -52,10 +54,7 @@ const CheckoutPage = () => {
   }, [user]);
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e) => {
@@ -98,15 +97,17 @@ const CheckoutPage = () => {
 
       const orderId = orderRes.data.id;
 
+      const isOnlinePayment = ["momo", "paypal", "vnpay"].includes(
+        formData.paymentMethod
+      );
+
       const paymentRes = await createPayment({
         orderId,
         userId: user.id,
         amount: total,
-        paymentMethod: formData.paymentMethod,
-        status:
-          formData.paymentMethod === "COD"
-            ? "Chưa thanh toán"
-            : "Đã thanh toán",
+        method: formData.paymentMethod,
+        paymentStatus: isOnlinePayment ? "paid" : "unpaid",
+        status: isOnlinePayment ? "completed" : "pending",
       });
 
       if (paymentRes.errCode && paymentRes.errCode !== 0) {
@@ -116,7 +117,7 @@ const CheckoutPage = () => {
 
       selectedItems.forEach((item) => dispatch(removeCartItem(item.id)));
 
-      toast.success("Đặt hàng thành công!");
+      toast.success("🎉 Đặt hàng thành công!");
       navigate(`/checkout-success/${orderId}`);
     } catch (error) {
       console.error("Checkout error:", error);
@@ -155,6 +156,7 @@ const CheckoutPage = () => {
         </h2>
 
         <Row>
+          {/* FORM GIAO HÀNG */}
           <Col lg={8}>
             <Card className="p-4 shadow-sm border-0 mb-4">
               <h5 className="fw-bold mb-3 text-secondary">
@@ -217,13 +219,10 @@ const CheckoutPage = () => {
                         value={formData.paymentMethod}
                         onChange={handleChange}
                       >
-                        <option value="COD">
-                          Thanh toán khi nhận hàng (COD)
-                        </option>
-                        <option value="BANK">Chuyển khoản ngân hàng</option>
-                        <option value="MOMO">
-                          Ví điện tử (Momo, ZaloPay...)
-                        </option>
+                        <option value="cod">Thanh toán khi nhận hàng</option>
+                        <option value="momo">MOMO</option>
+                        <option value="paypal">PAYPAL</option>
+                        <option value="vnpay">VNPAY</option>
                       </Form.Select>
                     </Form.Group>
                   </Col>
@@ -241,6 +240,7 @@ const CheckoutPage = () => {
             </Link>
           </Col>
 
+          {/* TÓM TẮT ĐƠN HÀNG */}
           <Col lg={4}>
             <Card className="p-3 shadow-sm border-0">
               <h5 className="fw-bold text-secondary mb-3">Tóm tắt đơn hàng</h5>

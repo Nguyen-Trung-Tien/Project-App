@@ -10,5 +10,8 @@ router.put(
   OrderController.handleUpdateOrderStatus
 );
 router.delete("/delete-order/:id", OrderController.handleDeleteOrder);
-
+router.put(
+  "/update-payment-status/:id",
+  OrderController.handleUpdatePaymentStatus
+);
 module.exports = router;

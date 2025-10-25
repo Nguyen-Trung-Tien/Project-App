@@ -4,13 +4,16 @@ const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
   class Order extends Model {
     static associate(models) {
-      // Mỗi Order thuộc về một User
       Order.belongsTo(models.User, { foreignKey: "userId", as: "user" });
 
-      // Một Order có nhiều OrderItem
       Order.hasMany(models.OrderItem, {
         foreignKey: "orderId",
         as: "orderItems",
+        onDelete: "CASCADE",
+      });
+      Order.hasOne(models.Payment, {
+        foreignKey: "orderId",
+        as: "payment",
         onDelete: "CASCADE",
       });
     }

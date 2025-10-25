@@ -37,9 +37,9 @@ export const createPayment = async (data) => {
   }
 };
 
-export const updatePayment = async (id, data) => {
+export const updatePayment = async (orderId, data) => {
   try {
-    const res = await API.put(`/payment/update-payment/${id}`, data);
+    const res = await API.put(`/payment/update-payment/${orderId}`, data);
     return res.data;
   } catch (error) {
     console.error("Error updating payment:", error);
