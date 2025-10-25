@@ -35,31 +35,33 @@ const AllProducts = () => {
   }, []);
 
   return (
-    <section className="all-products-section">
-      <Container>
-        <h2 className="section-title text-center mb-4 fw-bold">
-          Tất cả sản phẩm
-        </h2>
+    <>
+      <section className="all-products-section">
+        <Container>
+          <h2 className="section-title text-center mb-4 fw-bold">
+            Tất cả sản phẩm
+          </h2>
 
-        {loading ? (
-          <div className="text-center my-5">
-            <Spinner animation="border" variant="primary" />
-          </div>
-        ) : products.length === 0 ? (
-          <p className="text-center text-muted">
-            Không có sản phẩm nào được tìm thấy.
-          </p>
-        ) : (
-          <Row className="g-4 justify-content-center">
-            {products.map((product) => (
-              <Col key={product.id} md={3} sm={6} xs={12}>
-                <ProductCard product={product} userId={userId} />
-              </Col>
-            ))}
-          </Row>
-        )}
-      </Container>
-    </section>
+          {loading ? (
+            <div className="text-center my-5">
+              <Spinner animation="border" variant="primary" />
+            </div>
+          ) : products.length === 0 ? (
+            <p className="text-center text-muted">
+              Không có sản phẩm nào được tìm thấy.
+            </p>
+          ) : (
+            <Row className="g-4 justify-content-center">
+              {products.map((product) => (
+                <Col key={product.id} md={3} sm={6} xs={12}>
+                  <ProductCard product={product} userId={userId} />
+                </Col>
+              ))}
+            </Row>
+          )}
+        </Container>
+      </section>
+    </>
   );
 };
 

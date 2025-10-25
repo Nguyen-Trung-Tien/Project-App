@@ -4,6 +4,7 @@ import ProductCard from "../../components/ProductCard/ProductCard";
 import "./ProductListPage.scss";
 import { getAllCategoryApi } from "../../api/CategoryApi";
 import { getAllProductApi } from "../../api/productApi";
+import Loading from "../../components/Loading/Loading";
 
 const ProductListPage = () => {
   const [categories, setCategories] = useState([]);
@@ -19,10 +20,6 @@ const ProductListPage = () => {
           getAllCategoryApi(),
           getAllProductApi(),
         ]);
-
-        console.log("catRes:", catRes);
-        console.log("prodRes:", prodRes);
-
         setCategories(catRes?.data || []);
         setProducts(prodRes?.products || []);
       } catch (err) {
@@ -33,16 +30,14 @@ const ProductListPage = () => {
     };
     fetchData();
   }, []);
-
+  if (loading) {
+    return <Loading />;
+  }
   return (
     <Container className="py-4">
       <h3 className="mb-4">Danh sách sản phẩm</h3>
 
-      {loading ? (
-        <div className="text-center py-5">
-          <Spinner animation="border" />
-        </div>
-      ) : products.length > 0 ? (
+      {products.length > 0 ? (
         <Row xs={1} sm={2} md={3} lg={4} className="g-4">
           {products.map((product) => (
             <Col key={product.id}>

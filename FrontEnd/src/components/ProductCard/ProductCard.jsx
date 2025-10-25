@@ -57,17 +57,14 @@ const ProductCard = ({ product }) => {
 
     setLoading(true);
     try {
-      // Lấy tất cả cart của user
       const cartsRes = await getAllCarts();
       let cart = cartsRes.data.find((c) => c.userId === userId);
 
-      // Nếu chưa có cart, tạo mới
       if (!cart) {
         const newCartRes = await createCart(userId);
         cart = newCartRes.data;
       }
 
-      // Thêm sản phẩm vào cart
       const res = await addCart({
         cartId: cart.id,
         productId: id,
