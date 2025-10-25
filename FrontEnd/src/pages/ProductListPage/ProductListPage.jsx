@@ -1,12 +1,14 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
   Container,
   Row,
   Col,
-  Form,
   Button,
   Spinner,
   Alert,
+  Card,
+  InputGroup,
+  FormControl,
 } from "react-bootstrap";
 import { useSearchParams } from "react-router-dom";
 import ProductCard from "../../components/ProductCard/ProductCard";
@@ -15,18 +17,29 @@ import {
   getAllProductApi,
   getProductsByCategoryApi,
 } from "../../api/productApi";
-import Loading from "../../components/Loading/Loading";
+import "./ProductListPage.scss";
+
+// Skeleton card
+const SkeletonCard = () => (
+  <Card className="p-3 mb-3 shadow-sm skeleton-card">
+    <div className="skeleton-image mb-3" />
+    <div className="skeleton-text mb-2" />
+    <div className="skeleton-text w-50" />
+  </Card>
+);
 
 const ProductListPage = () => {
   const [categories, setCategories] = useState([]);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
-  const [categoryId, setCategoryId] = useState("");
+  const [selectedCategories, setSelectedCategories] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [error, setError] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
 
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const limit = 12;
 
   // Fetch categories
@@ -35,25 +48,35 @@ const ProductListPage = () => {
       try {
         const res = await getAllCategoryApi();
         if (res.errCode === 0) setCategories(res.data || []);
+        else setError("Lỗi khi load danh mục");
       } catch (err) {
-        console.error("Lỗi load danh mục:", err);
+        console.error(err);
+        setError("Lỗi khi load danh mục");
       }
     };
     fetchCategories();
   }, []);
 
   // Fetch products
-  const fetchProducts = async (page = 1, catId = "", append = false) => {
+  const fetchProducts = async (
+    page = 1,
+    catIds = [],
+    append = false,
+    search = ""
+  ) => {
     try {
       append ? setLoadingMore(true) : setLoading(true);
+      setError("");
 
       let res;
-      if (!catId) {
-        // Tất cả sản phẩm
-        res = await getAllProductApi(page, limit);
+
+      // Không gọi API với category rỗng
+      if (catIds.length === 0) {
+        // Gọi API tất cả sản phẩm (có search)
+        res = await getAllProductApi(page, limit, search);
       } else {
-        // Sản phẩm theo category
-        res = await getProductsByCategoryApi(catId, page, limit);
+        // Chỉ gửi category đầu tiên (API chỉ hỗ trợ 1 category)
+        res = await getProductsByCategoryApi(catIds[0], page, limit, search);
       }
 
       if (res?.errCode === 0) {
@@ -63,9 +86,13 @@ const ProductListPage = () => {
         );
         setCurrentPage(res.currentPage || page);
         setTotalPages(res.totalPages || 1);
+      } else {
+        setError(res.errMessage || "Lỗi khi load sản phẩm");
+        if (!append) setProducts([]);
       }
     } catch (err) {
-      console.error("Lỗi load sản phẩm:", err);
+      console.error(err);
+      setError("Lỗi khi load sản phẩm");
       if (!append) setProducts([]);
     } finally {
       setLoading(false);
@@ -73,53 +100,144 @@ const ProductListPage = () => {
     }
   };
 
-  // Init page
+  // Đọc query từ URL
   useEffect(() => {
     const catIdFromQuery = searchParams.get("category") || "";
-    setCategoryId(catIdFromQuery);
-    fetchProducts(1, catIdFromQuery, false);
+    const searchFromQuery = searchParams.get("search") || "";
+
+    setSelectedCategories(catIdFromQuery ? [catIdFromQuery] : []);
+    setSearchQuery(searchFromQuery);
+
+    fetchProducts(
+      1,
+      catIdFromQuery ? [catIdFromQuery] : [],
+      false,
+      searchFromQuery
+    );
   }, [searchParams]);
 
-  // Handle dropdown
-  const handleCategoryChange = (e) => {
-    const selected = e.target.value;
-    setCategoryId(selected);
-    fetchProducts(1, selected, false);
+  // Debounce helper
+  const debounce = (fn, delay) => {
+    let timer;
+    return (...args) => {
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(() => fn(...args), delay);
+    };
   };
 
-  // Handle "Xem thêm"
+  // Category change debounce
+  const handleCategoryChange = useCallback(
+    debounce((value) => {
+      const params = {};
+      if (value.length) params.category = value[0]; // chỉ category đầu tiên
+      if (searchQuery) params.search = searchQuery;
+      setSearchParams(params);
+      fetchProducts(1, value, false, searchQuery);
+    }, 300),
+    [searchQuery]
+  );
+
+  const toggleCategory = (id) => {
+    let updated = [];
+    if (selectedCategories.includes(id)) {
+      updated = selectedCategories.filter((c) => c !== id);
+    } else {
+      updated = [id]; // chỉ 1 category
+    }
+    setSelectedCategories(updated);
+    handleCategoryChange(updated);
+  };
+
+  // Search input change debounce
+  const handleSearchChange = (e) => {
+    const value = e.target.value;
+    setSearchQuery(value);
+
+    const params = {};
+    if (selectedCategories.length) params.category = selectedCategories[0];
+    if (value) params.search = value;
+    setSearchParams(params);
+
+    debounce(() => fetchProducts(1, selectedCategories, false, value), 300)();
+  };
+
+  // Load more
   const handleLoadMore = () => {
     if (currentPage >= totalPages) return;
-    fetchProducts(currentPage + 1, categoryId, true);
+    fetchProducts(currentPage + 1, selectedCategories, true, searchQuery);
   };
-
-  if (loading && products.length === 0) return <Loading />;
 
   return (
     <Container className="py-4">
       <h3 className="mb-4">Danh sách sản phẩm</h3>
 
-      {/* Dropdown filter */}
-      <Form className="mb-4">
-        <Form.Group controlId="categorySelect">
-          <Form.Label>Lọc theo danh mục:</Form.Label>
-          <Form.Select value={categoryId} onChange={handleCategoryChange}>
-            <option value="">Tất cả</option>
-            {categories.map((cat) => (
-              <option key={cat.id} value={cat.id}>
-                {cat.name}
-              </option>
-            ))}
-          </Form.Select>
-        </Form.Group>
-      </Form>
+      {/* Search */}
+      <div className="mb-3">
+        <InputGroup>
+          <FormControl
+            placeholder="Tìm sản phẩm..."
+            value={searchQuery}
+            onChange={handleSearchChange}
+          />
+          <Button
+            variant="primary"
+            onClick={() =>
+              fetchProducts(1, selectedCategories, false, searchQuery)
+            }
+          >
+            Tìm
+          </Button>
+        </InputGroup>
+      </div>
 
-      {/* Product list */}
-      {products.length > 0 ? (
+      {/* Category Filter */}
+      <div className="mb-4 d-flex flex-wrap gap-2 align-items-center">
+        <span className="fw-bold me-2">Lọc theo danh mục:</span>
+        {categories.map((cat) => (
+          <Button
+            key={cat.id}
+            size="sm"
+            variant={
+              selectedCategories.includes(cat.id)
+                ? "primary"
+                : "outline-secondary"
+            }
+            className="rounded-pill"
+            onClick={() => toggleCategory(cat.id)}
+          >
+            {cat.name}
+          </Button>
+        ))}
+        {selectedCategories.length > 0 && (
+          <Button
+            variant="danger"
+            size="sm"
+            className="ms-2 rounded-pill"
+            onClick={() =>
+              setSelectedCategories([]) ||
+              fetchProducts(1, [], false, searchQuery)
+            }
+          >
+            Clear All
+          </Button>
+        )}
+      </div>
+
+      {error && <Alert variant="danger">{error}</Alert>}
+
+      {loading && products.length === 0 ? (
+        <Row xs={1} sm={2} md={3} lg={4} className="g-4">
+          {Array.from({ length: limit }).map((_, idx) => (
+            <Col key={idx}>
+              <SkeletonCard />
+            </Col>
+          ))}
+        </Row>
+      ) : products.length > 0 ? (
         <>
           <Row xs={1} sm={2} md={3} lg={4} className="g-4">
-            {products.map((product) => (
-              <Col key={product.id}>
+            {products.map((product, index) => (
+              <Col key={`${product.id}-${index}`}>
                 <ProductCard product={product} />
               </Col>
             ))}
@@ -127,7 +245,12 @@ const ProductListPage = () => {
 
           {currentPage < totalPages && (
             <div className="text-center mt-4">
-              <Button onClick={handleLoadMore} disabled={loadingMore}>
+              <Button
+                size="lg"
+                variant="outline-primary"
+                onClick={handleLoadMore}
+                disabled={loadingMore}
+              >
                 {loadingMore ? (
                   <>
                     <Spinner animation="border" size="sm" className="me-2" />

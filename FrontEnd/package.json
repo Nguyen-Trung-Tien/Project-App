@@ -17,6 +17,7 @@
     "dotenv": "^17.2.3",
     "framer-motion": "^12.23.24",
     "jwt-decode": "^4.0.0",
+    "lodash.debounce": "^4.0.8",
     "react": "^19.1.1",
     "react-bootstrap": "^2.10.10",
     "react-bootstrap-icons": "^1.11.6",

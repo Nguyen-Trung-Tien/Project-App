@@ -5,23 +5,20 @@ import { useNavigate } from "react-router-dom";
 
 const HeroSection = () => {
   const navigate = useNavigate();
+
   const handleGetAllProduct = () => {
     navigate("/product-list");
   };
+
   return (
-    <section className="hero-section text-center text-light d-flex flex-column justify-content-center align-items-center">
-      <div className="hero-content">
+    <section className="hero-section d-flex align-items-center justify-content-center">
+      <div className="hero-overlay"></div>
+      <div className="hero-content text-center text-light">
         <h1>
           Chào mừng đến với <span>E-Store</span>
         </h1>
         <p>Mua sắm thông minh – Chất lượng hàng đầu – Giá siêu ưu đãi</p>
-        <Button
-          variant="primary"
-          className="hero-btn"
-          onClick={() => {
-            handleGetAllProduct();
-          }}
-        >
+        <Button className="hero-btn" onClick={handleGetAllProduct}>
           Khám phá ngay
         </Button>
       </div>

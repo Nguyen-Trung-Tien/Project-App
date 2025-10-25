@@ -1,23 +1,38 @@
-.product-list-page {
-  .page-title {
-    font-size: 1.8rem;
-    color: #222;
+.skeleton-card {
+  border-radius: 1rem;
+  overflow: hidden;
+  .skeleton-image {
+    height: 180px;
+    border-radius: 0.5rem;
+    background: linear-gradient(90deg, #e0e0e0 25%, #f6f6f6 50%, #e0e0e0 75%);
+    background-size: 400px 100%;
+    animation: shimmer 1.2s infinite linear;
   }
-
-  .category-filter {
-    border-radius: 8px;
-    padding: 0.6rem;
-    border: 1px solid #ccc;
-    transition: all 0.2s ease;
-
-    &:focus {
-      border-color: #007bff;
-      box-shadow: 0 0 0 0.15rem rgba(0, 123, 255, 0.25);
-    }
+  .skeleton-text {
+    height: 16px;
+    border-radius: 0.25rem;
+    background: linear-gradient(90deg, #e0e0e0 25%, #f6f6f6 50%, #e0e0e0 75%);
+    background-size: 400px 100%;
+    animation: shimmer 1.2s infinite linear;
   }
+  .w-50 {
+    width: 50% !important;
+  }
+}
 
-  .row {
-    margin-left: 0;
-    margin-right: 0;
+@keyframes shimmer {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: 200px 0;
+  }
+}
+
+.product-card {
+  transition: transform 0.2s, box-shadow 0.2s;
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
   }
 }
