@@ -90,7 +90,6 @@ const CheckoutPage = () => {
         orderItems,
       };
 
-      // Tạo order + thanh toán
       const orderRes = await createOrder(orderData);
       if (orderRes.errCode !== 0) {
         toast.error(orderRes.errMessage || "Lỗi khi tạo đơn hàng!");
@@ -115,7 +114,6 @@ const CheckoutPage = () => {
         return;
       }
 
-      // Cập nhật Redux: xóa khỏi giỏ hàng frontend
       selectedItems.forEach((item) => dispatch(removeCartItem(item.id)));
 
       toast.success("Đặt hàng thành công!");
