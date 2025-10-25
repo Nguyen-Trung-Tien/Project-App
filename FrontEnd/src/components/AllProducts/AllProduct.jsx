@@ -2,8 +2,9 @@ import React, { useEffect, useState } from "react";
 import { Container, Row, Col, Spinner, Button } from "react-bootstrap";
 import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
+import { useSearchParams } from "react-router-dom";
 import ProductCard from "../../components/ProductCard/ProductCard";
-import { getAllProductApi } from "../../api/productApi";
+import { getAllProductApi, searchProductsApi } from "../../api/productApi";
 import "./AllProducts.scss";
 
 const AllProducts = () => {
@@ -17,18 +18,27 @@ const AllProducts = () => {
   const user = useSelector((state) => state.user.user);
   const userId = user?.id;
 
+  const [searchParams] = useSearchParams();
+  const searchQuery = searchParams.get("search") || "";
+
   const fetchProducts = async (currentPage = 1, append = false) => {
     try {
       if (append) setLoadingMore(true);
       else setLoading(true);
 
-      const res = await getAllProductApi(currentPage, limit);
+      let res;
+      if (searchQuery) {
+        // Nếu có từ khóa tìm kiếm, gọi search API
+        res = await searchProductsApi(searchQuery, currentPage, limit);
+      } else {
+        res = await getAllProductApi(currentPage, limit);
+      }
+
       if (res && res.errCode === 0) {
-        if (append) {
-          setProducts((prev) => [...prev, ...(res.products || [])]);
-        } else {
-          setProducts(res.products || []);
-        }
+        const newProducts = res.products || [];
+        if (append) setProducts((prev) => [...prev, ...newProducts]);
+        else setProducts(newProducts);
+
         setTotalPages(res.totalPages || 1);
         setPage(currentPage);
       } else {
@@ -44,8 +54,9 @@ const AllProducts = () => {
   };
 
   useEffect(() => {
+    // Khi searchQuery thay đổi, reset trang về 1
     fetchProducts(1, false);
-  }, []);
+  }, [searchQuery]);
 
   const handleLoadMore = () => {
     if (page >= totalPages) return;
@@ -56,7 +67,9 @@ const AllProducts = () => {
     <section className="all-products-section py-5">
       <Container>
         <h2 className="section-title text-center mb-4 fw-bold">
-          Tất cả sản phẩm
+          {searchQuery
+            ? `Kết quả tìm kiếm: "${searchQuery}"`
+            : "Tất cả sản phẩm"}
         </h2>
 
         {loading && !products.length ? (
@@ -64,9 +77,7 @@ const AllProducts = () => {
             <Spinner animation="border" variant="primary" />
           </div>
         ) : products.length === 0 ? (
-          <p className="text-center text-muted">
-            Không có sản phẩm nào được tìm thấy.
-          </p>
+          <p className="text-center text-muted">Không tìm thấy sản phẩm nào.</p>
         ) : (
           <>
             <Row className="g-4 justify-content-center">

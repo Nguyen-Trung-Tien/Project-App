@@ -72,3 +72,17 @@ export const getProductsByCategoryApi = async (categoryId) => {
     throw error;
   }
 };
+
+export const searchProductsApi = async (query, page = 1, limit = 10) => {
+  try {
+    const res = await API.get(
+      `/product/search?q=${encodeURIComponent(
+        query
+      )}&page=${page}&limit=${limit}`
+    );
+    return res.data;
+  } catch (err) {
+    console.error("Search products API error:", err);
+    throw err;
+  }
+};

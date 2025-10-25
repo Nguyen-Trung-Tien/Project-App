@@ -17,4 +17,6 @@ router.put(
 );
 router.delete("/delete-product/:id", ProductController.handleDeleteProduct);
 router.get("/product-by-category", ProductController.getProductsByCategory);
+router.get("/search", ProductController.handleSearchProducts);
+
 module.exports = router;

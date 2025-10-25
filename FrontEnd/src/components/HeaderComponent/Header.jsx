@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useCallback } from "react";
 import {
   Navbar,
   Nav,
@@ -6,22 +6,29 @@ import {
   NavDropdown,
   Badge,
   Image,
+  Button,
 } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
-import { Cart, PersonCircle } from "react-bootstrap-icons";
+import { Cart, PersonCircle, Search } from "react-bootstrap-icons";
 import { useSelector, useDispatch } from "react-redux";
 import { removeUser } from "../../redux/userSlice";
-import "./Header.scss";
 import { logoutUserApi } from "../../api/userApi";
+import { debounce } from "lodash";
+import "./Header.scss";
 
 function Header() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [searchInput, setSearchInput] = useState("");
+
   const user = useSelector((state) => state.user.user);
-  const cartItemCount = useSelector((state) =>
-    state.cart.cartItems.reduce((sum, i) => sum + i.quantity, 0)
+  const cartItemCount = useSelector(
+    (state) =>
+      state.cart.cartItems?.reduce((sum, i) => sum + (i.quantity || 0), 0) || 0
   );
+
   const avatarUrl = user?.avatar || "/default-avatar.png";
+
   const handleLogout = async () => {
     try {
       await logoutUserApi();
@@ -29,6 +36,27 @@ function Header() {
       navigate("/login");
     } catch (err) {
       console.error("Logout error:", err);
+    }
+  };
+
+  const handleSearchDebounced = useCallback(
+    debounce((query) => {
+      if (query.trim())
+        navigate(`/products?search=${encodeURIComponent(query.trim())}`);
+    }, 300),
+    []
+  );
+
+  const onSearchChange = (e) => {
+    const value = e.target.value;
+    setSearchInput(value);
+    handleSearchDebounced(value);
+  };
+
+  const onSearchSubmit = (e) => {
+    e.preventDefault();
+    if (searchInput.trim()) {
+      navigate(`/products?search=${encodeURIComponent(searchInput.trim())}`);
     }
   };
 
@@ -50,12 +78,29 @@ function Header() {
             </Nav.Link>
           </Nav>
 
+          <form
+            onSubmit={onSearchSubmit}
+            className="d-flex align-items-center me-3 search-wrapper"
+          >
+            <Search className="search-icon" />
+            <input
+              type="text"
+              placeholder="Tìm sản phẩm..."
+              value={searchInput}
+              onChange={onSearchChange}
+              className="form-control"
+            />
+            <Button type="submit" variant="outline-light" className="ms-2">
+              Tìm
+            </Button>
+          </form>
+
           <Nav className="header__actions">
+            {/* Cart */}
             <Nav.Link as={Link} to="/cart" className="header__icon-link">
-              <Cart size={18} />
-              <span>Giỏ hàng</span>
+              <Cart size={22} />
               {cartItemCount > 0 && (
-                <Badge bg="danger" pill className="ms-1">
+                <Badge bg="danger" pill className="cart-badge">
                   {cartItemCount}
                 </Badge>
               )}
@@ -64,7 +109,7 @@ function Header() {
             {user ? (
               <>
                 {user.role === "admin" && (
-                  <NavDropdown title="Quản lý hệ thống" id="admin-dropdown">
+                  <NavDropdown title="Quản lý" id="admin-dropdown">
                     <NavDropdown.Item as={Link} to="/admin/dashboard">
                       Dashboard
                     </NavDropdown.Item>
@@ -74,14 +119,14 @@ function Header() {
                     <NavDropdown.Item as={Link} to="/admin/products">
                       Quản lý sản phẩm
                     </NavDropdown.Item>
-                    <NavDropdown.Item as={Link} to="/admin/products">
+                    <NavDropdown.Item as={Link} to="/admin/users">
                       Quản lý người dùng
                     </NavDropdown.Item>
-                    <NavDropdown.Item as={Link} to="/admin/users">
+                    <NavDropdown.Item as={Link} to="/admin/categories">
                       Quản lý danh mục
                     </NavDropdown.Item>
                     <NavDropdown.Item as={Link} to="/admin/revenue">
-                      Quản lý báo cáo
+                      Báo cáo
                     </NavDropdown.Item>
                   </NavDropdown>
                 )}
@@ -92,7 +137,7 @@ function Header() {
                       <Image
                         src={avatarUrl}
                         alt="avatar"
-                        className="me-2 header__avatar"
+                        className="header__avatar me-2"
                       />
                       <span>{user.username || user.email}</span>
                     </div>
@@ -115,8 +160,7 @@ function Header() {
               </>
             ) : (
               <Nav.Link as={Link} to="/login" className="header__icon-link">
-                <PersonCircle size={18} />
-                <span>Đăng nhập</span>
+                <PersonCircle size={22} />
               </Nav.Link>
             )}
           </Nav>

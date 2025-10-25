@@ -108,6 +108,30 @@ const getProductsByCategory = async (categoryId, page = 1, limit = 10) => {
     totalPages: Math.ceil(count / limit),
   };
 };
+
+const searchProducts = async (query, page = 1, limit = 10) => {
+  const offset = (page - 1) * limit;
+
+  const whereCondition = query
+    ? { name: { [db.Sequelize.Op.like]: `%${query}%` } }
+    : {};
+
+  const { count, rows } = await db.Product.findAndCountAll({
+    where: whereCondition,
+    include: [{ model: db.Category, as: "category" }],
+    limit,
+    offset,
+    order: [["createdAt", "DESC"]],
+  });
+
+  return {
+    errCode: 0,
+    products: rows.map((p) => ({ ...p.toJSON(), image: p.image || null })),
+    totalItems: count,
+    currentPage: page,
+    totalPages: Math.ceil(count / limit),
+  };
+};
 module.exports = {
   createProduct,
   getAllProducts,
@@ -115,4 +139,5 @@ module.exports = {
   updateProduct,
   deleteProduct,
   getProductsByCategory,
+  searchProducts,
 };

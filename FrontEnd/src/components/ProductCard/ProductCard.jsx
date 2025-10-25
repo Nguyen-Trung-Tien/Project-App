@@ -3,9 +3,9 @@ import { Card, Button, Spinner } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
-import imgPro from "../../assets/Product.jpg";
 import { addCart, getAllCarts, createCart } from "../../api/cartApi";
 import "./ProductCard.scss";
+import { getImage } from "../../utils/decodeImage";
 
 const ProductCard = ({ product }) => {
   const navigate = useNavigate();
@@ -15,28 +15,6 @@ const ProductCard = ({ product }) => {
   const [loading, setLoading] = useState(false);
   const user = useSelector((state) => state.user.user);
   const userId = user?.id;
-
-  const getImage = (image) => {
-    if (!image) return imgPro;
-    if (typeof image === "string") return image;
-    if (image?.data && Array.isArray(image.data)) {
-      try {
-        const decoded = new TextDecoder().decode(new Uint8Array(image.data));
-        if (decoded.startsWith("http")) return decoded;
-        const base64String = btoa(
-          new Uint8Array(image.data).reduce(
-            (data, byte) => data + String.fromCharCode(byte),
-            ""
-          )
-        );
-        return `data:image/jpeg;base64,${base64String}`;
-      } catch (error) {
-        console.error("Error decoding image:", error);
-        return imgPro;
-      }
-    }
-    return imgPro;
-  };
 
   const rawPrice = Number(price);
   const rawDiscount = Number(discount);

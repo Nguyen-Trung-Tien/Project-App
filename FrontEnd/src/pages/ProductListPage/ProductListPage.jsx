@@ -7,8 +7,6 @@ import {
   Spinner,
   Alert,
   Card,
-  InputGroup,
-  FormControl,
 } from "react-bootstrap";
 import { useSearchParams } from "react-router-dom";
 import ProductCard from "../../components/ProductCard/ProductCard";
@@ -37,12 +35,10 @@ const ProductListPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [error, setError] = useState("");
-  const [searchQuery, setSearchQuery] = useState("");
 
   const [searchParams, setSearchParams] = useSearchParams();
   const limit = 12;
 
-  // Fetch categories
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -57,26 +53,17 @@ const ProductListPage = () => {
     fetchCategories();
   }, []);
 
-  // Fetch products
-  const fetchProducts = async (
-    page = 1,
-    catIds = [],
-    append = false,
-    search = ""
-  ) => {
+  const fetchProducts = async (page = 1, catIds = [], append = false) => {
     try {
       append ? setLoadingMore(true) : setLoading(true);
       setError("");
 
       let res;
 
-      // Không gọi API với category rỗng
       if (catIds.length === 0) {
-        // Gọi API tất cả sản phẩm (có search)
-        res = await getAllProductApi(page, limit, search);
+        res = await getAllProductApi(page, limit);
       } else {
-        // Chỉ gửi category đầu tiên (API chỉ hỗ trợ 1 category)
-        res = await getProductsByCategoryApi(catIds[0], page, limit, search);
+        res = await getProductsByCategoryApi(catIds[0], page, limit);
       }
 
       if (res?.errCode === 0) {
@@ -100,23 +87,12 @@ const ProductListPage = () => {
     }
   };
 
-  // Đọc query từ URL
   useEffect(() => {
     const catIdFromQuery = searchParams.get("category") || "";
-    const searchFromQuery = searchParams.get("search") || "";
-
     setSelectedCategories(catIdFromQuery ? [catIdFromQuery] : []);
-    setSearchQuery(searchFromQuery);
-
-    fetchProducts(
-      1,
-      catIdFromQuery ? [catIdFromQuery] : [],
-      false,
-      searchFromQuery
-    );
+    fetchProducts(1, catIdFromQuery ? [catIdFromQuery] : []);
   }, [searchParams]);
 
-  // Debounce helper
   const debounce = (fn, delay) => {
     let timer;
     return (...args) => {
@@ -125,16 +101,14 @@ const ProductListPage = () => {
     };
   };
 
-  // Category change debounce
   const handleCategoryChange = useCallback(
     debounce((value) => {
       const params = {};
-      if (value.length) params.category = value[0]; // chỉ category đầu tiên
-      if (searchQuery) params.search = searchQuery;
+      if (value.length) params.category = value[0];
       setSearchParams(params);
-      fetchProducts(1, value, false, searchQuery);
+      fetchProducts(1, value);
     }, 300),
-    [searchQuery]
+    []
   );
 
   const toggleCategory = (id) => {
@@ -142,55 +116,20 @@ const ProductListPage = () => {
     if (selectedCategories.includes(id)) {
       updated = selectedCategories.filter((c) => c !== id);
     } else {
-      updated = [id]; // chỉ 1 category
+      updated = [id];
     }
     setSelectedCategories(updated);
     handleCategoryChange(updated);
   };
 
-  // Search input change debounce
-  const handleSearchChange = (e) => {
-    const value = e.target.value;
-    setSearchQuery(value);
-
-    const params = {};
-    if (selectedCategories.length) params.category = selectedCategories[0];
-    if (value) params.search = value;
-    setSearchParams(params);
-
-    debounce(() => fetchProducts(1, selectedCategories, false, value), 300)();
-  };
-
-  // Load more
   const handleLoadMore = () => {
     if (currentPage >= totalPages) return;
-    fetchProducts(currentPage + 1, selectedCategories, true, searchQuery);
+    fetchProducts(currentPage + 1, selectedCategories, true);
   };
 
   return (
     <Container className="py-4">
       <h3 className="mb-4">Danh sách sản phẩm</h3>
-
-      {/* Search */}
-      <div className="mb-3">
-        <InputGroup>
-          <FormControl
-            placeholder="Tìm sản phẩm..."
-            value={searchQuery}
-            onChange={handleSearchChange}
-          />
-          <Button
-            variant="primary"
-            onClick={() =>
-              fetchProducts(1, selectedCategories, false, searchQuery)
-            }
-          >
-            Tìm
-          </Button>
-        </InputGroup>
-      </div>
-
-      {/* Category Filter */}
       <div className="mb-4 d-flex flex-wrap gap-2 align-items-center">
         <span className="fw-bold me-2">Lọc theo danh mục:</span>
         {categories.map((cat) => (
@@ -213,10 +152,7 @@ const ProductListPage = () => {
             variant="danger"
             size="sm"
             className="ms-2 rounded-pill"
-            onClick={() =>
-              setSelectedCategories([]) ||
-              fetchProducts(1, [], false, searchQuery)
-            }
+            onClick={() => setSelectedCategories([]) || fetchProducts(1, [])}
           >
             Clear All
           </Button>
@@ -238,7 +174,9 @@ const ProductListPage = () => {
           <Row xs={1} sm={2} md={3} lg={4} className="g-4">
             {products.map((product, index) => (
               <Col key={`${product.id}-${index}`}>
-                <ProductCard product={product} />
+                <div className="product-card-wrapper">
+                  <ProductCard product={product} />
+                </div>
               </Col>
             ))}
           </Row>
