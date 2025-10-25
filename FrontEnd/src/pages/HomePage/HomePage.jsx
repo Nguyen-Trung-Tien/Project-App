@@ -1,4 +1,5 @@
 import React from "react";
+import { Container } from "react-bootstrap";
 import "./HomePage.scss";
 import HeroSection from "../../components/HomePageComponent/HeroSection";
 import CategorySection from "../../components/HomePageComponent/CategorySection";
@@ -7,21 +8,18 @@ import AllProducts from "../../components/AllProducts/AllProduct";
 
 const HomePage = () => {
   return (
-    <div className="homepage">
-      <div>
-        <HeroSection />
-      </div>
-
-      <div>
+    <Container fluid className="homepage px-0">
+      <HeroSection />
+      <div className="my-5">
         <CategorySection />
       </div>
-      <div>
+      <div className="my-5">
         <ProductSection />
       </div>
-      <div>
+      <div className="my-5">
         <AllProducts />
       </div>
-    </div>
+    </Container>
   );
 };
 

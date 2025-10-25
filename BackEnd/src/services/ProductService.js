@@ -17,20 +17,25 @@ const createProduct = async (data) => {
   }
 };
 
-const getAllProducts = async () => {
-  const products = await db.Product.findAll({
+const getAllProducts = async (categoryId, page, limit) => {
+  const offset = (page - 1) * limit;
+  const whereCondition = categoryId ? { categoryId } : {};
+
+  const { count, rows } = await db.Product.findAndCountAll({
+    where: whereCondition,
     include: [{ model: db.Category, as: "category" }],
+    limit,
+    offset,
+    order: [["createdAt", "DESC"]],
   });
 
-  const productsWithUrl = products.map((p) => {
-    const productJson = p.toJSON();
-    return {
-      ...productJson,
-      image: productJson.image || null,
-    };
-  });
-
-  return { errCode: 0, products: productsWithUrl };
+  return {
+    errCode: 0,
+    products: rows.map((p) => ({ ...p.toJSON(), image: p.image || null })),
+    totalItems: count,
+    currentPage: page,
+    totalPages: Math.ceil(count / limit),
+  };
 };
 
 const getProductById = async (id) => {
@@ -83,11 +88,25 @@ const deleteProduct = async (id) => {
   }
 };
 
-const getProductsByCategory = async (categoryId) => {
-  const query = { include: [{ model: db.Category, as: "category" }] };
-  if (categoryId) query.where = { categoryId };
-  const products = await db.Product.findAll(query);
-  return { errCode: 0, products };
+const getProductsByCategory = async (categoryId, page = 1, limit = 10) => {
+  const offset = (page - 1) * limit;
+  const whereCondition = categoryId ? { categoryId } : {};
+
+  const { count, rows } = await db.Product.findAndCountAll({
+    where: whereCondition,
+    include: [{ model: db.Category, as: "category" }],
+    limit,
+    offset,
+    order: [["createdAt", "DESC"]],
+  });
+
+  return {
+    errCode: 0,
+    products: rows,
+    totalItems: count,
+    currentPage: page,
+    totalPages: Math.ceil(count / limit),
+  };
 };
 module.exports = {
   createProduct,

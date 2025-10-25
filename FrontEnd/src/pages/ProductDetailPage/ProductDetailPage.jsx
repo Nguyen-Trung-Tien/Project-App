@@ -25,7 +25,6 @@ import {
 import { addCart, getAllCarts, createCart } from "../../api/cartApi";
 import { createReviewApi, getReviewsByProductApi } from "../../api/reviewApi";
 import ProductCard from "../../components/ProductCard/ProductCard";
-
 import "./ProductDetailPage.scss";
 import { getImage } from "../../utils/decodeImage";
 
@@ -42,6 +41,10 @@ const ProductDetailPage = () => {
   const [reviews, setReviews] = useState([]);
   const [newReview, setNewReview] = useState({ rating: 5, comment: "" });
   const [suggestedProducts, setSuggestedProducts] = useState([]);
+  const [suggestedPage, setSuggestedPage] = useState(1);
+  const [suggestedTotalPages, setSuggestedTotalPages] = useState(1);
+  const [loadingSuggested, setLoadingSuggested] = useState(false);
+  const suggestedLimit = 4;
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -74,17 +77,34 @@ const ProductDetailPage = () => {
     }
   };
 
-  const fetchSuggestedProducts = async () => {
+  const fetchSuggestedProducts = async (page = 1, append = false) => {
     if (!product?.categoryId) return;
     try {
-      const res = await getProductsByCategoryApi(product.categoryId);
+      append ? setLoadingSuggested(true) : setLoadingSuggested(true);
+      const res = await getProductsByCategoryApi(
+        product.categoryId,
+        page,
+        suggestedLimit
+      );
       if (res?.errCode === 0) {
         const filtered = res.products.filter((p) => p.id !== product.id);
-        setSuggestedProducts(filtered);
+        setSuggestedProducts((prev) =>
+          append ? [...prev, ...filtered] : filtered
+        );
+        setSuggestedPage(res.currentPage || page);
+        setSuggestedTotalPages(res.totalPages || 1);
       }
     } catch (err) {
       console.error("Lỗi lấy sản phẩm gợi ý:", err);
+    } finally {
+      setLoadingSuggested(false);
     }
+  };
+
+  // Nút xem thêm
+  const handleLoadMoreSuggested = () => {
+    if (suggestedPage >= suggestedTotalPages) return;
+    fetchSuggestedProducts(suggestedPage + 1, true);
   };
 
   const handleSubmitReview = async () => {
@@ -189,31 +209,29 @@ const ProductDetailPage = () => {
 
           <Col md={6}>
             <h2 className="fw-bold mb-2">{product.name}</h2>
-            <p className="text-muted mb-1">{product.brand || "Không rõ"}</p>
-            <h3 className="text-danger fw-semibold mb-3">
-              {Number(product.price).toLocaleString("vi-VN")} ₫
-            </h3>
-            {product.discount > 0 && (
-              <p className="text-warning fw-semibold mb-3">
-                Giảm giá: {product.discount}%
-              </p>
-            )}
-            <p className="text-secondary mb-4">{product.description}</p>
 
-            <ul className="list-unstyled mb-4">
+            <ul className="list-unstyled mb-3">
               <li>
                 <strong>Danh mục:</strong>{" "}
                 {product.category?.name || "Chưa phân loại"}
               </li>
               <li>
-                <strong>Tình trạng:</strong>{" "}
+                <strong>Số lượng sản phẩm:</strong>{" "}
                 {product.stock > 0 ? (
-                  <span className="text-success">Còn hàng</span>
+                  <span className="text-success">{product.stock} còn hàng</span>
                 ) : (
                   <span className="text-danger">Hết hàng</span>
                 )}
               </li>
+              {product.discount > 0 && (
+                <li>
+                  <strong>Giảm giá:</strong>{" "}
+                  {Number(product.discount).toFixed(2)}%
+                </li>
+              )}
             </ul>
+
+            <p className="text-secondary mb-4">{product.description}</p>
 
             <div className="d-flex align-items-center gap-3 mb-4">
               <Form.Label className="fw-semibold mb-0">Số lượng:</Form.Label>
@@ -233,9 +251,14 @@ const ProductDetailPage = () => {
                 size="lg"
                 className="flex-fill"
                 onClick={handleAddToCart}
-                disabled={addingCart}
+                disabled={addingCart || product.stock < 1 || !product.isActive}
               >
-                <CartPlus className="me-2" /> Thêm vào giỏ hàng
+                {addingCart ? (
+                  <Spinner animation="border" size="sm" />
+                ) : (
+                  <CartPlus className="me-2" />
+                )}{" "}
+                Thêm vào giỏ hàng
               </Button>
               <Button
                 variant="success"
@@ -335,6 +358,21 @@ const ProductDetailPage = () => {
                 </Col>
               ))}
             </Row>
+
+            {suggestedPage < suggestedTotalPages && (
+              <div className="text-center mt-3">
+                <Button
+                  onClick={handleLoadMoreSuggested}
+                  disabled={loadingSuggested}
+                >
+                  {loadingSuggested ? (
+                    <Spinner animation="border" size="sm" className="me-2" />
+                  ) : (
+                    "Xem thêm"
+                  )}
+                </Button>
+              </div>
+            )}
           </div>
         )}
       </Container>

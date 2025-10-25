@@ -7,7 +7,6 @@ const getAllCategories = async () => {
       order: [["id", "ASC"]],
     });
 
-    // 🔄 Chuyển BLOB image sang base64 để frontend hiển thị được
     const formatted = categories.map((cat) => {
       let imageBase64 = null;
       if (cat.image) {

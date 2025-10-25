@@ -38,7 +38,10 @@ const handleCreateProduct = async (req, res) => {
 const handleGetAllProducts = async (req, res) => {
   try {
     const categoryId = req.query.categoryId;
-    const result = await ProductService.getAllProducts(categoryId);
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+
+    const result = await ProductService.getAllProducts(categoryId, page, limit);
     return res.status(200).json(result);
   } catch (e) {
     console.error("Error in handleGetAllProducts:", e);
@@ -99,14 +102,23 @@ const handleDeleteProduct = async (req, res) => {
   }
 };
 const getProductsByCategory = async (req, res) => {
-  const { categoryId } = req.query;
-  if (!categoryId)
+  const query = req.query || {};
+  const categoryId = query.categoryId;
+  const page = Number(query.page) || 1;
+  const limit = Number(query.limit) || 10;
+
+  if (!categoryId) {
     return res
       .status(400)
       .json({ errCode: 1, errMessage: "categoryId is required" });
+  }
 
   try {
-    const result = await ProductService.getProductsByCategory(categoryId);
+    const result = await ProductService.getProductsByCategory(
+      categoryId,
+      page,
+      limit
+    );
     return res.json(result);
   } catch (error) {
     console.error(error);

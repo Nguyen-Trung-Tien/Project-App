@@ -34,7 +34,10 @@ const LoginPage = () => {
         const minimalUser = {
           id: user.id,
           email: user.email,
+          username: user.username,
           role: user.role,
+          phone: user.phone,
+          address: user.address,
           avatar: getAvatarBase64(user.avatar),
         };
         dispatch(setUser({ user: minimalUser, token: accessToken }));

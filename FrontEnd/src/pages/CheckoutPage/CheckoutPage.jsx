@@ -9,6 +9,7 @@ import "./CheckoutPage.scss";
 import { createOrder } from "../../api/orderApi";
 import { createPayment } from "../../api/paymentApi";
 import { removeCartItem } from "../../redux/cartSlice";
+import { getImage } from "../../utils/decodeImage";
 
 const CheckoutPage = () => {
   const navigate = useNavigate();
@@ -19,12 +20,10 @@ const CheckoutPage = () => {
   const cartItems = useSelector((state) => state.cart.cartItems);
   const user = useSelector((state) => state.user.user);
 
-  // Lọc sản phẩm đã chọn
   const selectedItems = cartItems.filter((item) =>
     selectedIds?.includes(item.id)
   );
 
-  // Tính tổng tiền
   const total = selectedItems.reduce((acc, item) => {
     const price = item.product?.discount
       ? (item.product.price * (100 - item.product.discount)) / 100
@@ -33,7 +32,7 @@ const CheckoutPage = () => {
   }, 0);
 
   const [formData, setFormData] = useState({
-    fullName: "",
+    username: "",
     phone: "",
     address: "",
     email: "",
@@ -44,7 +43,7 @@ const CheckoutPage = () => {
     if (user) {
       setFormData((prev) => ({
         ...prev,
-        fullName: user.fullName || "",
+        username: user.username || "",
         phone: user.phone || "",
         address: user.address || "",
         email: user.email || "",
@@ -68,15 +67,19 @@ const CheckoutPage = () => {
       return toast.warning("Vui lòng nhập đầy đủ thông tin giao hàng!");
 
     try {
-      // Chuẩn bị dữ liệu gửi lên backend
-      const orderItems = selectedItems.map((item) => ({
-        productId: item.product.id,
-        productName: item.product.name,
-        quantity: item.quantity,
-        price: item.product.price,
-        subtotal: item.quantity * item.product.price,
-        cartItemId: item.id,
-      }));
+      const orderItems = selectedItems.map((item) => {
+        const price = item.product?.discount
+          ? (item.product.price * (100 - item.product.discount)) / 100
+          : item.product?.price || 0;
+        return {
+          productId: item.product.id,
+          productName: item.product.name,
+          quantity: item.quantity,
+          price,
+          subtotal: price * item.quantity,
+          cartItemId: item.id,
+        };
+      });
 
       const orderData = {
         userId: user.id,
@@ -87,9 +90,8 @@ const CheckoutPage = () => {
         orderItems,
       };
 
-      // Tạo order + giảm stock + xóa giỏ hàng trong 1 API
+      // Tạo order + thanh toán
       const orderRes = await createOrder(orderData);
-
       if (orderRes.errCode !== 0) {
         toast.error(orderRes.errMessage || "Lỗi khi tạo đơn hàng!");
         return;
@@ -97,7 +99,6 @@ const CheckoutPage = () => {
 
       const orderId = orderRes.data.id;
 
-      // Gọi API thanh toán (nếu cần)
       const paymentRes = await createPayment({
         orderId,
         userId: user.id,
@@ -114,7 +115,7 @@ const CheckoutPage = () => {
         return;
       }
 
-      // Cập nhật Redux: xóa khỏi giỏ hàng frontend (tránh trạng thái cũ)
+      // Cập nhật Redux: xóa khỏi giỏ hàng frontend
       selectedItems.forEach((item) => dispatch(removeCartItem(item.id)));
 
       toast.success("Đặt hàng thành công!");
@@ -156,7 +157,6 @@ const CheckoutPage = () => {
         </h2>
 
         <Row>
-          {/* LEFT: FORM */}
           <Col lg={8}>
             <Card className="p-4 shadow-sm border-0 mb-4">
               <h5 className="fw-bold mb-3 text-secondary">
@@ -168,9 +168,9 @@ const CheckoutPage = () => {
                     <Form.Group>
                       <Form.Label>Họ và tên</Form.Label>
                       <Form.Control
-                        name="fullName"
+                        name="username"
                         type="text"
-                        value={formData.fullName}
+                        value={formData.username}
                         onChange={handleChange}
                         required
                       />
@@ -243,7 +243,6 @@ const CheckoutPage = () => {
             </Link>
           </Col>
 
-          {/* RIGHT: SUMMARY */}
           <Col lg={4}>
             <Card className="p-3 shadow-sm border-0">
               <h5 className="fw-bold text-secondary mb-3">Tóm tắt đơn hàng</h5>
@@ -251,7 +250,7 @@ const CheckoutPage = () => {
               {selectedItems.map((item) => (
                 <div key={item.id} className="d-flex align-items-center mb-3">
                   <img
-                    src={item.product?.image || "/no-image.jpg"}
+                    src={getImage(item.product?.image) || "/no-image.jpg"}
                     alt={item.product?.name}
                     className="checkout-img me-3"
                   />
