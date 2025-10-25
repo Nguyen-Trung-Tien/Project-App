@@ -1,4 +1,3 @@
-// Profile.jsx
 import React, { useState, useEffect } from "react";
 import {
   Container,
@@ -23,7 +22,6 @@ const Profile = () => {
   const user = useSelector((state) => state.user.user);
   const token = useSelector((state) => state.user.token);
 
-  const [avatarFile, setAvatarFile] = useState(null);
   const [formData, setFormData] = useState({
     username: "",
     email: "",
@@ -72,7 +70,7 @@ const Profile = () => {
 
     const reader = new FileReader();
     reader.onloadend = () => {
-      setFormData((prev) => ({ ...prev, avatar: reader.result })); // base64
+      setFormData((prev) => ({ ...prev, avatar: reader.result }));
     };
     reader.readAsDataURL(file);
   };

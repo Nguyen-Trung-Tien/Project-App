@@ -40,7 +40,7 @@ const UserManage = ({ token }) => {
           address: u.address || "",
           role: u.role,
           status: u.isActive ? "active" : "blocked",
-          avatar: u.avatar ? u.avatar.toString("base64") : null,
+          avatar: u.avatar || null,
         }));
         setUsers(mappedUsers);
       } else {
@@ -64,7 +64,6 @@ const UserManage = ({ token }) => {
       u.email.toLowerCase().includes(search.toLowerCase())
   );
 
-  // Modal control
   const handleShowModal = (user = null) => {
     setEditUser(user);
     setShowModal(true);
@@ -74,7 +73,6 @@ const UserManage = ({ token }) => {
     setEditUser(null);
   };
 
-  // Create new user
   const handleCreateUser = async (form) => {
     const userData = {
       username: form.username.value.trim(),
@@ -104,10 +102,9 @@ const UserManage = ({ token }) => {
     }
   };
 
-  // Update existing user
   const handleUpdateUser = async (form, editUserId) => {
     const userData = {
-      id: editUserId, // gắn ID vào payload
+      id: editUserId,
       username: form.username.value.trim(),
       email: form.email.value.trim(),
       phone: form.phone.value.trim(),
@@ -121,8 +118,6 @@ const UserManage = ({ token }) => {
     }
 
     try {
-      console.log("Updating user:", JSON.stringify(userData));
-
       const res = await updateUserApi(userData, token);
 
       if (res.errCode === 0) {
@@ -149,7 +144,6 @@ const UserManage = ({ token }) => {
     }
   };
 
-  // Delete user
   const handleDelete = async (id) => {
     if (!window.confirm("Bạn có chắc muốn xóa người dùng này?")) return;
 
@@ -246,9 +240,11 @@ const UserManage = ({ token }) => {
                     <td>
                       {u.avatar ? (
                         <img
-                          src={`data:image/png;base64,${u.avatar}`}
+                          src={u.avatar}
                           width="40"
-                          className="rounded-circle"
+                          height="40"
+                          className="rounded-circle object-fit-cover"
+                          alt="Avatar"
                         />
                       ) : (
                         "N/A"
