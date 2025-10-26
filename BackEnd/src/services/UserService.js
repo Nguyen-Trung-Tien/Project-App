@@ -116,11 +116,17 @@ const getUserById = async (userId) => {
   }
 };
 
-const getAllUsers = async () => {
+const getAllUsers = async (page = 1, limit = 10) => {
   try {
-    const users = await db.User.findAll({
+    const offset = (page - 1) * limit;
+
+    const { rows: users, count: totalUsers } = await db.User.findAndCountAll({
       attributes: { exclude: ["password"] },
+      offset,
+      limit,
+      order: [["createdAt", "DESC"]],
     });
+
     const data = users.map((user) => {
       const u = user.toJSON();
       u.avatar = u.avatar
@@ -128,7 +134,20 @@ const getAllUsers = async () => {
         : null;
       return u;
     });
-    return { errCode: 0, errMessage: "OK", data };
+
+    const totalPages = Math.ceil(totalUsers / limit);
+
+    return {
+      errCode: 0,
+      errMessage: "OK",
+      pagination: {
+        currentPage: page,
+        totalPages,
+        totalUsers,
+        limit,
+      },
+      data,
+    };
   } catch (e) {
     console.error(e);
     throw e;

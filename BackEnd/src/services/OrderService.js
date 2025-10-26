@@ -1,8 +1,10 @@
 const db = require("../models");
 
-const getAllOrders = async () => {
+const getAllOrders = async (page = 1, limit = 10) => {
   try {
-    const orders = await db.Order.findAll({
+    const offset = (page - 1) * limit;
+
+    const { count, rows: orders } = await db.Order.findAndCountAll({
       include: [
         {
           model: db.User,
@@ -13,12 +15,22 @@ const getAllOrders = async () => {
         { model: db.Payment, as: "payment" },
       ],
       order: [["createdAt", "DESC"]],
+      limit,
+      offset,
     });
+
+    const totalPages = Math.ceil(count / limit);
 
     return {
       errCode: 0,
       errMessage: "OK",
       data: orders,
+      pagination: {
+        total: count,
+        page,
+        limit,
+        totalPages,
+      },
     };
   } catch (e) {
     console.error("Error in getAllOrders:", e);

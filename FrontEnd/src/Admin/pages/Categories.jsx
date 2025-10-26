@@ -8,6 +8,7 @@ import {
   Col,
   Card,
   Image,
+  Spinner,
 } from "react-bootstrap";
 import { FiEdit, FiTrash2, FiPlus, FiImage } from "react-icons/fi";
 import { toast } from "react-toastify";
@@ -17,7 +18,6 @@ import {
   updateCategoryApi,
   deleteCategoryApi,
 } from "../../api/categoryApi";
-import Loading from "../../components/Loading/Loading";
 import "../Layout.scss";
 
 const Categories = () => {
@@ -31,8 +31,6 @@ const Categories = () => {
     image: "",
   });
   const [preview, setPreview] = useState(null);
-
-  // 🔹 Lấy danh mục khi load trang
   useEffect(() => {
     fetchCategories();
   }, []);
@@ -80,9 +78,9 @@ const Categories = () => {
     if (!file) return;
     const reader = new FileReader();
     reader.onload = () => {
-      const base64 = reader.result.split(",")[1]; // bỏ phần header data:image/jpeg;base64,
+      const base64 = reader.result.split(",")[1];
       setFormData({ ...formData, image: base64 });
-      setPreview(reader.result); // hiển thị preview
+      setPreview(reader.result);
     };
     reader.readAsDataURL(file);
   };
@@ -130,7 +128,6 @@ const Categories = () => {
 
   return (
     <>
-      {loading && <Loading />}
       <div className="p-4">
         <Card className="shadow-sm border-0 rounded-4">
           <Card.Body>
@@ -154,7 +151,13 @@ const Categories = () => {
                 </tr>
               </thead>
               <tbody>
-                {categories.length > 0 ? (
+                {loading ? (
+                  <tr>
+                    <td colSpan="10" className="text-center py-5">
+                      <Spinner animation="border" variant="primary" />
+                    </td>
+                  </tr>
+                ) : categories.length > 0 ? (
                   categories.map((cat) => (
                     <tr key={cat.id}>
                       <td>{cat.id}</td>
@@ -212,8 +215,6 @@ const Categories = () => {
             </Table>
           </Card.Body>
         </Card>
-
-        {/* 🔹 Modal thêm/sửa danh mục */}
         <Modal show={showModal} onHide={handleCloseModal} centered>
           <Modal.Header closeButton>
             <Modal.Title>

@@ -29,9 +29,10 @@ const handleCreateProduct = async (req, res) => {
     return res.status(201).json(product);
   } catch (e) {
     console.error(e);
-    return res
-      .status(500)
-      .json({ errCode: -1, errMessage: "Internal server error" });
+    return res.status(500).json({
+      errCode: -1,
+      errMessage: "Internal server error",
+    });
   }
 };
 
@@ -76,14 +77,14 @@ const handleUpdateProduct = async (req, res) => {
       const result = await uploadToCloudinary(req.file.buffer);
       data.image = result.secure_url;
     }
-
     const product = await ProductService.updateProduct(id, data);
     return res.status(200).json(product);
   } catch (e) {
     console.error(e);
-    return res
-      .status(500)
-      .json({ errCode: -1, errMessage: "Internal server error" });
+    return res.status(500).json({
+      errCode: -1,
+      errMessage: "Internal server error",
+    });
   }
 };
 
@@ -101,6 +102,7 @@ const handleDeleteProduct = async (req, res) => {
     });
   }
 };
+
 const getProductsByCategory = async (req, res) => {
   const query = req.query || {};
   const categoryId = query.categoryId;
@@ -108,9 +110,10 @@ const getProductsByCategory = async (req, res) => {
   const limit = Number(query.limit) || 10;
 
   if (!categoryId) {
-    return res
-      .status(400)
-      .json({ errCode: 1, errMessage: "categoryId is required" });
+    return res.status(400).json({
+      errCode: 1,
+      errMessage: "categoryId is required",
+    });
   }
 
   try {
@@ -136,9 +139,10 @@ const handleSearchProducts = async (req, res) => {
     return res.status(200).json(result);
   } catch (e) {
     console.error("Error in handleSearchProducts:", e);
-    return res
-      .status(500)
-      .json({ errCode: -1, errMessage: "Internal server error" });
+    return res.status(500).json({
+      errCode: -1,
+      errMessage: "Internal server error",
+    });
   }
 };
 

@@ -1,15 +1,18 @@
-// controllers/orderController.js
-const OrderService = require("../services/orderService");
+const OrderService = require("../services/OrderService");
 
 const handleGetAllOrders = async (req, res) => {
   try {
-    const result = await OrderService.getAllOrders();
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+
+    const result = await OrderService.getAllOrders(page, limit);
     return res.status(200).json(result);
   } catch (e) {
     console.error(e);
-    return res
-      .status(500)
-      .json({ errCode: -1, errMessage: "Internal server error" });
+    return res.status(500).json({
+      errCode: -1,
+      errMessage: "Internal server error",
+    });
   }
 };
 
@@ -20,9 +23,10 @@ const handleGetOrderById = async (req, res) => {
     return res.status(200).json(result);
   } catch (e) {
     console.error(e);
-    return res
-      .status(500)
-      .json({ errCode: -1, errMessage: "Internal server error" });
+    return res.status(500).json({
+      errCode: -1,
+      errMessage: "Internal server error",
+    });
   }
 };
 
@@ -32,9 +36,10 @@ const handleCreateOrder = async (req, res) => {
     return res.status(201).json(result);
   } catch (e) {
     console.error(e);
-    return res
-      .status(500)
-      .json({ errCode: -1, errMessage: "Internal server error" });
+    return res.status(500).json({
+      errCode: -1,
+      errMessage: "Internal server error",
+    });
   }
 };
 
@@ -46,9 +51,10 @@ const handleUpdateOrderStatus = async (req, res) => {
     return res.status(200).json(result);
   } catch (e) {
     console.error(e);
-    return res
-      .status(500)
-      .json({ errCode: -1, errMessage: "Internal server error" });
+    return res.status(500).json({
+      errCode: -1,
+      errMessage: "Internal server error",
+    });
   }
 };
 
@@ -59,11 +65,13 @@ const handleDeleteOrder = async (req, res) => {
     return res.status(200).json(result);
   } catch (e) {
     console.error(e);
-    return res
-      .status(500)
-      .json({ errCode: -1, errMessage: "Internal server error" });
+    return res.status(500).json({
+      errCode: -1,
+      errMessage: "Internal server error",
+    });
   }
 };
+
 const handleUpdatePaymentStatus = async (req, res) => {
   try {
     const { id } = req.params;
@@ -72,9 +80,10 @@ const handleUpdatePaymentStatus = async (req, res) => {
     return res.status(200).json(result);
   } catch (e) {
     console.error(e);
-    return res
-      .status(500)
-      .json({ errCode: -1, errMessage: "Internal server error" });
+    return res.status(500).json({
+      errCode: -1,
+      errMessage: "Internal server error",
+    });
   }
 };
 

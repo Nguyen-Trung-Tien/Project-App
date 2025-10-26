@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Card, ButtonGroup, Button } from "react-bootstrap";
+import { Card, ButtonGroup, Button, Spinner } from "react-bootstrap";
 import {
   LineChart,
   Line,
@@ -92,7 +92,16 @@ const ChartCard = () => {
     <Card className="chart-card shadow-sm border-0">
       <Card.Body>
         {loading ? (
-          <Loading />
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              minHeight: "60vh",
+            }}
+          >
+            <Spinner animation="border" variant="primary" />
+          </div>
         ) : (
           <>
             <p className="text-muted mb-3">

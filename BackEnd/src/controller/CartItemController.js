@@ -1,8 +1,8 @@
-const cartItemService = require("../services/CartItemService");
+const CartItemService = require("../services/CartItemService");
 
 const getAllCartItems = async (req, res) => {
   try {
-    const items = await cartItemService.getAllCartItems();
+    const items = await CartItemService.getAllCartItems();
     res.status(200).json({ errCode: 0, data: items });
   } catch (err) {
     res.status(500).json({ errCode: 1, errMessage: err.message });
@@ -11,7 +11,7 @@ const getAllCartItems = async (req, res) => {
 
 const getCartItemById = async (req, res) => {
   try {
-    const item = await cartItemService.getCartItemById(req.params.id);
+    const item = await CartItemService.getCartItemById(req.params.id);
     if (!item)
       return res.status(404).json({
         errCode: 1,
@@ -26,7 +26,7 @@ const getCartItemById = async (req, res) => {
 const createCartItem = async (req, res) => {
   try {
     const { cartId, productId, quantity } = req.body;
-    const newItem = await cartItemService.createCartItem({
+    const newItem = await CartItemService.createCartItem({
       cartId,
       productId,
       quantity,
@@ -39,7 +39,7 @@ const createCartItem = async (req, res) => {
 
 const updateCartItem = async (req, res) => {
   try {
-    const updatedItem = await cartItemService.updateCartItem(
+    const updatedItem = await CartItemService.updateCartItem(
       req.params.id,
       req.body
     );
@@ -51,7 +51,7 @@ const updateCartItem = async (req, res) => {
 
 const deleteCartItem = async (req, res) => {
   try {
-    await cartItemService.deleteCartItem(req.params.id);
+    await CartItemService.deleteCartItem(req.params.id);
     res.status(200).json({ errCode: 0, message: "CartItem deleted" });
   } catch (err) {
     res.status(500).json({ errCode: 1, errMessage: err.message });

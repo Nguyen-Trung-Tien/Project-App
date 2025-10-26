@@ -41,17 +41,11 @@ const ProductManage = () => {
     image: null,
   });
   const [imagePreview, setImagePreview] = useState(null);
-
-  // Phân trang
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const limit = 10;
-
-  // Loading table và modal riêng
   const [loadingTable, setLoadingTable] = useState(false);
   const [loadingModal, setLoadingModal] = useState(false);
-
-  // Fetch danh mục
   const fetchCategories = async () => {
     try {
       const res = await getAllCategoryApi();
@@ -60,24 +54,27 @@ const ProductManage = () => {
       console.error("Fetch categories error:", err);
     }
   };
-
-  // Fetch sản phẩm theo page
-  const fetchProducts = async (currentPage = 1) => {
+  const fetchProducts = async (currentPage = 1, search = "") => {
     setLoadingTable(true);
     try {
-      const res = await getAllProductApi(currentPage, limit);
-      if (res.errCode === 0 && Array.isArray(res.products)) {
-        setProducts(res.products);
+      const res = await getAllProductApi(currentPage, limit, search);
+      if (res.errCode === 0) {
+        setProducts(res.products || []);
         setTotalPages(res.totalPages || 1);
         setPage(currentPage);
 
-        // Scroll về đầu table
         const tableTop = document.getElementById("product-table-top");
         if (tableTop) tableTop.scrollIntoView({ behavior: "smooth" });
-      } else setProducts([]);
+      } else {
+        setProducts([]);
+        setTotalPages(1);
+        setPage(1);
+      }
     } catch (err) {
-      console.error("Fetch products error:", err);
+      console.error(err);
       setProducts([]);
+      setTotalPages(1);
+      setPage(1);
     } finally {
       setLoadingTable(false);
     }
@@ -88,7 +85,6 @@ const ProductManage = () => {
     fetchProducts(page);
   }, []);
 
-  // Modal
   const handleShowModal = (product = null) => {
     if (product) {
       setFormData({
@@ -140,6 +136,7 @@ const ProductManage = () => {
     e.preventDefault();
     try {
       setLoadingModal(true);
+
       const data = new FormData();
       data.append("name", formData.name);
       data.append("sku", formData.sku);
@@ -149,19 +146,25 @@ const ProductManage = () => {
       data.append("stock", formData.stock);
       data.append("categoryId", formData.categoryId);
       data.append("isActive", formData.isActive);
-      if (formData.image) data.append("image", formData.image);
-
+      if (formData.image instanceof File) {
+        data.append("image", formData.image);
+      }
       let res;
-      if (editProduct) res = await updateProductApi(editProduct.id, data);
-      else res = await createProductApi(data);
+      if (editProduct) {
+        res = await updateProductApi(editProduct.id, data);
+      } else {
+        res = await createProductApi(data);
+      }
 
       if (res.errCode === 0) {
         toast.success(
           editProduct ? "Cập nhật thành công!" : "Tạo sản phẩm thành công!"
         );
-        fetchProducts(page);
+        fetchProducts(page, searchTerm);
         handleCloseModal();
-      } else toast.error(res.data?.errMessage || "Thao tác thất bại!");
+      } else {
+        toast.error(res.errMessage || "Thao tác thất bại!");
+      }
     } catch (err) {
       console.error(err);
       toast.error("Lỗi kết nối server!");
@@ -176,7 +179,8 @@ const ProductManage = () => {
       const res = await deleteProductApi(id);
       if (res.errCode === 0) {
         toast.success("Đã xóa sản phẩm!");
-        fetchProducts(page);
+        const newPage = products.length === 1 && page > 1 ? page - 1 : page;
+        fetchProducts(newPage, searchTerm);
       } else toast.error(res.errMessage);
     } catch (err) {
       console.error(err);
@@ -184,26 +188,56 @@ const ProductManage = () => {
     }
   };
 
-  // Filter client-side
   const filteredProducts = products.filter((p) =>
     p.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Custom pagination
   const renderPagination = () => {
     if (totalPages <= 1) return null;
-
     const items = [];
-    for (let i = 1; i <= totalPages; i++) {
+    let startPage = Math.max(1, page - 2);
+    let endPage = Math.min(totalPages, page + 2);
+    if (startPage > 1) {
+      items.push(
+        <Pagination.First
+          key="first"
+          onClick={() => fetchProducts(1, searchTerm)}
+        />
+      );
+    }
+    if (page > 1) {
+      items.push(
+        <Pagination.Prev
+          key="prev"
+          onClick={() => fetchProducts(page - 1, searchTerm)}
+        />
+      );
+    }
+    for (let i = startPage; i <= endPage; i++) {
       items.push(
         <Pagination.Item
           key={i}
           active={i === page}
-          onClick={() => fetchProducts(i)}
-          className="custom-pagination-item"
+          onClick={() => fetchProducts(i, searchTerm)}
         >
           {i}
         </Pagination.Item>
+      );
+    }
+    if (page < totalPages) {
+      items.push(
+        <Pagination.Next
+          key="next"
+          onClick={() => fetchProducts(page + 1, searchTerm)}
+        />
+      );
+    }
+    if (endPage < totalPages) {
+      items.push(
+        <Pagination.Last
+          key="last"
+          onClick={() => fetchProducts(totalPages, searchTerm)}
+        />
       );
     }
 
@@ -323,8 +357,6 @@ const ProductManage = () => {
           {renderPagination()}
         </Card.Body>
       </Card>
-
-      {/* Modal Thêm/Chỉnh sửa */}
       <Modal show={showModal} onHide={handleCloseModal} centered size="lg">
         <Modal.Header closeButton>
           <Modal.Title>

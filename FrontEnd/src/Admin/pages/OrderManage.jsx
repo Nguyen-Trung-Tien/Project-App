@@ -10,6 +10,7 @@ import {
   OverlayTrigger,
   Tooltip,
   Spinner,
+  Pagination,
 } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
@@ -17,35 +18,12 @@ import { toast } from "react-toastify";
 import { getAllOrders, updateOrderStatus } from "../../api/orderApi";
 import { updatePayment } from "../../api/paymentApi";
 import "../Layout.scss";
-import Loading from "../../components/Loading/Loading";
-
-const statusMap = {
-  pending: { label: "Chờ xử lý", variant: "warning" },
-  confirmed: { label: "Đã xác nhận", variant: "info" },
-  processing: { label: "Đang xử lý", variant: "primary" },
-  shipped: { label: "Đang giao", variant: "primary" },
-  delivered: { label: "Đã giao", variant: "success" },
-  cancelled: { label: "Đã hủy", variant: "danger" },
-};
-
-const paymentStatusMap = {
-  unpaid: { label: "Chưa thanh toán", variant: "secondary" },
-  paid: { label: "Đã thanh toán", variant: "success" },
-  refunded: { label: "Hoàn tiền", variant: "info" },
-};
-
-const returnStatusMap = {
-  none: { label: "Không trả", variant: "secondary" },
-  requested: { label: "Đã yêu cầu", variant: "warning" },
-  approved: { label: "Được duyệt", variant: "success" },
-  rejected: { label: "Bị từ chối", variant: "danger" },
-  completed: { label: "Hoàn tất", variant: "primary" },
-};
-
-const StatusBadge = ({ map, status }) => {
-  const info = map[status] || { label: status, variant: "secondary" };
-  return <Badge bg={info.variant}>{info.label}</Badge>;
-};
+import {
+  paymentStatusMap,
+  returnStatusMap,
+  statusMap,
+} from "../../utils/StatusMap";
+import { StatusBadge } from "../../utils/StatusBadge";
 
 const OrderManage = () => {
   const navigate = useNavigate();
@@ -53,13 +31,19 @@ const OrderManage = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadingId, setLoadingId] = useState(null);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const limit = 10;
 
-  const fetchOrders = async () => {
+  const fetchOrders = async (currentPage = 1) => {
     try {
       setLoading(true);
-      const res = await getAllOrders();
-      if (res?.errCode === 0) setOrders(res.data);
-      else toast.error(res?.errMessage);
+      const res = await getAllOrders(currentPage, limit);
+      if (res?.errCode === 0) {
+        setOrders(res.data);
+        setPage(res.pagination?.currentPage || currentPage);
+        setTotalPages(res.pagination?.totalPages || 1);
+      } else toast.error(res?.errMessage);
     } catch (err) {
       console.error(err);
       toast.error("Lỗi tải danh sách đơn hàng");
@@ -72,7 +56,7 @@ const OrderManage = () => {
     fetchOrders();
   }, []);
 
-  // // 🪄 Mô phỏng hoàn tiền online
+  // //  Mô phỏng hoàn tiền online
   // const simulateRefund = async (order, method) => {
   //   console.log(
   //     `🔁 Bắt đầu hoàn tiền đơn #${order.id} qua ${method.toUpperCase()}...`
@@ -212,12 +196,51 @@ const OrderManage = () => {
   const formatCurrency = (v) =>
     v ? Number(v).toLocaleString("vi-VN") + " ₫" : "0 ₫";
   const formatDate = (d) => (d ? new Date(d).toLocaleDateString("vi-VN") : "—");
-
   const paidMethods = ["momo", "paypal", "vnpay", "bank", "transfer"];
+
+  const renderPagination = () => {
+    if (totalPages <= 1) return null;
+    const items = [];
+    let startPage = Math.max(1, page - 2);
+    let endPage = Math.min(totalPages, page + 2);
+
+    if (startPage > 1)
+      items.push(
+        <Pagination.First key="first" onClick={() => fetchOrders(1)} />
+      );
+    if (page > 1)
+      items.push(
+        <Pagination.Prev key="prev" onClick={() => fetchOrders(page - 1)} />
+      );
+
+    for (let i = startPage; i <= endPage; i++) {
+      items.push(
+        <Pagination.Item
+          key={i}
+          active={i === page}
+          onClick={() => fetchOrders(i)}
+        >
+          {i}
+        </Pagination.Item>
+      );
+    }
+
+    if (page < totalPages)
+      items.push(
+        <Pagination.Next key="next" onClick={() => fetchOrders(page + 1)} />
+      );
+    if (endPage < totalPages)
+      items.push(
+        <Pagination.Last key="last" onClick={() => fetchOrders(totalPages)} />
+      );
+
+    return (
+      <Pagination className="justify-content-center mt-3">{items}</Pagination>
+    );
+  };
 
   return (
     <>
-      {loading && <Loading />}
       <div>
         <h3 className="mb-4">📦 Quản lý đơn hàng</h3>
         <Card className="shadow-sm">
@@ -250,12 +273,20 @@ const OrderManage = () => {
                 </tr>
               </thead>
               <tbody>
-                {orders.length === 0 && (
+                {loading ? (
                   <tr>
-                    <td colSpan="10" className="text-center text-muted py-4">
-                      Không có đơn hàng nào.
+                    <td colSpan="10" className="text-center py-5">
+                      <Spinner animation="border" variant="primary" />
                     </td>
                   </tr>
+                ) : (
+                  orders.length === 0 && (
+                    <tr>
+                      <td colSpan="10" className="text-center text-muted py-4">
+                        Không có đơn hàng nào.
+                      </td>
+                    </tr>
+                  )
                 )}
                 {orders.map((order) => (
                   <tr key={order.id}>
@@ -463,6 +494,7 @@ const OrderManage = () => {
                 ))}
               </tbody>
             </Table>
+            {renderPagination()}
           </Card.Body>
         </Card>
       </div>

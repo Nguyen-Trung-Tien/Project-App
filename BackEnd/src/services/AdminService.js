@@ -3,10 +3,7 @@ const { Op } = require("sequelize");
 
 const getDashboardData = async () => {
   try {
-    // 🧮 Tổng sản phẩm
     const totalProducts = await db.Product.count();
-
-    // 📅 Đơn hàng hôm nay
     const startOfDay = new Date();
     startOfDay.setHours(0, 0, 0, 0);
 
@@ -17,14 +14,8 @@ const getDashboardData = async () => {
         },
       },
     });
-
-    // 💰 Tổng doanh thu
     const totalRevenue = await db.Order.sum("totalPrice");
-
-    // 👥 Tổng người dùng
     const totalUsers = await db.User.count();
-
-    // 📈 Tạm thời hardcode phần thay đổi %
     const change = {
       products: 8,
       orders: 5,
@@ -40,7 +31,7 @@ const getDashboardData = async () => {
       change,
     };
   } catch (error) {
-    console.error("❌ Lỗi ở service:", error);
+    console.error("Error from service!", error);
     throw error;
   }
 };

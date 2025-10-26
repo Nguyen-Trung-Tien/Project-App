@@ -19,9 +19,10 @@ const handleGetOrderItemById = async (req, res) => {
     return res.status(200).json(result);
   } catch (e) {
     console.error(e);
-    return res
-      .status(500)
-      .json({ errCode: -1, errMessage: "Internal server error" });
+    return res.status(500).json({
+      errCode: -1,
+      errMessage: "Internal server error",
+    });
   }
 };
 
@@ -31,9 +32,10 @@ const handleCreateOrderItem = async (req, res) => {
     return res.status(201).json(result);
   } catch (e) {
     console.error(e);
-    return res
-      .status(500)
-      .json({ errCode: -1, errMessage: "Internal server error" });
+    return res.status(500).json({
+      errCode: -1,
+      errMessage: "Internal server error",
+    });
   }
 };
 
@@ -46,9 +48,10 @@ const handleUpdateOrderItem = async (req, res) => {
     return res.status(200).json(result);
   } catch (e) {
     console.error(e);
-    return res
-      .status(500)
-      .json({ errCode: -1, errMessage: "Internal server error" });
+    return res.status(500).json({
+      errCode: -1,
+      errMessage: "Internal server error",
+    });
   }
 };
 
@@ -58,9 +61,10 @@ const handleDeleteOrderItem = async (req, res) => {
     return res.status(200).json(result);
   } catch (e) {
     console.error(e);
-    return res
-      .status(500)
-      .json({ errCode: -1, errMessage: "Internal server error" });
+    return res.status(500).json({
+      errCode: -1,
+      errMessage: "Internal server error",
+    });
   }
 };
 
@@ -73,9 +77,10 @@ const handleRequestReturn = async (req, res) => {
     return res.status(200).json(result);
   } catch (e) {
     console.error(e);
-    return res
-      .status(500)
-      .json({ errCode: -1, errMessage: "Internal server error" });
+    return res.status(500).json({
+      errCode: -1,
+      errMessage: "Internal server error",
+    });
   }
 };
 
@@ -88,9 +93,10 @@ const handleProcessReturn = async (req, res) => {
     return res.status(200).json(result);
   } catch (e) {
     console.error(e);
-    return res
-      .status(500)
-      .json({ errCode: -1, errMessage: "Internal server error" });
+    return res.status(500).json({
+      errCode: -1,
+      errMessage: "Internal server error",
+    });
   }
 };
 

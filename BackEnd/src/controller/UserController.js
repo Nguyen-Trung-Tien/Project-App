@@ -128,7 +128,8 @@ const handleUpdateUser = async (req, res) => {
 
 const handleGetAllUsers = async (req, res) => {
   try {
-    const result = await UserService.getAllUsers();
+    const { page = 1, limit = 10 } = req.query;
+    const result = await UserService.getAllUsers(+page, +limit);
     return res.status(200).json(result);
   } catch (e) {
     console.error(e);

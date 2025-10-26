@@ -9,6 +9,7 @@ import {
   Col,
   Card,
   Spinner,
+  Pagination,
 } from "react-bootstrap";
 import "../Layout.scss";
 import { toast } from "react-toastify";
@@ -18,7 +19,6 @@ import {
   registerUser,
   updateUserApi,
 } from "../../api/userApi";
-import Loading from "../../components/Loading/Loading";
 
 const UserManage = ({ token }) => {
   const [users, setUsers] = useState([]);
@@ -26,12 +26,18 @@ const UserManage = ({ token }) => {
   const [showModal, setShowModal] = useState(false);
   const [editUser, setEditUser] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [limit] = useState(10);
 
-  const fetchUsers = async () => {
+  const fetchUsers = async (page = 1) => {
     setLoading(true);
     try {
-      const res = await getAllUsersApi(token);
+      const res = await getAllUsersApi(token, page, limit);
       if (res.errCode === 0) {
+        setCurrentPage(res.pagination.currentPage);
+        setTotalPages(res.pagination.totalPages);
+
         const mappedUsers = (res.data || []).map((u) => ({
           id: u.id,
           name: u.username,
@@ -191,9 +197,57 @@ const UserManage = ({ token }) => {
     }
   };
 
+  const renderPagination = () => {
+    if (totalPages <= 1) return null;
+    const items = [];
+    const pageNeighbours = 2;
+    const startPage = Math.max(1, currentPage - pageNeighbours);
+    const endPage = Math.min(totalPages, currentPage + pageNeighbours);
+    if (startPage > 1) {
+      items.push(
+        <Pagination.First key="first" onClick={() => fetchUsers(1)} />
+      );
+    }
+    if (currentPage > 1) {
+      items.push(
+        <Pagination.Prev
+          key="prev"
+          onClick={() => fetchUsers(currentPage - 1)}
+        />
+      );
+    }
+    for (let i = startPage; i <= endPage; i++) {
+      items.push(
+        <Pagination.Item
+          key={i}
+          active={i === currentPage}
+          onClick={() => fetchUsers(i)}
+        >
+          {i}
+        </Pagination.Item>
+      );
+    }
+    if (currentPage < totalPages) {
+      items.push(
+        <Pagination.Next
+          key="next"
+          onClick={() => fetchUsers(currentPage + 1)}
+        />
+      );
+    }
+    if (endPage < totalPages) {
+      items.push(
+        <Pagination.Last key="last" onClick={() => fetchUsers(totalPages)} />
+      );
+    }
+
+    return (
+      <Pagination className="justify-content-center mt-3">{items}</Pagination>
+    );
+  };
+
   return (
     <>
-      {loading && <Loading />}
       <div className="user-manage">
         <h3 className="mb-4">👥 Quản lý người dùng</h3>
         <Card className="shadow-sm">
@@ -234,73 +288,84 @@ const UserManage = ({ token }) => {
                 </tr>
               </thead>
               <tbody>
-                {filteredUsers.map((u) => (
-                  <tr key={u.id}>
-                    <td>{u.id}</td>
-                    <td>
-                      {u.avatar ? (
-                        <img
-                          src={u.avatar}
-                          width="40"
-                          height="40"
-                          className="rounded-circle object-fit-cover"
-                          alt="Avatar"
-                        />
-                      ) : (
-                        "N/A"
-                      )}
-                    </td>
-                    <td>{u.name}</td>
-                    <td>{u.email}</td>
-                    <td>{u.phone}</td>
-                    <td>{u.address}</td>
-                    <td>
-                      <span
-                        className={`badge ${
-                          u.role === "admin" ? "bg-danger" : "bg-primary"
-                        }`}
-                      >
-                        {u.role === "admin" ? "Admin" : "Customer"}
-                      </span>
-                    </td>
-                    <td>
-                      <span
-                        className={`badge ${
-                          u.status === "active" ? "bg-success" : "bg-secondary"
-                        }`}
-                      >
-                        {u.status === "active" ? "Hoạt động" : "Đã khóa"}
-                      </span>
-                    </td>
-                    <td>
-                      <Button
-                        variant="outline-warning"
-                        size="sm"
-                        onClick={() => handleShowModal(u)}
-                      >
-                        ✏️
-                      </Button>{" "}
-                      {u.role !== "admin" && (
-                        <Button
-                          variant="outline-danger"
-                          size="sm"
-                          onClick={() => handleDelete(u.id)}
-                        >
-                          🗑️
-                        </Button>
-                      )}{" "}
-                      <Button
-                        variant="outline-info"
-                        size="sm"
-                        onClick={() => toggleStatus(u.id)}
-                      >
-                        🔄
-                      </Button>
+                {loading ? (
+                  <tr>
+                    <td colSpan="10" className="text-center py-5">
+                      <Spinner animation="border" variant="primary" />
                     </td>
                   </tr>
-                ))}
+                ) : (
+                  filteredUsers.map((u) => (
+                    <tr key={u.id}>
+                      <td>{u.id}</td>
+                      <td>
+                        {u.avatar ? (
+                          <img
+                            src={u.avatar}
+                            width="40"
+                            height="40"
+                            className="rounded-circle object-fit-cover"
+                            alt="Avatar"
+                          />
+                        ) : (
+                          "N/A"
+                        )}
+                      </td>
+                      <td>{u.name}</td>
+                      <td>{u.email}</td>
+                      <td>{u.phone}</td>
+                      <td>{u.address}</td>
+                      <td>
+                        <span
+                          className={`badge ${
+                            u.role === "admin" ? "bg-danger" : "bg-primary"
+                          }`}
+                        >
+                          {u.role === "admin" ? "Admin" : "Customer"}
+                        </span>
+                      </td>
+                      <td>
+                        <span
+                          className={`badge ${
+                            u.status === "active"
+                              ? "bg-success"
+                              : "bg-secondary"
+                          }`}
+                        >
+                          {u.status === "active" ? "Hoạt động" : "Đã khóa"}
+                        </span>
+                      </td>
+                      <td>
+                        <Button
+                          variant="outline-warning"
+                          size="sm"
+                          onClick={() => handleShowModal(u)}
+                        >
+                          ✏️
+                        </Button>{" "}
+                        {u.role !== "admin" && (
+                          <Button
+                            variant="outline-danger"
+                            size="sm"
+                            onClick={() => handleDelete(u.id)}
+                          >
+                            🗑️
+                          </Button>
+                        )}{" "}
+                        <Button
+                          variant="outline-info"
+                          size="sm"
+                          onClick={() => toggleStatus(u.id)}
+                        >
+                          🔄
+                        </Button>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </Table>
+            {renderPagination()}
           </Card.Body>
         </Card>
 

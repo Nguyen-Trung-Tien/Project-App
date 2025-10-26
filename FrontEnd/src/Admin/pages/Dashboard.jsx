@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { Row, Col, Container } from "react-bootstrap";
+import { Row, Col, Container, Spinner } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import { FaBox, FaShoppingCart, FaDollarSign, FaUsers } from "react-icons/fa";
 import StatsCard from "../components/StatsCard";
 import ChartCard from "../components/ChartCard";
-import Loading from "../../components/Loading/Loading";
 import { getDashboard } from "../../api/adminApi";
 
 const Dashboard = () => {
@@ -74,33 +73,46 @@ const Dashboard = () => {
     fetchDashboard();
   }, []);
 
-  if (loading) return <Loading />;
-
   return (
     <div className="admin-layout d-flex">
       <div className="main-content flex-grow-1">
         <Container fluid className="p-4">
           <h3 className="mb-4 fw-bold">📊 Thống kê tổng quan</h3>
-          <Row>
-            {stats.length > 0 ? (
-              stats.map((item, i) => (
-                <Col key={i} md={3} sm={6} className="mb-4">
-                  <Link to={item.link} style={{ textDecoration: "none" }}>
-                    <StatsCard {...item} />
-                  </Link>
+          {loading ? (
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                minHeight: "60vh",
+              }}
+            >
+              <Spinner animation="border" variant="primary" />
+            </div>
+          ) : (
+            <>
+              <Row>
+                {stats.length > 0 ? (
+                  stats.map((item, i) => (
+                    <Col key={i} md={3} sm={6} className="mb-4">
+                      <Link to={item.link} style={{ textDecoration: "none" }}>
+                        <StatsCard {...item} />
+                      </Link>
+                    </Col>
+                  ))
+                ) : (
+                  <p className="text-muted text-center">
+                    Không có dữ liệu thống kê.
+                  </p>
+                )}
+              </Row>
+              <Row className="mt-4">
+                <Col md={12}>
+                  <ChartCard />
                 </Col>
-              ))
-            ) : (
-              <p className="text-muted text-center">
-                Không có dữ liệu thống kê.
-              </p>
-            )}
-          </Row>
-          <Row className="mt-4">
-            <Col md={12}>
-              <ChartCard />
-            </Col>
-          </Row>
+              </Row>
+            </>
+          )}
         </Container>
       </div>
     </div>

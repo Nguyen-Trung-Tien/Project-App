@@ -6,9 +6,10 @@ const handleGetAllPayments = async (req, res) => {
     return res.status(200).json(result);
   } catch (e) {
     console.error(e);
-    return res
-      .status(500)
-      .json({ errCode: -1, errMessage: "Internal server error" });
+    return res.status(500).json({
+      errCode: -1,
+      errMessage: "Internal server error",
+    });
   }
 };
 
@@ -18,9 +19,10 @@ const handleGetPaymentById = async (req, res) => {
     return res.status(200).json(result);
   } catch (e) {
     console.error(e);
-    return res
-      .status(500)
-      .json({ errCode: -1, errMessage: "Internal server error" });
+    return res.status(500).json({
+      errCode: -1,
+      errMessage: "Internal server error",
+    });
   }
 };
 
@@ -30,9 +32,10 @@ const handleCreatePayment = async (req, res) => {
     return res.status(201).json(result);
   } catch (e) {
     console.error(e);
-    return res
-      .status(500)
-      .json({ errCode: -1, errMessage: "Internal server error" });
+    return res.status(500).json({
+      errCode: -1,
+      errMessage: "Internal server error",
+    });
   }
 };
 
@@ -56,9 +59,10 @@ const handleDeletePayment = async (req, res) => {
     return res.status(200).json(result);
   } catch (e) {
     console.error(e);
-    return res
-      .status(500)
-      .json({ errCode: -1, errMessage: "Internal server error" });
+    return res.status(500).json({
+      errCode: -1,
+      errMessage: "Internal server error",
+    });
   }
 };
 
@@ -71,9 +75,10 @@ const handleCompletePayment = async (req, res) => {
     return res.status(200).json(result);
   } catch (e) {
     console.error(e);
-    return res
-      .status(500)
-      .json({ errCode: -1, errMessage: "Internal server error" });
+    return res.status(500).json({
+      errCode: -1,
+      errMessage: "Internal server error",
+    });
   }
 };
 
@@ -86,9 +91,10 @@ const handleRefundPayment = async (req, res) => {
     return res.status(200).json(result);
   } catch (e) {
     console.error(e);
-    return res
-      .status(500)
-      .json({ errCode: -1, errMessage: "Internal server error" });
+    return res.status(500).json({
+      errCode: -1,
+      errMessage: "Internal server error",
+    });
   }
 };
 

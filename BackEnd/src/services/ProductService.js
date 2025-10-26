@@ -8,7 +8,6 @@ const createProduct = async (data) => {
       const fs = require("fs");
       newData.image = fs.readFileSync(data.image.path);
     }
-
     const product = await db.Product.create(newData);
     return { errCode: 0, product };
   } catch (e) {

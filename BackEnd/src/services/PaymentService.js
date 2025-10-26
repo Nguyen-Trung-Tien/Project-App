@@ -9,7 +9,11 @@ const getAllPayments = async () => {
           as: "order",
           attributes: ["id", "status", "totalPrice"],
         },
-        { model: db.User, as: "user", attributes: ["id", "name", "email"] },
+        {
+          model: db.User,
+          as: "user",
+          attributes: ["id", "name", "email", "phone"],
+        },
       ],
       order: [["createdAt", "DESC"]],
     });
@@ -160,7 +164,6 @@ const deletePayment = async (id) => {
   try {
     const payment = await db.Payment.findByPk(id);
     if (!payment) return { errCode: 1, errMessage: "Payment not found" };
-
     await payment.destroy();
     return { errCode: 0, errMessage: "Payment deleted successfully" };
   } catch (e) {
@@ -173,18 +176,15 @@ const completePayment = async (id, transactionId) => {
   try {
     const payment = await db.Payment.findByPk(id);
     if (!payment) return { errCode: 1, errMessage: "Payment not found" };
-
     payment.status = "completed";
     payment.transactionId = transactionId || payment.transactionId;
     payment.paymentDate = new Date();
     await payment.save();
-
     const order = await db.Order.findByPk(payment.orderId);
     if (order) {
       order.paymentStatus = "paid";
       await order.save();
     }
-
     return { errCode: 0, errMessage: "Payment completed", data: payment };
   } catch (e) {
     console.error("Error completePayment:", e);
@@ -196,7 +196,6 @@ const refundPayment = async (id, note) => {
   try {
     const payment = await db.Payment.findByPk(id);
     if (!payment) return { errCode: 1, errMessage: "Payment not found" };
-
     payment.status = "refunded";
     payment.note = note || payment.note;
     await payment.save();
@@ -205,7 +204,6 @@ const refundPayment = async (id, note) => {
       order.paymentStatus = "refunded";
       await order.save();
     }
-
     return { errCode: 0, errMessage: "Payment refunded", data: payment };
   } catch (e) {
     console.error("Error refundPayment:", e);

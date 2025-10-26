@@ -7,9 +7,11 @@ const API = axios.create({
   },
 });
 
-export const getAllOrders = async () => {
+export const getAllOrders = async (page = 1, limit = 10) => {
   try {
-    const res = await API.get("/order/get-all-orders");
+    const res = await API.get("/order/get-all-orders", {
+      params: { page, limit },
+    });
     return res.data;
   } catch (error) {
     console.error("Error getting all orders:", error);

@@ -48,13 +48,14 @@ export const updateUserApi = async (data, token) => {
   }
 };
 
-export const getAllUsersApi = async (token) => {
+export const getAllUsersApi = async (token, page = 1, limit = 10) => {
   try {
-    const res = await axiosClient.get("/user/get-all-user", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    const res = await axiosClient.get(
+      `/user/get-all-user?page=${page}&limit=${limit}`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
     return res.data;
   } catch (err) {
     console.error("Get All Users API error:", err);

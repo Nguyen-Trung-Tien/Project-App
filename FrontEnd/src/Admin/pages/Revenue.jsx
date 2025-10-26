@@ -1,5 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { Container, Row, Col, Card, Table, Badge } from "react-bootstrap";
+import {
+  Container,
+  Row,
+  Col,
+  Card,
+  Table,
+  Badge,
+  Spinner,
+} from "react-bootstrap";
 import {
   CartesianGrid,
   XAxis,
@@ -127,7 +135,6 @@ const Revenue = () => {
 
   return (
     <>
-      {loading && <Loading />}
       <div className="admin-layout d-flex">
         <div className="main-content flex-grow-1">
           <Container fluid className="p-4">
@@ -198,38 +205,46 @@ const Revenue = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {orders.map((order, idx) => (
-                    <tr key={order.id}>
-                      <td>{idx + 1}</td>
-                      <td>{`DH${order.id}`}</td>
-                      <td>{order.user?.username || "Ẩn danh"}</td>
-                      <td>
-                        {new Date(order.createdAt).toLocaleString("vi-VN")}
-                      </td>
-                      <td>
-                        {new Intl.NumberFormat("vi-VN", {
-                          style: "currency",
-                          currency: "VND",
-                          maximumFractionDigits: 0,
-                        }).format(order.totalPrice)}
-                      </td>
-                      <td>
-                        <Badge
-                          bg={ordersStatusColors[order.status] || "secondary"}
-                          className="text-uppercase px-3 py-2 rounded-pill"
-                        >
-                          {{
-                            pending: "Chờ xử lý",
-                            confirmed: "Đã xác nhận",
-                            processing: "Đang xử lý",
-                            shipped: "Đã gửi hàng",
-                            delivered: "Đã giao",
-                            cancelled: "Đã hủy",
-                          }[order.status] || "Không xác định"}
-                        </Badge>
+                  {loading ? (
+                    <tr>
+                      <td colSpan="10" className="text-center py-5">
+                        <Spinner animation="border" variant="primary" />
                       </td>
                     </tr>
-                  ))}
+                  ) : (
+                    orders.map((order, idx) => (
+                      <tr key={order.id}>
+                        <td>{idx + 1}</td>
+                        <td>{`DH${order.id}`}</td>
+                        <td>{order.user?.username || "Ẩn danh"}</td>
+                        <td>
+                          {new Date(order.createdAt).toLocaleString("vi-VN")}
+                        </td>
+                        <td>
+                          {new Intl.NumberFormat("vi-VN", {
+                            style: "currency",
+                            currency: "VND",
+                            maximumFractionDigits: 0,
+                          }).format(order.totalPrice)}
+                        </td>
+                        <td>
+                          <Badge
+                            bg={ordersStatusColors[order.status] || "secondary"}
+                            className="text-uppercase px-3 py-2 rounded-pill"
+                          >
+                            {{
+                              pending: "Chờ xử lý",
+                              confirmed: "Đã xác nhận",
+                              processing: "Đang xử lý",
+                              shipped: "Đã gửi hàng",
+                              delivered: "Đã giao",
+                              cancelled: "Đã hủy",
+                            }[order.status] || "Không xác định"}
+                          </Badge>
+                        </td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </Table>
             </Card>
