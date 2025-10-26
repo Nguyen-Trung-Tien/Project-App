@@ -17,7 +17,6 @@ import {
 } from "../../api/productApi";
 import "./ProductListPage.scss";
 
-// Skeleton card
 const SkeletonCard = () => (
   <Card className="p-3 mb-3 shadow-sm skeleton-card">
     <div className="skeleton-image mb-3" />
@@ -182,7 +181,7 @@ const ProductListPage = () => {
           </Row>
 
           {currentPage < totalPages && (
-            <div className="text-center mt-4">
+            <div className="text-center mt-2">
               <Button
                 size="lg"
                 variant="outline-primary"

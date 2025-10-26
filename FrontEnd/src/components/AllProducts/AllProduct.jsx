@@ -28,7 +28,6 @@ const AllProducts = () => {
 
       let res;
       if (searchQuery) {
-        // Nếu có từ khóa tìm kiếm, gọi search API
         res = await searchProductsApi(searchQuery, currentPage, limit);
       } else {
         res = await getAllProductApi(currentPage, limit);
@@ -54,7 +53,6 @@ const AllProducts = () => {
   };
 
   useEffect(() => {
-    // Khi searchQuery thay đổi, reset trang về 1
     fetchProducts(1, false);
   }, [searchQuery]);
 
@@ -82,7 +80,12 @@ const AllProducts = () => {
           <>
             <Row className="g-4 justify-content-center">
               {products.map((product) => (
-                <Col key={product.id} md={3} sm={6} xs={12}>
+                <Col
+                  key={`${product.id}-${Math.random()}`}
+                  md={3}
+                  sm={6}
+                  xs={12}
+                >
                   <ProductCard product={product} userId={userId} />
                 </Col>
               ))}
@@ -91,7 +94,8 @@ const AllProducts = () => {
             {page < totalPages && (
               <div className="text-center mt-4">
                 <Button
-                  variant="primary"
+                  size="lg"
+                  variant="outline-primary"
                   onClick={handleLoadMore}
                   disabled={loadingMore}
                 >
