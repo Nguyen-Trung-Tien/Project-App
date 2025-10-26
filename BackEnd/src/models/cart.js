@@ -4,13 +4,13 @@ const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
   class Cart extends Model {
     static associate(models) {
-      // 🧍 Mỗi giỏ hàng thuộc về 1 người dùng
+      // Mỗi giỏ hàng thuộc về 1 người dùng
       Cart.belongsTo(models.User, {
         foreignKey: "userId",
         as: "user",
       });
 
-      // 🛒 Một giỏ hàng có nhiều sản phẩm (CartItems)
+      // Một giỏ hàng có nhiều sản phẩm (CartItems)
       Cart.hasMany(models.CartItem, {
         foreignKey: "cartId",
         as: "cartItems",
@@ -24,10 +24,10 @@ module.exports = (sequelize, DataTypes) => {
       userId: {
         type: DataTypes.INTEGER,
         allowNull: false,
-        // references: {
-        //   model: "Users",
-        //   key: "id",
-        // },
+        references: {
+          model: "Users",
+          key: "id",
+        },
         onUpdate: "CASCADE",
         onDelete: "CASCADE",
       },

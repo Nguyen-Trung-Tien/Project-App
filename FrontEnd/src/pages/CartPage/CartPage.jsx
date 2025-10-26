@@ -96,13 +96,6 @@ const CartPage = () => {
     navigate("/checkout", { state: { selectedIds: selectedItems } });
   };
 
-  if (loading)
-    return (
-      <div className="text-center mt-5">
-        <Spinner animation="border" />
-      </div>
-    );
-
   return (
     <div className="cart-page">
       <Container>

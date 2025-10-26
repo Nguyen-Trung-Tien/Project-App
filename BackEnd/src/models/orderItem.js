@@ -27,8 +27,6 @@ module.exports = (sequelize, DataTypes) => {
       subtotal: { type: DataTypes.DECIMAL(10, 2), allowNull: false },
       productName: { type: DataTypes.STRING, allowNull: false },
       image: { type: DataTypes.BLOB("long"), allowNull: true },
-
-      // --------- Trả hàng ---------
       returnStatus: {
         type: DataTypes.ENUM(
           "none", // chưa yêu cầu trả

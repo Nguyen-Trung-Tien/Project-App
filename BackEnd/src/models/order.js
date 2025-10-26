@@ -24,7 +24,7 @@ module.exports = (sequelize, DataTypes) => {
       userId: {
         type: DataTypes.INTEGER,
         allowNull: false,
-        // references: { model: "Users", key: "id" },
+        references: { model: "Users", key: "id" },
         onUpdate: "CASCADE",
         onDelete: "SET NULL",
       },
@@ -33,7 +33,6 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         defaultValue: 0,
       },
-      // Trạng thái đơn hàng
       status: {
         type: DataTypes.ENUM(
           "pending", // chờ xử lý

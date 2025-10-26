@@ -48,7 +48,7 @@ module.exports = (sequelize, DataTypes) => {
       categoryId: {
         type: DataTypes.INTEGER,
         allowNull: true,
-        // references: { model: "Categories", key: "id" },
+        references: { model: "Categories", key: "id" },
         onDelete: "SET NULL",
         onUpdate: "CASCADE",
       },

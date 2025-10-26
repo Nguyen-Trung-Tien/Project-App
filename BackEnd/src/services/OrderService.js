@@ -4,7 +4,11 @@ const getAllOrders = async () => {
   try {
     const orders = await db.Order.findAll({
       include: [
-        { model: db.User, as: "user", attributes: ["id", "username", "email"] },
+        {
+          model: db.User,
+          as: "user",
+          attributes: ["id", "username", "email", "phone"],
+        },
         { model: db.OrderItem, as: "orderItems" },
         { model: db.Payment, as: "payment" },
       ],
@@ -136,7 +140,7 @@ const updateOrderStatus = async (id, status) => {
 
     history.push({ status, date: new Date().toISOString() });
 
-    order.status = status; // chỉ dùng ENUM hợp lệ
+    order.status = status;
     order.confirmationHistory = history;
     await order.save();
 
@@ -166,6 +170,7 @@ const deleteOrder = async (id) => {
     throw e;
   }
 };
+
 const updatePaymentStatus = async (id, paymentStatus) => {
   try {
     const order = await db.Order.findByPk(id);

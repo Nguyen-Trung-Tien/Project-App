@@ -4,14 +4,14 @@ const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
   class CartItem extends Model {
     static associate(models) {
-      // 🛒 Mỗi CartItem thuộc về 1 Cart
+      // Mỗi CartItem thuộc về 1 Cart
       CartItem.belongsTo(models.Cart, {
         foreignKey: "cartId",
         as: "cart",
         onDelete: "CASCADE",
       });
 
-      // 📦 Mỗi CartItem thuộc về 1 Product
+      // Mỗi CartItem thuộc về 1 Product
       CartItem.belongsTo(models.Product, {
         foreignKey: "productId",
         as: "product",
@@ -25,20 +25,20 @@ module.exports = (sequelize, DataTypes) => {
       cartId: {
         type: DataTypes.INTEGER,
         allowNull: false,
-        // references: {
-        //   model: "Carts",
-        //   key: "id",
-        // },
+        references: {
+          model: "Carts",
+          key: "id",
+        },
         onUpdate: "CASCADE",
         onDelete: "CASCADE",
       },
       productId: {
         type: DataTypes.INTEGER,
         allowNull: false,
-        // references: {
-        //   model: "Products",
-        //   key: "id",
-        // },
+        references: {
+          model: "Products",
+          key: "id",
+        },
         onUpdate: "CASCADE",
         onDelete: "CASCADE",
       },

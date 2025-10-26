@@ -11,7 +11,7 @@ module.exports = {
       },
       sku: {
         type: Sequelize.STRING,
-        allowNull: true, // allowNull true như model
+        allowNull: true,
         unique: true,
       },
       name: {
@@ -45,7 +45,7 @@ module.exports = {
       categoryId: {
         type: Sequelize.INTEGER,
         allowNull: true,
-        // references: { model: "Categories", key: "id" },
+        references: { model: "Categories", key: "id" },
         onUpdate: "CASCADE",
         onDelete: "SET NULL",
       },

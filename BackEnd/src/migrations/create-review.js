@@ -11,14 +11,14 @@ module.exports = {
       userId: {
         type: Sequelize.INTEGER,
         allowNull: false,
-        // references: { model: "Users", key: "id" }, // 🔹 Khóa ngoại
+        references: { model: "Users", key: "id" },
         onUpdate: "CASCADE",
         onDelete: "CASCADE",
       },
       productId: {
         type: Sequelize.INTEGER,
         allowNull: false,
-        // references: { model: "Products", key: "id" }, // 🔹 Khóa ngoại
+        references: { model: "Products", key: "id" },
         onUpdate: "CASCADE",
         onDelete: "CASCADE",
       },

@@ -199,7 +199,6 @@ const OrderDetail = () => {
         <Table responsive bordered hover className="product-table">
           <thead>
             <tr className="text-center">
-              <th>Hình ảnh</th>
               <th>Tên sản phẩm</th>
               <th>Số lượng</th>
               <th>Giá</th>
@@ -214,13 +213,6 @@ const OrderDetail = () => {
               const subtotal = price * (item.quantity || 0);
               return (
                 <tr key={item.id} className="align-middle text-center">
-                  <td>
-                    <img
-                      src={item.image || "/images/default.jpg"}
-                      alt={item.productName}
-                      className="product-img"
-                    />
-                  </td>
                   <td>{item.productName}</td>
                   <td>{item.quantity}</td>
                   <td>{price.toLocaleString()} ₫</td>

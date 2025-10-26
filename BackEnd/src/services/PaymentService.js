@@ -96,6 +96,23 @@ const updatePayment = async (orderId, data) => {
     };
     const paymentStatus = statusMap[data.paymentStatus] || "pending";
 
+    if (paymentStatus === "refunded") {
+      const method = order.paymentMethod?.toLowerCase();
+      const isOnlineMethod = ["momo", "paypal", "vnpay", "bank"].includes(
+        method
+      );
+
+      if (isOnlineMethod) {
+        const refundResult = await simulateRefund(order, method);
+        if (!refundResult.success) {
+          return {
+            errCode: 3,
+            errMessage: `Refund failed: ${refundResult.message}`,
+          };
+        }
+      }
+    }
+
     if (!payment) {
       payment = await db.Payment.create({
         orderId,
@@ -114,6 +131,7 @@ const updatePayment = async (orderId, data) => {
       });
     }
 
+    // Cập nhật trạng thái thanh toán của Order
     const orderStatusMap = {
       completed: "paid",
       refunded: "refunded",

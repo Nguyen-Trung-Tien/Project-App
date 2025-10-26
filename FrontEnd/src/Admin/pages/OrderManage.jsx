@@ -9,6 +9,7 @@ import {
   Card,
   OverlayTrigger,
   Tooltip,
+  Spinner,
 } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
@@ -71,14 +72,78 @@ const OrderManage = () => {
     fetchOrders();
   }, []);
 
+  // // 🪄 Mô phỏng hoàn tiền online
+  // const simulateRefund = async (order, method) => {
+  //   console.log(
+  //     `🔁 Bắt đầu hoàn tiền đơn #${order.id} qua ${method.toUpperCase()}...`
+  //   );
+
+  //   // Mô phỏng gọi API bên thứ 3 (trong thực tế: axios.post đến endpoint refund)
+  //   await new Promise((resolve) => setTimeout(resolve, 1200)); // delay giả lập
+
+  //   // Tùy từng phương thức, bạn có thể log hoặc lưu transactionId
+  //   switch (method) {
+  //     case "momo":
+  //       // gọi API refund MoMo thật: refundId, refundTransId...
+  //       break;
+  //     case "paypal":
+  //       // gọi PayPal SDK refund()
+  //       break;
+  //     case "vnpay":
+  //       // gọi VNPAY refund endpoint
+  //       break;
+  //     case "bank":
+  //       // gọi API của ngân hàng hoặc chuyển hoàn thủ công
+  //       break;
+  //   }
+
+  //   console.log(`✅ Hoàn tiền thành công cho đơn #${order.id} (${method})`);
+  //   return { success: true, message: "Refund completed successfully" };
+  // };
+
   const handleUpdateStatus = async (orderId, status) => {
     try {
       setLoadingId(orderId);
       const res = await updateOrderStatus(orderId, status);
-      if (res?.errCode === 0)
+
+      if (res?.errCode === 0) {
         toast.success(`Cập nhật: ${statusMap[status]?.label}`);
-      else toast.error(res?.errMessage);
-      await fetchOrders();
+        await fetchOrders();
+
+        const order = orders.find((o) => o.id === orderId);
+        const method = order.paymentMethod?.toLowerCase();
+        const isOnlineMethod = ["momo", "paypal", "vnpay", "bank"].includes(
+          method
+        );
+
+        if (
+          status === "cancelled" &&
+          isOnlineMethod &&
+          order.paymentStatus === "paid"
+        ) {
+          try {
+            const refundRes = await updatePayment(orderId, {
+              paymentStatus: "refunded",
+            });
+
+            if (refundRes?.errCode === 0) {
+              toast.success(
+                `💸 Đơn hàng ${orderId} đã được hoàn tiền cho khách!`
+              );
+              await fetchOrders();
+            } else {
+              toast.error(
+                refundRes?.errMessage || "Không thể hoàn tiền tự động"
+              );
+            }
+          } catch (refundErr) {
+            console.error(refundErr);
+            toast.error("Lỗi khi hoàn tiền khách hàng!");
+          }
+        }
+      } else {
+        toast.error(res?.errMessage);
+      }
     } catch (err) {
       console.error(err);
       toast.error("Lỗi cập nhật trạng thái");
@@ -93,6 +158,19 @@ const OrderManage = () => {
       return;
     }
 
+    const method = order.paymentMethod?.toLowerCase();
+
+    const canUpdate =
+      method === "cod" ||
+      (["momo", "paypal", "vnpay", "bank"].includes(method) &&
+        order.status === "cancelled");
+
+    if (!canUpdate) {
+      toast.info(
+        "Chỉ được cập nhật thanh toán cho đơn COD hoặc đơn online đã bị hủy!"
+      );
+      return;
+    }
     if (order.paymentMethod?.toLowerCase() !== "cod") {
       toast.info("Chỉ đơn hàng COD mới được cập nhật thủ công!");
       return;
@@ -102,7 +180,9 @@ const OrderManage = () => {
       setLoadingId(order.id);
       const res = await updatePayment(order.id, { paymentStatus: status });
       if (res?.errCode === 0) {
-        toast.success(`Thanh toán: ${paymentStatusMap[status]?.label}`);
+        toast.success(
+          `Cập nhật thanh toán: ${paymentStatusMap[status]?.label}`
+        );
         setOrders((prev) =>
           prev.map((o) =>
             o.id === order.id
@@ -158,6 +238,7 @@ const OrderManage = () => {
                 <tr>
                   <th>Mã đơn</th>
                   <th className="text-start">Khách hàng</th>
+                  <th className="text-start">SĐT</th>
                   <th>Ngày đặt</th>
                   <th>Tổng tiền</th>
                   <th>Phương thức TT</th>
@@ -180,6 +261,7 @@ const OrderManage = () => {
                   <tr key={order.id}>
                     <td>{`DH${order.id}`}</td>
                     <td className="text-start">{order.user?.username}</td>
+                    <td className="text-start">{order.user?.phone}</td>
                     <td>{formatDate(order.createdAt)}</td>
                     <td>{formatCurrency(order.totalPrice)}</td>
                     <td>{order.paymentMethod?.toUpperCase() || "—"}</td>
@@ -277,26 +359,78 @@ const OrderManage = () => {
                         </Dropdown>
 
                         {user?.role === "admin" &&
-                          order.paymentMethod?.toLowerCase() === "cod" && (
+                          (order.paymentMethod?.toLowerCase() === "cod" ||
+                            (["momo", "paypal", "vnpay", "bank"].includes(
+                              order.paymentMethod?.toLowerCase()
+                            ) &&
+                              order.status === "cancelled")) && (
                             <Dropdown>
                               <Dropdown.Toggle
                                 variant="outline-success"
                                 size="sm"
                                 disabled={loadingId === order.id}
                               >
-                                Cập nhật TT (COD)
+                                {loadingId === order.id ? (
+                                  <>
+                                    <Spinner
+                                      animation="border"
+                                      size="sm"
+                                      variant="light"
+                                      role="status"
+                                      className="me-1"
+                                    />
+                                    Đang cập nhật...
+                                  </>
+                                ) : (
+                                  order.paymentMethod?.toUpperCase()
+                                )}
                               </Dropdown.Toggle>
+
                               <Dropdown.Menu>
-                                {Object.keys(paymentStatusMap).map((key) => (
-                                  <Dropdown.Item
-                                    key={key}
-                                    onClick={() =>
-                                      handleUpdatePaymentStatus(order, key)
-                                    }
-                                  >
-                                    {paymentStatusMap[key].label}
-                                  </Dropdown.Item>
-                                ))}
+                                {(() => {
+                                  const method =
+                                    order.paymentMethod?.toLowerCase();
+
+                                  if (method === "cod") {
+                                    return Object.keys(paymentStatusMap).map(
+                                      (key) => (
+                                        <Dropdown.Item
+                                          key={key}
+                                          onClick={() =>
+                                            handleUpdatePaymentStatus(
+                                              order,
+                                              key
+                                            )
+                                          }
+                                        >
+                                          {paymentStatusMap[key].label}
+                                        </Dropdown.Item>
+                                      )
+                                    );
+                                  }
+                                  if (
+                                    [
+                                      "momo",
+                                      "paypal",
+                                      "vnpay",
+                                      "bank",
+                                    ].includes(method) &&
+                                    order.status === "cancelled"
+                                  ) {
+                                    return ["unpaid", "refunded"].map((key) => (
+                                      <Dropdown.Item
+                                        key={key}
+                                        onClick={() =>
+                                          handleUpdatePaymentStatus(order, key)
+                                        }
+                                      >
+                                        {paymentStatusMap[key].label}
+                                      </Dropdown.Item>
+                                    ));
+                                  }
+
+                                  return null;
+                                })()}
                               </Dropdown.Menu>
                             </Dropdown>
                           )}

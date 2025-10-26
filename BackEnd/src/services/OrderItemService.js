@@ -4,11 +4,21 @@ const getAllOrderItems = async () => {
   try {
     const orderItems = await db.OrderItem.findAll({
       include: [
-        { model: db.Order, as: "order", attributes: ["id", "status"] },
+        {
+          model: db.Order,
+          as: "order",
+          attributes: [
+            "id",
+            "status",
+            "confirmationHistory",
+            "shippingAddress",
+            "orderDate",
+          ],
+        },
         {
           model: db.Product,
           as: "product",
-          attributes: ["id", "name", "price"],
+          attributes: ["id", "name", "price", "image"],
         },
       ],
       order: [["createdAt", "DESC"]],
@@ -33,11 +43,21 @@ const getOrderItemById = async (id) => {
   try {
     const item = await db.OrderItem.findByPk(id, {
       include: [
-        { model: db.Order, as: "order", attributes: ["id", "status"] },
+        {
+          model: db.Order,
+          as: "order",
+          attributes: [
+            "id",
+            "status",
+            "confirmationHistory",
+            "shippingAddress",
+            "orderDate",
+          ],
+        },
         {
           model: db.Product,
           as: "product",
-          attributes: ["id", "name", "price"],
+          attributes: ["id", "name", "price", "image"],
         },
       ],
     });

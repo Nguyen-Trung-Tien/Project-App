@@ -12,14 +12,14 @@ module.exports = {
       cartId: {
         type: Sequelize.INTEGER,
         allowNull: false,
-        // references: { model: "Carts", key: "id" }, // 🔹 Khóa ngoại
+        references: { model: "Carts", key: "id" },
         onUpdate: "CASCADE",
         onDelete: "CASCADE",
       },
       productId: {
         type: Sequelize.INTEGER,
         allowNull: false,
-        // references: { model: "Products", key: "id" }, // 🔹 Khóa ngoại
+        references: { model: "Products", key: "id" },
         onUpdate: "CASCADE",
         onDelete: "CASCADE",
       },
