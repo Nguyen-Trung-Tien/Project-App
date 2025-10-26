@@ -1,14 +1,34 @@
 import React, { useEffect, useState } from "react";
-import { Container, Row, Col } from "react-bootstrap";
-import "../../styles/ProductSection.scss";
-import { getAllProductApi } from "../../api/productApi";
+import { Container, Row, Col, Alert } from "react-bootstrap";
 import { toast } from "react-toastify";
-import { addCart, createCart, getAllCarts } from "../../api/cartApi";
 import { useSelector, useDispatch } from "react-redux";
-import Loading from "../Loading/Loading";
-import ProductCard from "../../components/ProductCard/ProductCard";
-import { getImage } from "../../utils/decodeImage";
+import { getAllProductApi } from "../../api/productApi";
+import { addCart, createCart, getAllCarts } from "../../api/cartApi";
 import { addCartItem } from "../../redux/cartSlice";
+import { getImage } from "../../utils/decodeImage";
+import ProductCard from "../../components/ProductCard/ProductCard";
+
+const SkeletonCard = () => (
+  <div
+    className="product-card shadow-sm border-0 rounded-3 overflow-hidden bg-white"
+    style={{ maxWidth: "220px", height: "300px" }}
+  >
+    <div
+      className="bg-secondary bg-opacity-10 rounded mb-3"
+      style={{ width: "100%", height: "180px" }}
+    />
+    <div className="p-3">
+      <div
+        className="bg-secondary bg-opacity-10 rounded mb-2"
+        style={{ height: "20px" }}
+      />
+      <div
+        className="bg-secondary bg-opacity-10 rounded w-50"
+        style={{ height: "20px" }}
+      />
+    </div>
+  </div>
+);
 
 const ProductSection = () => {
   const dispatch = useDispatch();
@@ -26,12 +46,14 @@ const ProductSection = () => {
         if (res?.errCode === 0) {
           const featured = res.products
             ?.filter((p) => p.isActive)
-            ?.slice(0, 4)
+            ?.slice(0, 6)
             ?.map((p) => ({
               ...p,
               image: getImage(p.image),
             }));
           setProducts(featured);
+        } else {
+          toast.error("Không thể tải sản phẩm!");
         }
       } catch (error) {
         console.error("Lỗi tải sản phẩm:", error);
@@ -82,17 +104,35 @@ const ProductSection = () => {
   };
 
   return (
-    <>
-      {loading && <Loading />}
-      <section className="products py-5">
-        <Container>
-          <h2 className="section-title text-center mb-4">
-            ✨ Sản phẩm nổi bật ✨
-          </h2>
+    <section className="products py-5 bg-light">
+      <Container>
+        <h2 className="section-title text-center mb-5 fw-bold fs-3">
+          ✨ Sản phẩm nổi bật ✨
+        </h2>
 
-          <Row className="g-4 justify-content-center">
+        {loading ? (
+          <Row xs={1} sm={2} md={3} lg={5} className="g-3">
+            {Array.from({ length: 6 }).map((_, idx) => (
+              <Col
+                key={idx}
+                lg={2}
+                md={3}
+                sm={6}
+                xs={12}
+                className="d-flex justify-content-center"
+              >
+                <SkeletonCard />
+              </Col>
+            ))}
+          </Row>
+        ) : products.length > 0 ? (
+          <Row xs={1} sm={2} md={3} lg={5} className="g-3">
             {products.map((product) => (
-              <Col lg={3} md={4} sm={6} xs={12} key={product.id}>
+              <Col
+                key={product.id}
+                className="d-flex justify-content-center"
+                style={{ flex: "0 0 16.6667%" }}
+              >
                 <ProductCard
                   product={product}
                   onAddToCart={() => handleAddToCart(product, 1)}
@@ -101,9 +141,13 @@ const ProductSection = () => {
               </Col>
             ))}
           </Row>
-        </Container>
-      </section>
-    </>
+        ) : (
+          <Alert variant="warning" className="text-center">
+            Không có sản phẩm nổi bật nào!
+          </Alert>
+        )}
+      </Container>
+    </section>
   );
 };
 

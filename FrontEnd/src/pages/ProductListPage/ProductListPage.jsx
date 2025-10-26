@@ -1,13 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
-import {
-  Container,
-  Row,
-  Col,
-  Button,
-  Spinner,
-  Alert,
-  Card,
-} from "react-bootstrap";
+import { Container, Row, Col, Button, Spinner, Alert } from "react-bootstrap";
 import { useSearchParams } from "react-router-dom";
 import ProductCard from "../../components/ProductCard/ProductCard";
 import { getAllCategoryApi } from "../../api/categoryApi";
@@ -15,14 +7,27 @@ import {
   getAllProductApi,
   getProductsByCategoryApi,
 } from "../../api/productApi";
-import "./ProductListPage.scss";
 
 const SkeletonCard = () => (
-  <Card className="p-3 mb-3 shadow-sm skeleton-card">
-    <div className="skeleton-image mb-3" />
-    <div className="skeleton-text mb-2" />
-    <div className="skeleton-text w-50" />
-  </Card>
+  <div
+    className="product-card shadow-sm border-0 rounded-3 overflow-hidden bg-white"
+    style={{ maxWidth: "220px", height: "300px" }}
+  >
+    <div
+      className="bg-secondary bg-opacity-10 rounded mb-3"
+      style={{ width: "100%", height: "180px" }}
+    />
+    <div className="p-3">
+      <div
+        className="bg-secondary bg-opacity-10 rounded mb-2"
+        style={{ height: "20px" }}
+      />
+      <div
+        className="bg-secondary bg-opacity-10 rounded w-50"
+        style={{ height: "20px" }}
+      />
+    </div>
+  </div>
 );
 
 const ProductListPage = () => {
@@ -36,7 +41,7 @@ const ProductListPage = () => {
   const [error, setError] = useState("");
 
   const [searchParams, setSearchParams] = useSearchParams();
-  const limit = 12;
+  const limit = 10;
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -58,7 +63,6 @@ const ProductListPage = () => {
       setError("");
 
       let res;
-
       if (catIds.length === 0) {
         res = await getAllProductApi(page, limit);
       } else {
@@ -127,83 +131,102 @@ const ProductListPage = () => {
   };
 
   return (
-    <Container className="py-4">
-      <h3 className="mb-4">Danh sách sản phẩm</h3>
-      <div className="mb-4 d-flex flex-wrap gap-2 align-items-center">
-        <span className="fw-bold me-2">Lọc theo danh mục:</span>
-        {categories.map((cat) => (
-          <Button
-            key={cat.id}
-            size="sm"
-            variant={
-              selectedCategories.includes(cat.id)
-                ? "primary"
-                : "outline-secondary"
-            }
-            className="rounded-pill"
-            onClick={() => toggleCategory(cat.id)}
-          >
-            {cat.name}
-          </Button>
-        ))}
-        {selectedCategories.length > 0 && (
-          <Button
-            variant="danger"
-            size="sm"
-            className="ms-2 rounded-pill"
-            onClick={() => setSelectedCategories([]) || fetchProducts(1, [])}
-          >
-            Clear All
-          </Button>
-        )}
-      </div>
+    <section className="product-list-section py-5 bg-light">
+      <Container>
+        <h3 className="mb-5 fw-bold fs-3 text-center">Danh sách sản phẩm</h3>
 
-      {error && <Alert variant="danger">{error}</Alert>}
-
-      {loading && products.length === 0 ? (
-        <Row xs={1} sm={2} md={3} lg={4} className="g-4">
-          {Array.from({ length: limit }).map((_, idx) => (
-            <Col key={idx}>
-              <SkeletonCard />
-            </Col>
+        <div className="mb-4 d-flex flex-wrap gap-2 align-items-center">
+          <span className="fw-bold me-3">Lọc theo danh mục:</span>
+          {categories.map((cat) => (
+            <Button
+              key={cat.id}
+              size="sm"
+              variant={
+                selectedCategories.includes(cat.id)
+                  ? "primary"
+                  : "outline-secondary"
+              }
+              className="rounded-pill px-3"
+              onClick={() => toggleCategory(cat.id)}
+            >
+              {cat.name}
+            </Button>
           ))}
-        </Row>
-      ) : products.length > 0 ? (
-        <>
-          <Row xs={1} sm={2} md={3} lg={4} className="g-4">
-            {products.map((product, index) => (
-              <Col key={`${product.id}-${index}`}>
-                <div className="product-card-wrapper">
-                  <ProductCard product={product} />
-                </div>
+          {selectedCategories.length > 0 && (
+            <Button
+              variant="outline-danger"
+              size="sm"
+              className="rounded-pill px-3"
+              onClick={() => {
+                setSelectedCategories([]);
+                setSearchParams({});
+                fetchProducts(1, []);
+              }}
+            >
+              Xóa bộ lọc
+            </Button>
+          )}
+        </div>
+
+        {error && (
+          <Alert variant="danger" className="text-center">
+            {error}
+          </Alert>
+        )}
+
+        {loading && products.length === 0 ? (
+          <Row xs={1} sm={2} md={3} lg={5} className="g-3">
+            {Array.from({ length: limit }).map((_, idx) => (
+              <Col key={idx} className="d-flex justify-content-center">
+                <SkeletonCard />
               </Col>
             ))}
           </Row>
+        ) : products.length > 0 ? (
+          <>
+            <Row xs={1} sm={2} md={3} lg={5} className="g-3">
+              {products.map((product) => (
+                <Col
+                  key={product.id}
+                  lg={2}
+                  md={3}
+                  sm={6}
+                  xs={12}
+                  className="d-flex justify-content-center"
+                >
+                  <ProductCard product={product} />
+                </Col>
+              ))}
+            </Row>
 
-          {currentPage < totalPages && (
-            <div className="text-center mt-2">
-              <Button
-                size="lg"
-                variant="outline-primary"
-                onClick={handleLoadMore}
-                disabled={loadingMore}
-              >
-                {loadingMore ? (
-                  <>
-                    <Spinner animation="border" size="sm" className="me-2" />
-                    Đang tải...
-                  </>
-                ) : (
-                  "Xem thêm"
-                )}
-              </Button>
-            </div>
-          )}
-        </>
-      ) : (
-        <Alert variant="warning">Không có sản phẩm nào!</Alert>
-      )}
-    </Container>
+            {currentPage < totalPages && (
+              <div className="text-center mt-5">
+                <Button
+                  variant="outline-primary"
+                  size="lg"
+                  className="rounded-pill px-4 py-2"
+                  onClick={handleLoadMore}
+                  disabled={loadingMore}
+                >
+                  {loadingMore ? (
+                    <>
+                      <Spinner animation="border" size="sm" className="me-2" />
+                      Đang tải...
+                    </>
+                  ) : (
+                    "Xem thêm sản phẩm"
+                  )}
+                </Button>
+              </div>
+            )}
+          </>
+        ) : (
+          <Alert variant="warning" className="text-center">
+            Không có sản phẩm nào phù hợp!
+          </Alert>
+        )}
+      </Container>
+    </section>
   );
 };
 

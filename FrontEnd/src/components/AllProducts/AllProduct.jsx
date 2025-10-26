@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Container, Row, Col, Spinner, Button } from "react-bootstrap";
+import { Container, Row, Col, Spinner, Button, Alert } from "react-bootstrap";
 import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
 import { useSearchParams } from "react-router-dom";
@@ -13,7 +13,7 @@ const AllProducts = () => {
   const [loadingMore, setLoadingMore] = useState(false);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const limit = 8;
+  const limit = 10; // Tăng limit để hiển thị nhiều sản phẩm hơn mỗi trang
 
   const user = useSelector((state) => state.user.user);
   const userId = user?.id;
@@ -62,9 +62,9 @@ const AllProducts = () => {
   };
 
   return (
-    <section className="all-products-section py-5">
+    <section className="all-products-section py-5 bg-light">
       <Container>
-        <h2 className="section-title text-center mb-4 fw-bold">
+        <h2 className="section-title text-center mb-5 fw-bold fs-3">
           {searchQuery
             ? `Kết quả tìm kiếm: "${searchQuery}"`
             : "Tất cả sản phẩm"}
@@ -72,19 +72,24 @@ const AllProducts = () => {
 
         {loading && !products.length ? (
           <div className="text-center my-5">
-            <Spinner animation="border" variant="primary" />
+            <Spinner animation="border" variant="primary" size="lg" />
+            <p className="mt-2 text-muted">Đang tải sản phẩm...</p>
           </div>
         ) : products.length === 0 ? (
-          <p className="text-center text-muted">Không tìm thấy sản phẩm nào.</p>
+          <Alert variant="warning" className="text-center">
+            Không tìm thấy sản phẩm nào phù hợp.
+          </Alert>
         ) : (
           <>
-            <Row className="g-4 justify-content-center">
+            <Row className="g-3 justify-content-center">
               {products.map((product) => (
                 <Col
-                  key={`${product.id}-${Math.random()}`}
-                  md={3}
-                  sm={6}
-                  xs={12}
+                  key={`${product.id}-${Math.random()}`} // Lưu ý: Nên dùng unique key tốt hơn
+                  lg={2} // 5 cột trên màn hình lớn
+                  md={3} // 4 cột trên màn hình trung bình
+                  sm={6} // 2 cột trên màn hình nhỏ
+                  xs={12} // 1 cột trên màn hình rất nhỏ
+                  className="d-flex justify-content-center"
                 >
                   <ProductCard product={product} userId={userId} />
                 </Col>
@@ -92,10 +97,11 @@ const AllProducts = () => {
             </Row>
 
             {page < totalPages && (
-              <div className="text-center mt-4">
+              <div className="text-center mt-5">
                 <Button
-                  size="lg"
                   variant="outline-primary"
+                  size="lg"
+                  className="rounded-pill px-4 py-2"
                   onClick={handleLoadMore}
                   disabled={loadingMore}
                 >
@@ -105,7 +111,7 @@ const AllProducts = () => {
                       Đang tải...
                     </>
                   ) : (
-                    "Xem thêm"
+                    "Xem thêm sản phẩm"
                   )}
                 </Button>
               </div>

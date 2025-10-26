@@ -6,7 +6,6 @@ import { useSelector, useDispatch } from "react-redux";
 import { addCart, getAllCarts, createCart } from "../../api/cartApi";
 import { addCartItem } from "../../redux/cartSlice";
 import { getImage } from "../../utils/decodeImage";
-import "./ProductCard.scss";
 
 const ProductCard = ({ product }) => {
   const navigate = useNavigate();
@@ -15,8 +14,7 @@ const ProductCard = ({ product }) => {
   const userId = user?.id;
   const [loading, setLoading] = useState(false);
 
-  const { id, name, price, discount, stock, image, isActive, sku, category } =
-    product;
+  const { id, name, price, discount, stock, image, isActive } = product;
 
   const { rawPrice, rawDiscount, finalPrice, hasDiscount } = useMemo(() => {
     const p = Number(price) || 0;
@@ -75,141 +73,105 @@ const ProductCard = ({ product }) => {
 
   return (
     <Card
-      className={`product-card shadow-sm border-0 rounded-4 overflow-hidden ${
-        !isActive ? "inactive" : ""
-      }`}
+      className={`product-card shadow-sm border-0 rounded-3 overflow-hidden ${
+        !isActive ? "opacity-75" : ""
+      } h-100`}
       onClick={() => navigate(`/product-detail/${id}`)}
       style={{
         cursor: "pointer",
         transition: "transform 0.2s ease, box-shadow 0.2s ease",
-        height: "100%",
+        maxWidth: "200px",
+        minWidth: "200px",
       }}
-      onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.02)")}
-      onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.transform = "scale(1.03)";
+        e.currentTarget.style.boxShadow = "0 4px 12px rgba(0,0,0,0.1)";
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.transform = "scale(1)";
+        e.currentTarget.style.boxShadow = "none";
+      }}
     >
       <div
-        className="image-wrapper position-relative bg-white"
+        className="image-wrapper position-relative bg-white d-flex align-items-center justify-content-center"
         style={{
           width: "100%",
-          height: "220px",
-          overflow: "hidden",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
+          height: "150px",
         }}
       >
         <Card.Img
           variant="top"
           src={getImage(image)}
           alt={name}
+          className="p-2"
           style={{
             width: "100%",
             height: "100%",
             objectFit: "contain",
             transition: "transform 0.3s ease",
           }}
-          onMouseEnter={(e) =>
-            (e.currentTarget.style.transform = "scale(1.05)")
-          }
+          onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.1)")}
           onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
         />
 
         {hasDiscount && (
           <span
-            className="discount-badge"
-            style={{
-              position: "absolute",
-              top: "10px",
-              left: "10px",
-              backgroundColor: "#dc3545",
-              color: "#fff",
-              fontWeight: "600",
-              padding: "4px 8px",
-              borderRadius: "6px",
-              fontSize: "0.8rem",
-            }}
+            className="position-absolute top-0 start-0 bg-danger text-white fw-bold px-2 py-1 rounded-bottom-end"
+            style={{ fontSize: "0.75rem" }}
           >
             -{rawDiscount}%
           </span>
         )}
       </div>
 
-      <Card.Body
-        className="d-flex flex-column justify-content-between"
-        style={{ padding: "0.75rem 1rem" }}
-      >
-        <div>
-          <Card.Title
-            className="mb-2 text-truncate"
-            title={name}
-            style={{ fontWeight: 600, fontSize: "1rem" }}
-          >
-            {name}
-          </Card.Title>
+      <Card.Body className="d-flex flex-column p-3">
+        <Card.Title
+          className="mb-2 text-truncate-2-lines"
+          title={name}
+          style={{ fontSize: "0.9rem", minHeight: "2.4rem" }}
+        >
+          {name}
+        </Card.Title>
 
-          <div className="price-section mb-2">
-            {hasDiscount ? (
-              <>
-                <div
-                  className="text-muted"
-                  style={{ textDecoration: "line-through", fontSize: "0.9rem" }}
-                >
-                  {formatVND(rawPrice)}
-                </div>
-                <div
-                  style={{
-                    color: "#d0021b",
-                    fontWeight: "bold",
-                    fontSize: "1.1rem",
-                  }}
-                >
-                  {formatVND(finalPrice)}
-                </div>
-              </>
-            ) : (
-              <div
-                style={{
-                  color: "#d0021b",
-                  fontWeight: "bold",
-                  fontSize: "1.1rem",
-                }}
-              >
+        <div className="price-section mb-2">
+          {hasDiscount ? (
+            <>
+              <div className="text-muted text-decoration-line-through fs-6">
+                {formatVND(rawPrice)}
+              </div>
+              <div className="text-danger fw-bold fs-5">
                 {formatVND(finalPrice)}
               </div>
-            )}
-          </div>
-
-          <div className="small text-secondary">
-            <div>
-              <strong>Mã:</strong> {sku || "—"}
+            </>
+          ) : (
+            <div className="text-danger fw-bold fs-5">
+              {formatVND(finalPrice)}
             </div>
-            <div>
-              <strong>Danh mục:</strong> {category?.name || "Không có"}
-            </div>
-            <div>
-              <strong>Tồn kho:</strong> {stock}
-            </div>
-          </div>
+          )}
         </div>
 
-        <div className="d-grid mt-3">
-          <Button
-            variant="primary"
-            disabled={!isActive || stock < 1 || loading}
-            onClick={handleAddToCart}
-            style={{
-              borderRadius: 50,
-              backgroundColor: "#007bff",
-              fontWeight: 500,
-            }}
-          >
-            {loading ? (
-              <Spinner animation="border" size="sm" />
-            ) : (
-              "🛒 Thêm vào giỏ"
-            )}
-          </Button>
+        <div className="text-muted fs-6 mb-2">
+          Đã bán: {stock > 0 ? stock : "Hết hàng"}
         </div>
+
+        <Button
+          variant="outline-primary"
+          disabled={!isActive || stock < 1 || loading}
+          onClick={handleAddToCart}
+          className="mt-auto rounded-pill"
+          style={{
+            fontSize: "0.85rem",
+            padding: "0.5rem",
+          }}
+        >
+          {loading ? (
+            <Spinner size="sm" animation="border" />
+          ) : (
+            <>
+              <i className="bi bi-cart-plus me-1"></i> Thêm vào giỏ
+            </>
+          )}
+        </Button>
       </Card.Body>
     </Card>
   );

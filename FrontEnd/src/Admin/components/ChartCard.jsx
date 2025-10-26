@@ -10,7 +10,6 @@ import {
   CartesianGrid,
 } from "recharts";
 import "../Layout.scss";
-import Loading from "../../components/Loading/Loading";
 import { getDashboard } from "../../api/adminApi";
 
 const ChartCard = () => {
@@ -28,7 +27,6 @@ const ChartCard = () => {
       try {
         setLoading(true);
         const res = await getDashboard();
-
         if (res?.errCode === 0 && res.data) {
           const convertData = (arr, labelKey, valueKey) =>
             (arr || []).map((x) => ({
@@ -36,7 +34,6 @@ const ChartCard = () => {
               value: x[valueKey],
             }));
 
-          // ✅ Đảm bảo dữ liệu luôn có key `name` và `value`
           setDashboardData({
             totalRevenue: res.data.totalRevenue || 0,
             revenueByWeek: convertData(
@@ -56,7 +53,7 @@ const ChartCard = () => {
             ),
           });
         } else {
-          console.warn("⚠️ API không có dữ liệu hợp lệ:", res);
+          console.warn("API không có dữ liệu hợp lệ:", res);
         }
       } catch (error) {
         console.error("Lỗi khi tải dữ liệu dashboard:", error);
@@ -74,7 +71,6 @@ const ChartCard = () => {
     year: dashboardData.revenueByYear,
   };
 
-  // ✅ Fallback demo nếu API chưa có dữ liệu
   const selectedData =
     dataMap[type]?.length > 0
       ? dataMap[type]

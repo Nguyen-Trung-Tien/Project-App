@@ -1,5 +1,5 @@
 import React from "react";
-import { Container, Row, Col } from "react-bootstrap";
+import { Container, Row, Col, Navbar } from "react-bootstrap";
 import {
   Facebook,
   Instagram,
@@ -9,6 +9,7 @@ import {
   GeoAlt,
 } from "react-bootstrap-icons";
 import "./Footer.scss";
+import { Link } from "react-router-dom";
 
 const Footer = () => {
   return (
@@ -17,7 +18,14 @@ const Footer = () => {
         <Row className="gy-2">
           {/* Cột 1 */}
           <Col md={3} sm={6}>
-            <h5 className="footer__title">T-Store</h5>
+            <Navbar.Brand
+              as={Link}
+              to="/"
+              className="header__brand fw-bold fs-4"
+            >
+              <span className="brand-highlight text-primary">T</span>ien-
+              <span className="brand-highlight text-primary">T</span>ech
+            </Navbar.Brand>
             <p className="footer__desc">
               Cửa hàng điện tử hàng đầu Việt Nam — cung cấp sản phẩm chất lượng
               chính hãng với giá tốt nhất.

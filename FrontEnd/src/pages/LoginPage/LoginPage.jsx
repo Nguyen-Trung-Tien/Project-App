@@ -14,7 +14,6 @@ import { loginUser } from "../../api/userApi";
 import { setUser } from "../../redux/userSlice";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
-import Loading from "../../components/Loading/Loading";
 import { getAvatarBase64 } from "../../utils/decodeImage";
 
 const LoginPage = () => {
@@ -55,7 +54,6 @@ const LoginPage = () => {
 
   return (
     <>
-      {loading && <Loading />}
       <div className="login-page">
         <Container className="d-flex justify-content-center align-items-center vh-100">
           <Row className="w-100 justify-content-center">

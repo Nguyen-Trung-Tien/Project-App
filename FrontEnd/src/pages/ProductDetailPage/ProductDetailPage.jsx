@@ -394,27 +394,28 @@ const ProductDetailPage = () => {
             <h4 className="fw-bold mb-3">Sản phẩm gợi ý</h4>
             <Row className="g-4">
               {suggestedProducts.map((p) => (
-                <Col key={p.id} md={3} sm={6} xs={12}>
+                <Col key={p.id} lg={2} md={3} sm={6} xs={12}>
                   <ProductCard product={p} />
                 </Col>
               ))}
             </Row>
 
             {suggestedPage < suggestedTotalPages && (
-              <div className="text-center mt-4">
+              <div className="text-center mt-5">
                 <Button
-                  size="lg"
                   variant="outline-primary"
+                  size="lg"
+                  className="rounded-pill px-4 py-2"
                   onClick={handleLoadMoreSuggested}
                   disabled={loadingSuggested}
                 >
-                  {loadingSuggested ? (
+                  {loading ? (
                     <>
                       <Spinner animation="border" size="sm" className="me-2" />
                       Đang tải...
                     </>
                   ) : (
-                    "Xem thêm"
+                    "Xem thêm sản phẩm"
                   )}
                 </Button>
               </div>

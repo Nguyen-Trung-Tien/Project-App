@@ -90,7 +90,8 @@ function Header() {
     >
       <Container>
         <Navbar.Brand as={Link} to="/" className="header__brand fw-bold fs-4">
-          <span className="brand-highlight text-primary">T</span>-Store
+          <span className="brand-highlight text-primary">T</span>ien-
+          <span className="brand-highlight text-primary">T</span>ech
         </Navbar.Brand>
 
         <Navbar.Toggle aria-controls="navbar-nav" />
