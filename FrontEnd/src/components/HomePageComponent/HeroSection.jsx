@@ -15,7 +15,7 @@ const HeroSection = () => {
       <div className="hero-overlay"></div>
       <div className="hero-content text-center text-light">
         <h1>
-          Chào mừng đến với <span>E-Store</span>
+          Chào mừng đến với <span>T-Store</span>
         </h1>
         <p>Mua sắm thông minh – Chất lượng hàng đầu – Giá siêu ưu đãi</p>
         <Button className="hero-btn" onClick={handleGetAllProduct}>

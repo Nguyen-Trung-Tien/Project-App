@@ -5,8 +5,36 @@ import LoginPage from "./pages/LoginPage/LoginPage";
 import RegisterPage from "./pages/RegisterPage/RegisterPage";
 import { ToastContainer } from "react-toastify";
 import AdminRoutes from "./routes/AdminRoutes";
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { getAllCarts } from "./api/cartApi";
+import { setCartItems } from "./redux/cartSlice";
 
 const App = () => {
+  const dispatch = useDispatch();
+  const user = useSelector((state) => state.user.currentUser);
+
+  useEffect(() => {
+    const fetchCart = async () => {
+      if (!user?.id) return;
+
+      try {
+        const res = await getAllCarts();
+        const userCart = res.data.find((c) => c.userId === user.id);
+
+        if (userCart?.items) {
+          dispatch(setCartItems(userCart.items));
+        } else {
+          dispatch(setCartItems([]));
+        }
+      } catch (error) {
+        console.error("Lỗi tải giỏ hàng:", error);
+      }
+    };
+
+    fetchCart();
+  }, [user, dispatch]);
+
   return (
     <>
       <Routes>
@@ -27,7 +55,6 @@ const App = () => {
           }
         />
 
-        {/* User routes */}
         <Route
           path="/*"
           element={
@@ -36,8 +63,6 @@ const App = () => {
             </LayoutComponent>
           }
         />
-
-        {/* Admin routes */}
         <Route
           path="/admin/*"
           element={
@@ -47,7 +72,6 @@ const App = () => {
           }
         />
 
-        {/* Catch-all */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
 

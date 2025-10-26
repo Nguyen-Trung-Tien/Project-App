@@ -22,7 +22,7 @@ const CheckoutSuccess = () => {
 
         <h2 className="mt-3 fw-bold text-success">Thanh toán thành công!</h2>
         <p className="text-muted mt-2">
-          Cảm ơn bạn đã mua hàng tại <strong>E-Store</strong>.<br />
+          Cảm ơn bạn đã mua hàng tại <strong>T-Store</strong>.<br />
           Đơn hàng của bạn đang được xử lý và sẽ sớm được giao đến bạn.
         </p>
 

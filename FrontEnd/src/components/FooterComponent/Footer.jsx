@@ -17,7 +17,7 @@ const Footer = () => {
         <Row className="gy-2">
           {/* Cột 1 */}
           <Col md={3} sm={6}>
-            <h5 className="footer__title">E-Store</h5>
+            <h5 className="footer__title">T-Store</h5>
             <p className="footer__desc">
               Cửa hàng điện tử hàng đầu Việt Nam — cung cấp sản phẩm chất lượng
               chính hãng với giá tốt nhất.

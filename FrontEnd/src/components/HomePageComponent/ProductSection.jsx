@@ -1,15 +1,17 @@
 import React, { useEffect, useState } from "react";
-import { Container, Row, Col, Spinner } from "react-bootstrap";
+import { Container, Row, Col } from "react-bootstrap";
 import "../../styles/ProductSection.scss";
 import { getAllProductApi } from "../../api/productApi";
 import { toast } from "react-toastify";
 import { addCart, createCart, getAllCarts } from "../../api/cartApi";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import Loading from "../Loading/Loading";
 import ProductCard from "../../components/ProductCard/ProductCard";
 import { getImage } from "../../utils/decodeImage";
+import { addCartItem } from "../../redux/cartSlice";
 
 const ProductSection = () => {
+  const dispatch = useDispatch();
   const user = useSelector((state) => state.user.user);
   const userId = user?.id;
 
@@ -66,6 +68,7 @@ const ProductSection = () => {
       });
 
       if (res.errCode === 0) {
+        dispatch(addCartItem({ ...product, quantity }));
         toast.success(`Đã thêm "${product.name}" vào giỏ hàng`);
       } else {
         toast.error(res.errMessage || "Thêm vào giỏ hàng thất bại!");
@@ -87,7 +90,7 @@ const ProductSection = () => {
             ✨ Sản phẩm nổi bật ✨
           </h2>
 
-          <Row className="g-4 justify-content-center ">
+          <Row className="g-4 justify-content-center">
             {products.map((product) => (
               <Col lg={3} md={4} sm={6} xs={12} key={product.id}>
                 <ProductCard

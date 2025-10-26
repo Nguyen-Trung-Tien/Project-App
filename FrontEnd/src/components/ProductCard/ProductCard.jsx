@@ -2,13 +2,15 @@ import React, { useState, useMemo } from "react";
 import { Card, Button, Spinner } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { addCart, getAllCarts, createCart } from "../../api/cartApi";
+import { addCartItem } from "../../redux/cartSlice";
 import { getImage } from "../../utils/decodeImage";
 import "./ProductCard.scss";
 
 const ProductCard = ({ product }) => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const user = useSelector((state) => state.user.user);
   const userId = user?.id;
   const [loading, setLoading] = useState(false);
@@ -20,7 +22,6 @@ const ProductCard = ({ product }) => {
     const p = Number(price) || 0;
     const d = Number(discount) || 0;
     const discounted = d > 0 ? p * (1 - d / 100) : p;
-
     return {
       rawPrice: Math.round(p),
       rawDiscount: d,
@@ -51,13 +52,19 @@ const ProductCard = ({ product }) => {
         const newCartRes = await createCart(userId);
         cart = newCartRes.data;
       }
+
       const res = await addCart({
         cartId: cart.id,
         productId: id,
         quantity: 1,
       });
-      if (res.errCode === 0) toast.success(`Đã thêm "${name}" vào giỏ hàng`);
-      else toast.error(res.errMessage || "Thêm vào giỏ hàng thất bại!");
+
+      if (res.errCode === 0) {
+        dispatch(addCartItem({ ...product, quantity: 1 }));
+        toast.success(`Đã thêm "${name}" vào giỏ hàng`);
+      } else {
+        toast.error(res.errMessage || "Thêm vào giỏ hàng thất bại!");
+      }
     } catch (err) {
       console.error("Error adding cart item:", err);
       toast.error("Lỗi khi thêm vào giỏ hàng!");
@@ -140,7 +147,6 @@ const ProductCard = ({ product }) => {
             {name}
           </Card.Title>
 
-          {/* ✅ Giá hiển thị rõ ràng, đẹp mắt */}
           <div className="price-section mb-2">
             {hasDiscount ? (
               <>
