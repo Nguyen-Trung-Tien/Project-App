@@ -6,23 +6,25 @@ import { useSelector, useDispatch } from "react-redux";
 import { addCart, getAllCarts, createCart } from "../../api/cartApi";
 import { addCartItem } from "../../redux/cartSlice";
 import { getImage } from "../../utils/decodeImage";
-
+import { CartPlus, CreditCard } from "react-bootstrap-icons";
+import "./ProductCard.scss";
 const ProductCard = ({ product }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const user = useSelector((state) => state.user.user);
   const userId = user?.id;
-  const [loading, setLoading] = useState(false);
+
+  const [loadingCart, setLoadingCart] = useState(false);
+  const [loadingBuy, setLoadingBuy] = useState(false);
 
   const { id, name, price, discount, stock, image, isActive } = product;
 
-  const { rawPrice, rawDiscount, finalPrice, hasDiscount } = useMemo(() => {
+  const { rawPrice, finalPrice, hasDiscount } = useMemo(() => {
     const p = Number(price) || 0;
     const d = Number(discount) || 0;
     const discounted = d > 0 ? p * (1 - d / 100) : p;
     return {
       rawPrice: Math.round(p),
-      rawDiscount: d,
       finalPrice: Math.round(discounted),
       hasDiscount: d > 0,
     };
@@ -42,7 +44,7 @@ const ProductCard = ({ product }) => {
       return;
     }
 
-    setLoading(true);
+    setLoadingCart(true);
     try {
       const cartsRes = await getAllCarts();
       let cart = cartsRes.data.find((c) => c.userId === userId);
@@ -50,24 +52,45 @@ const ProductCard = ({ product }) => {
         const newCartRes = await createCart(userId);
         cart = newCartRes.data;
       }
-
-      const res = await addCart({
-        cartId: cart.id,
-        productId: id,
-        quantity: 1,
-      });
-
-      if (res.errCode === 0) {
-        dispatch(addCartItem({ ...product, quantity: 1 }));
-        toast.success(`Đã thêm "${name}" vào giỏ hàng`);
-      } else {
-        toast.error(res.errMessage || "Thêm vào giỏ hàng thất bại!");
-      }
+      await addCart({ cartId: cart.id, productId: id, quantity: 1 });
+      dispatch(addCartItem({ ...product, quantity: 1 }));
+      toast.success(`Đã thêm "${name}" vào giỏ hàng`);
     } catch (err) {
-      console.error("Error adding cart item:", err);
+      console.error(err);
       toast.error("Lỗi khi thêm vào giỏ hàng!");
     } finally {
-      setLoading(false);
+      setLoadingCart(false);
+    }
+  };
+
+  const handleBuyNow = async (e) => {
+    e.stopPropagation();
+    if (!userId) {
+      toast.warn("Vui lòng đăng nhập để mua hàng!");
+      return;
+    }
+    if (!isActive || stock < 1) {
+      toast.error("Sản phẩm không khả dụng!");
+      return;
+    }
+
+    setLoadingBuy(true);
+    try {
+      const cartsRes = await getAllCarts();
+      let cart = cartsRes.data.find((c) => c.userId === userId);
+      if (!cart) {
+        const newCartRes = await createCart(userId);
+        cart = newCartRes.data;
+      }
+      await addCart({ cartId: cart.id, productId: id, quantity: 1 });
+      dispatch(addCartItem({ ...product, quantity: 1 }));
+
+      navigate("/checkout", { state: { product, quantity: 1 } });
+    } catch (err) {
+      console.error(err);
+      toast.error("Không thể mua ngay, vui lòng thử lại!");
+    } finally {
+      setLoadingBuy(false);
     }
   };
 
@@ -94,10 +117,7 @@ const ProductCard = ({ product }) => {
     >
       <div
         className="image-wrapper position-relative bg-white d-flex align-items-center justify-content-center"
-        style={{
-          width: "100%",
-          height: "150px",
-        }}
+        style={{ width: "100%", height: "150px" }}
       >
         <Card.Img
           variant="top"
@@ -113,13 +133,12 @@ const ProductCard = ({ product }) => {
           onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.1)")}
           onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
         />
-
         {hasDiscount && (
           <span
             className="position-absolute top-0 start-0 bg-danger text-white fw-bold px-2 py-1 rounded-bottom-end"
             style={{ fontSize: "0.75rem" }}
           >
-            -{rawDiscount}%
+            -{discount}%
           </span>
         )}
       </div>
@@ -134,44 +153,50 @@ const ProductCard = ({ product }) => {
         </Card.Title>
 
         <div className="price-section mb-2">
-          {hasDiscount ? (
-            <>
-              <div className="text-muted text-decoration-line-through fs-6">
-                {formatVND(rawPrice)}
-              </div>
-              <div className="text-danger fw-bold fs-5">
-                {formatVND(finalPrice)}
-              </div>
-            </>
-          ) : (
-            <div className="text-danger fw-bold fs-5">
-              {formatVND(finalPrice)}
+          {hasDiscount && (
+            <div className="text-muted text-decoration-line-through fs-6">
+              {formatVND(rawPrice)}
             </div>
           )}
+          <div className="text-danger fw-bold fs-5">
+            {formatVND(finalPrice)}
+          </div>
         </div>
 
         <div className="text-muted fs-6 mb-2">
-          Đã bán: {stock > 0 ? stock : "Hết hàng"}
+          {stock > 0 ? `Còn ${stock} sản phẩm` : "Hết hàng"}
         </div>
 
-        <Button
-          variant="outline-primary"
-          disabled={!isActive || stock < 1 || loading}
-          onClick={handleAddToCart}
-          className="mt-auto rounded-pill"
-          style={{
-            fontSize: "0.85rem",
-            padding: "0.5rem",
-          }}
-        >
-          {loading ? (
-            <Spinner size="sm" animation="border" />
-          ) : (
-            <>
-              <i className="bi bi-cart-plus me-1"></i> Thêm vào giỏ
-            </>
-          )}
-        </Button>
+        <div className="d-flex gap-2 mt-auto shopee-buttons">
+          <Button
+            variant="outline-primary"
+            disabled={!isActive || stock < 1 || loadingCart}
+            onClick={handleAddToCart}
+            className="flex-fill btn-shopee-add btn-shopee-small d-flex align-items-center justify-content-center"
+          >
+            {loadingCart ? (
+              <Spinner size="sm" animation="border" />
+            ) : (
+              <>
+                <CartPlus className="me-1" />
+              </>
+            )}
+          </Button>
+
+          <Button
+            disabled={!isActive || stock < 1 || loadingBuy}
+            onClick={handleBuyNow}
+            className="flex-fill btn-shopee-buy btn-shopee-small d-flex align-items-center justify-content-center"
+          >
+            {loadingBuy ? (
+              <Spinner size="sm" animation="border" />
+            ) : (
+              <>
+                <CreditCard className="me-1" /> Mua ngay
+              </>
+            )}
+          </Button>
+        </div>
       </Card.Body>
     </Card>
   );

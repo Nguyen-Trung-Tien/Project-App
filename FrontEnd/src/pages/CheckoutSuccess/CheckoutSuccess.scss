@@ -1,15 +1,15 @@
 .checkout-success-page {
-  min-height: 100vh;
-  background: linear-gradient(135deg, #e3fdfd, #ffffff);
+  min-height: 70vh;
   display: flex;
   align-items: center;
   justify-content: center;
 
   .success-icon {
-    color: #28a745;
-    svg {
-      filter: drop-shadow(0 0 8px rgba(40, 167, 69, 0.3));
-    }
+    font-size: 100px;
+  }
+
+  .brand-highlight {
+    font-weight: 700;
   }
 
   .order-code {
@@ -17,11 +17,36 @@
     letter-spacing: 1px;
   }
 
-  button {
-    border-radius: 10px;
-    transition: all 0.2s ease;
-    &:hover {
-      transform: translateY(-2px);
+  .button-group {
+    button {
+      min-width: 140px;
+      font-size: 0.9rem;
+      border-radius: 50px;
+      transition: all 0.2s ease;
+
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      }
+    }
+  }
+
+  @media (max-width: 576px) {
+    .success-icon {
+      font-size: 70px;
+    }
+
+    .order-code {
+      font-size: 1rem;
+    }
+
+    .button-group {
+      flex-direction: column;
+      gap: 0.75rem;
+
+      button {
+        width: 100%;
+      }
     }
   }
 }

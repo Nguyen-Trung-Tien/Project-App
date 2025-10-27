@@ -1,0 +1,26 @@
+.shopee-buttons .btn-shopee-small {
+  font-size: 1rem;
+  padding: 0.35rem 0;
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.shopee-buttons .btn-shopee-add {
+  background-color: #2c96f1;
+  color: #fff;
+  border: none;
+}
+
+.shopee-buttons .btn-shopee-buy {
+  background-color: #198754;
+  color: #fff;
+  border: none;
+}
+
+.shopee-buttons .btn-shopee-small:hover {
+  transform: translateY(-1.5px);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
+}

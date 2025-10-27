@@ -126,7 +126,7 @@ const handleCreateVnpayPayment = async (req, res) => {
     vnp_OrderInfo: `Thanh toan don hang ${txnRef}`,
     vnp_OrderType: "billpayment",
     vnp_Amount: Math.round(Number(amount) * 100),
-    vnp_ReturnUrl: encodeURIComponent(`${returnUrl}?orderId=${txnRef}`), // ✅ encode
+    vnp_ReturnUrl: encodeURIComponent(`${returnUrl}?orderId=${txnRef}`),
     vnp_IpAddr: ipAddr,
     vnp_CreateDate: createDate,
   };
@@ -143,10 +143,6 @@ const handleCreateVnpayPayment = async (req, res) => {
 
   const query = qs.stringify(vnp_Params, { encode: false });
   const paymentUrl = `${vnpUrl}?${query}`;
-
-  console.log("🔹 signData:", signData);
-  console.log("🔹 signed:", signed);
-  console.log("🔹 paymentUrl:", paymentUrl);
 
   return res.status(200).json({
     errCode: 0,
@@ -165,7 +161,7 @@ const handleVnpayReturn = async (req, res) => {
     vnp_Params = sortObject(vnp_Params);
 
     const secretKey = process.env.VNP_HASH_SECRET;
-    const signData = qs.stringify(vnp_Params, { encode: true });
+    const signData = qs.stringify(vnp_Params, { encode: false });
     const signed = crypto
       .createHmac("sha512", secretKey)
       .update(Buffer.from(signData, "utf-8"))

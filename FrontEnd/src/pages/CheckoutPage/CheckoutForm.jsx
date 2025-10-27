@@ -64,30 +64,27 @@ const CheckoutForm = ({
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!formData.address || !formData.phone)
+    if (!formData.address || !formData.phone) {
       return toast.warning("Vui lòng nhập đầy đủ thông tin giao hàng!");
+    }
 
     const orderData = buildOrderData();
+
     if (formData.paymentMethod === "vnpay") {
       try {
-        const res = await createVnpayPayment({
+        const paymentUrl = await createVnpayPayment({
           orderId: `ORD${Date.now()}`,
-          amount: total,
+          amount: Math.round(total * 100),
         });
 
-        if (res.errCode === 0 && res.data?.paymentUrl) {
-          window.location.href = res.data.paymentUrl; // 👉 chuyển hướng sang VNPAY
-        } else {
-          toast.error(
-            res.errMessage || "Không tạo được liên kết thanh toán VNPAY!"
-          );
-        }
+        window.open(paymentUrl, "_blank");
       } catch (error) {
         console.error("Error creating VNPAY payment:", error);
-        toast.error("Lỗi khi tạo thanh toán VNPAY!");
+        toast.error(error.message || "Lỗi khi tạo thanh toán VNPAY!");
       }
       return;
     }
+
     await onOrderComplete(orderData);
   };
 
