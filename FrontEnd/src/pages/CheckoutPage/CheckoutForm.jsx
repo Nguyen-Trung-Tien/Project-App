@@ -74,13 +74,15 @@ const CheckoutForm = ({
       try {
         const paymentUrl = await createVnpayPayment({
           orderId: `ORD${Date.now()}`,
-          amount: Math.round(total * 100),
+          amount: Math.round(total), // tiền VNĐ nguyên
         });
-
-        window.open(paymentUrl, "_blank");
+        const newWindow = window.open(paymentUrl, "_blank");
+        if (!newWindow) {
+          toast.error("Vui lòng cho phép popup để thanh toán VNPay!");
+        }
       } catch (error) {
-        console.error("Error creating VNPAY payment:", error);
-        toast.error(error.message || "Lỗi khi tạo thanh toán VNPAY!");
+        console.error("Error creating VNPay payment:", error);
+        toast.error(error.message || "Lỗi khi tạo thanh toán VNPay!");
       }
       return;
     }
