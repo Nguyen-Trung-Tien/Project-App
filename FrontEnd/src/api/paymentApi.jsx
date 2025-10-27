@@ -76,3 +76,20 @@ export const refundPayment = async (id) => {
     throw error;
   }
 };
+
+export const createVnpayPayment = async (data) => {
+  try {
+    const res = await API.post("/payment/create-vnpay-payment", data);
+
+    if (res.data?.errCode === 0 && res.data?.data?.paymentUrl) {
+      return res.data.data.paymentUrl;
+    } else {
+      throw new Error(
+        res.data?.errMessage || "Tạo liên kết thanh toán thất bại"
+      );
+    }
+  } catch (error) {
+    console.error("Error creating VNPAY payment:", error);
+    throw error;
+  }
+};

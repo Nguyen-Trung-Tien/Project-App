@@ -5,7 +5,7 @@ $button-hover: #4facfe;
 
 .hero-section {
   position: relative;
-  height: 65vh; // giảm từ 90vh xuống
+  height: 65vh;
   background: $primary-gradient;
   overflow: hidden;
 
@@ -27,14 +27,14 @@ $button-hover: #4facfe;
     animation: fadeInUp 1s ease-out;
 
     .hero-title {
-      font-size: 2.8rem; // vừa phải
+      font-size: 2.8rem;
       line-height: 1.2;
       letter-spacing: 1px;
       margin-bottom: 0.8rem;
 
       .brand-highlight {
         color: #fff;
-        background: #00f2fe;
+        background: #007bff;
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         font-weight: 800;

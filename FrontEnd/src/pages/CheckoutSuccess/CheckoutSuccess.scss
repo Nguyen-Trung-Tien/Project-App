@@ -1,65 +1,27 @@
 .checkout-success-page {
-  background-color: #f8f9fa;
   min-height: 100vh;
+  background: linear-gradient(135deg, #e3fdfd, #ffffff);
   display: flex;
   align-items: center;
+  justify-content: center;
 
   .success-icon {
     color: #28a745;
-    animation: bounceIn 0.8s ease;
-  }
-
-  h2 {
-    font-weight: 700;
-    color: #333;
-  }
-
-  p {
-    font-size: 1rem;
-    color: #666;
-  }
-
-  .order-info {
-    background: #fff;
-    display: inline-block;
-    padding: 15px 30px;
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    margin-top: 10px;
-
-    h6 {
-      font-weight: 600;
-      color: #555;
+    svg {
+      filter: drop-shadow(0 0 8px rgba(40, 167, 69, 0.3));
     }
+  }
 
-    .order-code {
-      font-size: 1.2rem;
-      font-weight: 700;
-      color: #007bff;
-      letter-spacing: 1px;
-    }
+  .order-code {
+    font-size: 1.25rem;
+    letter-spacing: 1px;
   }
 
   button {
-    border-radius: 50px;
-    font-weight: 500;
-    min-width: 180px;
-  }
-
-  @keyframes bounceIn {
-    0% {
-      transform: scale(0.3);
-      opacity: 0;
-    }
-    50% {
-      transform: scale(1.05);
-      opacity: 1;
-    }
-    70% {
-      transform: scale(0.9);
-    }
-    100% {
-      transform: scale(1);
+    border-radius: 10px;
+    transition: all 0.2s ease;
+    &:hover {
+      transform: translateY(-2px);
     }
   }
 }

@@ -1,13 +1,4 @@
-import React, { useEffect, useState } from "react";
-import {
-  Container,
-  Row,
-  Col,
-  Card,
-  Form,
-  Button,
-  Spinner,
-} from "react-bootstrap";
+import { Container, Row, Col, Card } from "react-bootstrap";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ArrowLeftCircle } from "react-bootstrap-icons";
 import { useSelector, useDispatch } from "react-redux";
@@ -16,7 +7,10 @@ import { toast } from "react-toastify";
 import { createOrder } from "../../api/orderApi";
 import { createPayment } from "../../api/paymentApi";
 import { removeCartItem } from "../../redux/cartSlice";
-import { getImage } from "../../utils/decodeImage";
+
+import CheckoutForm from "./CheckoutForm";
+import OrderSummary from "./OrderSummary";
+
 import "./CheckoutPage.scss";
 
 const CheckoutPage = () => {
@@ -33,7 +27,6 @@ const CheckoutPage = () => {
     quantity: singleQuantity,
   } = location.state || {};
 
-  // Xác định danh sách sản phẩm thanh toán
   const isSingleProduct = !!singleProduct;
   const selectedItems = isSingleProduct
     ? [
@@ -45,7 +38,6 @@ const CheckoutPage = () => {
       ]
     : cartItems.filter((item) => selectedIds?.includes(item.id));
 
-  // Tính tổng tiền
   const total = selectedItems.reduce((acc, item) => {
     const price = item.product?.discount
       ? (item.product.price * (100 - item.product.discount)) / 100
@@ -53,91 +45,37 @@ const CheckoutPage = () => {
     return acc + price * (item.quantity || 0);
   }, 0);
 
-  const [formData, setFormData] = useState({
-    username: user?.username || "",
-    phone: user?.phone || "",
-    address: user?.address || "",
-    email: user?.email || "",
-    paymentMethod: "cod",
-  });
-
-  useEffect(() => {
-    if (user) {
-      setFormData((prev) => ({
-        ...prev,
-        username: user.username || "",
-        phone: user.phone || "",
-        address: user.address || "",
-        email: user.email || "",
-      }));
-    }
-  }, [user]);
-
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    if (!selectedItems.length)
-      return toast.warning("Không có sản phẩm để thanh toán!");
-    if (!formData.address || !formData.phone)
-      return toast.warning("Vui lòng nhập đầy đủ thông tin giao hàng!");
-
+  const handleOrderComplete = async (orderData, paypalDetails = null) => {
     try {
-      const orderItems = selectedItems.map((item) => {
-        const price = item.product?.discount
-          ? (item.product.price * (100 - item.product.discount)) / 100
-          : item.product?.price || 0;
-        return {
-          productId: item.product.id,
-          productName: item.product.name,
-          quantity: item.quantity,
-          price,
-          subtotal: price * item.quantity,
-          cartItemId: item.id,
-        };
-      });
-
-      const orderData = {
-        userId: user.id,
-        totalPrice: total,
-        shippingAddress: formData.address,
-        paymentMethod: formData.paymentMethod,
-        note: "",
-        orderItems,
-      };
-
       const orderRes = await createOrder(orderData);
-      if (orderRes.errCode !== 0) {
-        toast.error(orderRes.errMessage || "Lỗi khi tạo đơn hàng!");
-        return;
-      }
+      if (orderRes.errCode !== 0)
+        return toast.error(orderRes.errMessage || "Lỗi khi tạo đơn hàng!");
 
       const orderId = orderRes.data.id;
-      const isOnlinePayment = ["momo", "paypal", "vnpay"].includes(
-        formData.paymentMethod
-      );
 
       const paymentRes = await createPayment({
         orderId,
         userId: user.id,
         amount: total,
-        method: formData.paymentMethod,
-        paymentStatus: isOnlinePayment ? "paid" : "unpaid",
-        status: isOnlinePayment ? "completed" : "pending",
+        method: orderData.paymentMethod,
+        paymentStatus: paypalDetails
+          ? "paid"
+          : orderData.paymentMethod === "cod"
+          ? "unpaid"
+          : "paid",
+        status: paypalDetails
+          ? "completed"
+          : orderData.paymentMethod === "cod"
+          ? "pending"
+          : "completed",
+        paypalInfo: paypalDetails,
       });
 
-      if (paymentRes.errCode && paymentRes.errCode !== 0) {
-        toast.error(paymentRes.errMessage || "Thanh toán thất bại!");
-        return;
-      }
+      if (paymentRes.errCode && paymentRes.errCode !== 0)
+        return toast.error(paymentRes.errMessage || "Thanh toán thất bại!");
 
-      // Nếu mua từ giỏ hàng, remove sản phẩm khỏi Redux
-      if (!isSingleProduct) {
+      if (!isSingleProduct)
         selectedItems.forEach((item) => dispatch(removeCartItem(item.id)));
-      }
 
       toast.success("Đặt hàng thành công!");
       navigate(`/checkout-success/${orderId}`);
@@ -183,132 +121,18 @@ const CheckoutPage = () => {
         </h2>
 
         <Row>
-          {/* FORM GIAO HÀNG */}
           <Col lg={8}>
-            <Card className="p-4 shadow-sm border-0 mb-4">
-              <h5 className="fw-bold mb-3 text-secondary">
-                Thông tin giao hàng
-              </h5>
-              <Form onSubmit={handleSubmit}>
-                <Row className="g-3">
-                  <Col md={6}>
-                    <Form.Group>
-                      <Form.Label>Họ và tên</Form.Label>
-                      <Form.Control
-                        name="username"
-                        type="text"
-                        value={formData.username}
-                        onChange={handleChange}
-                        required
-                      />
-                    </Form.Group>
-                  </Col>
-                  <Col md={6}>
-                    <Form.Group>
-                      <Form.Label>Số điện thoại</Form.Label>
-                      <Form.Control
-                        name="phone"
-                        type="text"
-                        value={formData.phone}
-                        onChange={handleChange}
-                        required
-                      />
-                    </Form.Group>
-                  </Col>
-                  <Col md={12}>
-                    <Form.Group>
-                      <Form.Label>Địa chỉ</Form.Label>
-                      <Form.Control
-                        name="address"
-                        type="text"
-                        value={formData.address}
-                        onChange={handleChange}
-                        required
-                      />
-                    </Form.Group>
-                  </Col>
-                  <Col md={6}>
-                    <Form.Group>
-                      <Form.Label>Email</Form.Label>
-                      <Form.Control
-                        name="email"
-                        type="email"
-                        value={formData.email}
-                        onChange={handleChange}
-                      />
-                    </Form.Group>
-                  </Col>
-                  <Col md={6}>
-                    <Form.Group>
-                      <Form.Label>Phương thức thanh toán</Form.Label>
-                      <Form.Select
-                        name="paymentMethod"
-                        value={formData.paymentMethod}
-                        onChange={handleChange}
-                      >
-                        <option value="cod">Thanh toán khi nhận hàng</option>
-                        <option value="momo">MOMO</option>
-                        <option value="paypal">PAYPAL</option>
-                        <option value="vnpay">VNPAY</option>
-                      </Form.Select>
-                    </Form.Group>
-                  </Col>
-                </Row>
-
-                <Button type="submit" className="btn-primary w-100 mt-4">
-                  Xác nhận thanh toán
-                </Button>
-              </Form>
-            </Card>
-
-            <Link
-              to={isSingleProduct ? "/" : "/cart"}
-              className="btn btn-outline-secondary mt-2"
-            >
-              <ArrowLeftCircle size={18} className="me-1" />
-              Quay lại
-            </Link>
+            <CheckoutForm
+              user={user}
+              total={total}
+              selectedItems={selectedItems}
+              onOrderComplete={handleOrderComplete}
+              isSingleProduct={isSingleProduct}
+            />
           </Col>
 
-          {/* TÓM TẮT ĐƠN HÀNG */}
           <Col lg={4}>
-            <Card className="p-3 shadow-sm border-0">
-              <h5 className="fw-bold text-secondary mb-3">Tóm tắt đơn hàng</h5>
-
-              {selectedItems.map((item) => (
-                <div key={item.id} className="d-flex align-items-center mb-3">
-                  <img
-                    src={getImage(item.product?.image) || "/no-image.jpg"}
-                    alt={item.product?.name}
-                    className="checkout-img me-3"
-                  />
-                  <div className="flex-grow-1">
-                    <p className="mb-1 fw-semibold">{item.product?.name}</p>
-                    <small className="text-muted">
-                      {item.quantity} x{" "}
-                      {(item.product?.discount
-                        ? (item.product.price * (100 - item.product.discount)) /
-                          100
-                        : item.product.price
-                      ).toLocaleString()}
-                      ₫
-                    </small>
-                  </div>
-                </div>
-              ))}
-
-              <hr />
-              <p className="fw-semibold d-flex justify-content-between">
-                Tạm tính: <span>{total.toLocaleString()}₫</span>
-              </p>
-              <p className="fw-semibold d-flex justify-content-between">
-                Phí vận chuyển: <span className="text-success">Miễn phí</span>
-              </p>
-              <hr />
-              <h5 className="fw-bold d-flex justify-content-between text-primary">
-                Tổng cộng: <span>{total.toLocaleString()}₫</span>
-              </h5>
-            </Card>
+            <OrderSummary selectedItems={selectedItems} total={total} />
           </Col>
         </Row>
       </Container>

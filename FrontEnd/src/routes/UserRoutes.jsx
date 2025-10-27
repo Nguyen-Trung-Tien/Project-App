@@ -16,6 +16,7 @@ import PrivateRoute from "./PrivateRoute";
 import AboutPage from "../pages/AboutPage/AboutPage";
 import ProductListPage from "../pages/ProductListPage/ProductListPage";
 import AllProducts from "../components/AllProducts/AllProduct";
+import CheckoutFailed from "../pages/CheckoutFailed/CheckoutFailed";
 
 const UserRoutes = () => {
   return (
@@ -28,6 +29,7 @@ const UserRoutes = () => {
         <Route path="cart" element={<CartPage />} />
         <Route path="checkout" element={<CheckoutPage />} />
         <Route path="checkout-success/:orderId" element={<CheckoutSuccess />} />
+        <Route path="/checkout-failed/:orderId" element={<CheckoutFailed />} />
         <Route path="order-history" element={<OrderHistory />} />
         <Route path="orders" element={<OrderPage />} />
         <Route path="orders-detail/:id" element={<OrderDetail />} />

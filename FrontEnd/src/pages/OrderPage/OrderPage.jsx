@@ -65,10 +65,16 @@ const OrderPage = () => {
   const [orders, setOrders] = useState([]);
   const [filter, setFilter] = useState("");
   const [loading, setLoading] = useState(true);
+
+  // Modal trả hàng
   const [showReturnModal, setShowReturnModal] = useState(false);
   const [currentOrder, setCurrentOrder] = useState(null);
   const [selectedItems, setSelectedItems] = useState([]);
   const [returnReason, setReturnReason] = useState("");
+
+  // Modal xác nhận hủy đơn
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [orderToCancel, setOrderToCancel] = useState(null);
 
   const fetchOrders = async () => {
     try {
@@ -103,18 +109,38 @@ const OrderPage = () => {
     }
   };
 
-  const handleCancelOrder = async (orderId) => {
+  // Mở modal xác nhận hủy
+  const confirmCancelOrder = (order) => {
+    setOrderToCancel(order);
+    setShowCancelModal(true);
+  };
+
+  // Thực hiện hủy đơn
+  const handleCancelOrder = async () => {
+    if (!orderToCancel) return;
+
     try {
-      const res = await updateOrderStatus(orderId, "cancelled");
-      if (res?.errCode === 0) toast.success("Đã hủy đơn hàng!");
-      else toast.warning(res?.errMessage || "Không thể cập nhật trạng thái");
+      setLoading(true);
+      const res = await updateOrderStatus(orderToCancel.id, "cancelled");
+      if (res?.errCode === 0) {
+        toast.success("Đã hủy đơn hàng thành công!");
+      } else {
+        toast.warning(
+          res?.errMessage || "Không thể cập nhật trạng thái đơn hàng"
+        );
+      }
       fetchOrders();
     } catch (error) {
       console.error(error);
-      toast.error("Lỗi khi hủy đơn hàng");
+      toast.error("Đã xảy ra lỗi khi hủy đơn hàng");
+    } finally {
+      setLoading(false);
+      setShowCancelModal(false);
+      setOrderToCancel(null);
     }
   };
 
+  // Modal trả hàng
   const openReturnModal = (order) => {
     const items =
       order.orderItems?.filter((i) => i.returnStatus === "none") || [];
@@ -253,7 +279,7 @@ const OrderPage = () => {
                         <Button
                           variant="danger"
                           size="sm"
-                          onClick={() => handleCancelOrder(order.id)}
+                          onClick={() => confirmCancelOrder(order)}
                         >
                           Hủy đơn
                         </Button>
@@ -333,6 +359,49 @@ const OrderPage = () => {
             </Button>
             <Button variant="primary" onClick={handleSubmitReturn}>
               Gửi yêu cầu
+            </Button>
+          </Modal.Footer>
+        </Modal>
+
+        <Modal
+          show={showCancelModal}
+          onHide={() => setShowCancelModal(false)}
+          centered
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>Xác nhận hủy đơn hàng</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            {orderToCancel && (
+              <p>
+                Bạn có chắc chắn muốn hủy đơn hàng
+                <strong> #{`DH${orderToCancel.id}`}</strong> không?
+                <br />
+                Hành động này{" "}
+                <span className="text-danger">không thể hoàn tác</span>.
+              </p>
+            )}
+          </Modal.Body>
+          <Modal.Footer>
+            <Button
+              variant="secondary"
+              onClick={() => setShowCancelModal(false)}
+            >
+              Không
+            </Button>
+            <Button
+              variant="danger"
+              onClick={handleCancelOrder}
+              disabled={loading}
+            >
+              {loading ? (
+                <>
+                  <Spinner animation="border" size="sm" className="me-2" />
+                  Đang hủy...
+                </>
+              ) : (
+                "Xác nhận hủy"
+              )}
             </Button>
           </Modal.Footer>
         </Modal>

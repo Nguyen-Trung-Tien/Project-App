@@ -13,4 +13,9 @@ router.put(
 );
 router.put("/payment-refund/:id/refund", PaymentController.handleRefundPayment);
 
+router.post(
+  "/create-vnpay-payment",
+  PaymentController.handleCreateVnpayPayment
+);
+router.get("/vnpay-return", PaymentController.handleVnpayReturn);
 module.exports = router;
