@@ -28,7 +28,7 @@ module.exports = {
         allowNull: false,
       },
       method: {
-        type: Sequelize.ENUM("cod", "bank", "paypal", "momo"),
+        type: Sequelize.ENUM("cod", "bank", "paypal", "momo", "vnpay"),
         allowNull: false,
         defaultValue: "cod",
       },

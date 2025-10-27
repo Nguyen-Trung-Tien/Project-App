@@ -38,7 +38,7 @@ module.exports = (sequelize, DataTypes) => {
         },
       },
       method: {
-        type: DataTypes.ENUM("cod", "bank", "paypal", "momo"),
+        type: DataTypes.ENUM("cod", "bank", "paypal", "momo", "vnpay"),
         allowNull: false,
         defaultValue: "cod",
       },

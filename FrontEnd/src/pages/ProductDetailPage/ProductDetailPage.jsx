@@ -111,9 +111,13 @@ const ProductDetailPage = () => {
       );
       if (res?.errCode === 0) {
         const filtered = res.products.filter((p) => p.id !== Number(id));
-        setSuggestedProducts((prev) =>
-          append ? [...prev, ...filtered] : filtered
-        );
+        setSuggestedProducts((prev) => {
+          const combined = append ? [...prev, ...filtered] : filtered;
+          const unique = combined.filter(
+            (p, i, arr) => arr.findIndex((x) => x.id === p.id) === i
+          );
+          return unique;
+        });
         setSuggestedPage(res.currentPage || page);
         setSuggestedTotalPages(res.totalPages || 1);
       }
@@ -409,7 +413,7 @@ const ProductDetailPage = () => {
                   onClick={handleLoadMoreSuggested}
                   disabled={loadingSuggested}
                 >
-                  {loading ? (
+                  {loadingSuggested ? (
                     <>
                       <Spinner animation="border" size="sm" className="me-2" />
                       Đang tải...
