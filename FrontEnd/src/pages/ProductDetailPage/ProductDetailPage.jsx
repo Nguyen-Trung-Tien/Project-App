@@ -30,6 +30,7 @@ import ProductCard from "../../components/ProductCard/ProductCard";
 import { getImage } from "../../utils/decodeImage";
 import "./ProductDetailPage.scss";
 import { addCartItem } from "../../redux/cartSlice";
+import ChatBot from "../../components/ChatBot/ChatBot";
 
 const StarRating = ({ rating, onChange, interactive = false }) => (
   <div className="d-flex align-items-center">
@@ -227,6 +228,7 @@ const ProductDetailPage = () => {
   return (
     <div className="product-detail-page py-5">
       <Container>
+        <ChatBot />
         <Link to="/" className="btn btn-outline-secondary mb-4">
           <ArrowLeft size={18} className="me-2" /> Quay lại
         </Link>

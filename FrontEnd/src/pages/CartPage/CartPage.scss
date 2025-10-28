@@ -55,23 +55,40 @@
     .btn-primary {
       border-radius: 999px;
       font-weight: 600;
+      color: #fff;
+      background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
+      border: none;
       transition: all 0.3s ease;
 
       &:hover {
         transform: translateY(-2px);
-        box-shadow: 0 6px 15px rgba(13, 110, 253, 0.4);
+        box-shadow: 0 6px 15px rgba(79, 172, 254, 0.6);
+      }
+
+      &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
       }
     }
 
+    /* Nút outline secondary */
     .btn-outline-secondary {
       border-radius: 999px;
       font-weight: 500;
-      border-color: #ccc;
-      color: #555;
+      border: 2px solid #4facfe;
+      color: #4facfe;
+      background-color: #fff;
+      transition: all 0.3s ease;
 
       &:hover {
-        background-color: #f8f9fa;
-        color: #000;
+        background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
+        color: #fff;
+        border-color: transparent;
+      }
+
+      &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
       }
     }
   }

@@ -6,6 +6,7 @@ import CategorySection from "../../components/HomePageComponent/CategorySection"
 import ProductSection from "../../components/HomePageComponent/ProductSection";
 import AllProducts from "../../components/AllProducts/AllProduct";
 import { getAllCategoryApi } from "../../api/categoryApi";
+import ChatBot from "../../components/ChatBot/ChatBot";
 
 const HomePage = () => {
   const [categories, setCategories] = useState([]);
@@ -26,27 +27,33 @@ const HomePage = () => {
   }, []);
 
   return (
-    <Container fluid className="homepage px-0">
-      <HeroSection />
+    <>
+      <Container fluid className="homepage px-0">
+        <ChatBot />
 
-      <div className="my-5">
-        <CategorySection categories={categories} loading={loadingCategories} />
-      </div>
+        <HeroSection />
+        <div className="my-5">
+          <CategorySection
+            categories={categories}
+            loading={loadingCategories}
+          />
+        </div>
 
-      <div className="my-5">
-        <ProductSection
-          categories={categories}
-          loadingCategories={loadingCategories}
-        />
-      </div>
+        <div className="my-5">
+          <ProductSection
+            categories={categories}
+            loadingCategories={loadingCategories}
+          />
+        </div>
 
-      <div className="my-5">
-        <AllProducts
-          categories={categories}
-          loadingCategories={loadingCategories}
-        />
-      </div>
-    </Container>
+        <div className="my-5">
+          <AllProducts
+            categories={categories}
+            loadingCategories={loadingCategories}
+          />
+        </div>
+      </Container>
+    </>
   );
 };
 

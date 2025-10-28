@@ -7,6 +7,7 @@ import {
   getAllProductApi,
   getProductsByCategoryApi,
 } from "../../api/productApi";
+import ChatBot from "../../components/ChatBot/ChatBot";
 
 const SkeletonCard = () => (
   <div
@@ -133,6 +134,8 @@ const ProductListPage = () => {
   return (
     <section className="product-list-section py-5 bg-light">
       <Container>
+        <ChatBot />
+
         <h3 className="mb-5 fw-bold fs-3 text-center">Danh sách sản phẩm</h3>
 
         <div className="mb-4 d-flex flex-wrap gap-2 align-items-center">
