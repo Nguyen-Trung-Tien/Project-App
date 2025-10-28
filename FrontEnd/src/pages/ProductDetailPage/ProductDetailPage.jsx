@@ -109,8 +109,11 @@ const ProductDetailPage = () => {
         page,
         suggestedLimit
       );
-      if (res?.errCode === 0) {
+      console.log("Dữ liệu gợi ý:", res);
+
+      if (res?.errCode === 0 && Array.isArray(res.products)) {
         const filtered = res.products.filter((p) => p.id !== Number(id));
+
         setSuggestedProducts((prev) => {
           const combined = append ? [...prev, ...filtered] : filtered;
           const unique = combined.filter(
@@ -118,7 +121,8 @@ const ProductDetailPage = () => {
           );
           return unique;
         });
-        setSuggestedPage(res.currentPage || page);
+
+        setSuggestedPage(page);
         setSuggestedTotalPages(res.totalPages || 1);
       }
     } catch (err) {
@@ -318,19 +322,21 @@ const ProductDetailPage = () => {
                     </>
                   ) : (
                     <>
-                      <CartPlus className="me-2" /> Thêm vào giỏ hàng
+                      <CartPlus className="me-2" size={22} /> Thêm vào giỏ hàng
                     </>
                   )}
                 </Button>
 
-                <Button
-                  variant="success"
-                  size="lg"
-                  className="flex-fill d-flex align-items-center justify-content-center"
-                  onClick={handleBuyNow}
-                >
-                  <CreditCard className="me-2" /> Mua ngay
-                </Button>
+                {product.stock > 0 && (
+                  <Button
+                    variant="success"
+                    size="lg"
+                    className="flex-fill d-flex align-items-center justify-content-center"
+                    onClick={handleBuyNow}
+                  >
+                    <CreditCard className="me-2" size={22} /> Mua ngay
+                  </Button>
+                )}
               </div>
             </div>
           </Col>
@@ -399,7 +405,7 @@ const ProductDetailPage = () => {
           )}
         </div>
 
-        {suggestedProducts.length > 0 && (
+        {suggestedProducts.length > 0 ? (
           <div className="suggested-products mt-5 pt-4 border-top">
             <h4 className="fw-bold mb-3">Sản phẩm gợi ý</h4>
             <Row className="g-4">
@@ -410,8 +416,8 @@ const ProductDetailPage = () => {
               ))}
             </Row>
 
-            {suggestedPage < suggestedTotalPages && (
-              <div className="text-center mt-5">
+            <div className="text-center mt-5">
+              {suggestedPage < suggestedTotalPages ? (
                 <Button
                   variant="outline-primary"
                   size="lg"
@@ -428,8 +434,18 @@ const ProductDetailPage = () => {
                     "Xem thêm sản phẩm"
                   )}
                 </Button>
-              </div>
-            )}
+              ) : (
+                <p className="text-muted fst-italic">
+                  Đã hiển thị tất cả sản phẩm gợi ý
+                </p>
+              )}
+            </div>
+          </div>
+        ) : (
+          <div className="text-center mt-5 pt-4 border-top">
+            <p className="text-muted fst-italic">
+              Không có sản phẩm gợi ý nào.
+            </p>
           </div>
         )}
       </Container>

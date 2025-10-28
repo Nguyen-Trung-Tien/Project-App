@@ -1,4 +1,5 @@
 const db = require("../models");
+const ProductService = require("./ProductService");
 
 const getAllPayments = async () => {
   try {
@@ -176,15 +177,25 @@ const completePayment = async (id, transactionId) => {
   try {
     const payment = await db.Payment.findByPk(id);
     if (!payment) return { errCode: 1, errMessage: "Payment not found" };
+
     payment.status = "completed";
     payment.transactionId = transactionId || payment.transactionId;
     payment.paymentDate = new Date();
     await payment.save();
-    const order = await db.Order.findByPk(payment.orderId);
+
+    const order = await db.Order.findByPk(payment.orderId, {
+      include: [{ model: db.OrderItem, as: "orderItems" }],
+    });
+
     if (order) {
       order.paymentStatus = "paid";
       await order.save();
+
+      for (const item of order.orderItems) {
+        await ProductService.updateProductSold(item.productId, item.quantity);
+      }
     }
+
     return { errCode: 0, errMessage: "Payment completed", data: payment };
   } catch (e) {
     console.error("Error completePayment:", e);

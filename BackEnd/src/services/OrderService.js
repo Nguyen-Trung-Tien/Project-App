@@ -87,7 +87,6 @@ const createOrder = async (data) => {
       subtotal: item.subtotal,
     }));
 
-    // Tạo đơn hàng kèm orderItems
     const order = await db.Order.create(
       {
         userId,
@@ -100,25 +99,25 @@ const createOrder = async (data) => {
       { include: [{ model: db.OrderItem, as: "orderItems" }], transaction: t }
     );
 
-    // Giảm stock cho từng sản phẩm
     for (const item of orderItems) {
       const product = await db.Product.findByPk(item.productId, {
         transaction: t,
       });
-      if (product) {
-        if (product.stock < item.quantity) {
-          await t.rollback();
-          return {
-            errCode: 2,
-            errMessage: `Sản phẩm ${product.name} không đủ số lượng`,
-          };
-        }
-        product.stock -= item.quantity;
-        await product.save({ transaction: t });
-      }
-    }
 
-    // Xóa các item khỏi giỏ hàng nếu có
+      if (!product) continue;
+
+      if (product.stock < item.quantity) {
+        await t.rollback();
+        return {
+          errCode: 2,
+          errMessage: `Sản phẩm ${product.name} không đủ số lượng`,
+        };
+      }
+
+      product.stock -= item.quantity;
+      product.sold = (product.sold || 0) + item.quantity;
+      await product.save({ transaction: t });
+    }
     const cartItemIds = orderItems
       .map((item) => item.cartItemId)
       .filter(Boolean);
@@ -141,27 +140,86 @@ const createOrder = async (data) => {
 };
 
 const updateOrderStatus = async (id, status) => {
+  const t = await db.sequelize.transaction();
   try {
-    const order = await db.Order.findByPk(id);
+    const order = await db.Order.findByPk(id, {
+      include: [{ model: db.OrderItem, as: "orderItems" }],
+      transaction: t,
+    });
+
     if (!order) return { errCode: 1, errMessage: "Order not found" };
 
-    // Lịch sử xác nhận
+    const prevStatus = order.status;
+
     const history = Array.isArray(order.confirmationHistory)
       ? order.confirmationHistory
       : [];
-
     history.push({ status, date: new Date().toISOString() });
 
     order.status = status;
     order.confirmationHistory = history;
-    await order.save();
+
+    if (!order.orderItems?.length) {
+      console.warn("No orderItems found for order:", id);
+    }
+
+    if (
+      ["delivered", "completed"].includes(status) &&
+      !["delivered", "completed"].includes(prevStatus)
+    ) {
+      for (const item of order.orderItems) {
+        const product = await db.Product.findByPk(item.productId, {
+          transaction: t,
+        });
+        if (product) {
+          product.sold = (product.sold || 0) + item.quantity;
+          product.stock = Math.max(0, (product.stock || 0) - item.quantity);
+          await product.save({ transaction: t });
+        }
+      }
+    }
+
+    if (
+      status === "cancelled" &&
+      ["delivered", "completed"].includes(prevStatus)
+    ) {
+      for (const item of order.orderItems) {
+        const product = await db.Product.findByPk(item.productId, {
+          transaction: t,
+        });
+        if (product) {
+          product.sold = Math.max(0, (product.sold || 0) - item.quantity);
+          product.stock += item.quantity;
+          await product.save({ transaction: t });
+        }
+      }
+    }
+
+    if (
+      status === "cancelled" &&
+      !["delivered", "completed"].includes(prevStatus)
+    ) {
+      for (const item of order.orderItems) {
+        const product = await db.Product.findByPk(item.productId, {
+          transaction: t,
+        });
+        if (product) {
+          product.stock += item.quantity;
+          await product.save({ transaction: t });
+        }
+      }
+    }
+
+    await order.save({ transaction: t });
+    await t.commit();
 
     return {
       errCode: 0,
-      errMessage: "Order updated successfully",
+      errMessage: "Order status updated successfully",
       data: order,
     };
   } catch (e) {
+    await t.rollback();
     console.error("Error updating order status:", e);
     return {
       errCode: -1,

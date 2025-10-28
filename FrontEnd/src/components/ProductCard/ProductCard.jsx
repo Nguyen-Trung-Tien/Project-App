@@ -184,7 +184,7 @@ const ProductCard = ({ product }) => {
               <Spinner size="sm" animation="border" />
             ) : (
               <>
-                <CartPlus className="me-1" />
+                <CartPlus className="me-1" size={22} />
               </>
             )}
           </Button>
@@ -198,7 +198,7 @@ const ProductCard = ({ product }) => {
               <Spinner size="sm" animation="border" />
             ) : (
               <>
-                <CreditCard className="me-1" /> Mua ngay
+                <CreditCard className="me-1" size={22} /> Mua ngay
               </>
             )}
           </Button>

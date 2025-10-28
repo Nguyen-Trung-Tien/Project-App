@@ -50,6 +50,7 @@ const getProductById = async (id) => {
       product: {
         ...product.toJSON(),
         image: product.image || null,
+        sold: product.sold || 0,
       },
     };
   } catch (e) {
@@ -131,6 +132,21 @@ const searchProducts = async (query, page = 1, limit = 10) => {
     totalPages: Math.ceil(count / limit),
   };
 };
+const updateProductSold = async (productId, quantity) => {
+  try {
+    const product = await db.Product.findByPk(productId);
+    if (!product) return { errCode: 1, errMessage: "Product not found" };
+
+    await product.increment("sold", { by: quantity });
+    await product.decrement("stock", { by: quantity });
+
+    return { errCode: 0, errMessage: "Updated product sold count" };
+  } catch (e) {
+    console.error("Error updating sold count:", e);
+    return { errCode: 1, errMessage: e.message };
+  }
+};
+
 module.exports = {
   createProduct,
   getAllProducts,
@@ -139,4 +155,5 @@ module.exports = {
   deleteProduct,
   getProductsByCategory,
   searchProducts,
+  updateProductSold,
 };

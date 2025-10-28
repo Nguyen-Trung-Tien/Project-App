@@ -43,6 +43,12 @@ module.exports = (sequelize, DataTypes) => {
       stock: { type: DataTypes.INTEGER, defaultValue: 0, validate: { min: 0 } },
       image: { type: DataTypes.BLOB("long") },
       sku: { type: DataTypes.STRING, unique: true, allowNull: true },
+      sold: {
+        type: DataTypes.INTEGER,
+        defaultValue: 0,
+        allowNull: false,
+        validate: { min: 0 },
+      },
       discount: { type: DataTypes.DECIMAL(5, 2), defaultValue: 0.0 },
       isActive: { type: DataTypes.BOOLEAN, defaultValue: true },
       categoryId: {

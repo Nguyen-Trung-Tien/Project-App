@@ -14,6 +14,11 @@ module.exports = {
         allowNull: true,
         unique: true,
       },
+      sold: {
+        type: Sequelize.INTEGER,
+        defaultValue: 0,
+        allowNull: false,
+      },
       name: {
         type: Sequelize.STRING,
         allowNull: false,
