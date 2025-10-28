@@ -56,35 +56,6 @@ const OrderManage = () => {
     fetchOrders();
   }, []);
 
-  // //  Mô phỏng hoàn tiền online
-  // const simulateRefund = async (order, method) => {
-  //   console.log(
-  //     `🔁 Bắt đầu hoàn tiền đơn #${order.id} qua ${method.toUpperCase()}...`
-  //   );
-
-  //   // Mô phỏng gọi API bên thứ 3 (trong thực tế: axios.post đến endpoint refund)
-  //   await new Promise((resolve) => setTimeout(resolve, 1200)); // delay giả lập
-
-  //   // Tùy từng phương thức, bạn có thể log hoặc lưu transactionId
-  //   switch (method) {
-  //     case "momo":
-  //       // gọi API refund MoMo thật: refundId, refundTransId...
-  //       break;
-  //     case "paypal":
-  //       // gọi PayPal SDK refund()
-  //       break;
-  //     case "vnpay":
-  //       // gọi VNPAY refund endpoint
-  //       break;
-  //     case "bank":
-  //       // gọi API của ngân hàng hoặc chuyển hoàn thủ công
-  //       break;
-  //   }
-
-  //   console.log(`✅ Hoàn tiền thành công cho đơn #${order.id} (${method})`);
-  //   return { success: true, message: "Refund completed successfully" };
-  // };
-
   const handleUpdateStatus = async (orderId, status) => {
     try {
       setLoadingId(orderId);
@@ -111,9 +82,7 @@ const OrderManage = () => {
             });
 
             if (refundRes?.errCode === 0) {
-              toast.success(
-                `💸 Đơn hàng ${orderId} đã được hoàn tiền cho khách!`
-              );
+              toast.success(`Đơn hàng ${orderId} đã được hoàn tiền cho khách!`);
               await fetchOrders();
             } else {
               toast.error(

@@ -270,6 +270,12 @@ const ProductDetailPage = () => {
                     <span className="text-danger">Hết hàng</span>
                   )}
                 </li>
+                <li>
+                  <strong>Đã bán:</strong>{" "}
+                  <span className="text-primary fw-semibold">
+                    {product.sold ?? 0}
+                  </span>
+                </li>
               </ul>
 
               <p className="text-secondary mb-4" style={{ lineHeight: "1.6" }}>

@@ -17,7 +17,7 @@ const ProductCard = ({ product }) => {
   const [loadingCart, setLoadingCart] = useState(false);
   const [loadingBuy, setLoadingBuy] = useState(false);
 
-  const { id, name, price, discount, stock, image, isActive } = product;
+  const { id, name, price, discount, stock, sold, image, isActive } = product;
 
   const { rawPrice, finalPrice, hasDiscount } = useMemo(() => {
     const p = Number(price) || 0;
@@ -166,6 +166,12 @@ const ProductCard = ({ product }) => {
         <div className="text-muted fs-6 mb-2">
           {stock > 0 ? `Còn ${stock} sản phẩm` : "Hết hàng"}
         </div>
+
+        {sold !== undefined && (
+          <div className="text-secondary fs-6 mb-2">
+            Đã bán {sold.toLocaleString("vi-VN")}
+          </div>
+        )}
 
         <div className="d-flex gap-2 mt-auto shopee-buttons">
           <Button
