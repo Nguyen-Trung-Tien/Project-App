@@ -16,7 +16,7 @@ import { logoutUserApi } from "../../api/userApi";
 import { debounce } from "lodash";
 import "./Header.scss";
 import { getAllCarts } from "../../api/cartApi";
-import { setCartItems } from "../../redux/cartSlice";
+import { clearCart, setCartItems } from "../../redux/cartSlice";
 
 function Header() {
   const dispatch = useDispatch();
@@ -52,7 +52,10 @@ function Header() {
   const handleLogout = async () => {
     try {
       await logoutUserApi();
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("user");
       dispatch(removeUser());
+      dispatch(clearCart());
       navigate("/login");
     } catch (err) {
       console.error("Logout error:", err);
@@ -108,10 +111,10 @@ function Header() {
 
           <form
             onSubmit={onSearchSubmit}
-            className="d-flex align-items-center me-3 search-wrapper"
+            className="d-flex align-items-center me-3 search-wrapper w-50"
           >
             <div className="position-relative w-100">
-              <Search className="search-icon position-absolute" />
+              <Search className="search-icon position-absolute " />
               <input
                 type="text"
                 placeholder="Tìm sản phẩm..."
@@ -164,7 +167,6 @@ function Header() {
                     </NavDropdown.Item>
                   </NavDropdown>
                 )}
-
                 <NavDropdown
                   align="end"
                   title={
@@ -202,9 +204,9 @@ function Header() {
               <Nav.Link
                 as={Link}
                 to="/login"
-                className="header__icon-link ms-2"
+                className="header__icon-link ms-2 "
               >
-                <PersonCircle size={22} />
+                <PersonCircle size={22} className="me-1" /> Đăng nhập
               </Nav.Link>
             )}
           </Nav>

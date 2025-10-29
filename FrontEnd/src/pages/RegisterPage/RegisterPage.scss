@@ -1,5 +1,5 @@
 .register-page {
-  background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+  background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
   min-height: 100vh;
 
   .register-card {
@@ -15,7 +15,8 @@
     }
 
     h3 {
-      color: #0d6efd;
+      letter-spacing: 0.5px;
+      color: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%) !important;
     }
 
     .form-label {
@@ -30,14 +31,20 @@
       transition: all 0.2s ease;
 
       &:focus {
-        border-color: #0d6efd;
+        border-color: linear-gradient(
+          90deg,
+          #4facfe 0%,
+          #00f2fe 100%
+        ) !important;
         box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
       }
     }
 
     button[type="submit"] {
-      font-size: 1rem;
-      letter-spacing: 0.3px;
+      background: linear-gradient(135deg, #007bff, #6610f2);
+      border: none;
+      transition: 0.3s;
+      box-shadow: 0 4px 10px rgba(0, 123, 255, 0.3);
     }
 
     a {

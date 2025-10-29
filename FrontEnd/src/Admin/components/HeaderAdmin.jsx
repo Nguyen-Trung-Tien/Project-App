@@ -19,6 +19,7 @@ import { removeUser } from "../../redux/userSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router";
 import { logoutUserApi } from "../../api/userApi";
+import { clearCart } from "../../redux/cartSlice";
 
 const HeaderAdmin = () => {
   const dispatch = useDispatch();
@@ -31,6 +32,7 @@ const HeaderAdmin = () => {
       localStorage.removeItem("accessToken");
       localStorage.removeItem("user");
       dispatch(removeUser());
+      dispatch(clearCart());
       navigate("/admin/login-admin");
     } catch (err) {
       console.error("Logout error:", err);

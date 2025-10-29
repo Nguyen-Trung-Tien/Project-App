@@ -7,7 +7,7 @@ const ChatBot = () => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-
+  const [hasGreeted, setHasGreeted] = useState(false);
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
@@ -16,6 +16,19 @@ const ChatBot = () => {
 
   const toggleChat = () => setIsOpen(!isOpen);
 
+  useEffect(() => {
+    if (isOpen && !hasGreeted) {
+      setMessages([
+        {
+          role: "assistant",
+          content:
+            "🤖 Xin chào! Tôi là trợ lý TienTech. Tôi có thể giúp gì cho bạn hôm nay?",
+          time: new Date(),
+        },
+      ]);
+      setHasGreeted(true);
+    }
+  }, [isOpen, hasGreeted]);
   const handleSend = async (e) => {
     e.preventDefault();
     if (!input.trim()) return;

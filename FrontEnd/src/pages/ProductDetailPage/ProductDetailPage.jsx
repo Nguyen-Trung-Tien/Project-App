@@ -200,8 +200,16 @@ const ProductDetailPage = () => {
     }
   };
 
-  const formatVND = (val) =>
-    val?.toLocaleString("vi-VN", { style: "currency", currency: "VND" });
+  const formatVND = (val) => {
+    if (val == null || val === "") return "0 ₫";
+    const number = Number(val);
+    if (isNaN(number)) return "0 ₫";
+    return number.toLocaleString("vi-VN", {
+      style: "currency",
+      currency: "VND",
+      minimumFractionDigits: 0,
+    });
+  };
 
   if (loading)
     return (

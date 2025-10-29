@@ -1,5 +1,5 @@
 .login-page {
-  background: linear-gradient(135deg, #007bff15, #6f42c115);
+  background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%) !important;
   min-height: 100vh;
   display: flex;
   align-items: center;
@@ -17,6 +17,7 @@
 
     h3 {
       letter-spacing: 0.5px;
+      color: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%) !important;
     }
 
     .form-control {
@@ -26,7 +27,7 @@
       transition: all 0.2s ease-in-out;
 
       &:focus {
-        border-color: #007bff;
+        border-color: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
         box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.15);
       }
     }

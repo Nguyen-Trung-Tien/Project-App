@@ -15,6 +15,7 @@ import "../Layout.scss";
 import { useDispatch } from "react-redux";
 import { logoutUserApi } from "../../api/userApi";
 import { removeUser } from "../../redux/userSlice";
+import { clearCart } from "../../redux/cartSlice";
 
 const Sidebar = () => {
   const location = useLocation();
@@ -36,6 +37,7 @@ const Sidebar = () => {
       localStorage.removeItem("accessToken");
       localStorage.removeItem("user");
       dispatch(removeUser());
+      dispatch(clearCart());
       navigate("/admin/login-admin");
     } catch (err) {
       console.error("Logout error:", err);
