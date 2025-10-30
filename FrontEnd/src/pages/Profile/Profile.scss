@@ -2,6 +2,12 @@
   background-color: #f9fafc;
   min-height: 100vh;
 
+  .profile-title {
+    background: linear-gradient(90deg, #007bff 0%, #00c6ff 100%);
+    color: #fff;
+    box-shadow: 0 3px 8px rgba(0, 123, 255, 0.3);
+  }
+
   .profile-card {
     border-radius: 20px;
     transition: all 0.3s ease-in-out;

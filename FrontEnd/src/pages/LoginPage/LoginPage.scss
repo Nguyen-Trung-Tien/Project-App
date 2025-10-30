@@ -71,6 +71,14 @@
       margin-bottom: 15px;
     }
   }
+
+  .btn-link {
+    text-decoration: none !important;
+  }
+  .btn-link:hover {
+    text-decoration: none !important;
+    color: #0d6efd !important; /* màu primary Bootstrap */
+  }
   @media (max-width: 768px) {
     .login-card {
       padding: 15px;

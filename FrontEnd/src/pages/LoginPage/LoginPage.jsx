@@ -89,13 +89,27 @@ const LoginPage = () => {
                   </Form.Group>
 
                   <div className="d-flex justify-content-between align-items-center mb-3">
-                    <Form.Check type="checkbox" label="Ghi nhớ tôi" />
-                    <a
-                      className="text-decoration-none text-primary"
+                    <div className="form-check">
+                      <input
+                        className="form-check-input"
+                        type="checkbox"
+                        id="rememberMe"
+                      />
+                      <label
+                        className="form-check-label text-secondary"
+                        htmlFor="rememberMe"
+                      >
+                        Ghi nhớ tôi
+                      </label>
+                    </div>
+
+                    <button
+                      type="button"
+                      className="btn btn-link text-gradient fw-semibold p-0"
                       onClick={() => setShowForgotModal(true)}
                     >
                       Quên mật khẩu?
-                    </a>
+                    </button>
                     <ForgotPasswordModal
                       show={showForgotModal}
                       onClose={() => setShowForgotModal(false)}

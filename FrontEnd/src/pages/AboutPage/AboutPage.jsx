@@ -1,48 +1,62 @@
 import React from "react";
 import { Container, Row, Col, Card, Button } from "react-bootstrap";
+import { People, RocketTakeoff, Eye } from "react-bootstrap-icons";
 import "./AboutPage.scss";
+import imgPro1 from "../../assets/1759303601055.png";
+import imgPro2 from "../../assets/1759555834412.png";
+import imgPro3 from "../../assets/1759555519030.png";
 
 const teamMembers = [
-  { name: "Nguyễn Văn A", role: "CEO", img: "/images/team1.jpg" },
-  { name: "Trần Thị B", role: "CTO", img: "/images/team2.jpg" },
-  { name: "Lê Văn C", role: "Designer", img: "/images/team3.jpg" },
+  { name: "Nguyễn Trung Tiến", role: "CEO", img: imgPro1 },
+  { name: "Nguyễn Trung Tiến", role: "CTO", img: imgPro2 },
+  { name: "Nguyễn Trung Tiến", role: "Designer", img: imgPro3 },
 ];
 
 const AboutPage = () => {
   return (
     <div className="about-page">
       {/* Hero Section */}
-      <section className="hero-section text-center text-white d-flex align-items-center justify-content-center">
-        <Container>
-          <h1>Chào mừng đến với Công ty ABC</h1>
-          <p className="lead">
-            Chúng tôi mang lại giải pháp công nghệ tối ưu cho doanh nghiệp của
-            bạn.
+      <section className="hero-section text-white d-flex align-items-center">
+        <div className="overlay"></div>
+        <Container className="text-center position-relative z-2">
+          <h1 className="display-4 fw-bold mb-3">
+            <span style={{ color: "#007bff" }}>T</span>ien-
+            <span style={{ color: "#007bff" }}>T</span>ech
+          </h1>
+          <p className="lead mb-4">
+            Giải pháp công nghệ thông minh – Đồng hành cùng thành công của bạn.
           </p>
+          <Button
+            variant="light"
+            size="lg"
+            href="/product-list"
+            className="fw-semibold"
+          >
+            Khám phá ngay
+          </Button>
         </Container>
       </section>
 
-      {/* About Us */}
       <section className="py-5 bg-light">
         <Container>
           <Row className="align-items-center">
-            <Col md={6}>
+            <Col md={6} className="mb-4 mb-md-0">
               <img
-                src="/images/about.jpg"
+                src="https://images.unsplash.com/photo-1519389950473-47ba0277781c"
                 alt="About us"
-                className="img-fluid rounded shadow-sm"
+                className="img-fluid rounded-4 shadow-sm"
               />
             </Col>
             <Col md={6}>
-              <h2>Về chúng tôi</h2>
-              <p>
-                Công ty ABC được thành lập với mục tiêu cung cấp các giải pháp
-                công nghệ chất lượng cao, giúp doanh nghiệp tối ưu hóa hoạt động
-                và phát triển bền vững.
+              <h2 className="fw-bold text-primary mb-3">Về chúng tôi</h2>
+              <p className="text-muted">
+                <strong>Tien-Tech</strong> được thành lập với sứ mệnh cung cấp
+                các giải pháp công nghệ thông minh, giúp doanh nghiệp tối ưu hóa
+                hoạt động và tăng trưởng bền vững.
               </p>
-              <p>
-                Chúng tôi tự hào về đội ngũ chuyên gia giàu kinh nghiệm, luôn
-                sáng tạo và tận tâm với khách hàng.
+              <p className="text-muted">
+                Chúng tôi sở hữu đội ngũ chuyên gia sáng tạo, luôn đổi mới để
+                mang lại trải nghiệm công nghệ tốt nhất cho khách hàng.
               </p>
             </Col>
           </Row>
@@ -52,26 +66,28 @@ const AboutPage = () => {
       {/* Mission & Vision */}
       <section className="py-5">
         <Container>
-          <Row>
-            <Col md={6} className="mb-4">
-              <Card className="h-100 shadow-sm">
-                <Card.Body>
-                  <Card.Title>Sứ mệnh</Card.Title>
-                  <Card.Text>
-                    Cung cấp giải pháp công nghệ hiệu quả, hỗ trợ doanh nghiệp
-                    nâng cao năng suất và tiết kiệm chi phí.
-                  </Card.Text>
+          <Row className="g-4">
+            <Col md={6}>
+              <Card className="border-0 h-100 mission-card">
+                <Card.Body className="p-4 text-center">
+                  <RocketTakeoff size={40} className="text-primary mb-3" />
+                  <h4 className="fw-bold mb-2 text-primary">Sứ mệnh</h4>
+                  <p className="text-muted">
+                    Cung cấp giải pháp công nghệ tối ưu, giúp doanh nghiệp tăng
+                    hiệu suất, tiết kiệm chi phí và bứt phá trong kỷ nguyên số.
+                  </p>
                 </Card.Body>
               </Card>
             </Col>
             <Col md={6}>
-              <Card className="h-100 shadow-sm">
-                <Card.Body>
-                  <Card.Title>Tầm nhìn</Card.Title>
-                  <Card.Text>
-                    Trở thành đối tác công nghệ hàng đầu, mang lại giá trị lâu
-                    dài cho khách hàng và cộng đồng.
-                  </Card.Text>
+              <Card className="border-0 h-100 mission-card">
+                <Card.Body className="p-4 text-center">
+                  <Eye size={40} className="text-info mb-3" />
+                  <h4 className="fw-bold mb-2 text-info">Tầm nhìn</h4>
+                  <p className="text-muted">
+                    Trở thành đối tác công nghệ đáng tin cậy hàng đầu, mang lại
+                    giá trị bền vững cho khách hàng và cộng đồng.
+                  </p>
                 </Card.Body>
               </Card>
             </Col>
@@ -82,15 +98,23 @@ const AboutPage = () => {
       {/* Team */}
       <section className="py-5 bg-light">
         <Container>
-          <h2 className="text-center mb-4">Đội ngũ của chúng tôi</h2>
+          <div className="text-center mb-5">
+            <People size={40} className="text-primary mb-2" />
+            <h2 className="fw-bold">Đội ngũ của chúng tôi</h2>
+            <div className="section-line mx-auto mt-2"></div>
+          </div>
           <Row>
             {teamMembers.map((member, idx) => (
               <Col md={4} key={idx} className="mb-4">
-                <Card className="team-card h-100 text-center shadow-sm">
-                  <Card.Img variant="top" src={member.img} />
+                <Card className="team-card h-100 text-center border-0">
+                  <div className="team-img-wrapper">
+                    <Card.Img variant="top" src={member.img} />
+                  </div>
                   <Card.Body>
-                    <Card.Title>{member.name}</Card.Title>
-                    <Card.Text>{member.role}</Card.Text>
+                    <Card.Title className="fw-bold text-primary">
+                      {member.name}
+                    </Card.Title>
+                    <Card.Text className="text-muted">{member.role}</Card.Text>
                   </Card.Body>
                 </Card>
               </Col>
@@ -100,11 +124,19 @@ const AboutPage = () => {
       </section>
 
       {/* Contact CTA */}
-      <section className="py-5 text-center">
-        <Container>
-          <h2>Hãy liên hệ với chúng tôi ngay!</h2>
-          <p className="mb-4">Chúng tôi sẵn sàng hỗ trợ bạn 24/7.</p>
-          <Button variant="primary" size="lg" href="/contact">
+      <section className="contact-cta text-center text-white py-5">
+        <div className="overlay"></div>
+        <Container className="position-relative z-2">
+          <h2 className="fw-bold mb-3">Hãy liên hệ với chúng tôi ngay!</h2>
+          <p className="mb-4">
+            Đội ngũ <strong>Tien-Tech</strong> luôn sẵn sàng hỗ trợ bạn 24/7.
+          </p>
+          <Button
+            variant="light"
+            size="lg"
+            href="/contact"
+            className="fw-semibold"
+          >
             Liên hệ ngay
           </Button>
         </Container>

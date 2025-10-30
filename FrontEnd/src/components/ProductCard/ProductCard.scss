@@ -1,26 +1,98 @@
-.shopee-buttons .btn-shopee-small {
-  font-size: 1rem;
-  padding: 0.35rem 0;
-  min-height: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
+.product-card {
+  border-radius: 16px;
+  background: #fff;
+  overflow: hidden;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
 
-.shopee-buttons .btn-shopee-add {
-  background-color: #2c96f1;
-  color: #fff;
-  border: none;
-}
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 16px rgba(0, 123, 255, 0.15);
+  }
 
-.shopee-buttons .btn-shopee-buy {
-  background-color: #198754;
-  color: #fff;
-  border: none;
-}
+  .image-wrapper {
+    background: #f8f9fa;
+    position: relative;
+    overflow: hidden;
 
-.shopee-buttons .btn-shopee-small:hover {
-  transform: translateY(-1.5px);
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
+    img {
+      transition: transform 0.4s ease;
+    }
+
+    &:hover img {
+      transform: scale(1.08);
+    }
+
+    span {
+      border-bottom-right-radius: 10px;
+      font-size: 0.75rem;
+    }
+  }
+
+  .price-section {
+    .text-muted {
+      font-size: 0.8rem;
+    }
+
+    .text-danger {
+      color: #dc3545 !important;
+    }
+  }
+
+  .btn-shopee-add {
+    border-color: #007bff;
+    color: #007bff;
+    font-weight: 500;
+    transition: all 0.3s ease;
+
+    &:hover {
+      background: #007bff;
+      color: #fff;
+      transform: translateY(-2px);
+    }
+
+    &:active {
+      transform: scale(0.97);
+    }
+  }
+
+  .btn-shopee-buy {
+    background: linear-gradient(90deg, #007bff, #00b4d8);
+    border: none;
+    color: #fff;
+    font-weight: 600;
+    transition: all 0.3s ease;
+
+    &:hover {
+      background: linear-gradient(90deg, #0062cc, #00a2c8);
+      transform: translateY(-2px);
+    }
+
+    &:active {
+      transform: scale(0.97);
+    }
+  }
+
+  .text-truncate-2-lines {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .shopee-buttons {
+    .btn {
+      height: 38px;
+      font-size: 0.75rem;
+      border-radius: 10px;
+    }
+  }
+  .sale-badge {
+    background: linear-gradient(135deg, #ff416c, #ff4b2b);
+    color: #fff;
+    padding: 4px 8px;
+    font-weight: 600;
+    font-size: 0.8rem;
+    border-bottom-right-radius: 8px;
+    box-shadow: 0 2px 6px rgba(255, 75, 43, 0.4);
+  }
 }

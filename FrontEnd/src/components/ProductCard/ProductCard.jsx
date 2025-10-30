@@ -134,10 +134,7 @@ const ProductCard = ({ product }) => {
           onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
         />
         {hasDiscount && (
-          <span
-            className="position-absolute top-0 start-0 bg-danger text-white fw-bold px-2 py-1 rounded-bottom-end"
-            style={{ fontSize: "0.75rem" }}
-          >
+          <span className="position-absolute top-0 start-0 sale-badge">
             -{discount}%
           </span>
         )}

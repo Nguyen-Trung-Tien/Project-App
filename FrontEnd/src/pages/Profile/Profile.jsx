@@ -8,24 +8,19 @@ import {
   Form,
   Spinner,
   Image,
-  Modal,
 } from "react-bootstrap";
 import { useSelector, useDispatch } from "react-redux";
 import { updateUser } from "../../redux/userSlice";
-import {
-  getUserApi,
-  updateUserApi,
-  updatePasswordApi,
-} from "../../api/userApi";
+import { getUserApi, updateUserApi } from "../../api/userApi";
 import { toast } from "react-toastify";
 import Loading from "../../components/Loading/Loading";
 import "./Profile.scss";
+import ChangePasswordModal from "./ChangePasswordModal";
+import AvatarModal from "./AvatarModal";
 
 const Profile = () => {
   const dispatch = useDispatch();
-  const user = useSelector((state) => state.user.user);
-  const token = useSelector((state) => state.user.token);
-
+  const { user, token } = useSelector((state) => state.user);
   const [formData, setFormData] = useState({
     username: "",
     email: "",
@@ -37,11 +32,6 @@ const Profile = () => {
   const [loading, setLoading] = useState(false);
   const [showAvatarModal, setShowAvatarModal] = useState(false);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
-  const [passwordData, setPasswordData] = useState({
-    oldPassword: "",
-    newPassword: "",
-    confirmPassword: "",
-  });
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -49,19 +39,10 @@ const Profile = () => {
       setLoading(true);
       try {
         const res = await getUserApi(user.id, token);
-        if (res && res.errCode === 0) {
-          const data = res.data;
-          setFormData({
-            username: data.username || "",
-            email: data.email || "",
-            phone: data.phone || "",
-            address: data.address || "",
-            avatar: data.avatar || null,
-          });
-        }
-      } catch (err) {
-        console.error(err);
-        toast.error("Không thể tải thông tin người dùng");
+        if (res?.errCode === 0) setFormData(res.data);
+        else toast.error("Không thể tải thông tin người dùng");
+      } catch {
+        toast.error("Lỗi khi tải thông tin");
       } finally {
         setLoading(false);
       }
@@ -74,47 +55,17 @@ const Profile = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleAvatarChange = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setFormData((prev) => ({ ...prev, avatar: reader.result }));
-    };
-    reader.readAsDataURL(file);
-  };
   const handleSave = async () => {
     if (!user?.id || !token) return;
     setLoading(true);
-
     try {
-      const payload = {
-        id: user.id,
-        username: formData.username,
-        email: formData.email,
-        phone: formData.phone,
-        address: formData.address,
-        avatar: formData.avatar,
-      };
-
-      const res = await updateUserApi(payload, token);
-
+      const res = await updateUserApi({ id: user.id, ...formData }, token);
       if (res.errCode === 0) {
         toast.success("Cập nhật thành công!");
-
-        const userRes = await getUserApi(user.id, token);
-        if (userRes.errCode === 0) {
-          dispatch(updateUser(userRes.data));
-          setFormData((prev) => ({ ...prev, ...userRes.data }));
-        }
-
+        dispatch(updateUser(formData));
         setIsEditing(false);
-      } else {
-        toast.error(res.errMessage || "Lỗi server");
-      }
-    } catch (err) {
-      console.error(err);
+      } else toast.error(res.errMessage || "Lỗi server");
+    } catch {
       toast.error("Không thể cập nhật. Vui lòng thử lại!");
     } finally {
       setLoading(false);
@@ -124,82 +75,93 @@ const Profile = () => {
   return (
     <>
       {loading && <Loading />}
-      <div className="profile-page py-4">
+
+      <div
+        className="profile-page py-5"
+        style={{
+          background: "linear-gradient(120deg, #e0f7fa 0%, #f1f8ff 100%)",
+          minHeight: "100vh",
+        }}
+      >
         <Container>
-          <h2 className="text-center text-primary fw-bold mb-4">
-            Hồ sơ cá nhân
-          </h2>
+          <div className="text-center mb-5">
+            <div className="d-inline-flex align-items-center px-4 py-2 rounded-pill profile-title">
+              <h2 className="fw-bold mb-0">Hồ sơ của bạn</h2>
+            </div>
+            <div className="title-underline mx-auto mt-2"></div>
+          </div>
 
           <Row className="justify-content-center g-4">
             <Col md={4}>
-              <Card className="profile-card text-center shadow-sm p-4">
-                <div className="avatar-container position-relative mb-3">
+              <Card className="shadow-lg border-0 rounded-4 text-center py-4 px-3">
+                <div className="position-relative mb-3">
                   <Image
                     src={formData.avatar || "/images/avatar-default.png"}
                     roundedCircle
-                    width={120}
-                    height={120}
+                    width={130}
+                    height={130}
                     alt="Avatar"
-                    style={{ cursor: "pointer" }}
                     onClick={() => setShowAvatarModal(true)}
+                    style={{
+                      cursor: "pointer",
+                      border: "4px solid #4facfe",
+                      transition: "transform 0.3s ease",
+                    }}
+                    onMouseEnter={(e) =>
+                      (e.target.style.transform = "scale(1.05)")
+                    }
+                    onMouseLeave={(e) =>
+                      (e.target.style.transform = "scale(1)")
+                    }
                   />
-                  {isEditing && (
-                    <div className="avatar-overlay position-absolute top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center">
-                      <Form.Control
-                        type="file"
-                        accept="image/*"
-                        onChange={handleAvatarChange}
-                        style={{
-                          opacity: 0,
-                          width: "100%",
-                          height: "100%",
-                          cursor: "pointer",
-                        }}
-                      />
-                      <span className="text-white fw-bold position-absolute">
-                        Thay đổi ảnh
-                      </span>
-                    </div>
-                  )}
                 </div>
-                <h4 className="mt-3 mb-1 fw-bold">{formData.username}</h4>
-                <p className="text-muted small">{formData.email}</p>
-                <Button
-                  variant={isEditing ? "outline-danger" : "outline-primary"}
-                  className="rounded-pill mt-2"
-                  onClick={() => setIsEditing(!isEditing)}
-                >
-                  {isEditing ? "Hủy chỉnh sửa" : "Chỉnh sửa thông tin"}
-                </Button>
-                <Button
-                  variant="outline-warning"
-                  className="rounded-pill mt-3"
-                  onClick={() => setShowPasswordModal(true)}
-                >
-                  🔒 Đổi mật khẩu
-                </Button>
+
+                <h4 className="mt-2 mb-1 fw-bold text-dark">
+                  {formData.username}
+                </h4>
+                <p className="text-muted small mb-4">{formData.email}</p>
+
+                <div className="d-grid gap-2">
+                  <Button
+                    variant={isEditing ? "outline-danger" : "outline-primary"}
+                    className="rounded-pill fw-semibold"
+                    onClick={() => setIsEditing(!isEditing)}
+                  >
+                    {isEditing ? "❌ Hủy chỉnh sửa" : "✏️ Chỉnh sửa thông tin"}
+                  </Button>
+                  <Button
+                    variant="outline-warning"
+                    className="rounded-pill fw-semibold"
+                    onClick={() => setShowPasswordModal(true)}
+                  >
+                    🔒 Đổi mật khẩu
+                  </Button>
+                </div>
               </Card>
             </Col>
 
+            {/* RIGHT COLUMN */}
             <Col md={7}>
-              <Card className="profile-info shadow-sm p-4">
+              <Card className="shadow-lg border-0 rounded-4 p-4 bg-white">
                 <h5 className="text-secondary fw-bold mb-3">
                   Thông tin cá nhân
                 </h5>
+
                 <Form>
                   <Row>
                     {["username", "email", "phone", "address"].map(
                       (field, i) => (
                         <Col md={i < 2 ? 6 : 12} key={field}>
                           <Form.Group className="mb-3">
-                            <Form.Label className="fw-semibold">
-                              {field === "username"
-                                ? "Họ và tên"
-                                : field === "email"
-                                ? "Email"
-                                : field === "phone"
-                                ? "Số điện thoại"
-                                : "Địa chỉ"}
+                            <Form.Label className="fw-semibold text-muted">
+                              {
+                                {
+                                  username: "Họ và tên",
+                                  email: "Email",
+                                  phone: "Số điện thoại",
+                                  address: "Địa chỉ",
+                                }[field]
+                              }
                             </Form.Label>
                             <Form.Control
                               type={field === "email" ? "email" : "text"}
@@ -207,17 +169,27 @@ const Profile = () => {
                               value={formData[field] || ""}
                               onChange={handleChange}
                               disabled={!isEditing}
+                              className={`rounded-3 shadow-sm ${
+                                isEditing
+                                  ? "border-primary"
+                                  : "border-light bg-light"
+                              }`}
                             />
                           </Form.Group>
                         </Col>
                       )
                     )}
                   </Row>
+
                   {isEditing && (
-                    <div className="text-end">
+                    <div className="text-end mt-4">
                       <Button
                         variant="primary"
-                        className="px-4 rounded-pill"
+                        className="rounded-pill px-4 fw-semibold text-white border-0"
+                        style={{
+                          background:
+                            "linear-gradient(90deg, #4facfe 0%, #00f2fe 100%)",
+                        }}
                         onClick={handleSave}
                         disabled={loading}
                       >
@@ -235,141 +207,18 @@ const Profile = () => {
           </Row>
         </Container>
 
-        <Modal
+        {/* Modals */}
+        <AvatarModal
           show={showAvatarModal}
+          avatar={formData.avatar}
           onHide={() => setShowAvatarModal(false)}
-          centered
-        >
-          <Modal.Body className="text-center">
-            <Image
-              src={formData.avatar || "/images/avatar-default.png"}
-              rounded
-              fluid
-              alt="Avatar Preview"
-            />
-          </Modal.Body>
-          <Modal.Footer>
-            <Button
-              variant="secondary"
-              onClick={() => setShowAvatarModal(false)}
-            >
-              Đóng
-            </Button>
-          </Modal.Footer>
-        </Modal>
-        <Modal
+        />
+        <ChangePasswordModal
           show={showPasswordModal}
           onHide={() => setShowPasswordModal(false)}
-          centered
-        >
-          <Modal.Header closeButton>
-            <Modal.Title>🔒 Đổi mật khẩu</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            <Form>
-              <Form.Group className="mb-3">
-                <Form.Label>Mật khẩu cũ</Form.Label>
-                <Form.Control
-                  type="password"
-                  name="oldPassword"
-                  value={passwordData.oldPassword}
-                  onChange={(e) =>
-                    setPasswordData((prev) => ({
-                      ...prev,
-                      oldPassword: e.target.value,
-                    }))
-                  }
-                  placeholder="Nhập mật khẩu hiện tại"
-                />
-              </Form.Group>
-              <Form.Group className="mb-3">
-                <Form.Label>Mật khẩu mới</Form.Label>
-                <Form.Control
-                  type="password"
-                  name="newPassword"
-                  value={passwordData.newPassword}
-                  onChange={(e) =>
-                    setPasswordData((prev) => ({
-                      ...prev,
-                      newPassword: e.target.value,
-                    }))
-                  }
-                  placeholder="Nhập mật khẩu mới"
-                />
-              </Form.Group>
-              <Form.Group className="mb-3">
-                <Form.Label>Xác nhận mật khẩu mới</Form.Label>
-                <Form.Control
-                  type="password"
-                  name="confirmPassword"
-                  value={passwordData.confirmPassword}
-                  onChange={(e) =>
-                    setPasswordData((prev) => ({
-                      ...prev,
-                      confirmPassword: e.target.value,
-                    }))
-                  }
-                  placeholder="Nhập lại mật khẩu mới"
-                />
-              </Form.Group>
-            </Form>
-          </Modal.Body>
-          <Modal.Footer>
-            <Button
-              variant="secondary"
-              onClick={() => setShowPasswordModal(false)}
-            >
-              Hủy
-            </Button>
-            <Button
-              variant="primary"
-              onClick={async () => {
-                if (!passwordData.oldPassword || !passwordData.newPassword) {
-                  toast.warning("Vui lòng nhập đầy đủ thông tin");
-                  return;
-                }
-                if (passwordData.newPassword !== passwordData.confirmPassword) {
-                  toast.error("Mật khẩu xác nhận không khớp!");
-                  return;
-                }
-
-                try {
-                  setLoading(true);
-                  const res = await updatePasswordApi(
-                    {
-                      userId: user.id,
-                      oldPassword: passwordData.oldPassword,
-                      newPassword: passwordData.newPassword,
-                    },
-                    token
-                  );
-                  if (res.errCode === 0) {
-                    toast.success("Đổi mật khẩu thành công!");
-                    setShowPasswordModal(false);
-                    setPasswordData({
-                      oldPassword: "",
-                      newPassword: "",
-                      confirmPassword: "",
-                    });
-                  } else {
-                    toast.error(res.errMessage || "Không thể đổi mật khẩu");
-                  }
-                } catch (err) {
-                  console.log(err);
-                  toast.error("Lỗi máy chủ khi đổi mật khẩu");
-                } finally {
-                  setLoading(false);
-                }
-              }}
-            >
-              {loading ? (
-                <Spinner animation="border" size="sm" />
-              ) : (
-                "Lưu thay đổi"
-              )}
-            </Button>
-          </Modal.Footer>
-        </Modal>
+          userId={user?.id}
+          token={token}
+        />
       </div>
     </>
   );

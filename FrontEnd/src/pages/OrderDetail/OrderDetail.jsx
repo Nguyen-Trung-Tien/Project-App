@@ -73,6 +73,28 @@ const OrderDetail = () => {
     }
   };
 
+  const getPaymentBadge = (status) => {
+    if (status?.toLowerCase() === "paid") {
+      return (
+        <Badge bg="success" className="fs-7">
+          Đã thanh toán
+        </Badge>
+      );
+    }
+    if (status?.toLowerCase() === "unpaid") {
+      return (
+        <Badge bg="danger" className="fs-7">
+          Chưa thanh toán
+        </Badge>
+      );
+    }
+    return (
+      <Badge bg="secondary" className="fs-7">
+        Đang xử lý
+      </Badge>
+    );
+  };
+
   const getReturnBadge = (status) => {
     switch (status) {
       case "none":
@@ -121,7 +143,7 @@ const OrderDetail = () => {
     return <p className="text-center mt-5">Không có dữ liệu đơn hàng</p>;
 
   return (
-    <div className="order-detail-page py-2">
+    <div className="order-detail-page py-4">
       <Container>
         <Button
           variant="outline-secondary"
@@ -131,15 +153,17 @@ const OrderDetail = () => {
           ← Quay lại Lịch sử đơn hàng
         </Button>
 
-        <h2 className="mb-3 text-center text-primary">
-          Chi tiết đơn hàng # {`DH${order.id}`}
-        </h2>
+        <h3 className="mb-3 text-center fw-bold text-primary">
+          Chi tiết đơn hàng #DH{order.id}
+        </h3>
 
-        <Card className="mb-3 shadow-sm">
+        <Card className="mb-4 shadow-sm border-0">
           <Card.Body>
             <Row>
               <Col md={6}>
-                <h5>Thông tin người nhận</h5>
+                <h5 className="fw-semibold mb-3 text-secondary">
+                  👤 Thông tin người nhận
+                </h5>
                 <p>
                   <strong>Họ tên:</strong> {order.user?.username}
                 </p>
@@ -155,8 +179,11 @@ const OrderDetail = () => {
                   </p>
                 )}
               </Col>
+
               <Col md={6}>
-                <h5>Thông tin đơn hàng</h5>
+                <h5 className="fw-semibold mb-3 text-secondary">
+                  🧾 Thông tin đơn hàng
+                </h5>
                 <p>
                   <strong>Ngày đặt:</strong>{" "}
                   {new Date(
@@ -176,29 +203,35 @@ const OrderDetail = () => {
                   <strong>Phương thức thanh toán:</strong>{" "}
                   {order.paymentMethod?.toUpperCase()}
                 </p>
-                <p>
+                <div className="mt-2">
                   <strong>Trạng thái thanh toán:</strong>{" "}
-                  {order.paymentStatus?.toUpperCase()}
-                </p>
-                <p>
+                  {getPaymentBadge(order.paymentStatus)}
+                </div>
+                <p className="mt-3">
                   <strong>Tổng tiền:</strong>{" "}
-                  {parseFloat(order.totalPrice).toLocaleString()} ₫
+                  <span className="text-danger fw-bold">
+                    {parseFloat(order.totalPrice).toLocaleString()} ₫
+                  </span>
                 </p>
+
                 <ProgressBar
                   now={getProgress(order.status)}
                   label={`${getProgress(order.status)}%`}
                   variant={getProgressVariant(order.status)}
                   className="mt-3"
+                  style={{ height: "12px", borderRadius: "6px" }}
                 />
               </Col>
             </Row>
           </Card.Body>
         </Card>
 
-        <h4 className="mb-3">Sản phẩm trong đơn hàng</h4>
-        <Table responsive bordered hover className="product-table">
-          <thead>
-            <tr className="text-center">
+        <h5 className="fw-semibold mb-3 text-secondary">
+          📦 Sản phẩm trong đơn hàng
+        </h5>
+        <Table responsive bordered hover className="align-middle shadow-sm">
+          <thead className="table-primary text-center">
+            <tr>
               <th>Tên sản phẩm</th>
               <th>Số lượng</th>
               <th>Giá</th>
@@ -212,7 +245,7 @@ const OrderDetail = () => {
               const price = parseFloat(item.price || 0);
               const subtotal = price * (item.quantity || 0);
               return (
-                <tr key={item.id} className="align-middle text-center">
+                <tr key={item.id} className="text-center">
                   <td>{item.productName}</td>
                   <td>{item.quantity}</td>
                   <td>{price.toLocaleString()} ₫</td>
@@ -226,11 +259,11 @@ const OrderDetail = () => {
         </Table>
 
         <div className="text-end mt-4">
-          <h5>
+          <h5 className="fw-bold">
             Tổng cộng:{" "}
-            <strong className="text-danger">
+            <span className="text-danger fs-5">
               {parseFloat(order.totalPrice).toLocaleString()} ₫
-            </strong>
+            </span>
           </h5>
         </div>
       </Container>

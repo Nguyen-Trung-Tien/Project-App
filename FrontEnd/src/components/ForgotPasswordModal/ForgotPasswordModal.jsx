@@ -6,6 +6,13 @@ import {
   resetPasswordApi,
   verifyResetTokenApi,
 } from "../../api/userApi";
+import {
+  EnvelopeAtFill,
+  ShieldLockFill,
+  KeyFill,
+  ArrowLeft,
+  ArrowClockwise,
+} from "react-bootstrap-icons";
 
 const ForgotPasswordModal = ({ show, onClose }) => {
   const [step, setStep] = useState(1);
@@ -40,11 +47,8 @@ const ForgotPasswordModal = ({ show, onClose }) => {
       if (res.errCode === 0) {
         toast.success(res.errMessage);
         setStep(2);
-      } else {
-        toast.error(res.errMessage);
-      }
-    } catch (err) {
-      console.log(err);
+      } else toast.error(res.errMessage);
+    } catch {
       toast.error("Lỗi khi gửi mã xác nhận");
     } finally {
       setLoading(false);
@@ -62,11 +66,8 @@ const ForgotPasswordModal = ({ show, onClose }) => {
       if (res.errCode === 0) {
         toast.success(res.errMessage);
         setStep(3);
-      } else {
-        toast.error(res.errMessage);
-      }
-    } catch (err) {
-      console.log(err);
+      } else toast.error(res.errMessage);
+    } catch {
       toast.error("Lỗi khi xác thực mã");
     } finally {
       setLoading(false);
@@ -89,11 +90,8 @@ const ForgotPasswordModal = ({ show, onClose }) => {
       if (res.errCode === 0) {
         toast.success(res.errMessage || "Đổi mật khẩu thành công");
         handleClose();
-      } else {
-        toast.error(res.errMessage || "Không thể đổi mật khẩu");
-      }
-    } catch (err) {
-      console.log(err);
+      } else toast.error(res.errMessage || "Không thể đổi mật khẩu");
+    } catch {
       toast.error("Lỗi khi đổi mật khẩu");
     } finally {
       setLoading(false);
@@ -101,65 +99,100 @@ const ForgotPasswordModal = ({ show, onClose }) => {
   };
 
   const renderFooter = () => {
-    if (step === 1) {
-      return (
-        <>
-          <Button variant="secondary" onClick={handleClose}>
-            Hủy
-          </Button>
-          <Button
-            variant="primary"
-            onClick={handleSendEmail}
-            disabled={loading}
-          >
-            {loading ? <Spinner animation="border" size="sm" /> : "Gửi mã"}
-          </Button>
-        </>
-      );
+    switch (step) {
+      case 1:
+        return (
+          <>
+            <Button variant="secondary" onClick={handleClose}>
+              Hủy
+            </Button>
+            <Button
+              variant="primary"
+              onClick={handleSendEmail}
+              disabled={loading}
+            >
+              {loading ? (
+                <Spinner animation="border" size="sm" />
+              ) : (
+                "Gửi mã xác nhận"
+              )}
+            </Button>
+          </>
+        );
+      case 2:
+        return (
+          <>
+            <Button
+              variant="outline-secondary"
+              onClick={() => setStep(1)}
+              disabled={loading}
+            >
+              <ArrowLeft className="me-1" /> Quay lại
+            </Button>
+            <Button
+              variant="primary"
+              onClick={handleVerifyToken}
+              disabled={loading}
+            >
+              {loading ? (
+                <Spinner animation="border" size="sm" />
+              ) : (
+                "Xác thực mã"
+              )}
+            </Button>
+          </>
+        );
+      case 3:
+        return (
+          <>
+            <Button
+              variant="outline-secondary"
+              onClick={() => setStep(2)}
+              disabled={loading}
+            >
+              <ArrowLeft className="me-1" /> Quay lại
+            </Button>
+            <Button
+              variant="success"
+              onClick={handleResetPassword}
+              disabled={loading}
+            >
+              {loading ? (
+                <Spinner animation="border" size="sm" />
+              ) : (
+                "Đổi mật khẩu"
+              )}
+            </Button>
+          </>
+        );
+      default:
+        return null;
     }
-    if (step === 2) {
-      return (
-        <>
-          <Button variant="light" onClick={() => setStep(1)} disabled={loading}>
-            Quay lại
-          </Button>
-          <Button
-            variant="primary"
-            onClick={handleVerifyToken}
-            disabled={loading}
-          >
-            {loading ? <Spinner animation="border" size="sm" /> : "Xác thực mã"}
-          </Button>
-        </>
-      );
-    }
-    // step 3
-    return (
-      <>
-        <Button variant="light" onClick={() => setStep(2)} disabled={loading}>
-          Quay lại
-        </Button>
-        <Button
-          variant="success"
-          onClick={handleResetPassword}
-          disabled={loading}
-        >
-          {loading ? <Spinner animation="border" size="sm" /> : "Đổi mật khẩu"}
-        </Button>
-      </>
-    );
   };
 
   return (
-    <Modal show={show} onHide={handleClose} centered>
-      <Modal.Header closeButton>
-        <Modal.Title>
-          {step === 1 && "Khôi phục mật khẩu"}
-          {step === 2 && "Nhập mã xác nhận"}
-          {step === 3 && "Đặt mật khẩu mới"}
+    <Modal show={show} onHide={handleClose} centered size="md">
+      <Modal.Header closeButton className="border-0 pb-0">
+        <Modal.Title className="fw-bold text-primary">
+          {step === 1 && (
+            <>
+              <EnvelopeAtFill className="me-2" /> Khôi phục mật khẩu
+            </>
+          )}
+          {step === 2 && (
+            <>
+              <ShieldLockFill className="me-2" /> Nhập mã xác nhận
+            </>
+          )}
+          {step === 3 && (
+            <>
+              <KeyFill className="me-2" /> Đặt mật khẩu mới
+            </>
+          )}
         </Modal.Title>
       </Modal.Header>
-      <Modal.Body>
+
+      <Modal.Body className="pt-3">
         {step === 1 && <FormStepEmail email={email} setEmail={setEmail} />}
         {step === 2 && (
           <FormStepToken
@@ -178,23 +211,22 @@ const ForgotPasswordModal = ({ show, onClose }) => {
           />
         )}
       </Modal.Body>
-      <Modal.Footer>{renderFooter()}</Modal.Footer>
+
+      <Modal.Footer className="border-0">{renderFooter()}</Modal.Footer>
     </Modal>
   );
 };
 
-/* Subcomponents for clarity */
 const FormStepEmail = ({ email, setEmail }) => (
   <>
-    <p>
-      Vui lòng nhập email đã đăng ký. Chúng tôi sẽ gửi mã xác nhận đến email
-      này.
+    <p className="text-muted mb-3">
+      Nhập email bạn đã đăng ký để nhận mã xác nhận khôi phục mật khẩu.
     </p>
     <Form.Group>
-      <Form.Label>Email</Form.Label>
+      <Form.Label className="fw-semibold">Email</Form.Label>
       <Form.Control
         type="email"
-        placeholder="nhập email của bạn"
+        placeholder="nhập email của bạn..."
         value={email}
         onChange={(e) => setEmail(e.target.value.trim())}
       />
@@ -204,23 +236,23 @@ const FormStepEmail = ({ email, setEmail }) => (
 
 const FormStepToken = ({ email, token, setToken, onResend }) => (
   <>
-    <p>
-      Đã gửi mã xác nhận tới: <strong>{email}</strong>
+    <p className="text-muted">
+      Mã xác nhận đã được gửi tới: <strong>{email}</strong>
     </p>
-    <Form.Group>
-      <Form.Label>Mã xác nhận</Form.Label>
+    <Form.Group className="mb-2">
+      <Form.Label className="fw-semibold">Mã xác nhận</Form.Label>
       <InputGroup>
         <Form.Control
-          placeholder="dán mã xác nhận (UUID)"
+          placeholder="Nhập mã khôi phục..."
           value={token}
           onChange={(e) => setToken(e.target.value.trim())}
         />
-        <Button variant="outline-secondary" onClick={onResend}>
-          Gửi lại
+        <Button variant="outline-info" onClick={onResend}>
+          <ArrowClockwise className="me-1" /> Gửi lại
         </Button>
       </InputGroup>
       <Form.Text className="text-muted">
-        Mã có hiệu lực trong thời gian ngắn (ví dụ 15 phút).
+        Mã có hiệu lực trong 15 phút. Kiểm tra hộp thư hoặc spam.
       </Form.Text>
     </Form.Group>
   </>
@@ -233,20 +265,20 @@ const FormStepNewPassword = ({
   setConfirmPassword,
 }) => (
   <>
-    <Form.Group>
-      <Form.Label>Mật khẩu mới</Form.Label>
+    <Form.Group className="mb-3">
+      <Form.Label className="fw-semibold">Mật khẩu mới</Form.Label>
       <Form.Control
         type="password"
-        placeholder="Nhập mật khẩu mới"
+        placeholder="Nhập mật khẩu mới..."
         value={newPassword}
         onChange={(e) => setNewPassword(e.target.value)}
       />
     </Form.Group>
-    <Form.Group className="mt-3">
-      <Form.Label>Xác nhận mật khẩu</Form.Label>
+    <Form.Group>
+      <Form.Label className="fw-semibold">Xác nhận mật khẩu</Form.Label>
       <Form.Control
         type="password"
-        placeholder="Nhập lại mật khẩu mới"
+        placeholder="Nhập lại mật khẩu mới..."
         value={confirmPassword}
         onChange={(e) => setConfirmPassword(e.target.value)}
       />

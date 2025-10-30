@@ -1,105 +1,71 @@
-$primary-gradient: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
-$brand-color: #ffffff;
-$button-bg: #00c6ff;
-$button-hover: #4facfe;
-
 .hero-section {
+  height: 90vh;
+  background: url("https://images.unsplash.com/photo-1519389950473-47ba0277781c")
+    center/cover no-repeat;
   position: relative;
-  height: 65vh;
-  background: $primary-gradient;
   overflow: hidden;
 
   .hero-overlay {
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.25);
+    inset: 0;
+    background: linear-gradient(
+      180deg,
+      rgba(0, 123, 255, 0.4),
+      rgba(0, 0, 0, 0.6)
+    );
     z-index: 1;
   }
 
   .hero-content {
-    position: relative;
     z-index: 2;
-    max-width: 600px;
-    color: $brand-color;
-    animation: fadeInUp 1s ease-out;
+    max-width: 800px;
+    animation: fadeInUp 1.2s ease;
+  }
 
-    .hero-title {
+  .hero-title {
+    font-size: 4rem;
+    letter-spacing: 2px;
+
+    @media (max-width: 768px) {
       font-size: 2.8rem;
-      line-height: 1.2;
-      letter-spacing: 1px;
-      margin-bottom: 0.8rem;
-
-      .brand-highlight {
-        color: #fff;
-        background: #007bff;
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        font-weight: 800;
-        transition: transform 0.3s ease;
-
-        &:hover {
-          transform: scale(1.1) rotate(-3deg);
-        }
-      }
     }
 
-    .hero-subtitle {
-      font-size: 1.2rem;
-      margin-bottom: 1.5rem;
-      opacity: 0.9;
+    .text-gradient {
+      background: linear-gradient(90deg, #4facfe, #00f2fe);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
+  }
 
-    .hero-btn {
-      background: $button-bg;
-      border: none;
-      padding: 0.6rem 1.8rem;
-      font-size: 1rem;
-      font-weight: 600;
-      border-radius: 50px;
-      transition: all 0.3s ease;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  .hero-subtitle {
+    font-size: 1.25rem;
+    color: #f1f1f1;
+    line-height: 1.6;
+    max-width: 650px;
+    margin: 0 auto;
+  }
 
-      &:hover {
-        background: $button-hover;
-        transform: translateY(-2px);
-        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
-      }
+  .hero-btn {
+    background: linear-gradient(90deg, #4facfe, #00f2fe);
+    border: none;
+    color: white;
+    transition: all 0.3s ease;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
+      background: linear-gradient(90deg, #00f2fe, #4facfe);
     }
   }
 }
 
-// Animation fadeInUp
 @keyframes fadeInUp {
-  0% {
+  from {
     opacity: 0;
-    transform: translateY(30px);
+    transform: translateY(40px);
   }
-  100% {
+  to {
     opacity: 1;
     transform: translateY(0);
-  }
-}
-
-// Responsive
-@media (max-width: 768px) {
-  .hero-section {
-    height: 55vh;
-
-    .hero-content {
-      max-width: 90%;
-      .hero-title {
-        font-size: 2rem;
-      }
-      .hero-subtitle {
-        font-size: 1rem;
-      }
-      .hero-btn {
-        font-size: 0.9rem;
-        padding: 0.5rem 1.5rem;
-      }
-    }
   }
 }

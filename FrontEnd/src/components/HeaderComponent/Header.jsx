@@ -92,15 +92,15 @@ function Header() {
       className="header shadow-sm py-2"
     >
       <Container>
-        <Navbar.Brand as={Link} to="/" className="header__brand fw-bold fs-4">
-          <span className="brand-highlight text-primary">T</span>ien-
-          <span className="brand-highlight text-primary">T</span>ech
+        <Navbar.Brand as={Link} to="/" className="navbar-brand fw-bold">
+          <span style={{ color: "#007bff" }}>T</span>ien-
+          <span style={{ color: "#007bff" }}>T</span>ech
         </Navbar.Brand>
 
         <Navbar.Toggle aria-controls="navbar-nav" />
 
         <Navbar.Collapse id="navbar-nav" className="justify-content-between">
-          <Nav className="me-auto header__nav">
+          <Nav className="me-auto">
             <Nav.Link as={Link} to="/" className="header__link">
               Trang chủ
             </Nav.Link>
@@ -113,19 +113,14 @@ function Header() {
             onSubmit={onSearchSubmit}
             className="d-flex align-items-center me-3 search-wrapper w-50"
           >
-            <div className="position-relative w-100">
-              <Search className="search-icon position-absolute " />
-              <input
-                type="text"
-                placeholder="Tìm sản phẩm..."
-                value={searchInput}
-                onChange={onSearchChange}
-                className="form-control ps-5"
-              />
-            </div>
-            <Button type="submit" variant="outline-light" className="ms-2">
-              Tìm
-            </Button>
+            <Search className="search-icon position-absolute" />
+            <input
+              type="text"
+              placeholder="Tìm sản phẩm..."
+              value={searchInput}
+              onChange={onSearchChange}
+              className="form-control"
+            />
           </form>
 
           <Nav className="header__actions align-items-center">
@@ -190,7 +185,7 @@ function Header() {
                     Thông tin cá nhân
                   </NavDropdown.Item>
                   <NavDropdown.Item onClick={() => navigate("/orders")}>
-                    Đơn mua
+                    Đơn hàng
                   </NavDropdown.Item>
                   <NavDropdown.Item onClick={() => navigate("/order-history")}>
                     Lịch sử đơn hàng
@@ -204,7 +199,7 @@ function Header() {
               <Nav.Link
                 as={Link}
                 to="/login"
-                className="header__icon-link ms-2 "
+                className="header__icon-link ms-2"
               >
                 <PersonCircle size={22} className="me-1" /> Đăng nhập
               </Nav.Link>

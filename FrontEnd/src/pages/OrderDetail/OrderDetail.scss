@@ -1,84 +1,22 @@
 .order-detail-page {
-  background-color: #f8f9fa;
+  background: #f8f9fa;
   min-height: 100vh;
 
-  h2 {
-    font-weight: 700;
-    letter-spacing: 0.5px;
+  h3,
+  h5 {
+    color: #1d3557;
   }
 
-  .card {
-    border-radius: 16px;
-    border: none;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-
-    &:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
-    }
-  }
-
-  .product-table {
-    background: #fff;
+  .table {
     border-radius: 10px;
     overflow: hidden;
+  }
 
-    th {
-      background-color: #0d6efd;
-      color: #fff;
-      text-transform: uppercase;
-      font-weight: 600;
-      font-size: 0.9rem;
-      letter-spacing: 0.3px;
-    }
-
-    td {
-      vertical-align: middle;
-      font-size: 0.95rem;
-    }
-
-    .product-img {
-      width: 60px;
-      height: 60px;
-      border-radius: 10px;
-      object-fit: cover;
-      border: 1px solid #dee2e6;
-    }
-
-    tr:hover {
-      background-color: #f1f9ff;
-    }
+  .badge {
+    font-size: 0.75rem;
   }
 
   .progress {
-    height: 20px;
-    border-radius: 50px;
-    background-color: #e9ecef;
-
-    .progress-bar {
-      font-weight: 600;
-    }
-  }
-
-  .btn {
-    border-radius: 30px;
-    padding: 8px 20px;
-    font-weight: 500;
-    transition: all 0.3s ease;
-
-    &:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 4px 10px rgba(108, 117, 125, 0.3);
-    }
-  }
-
-  @media (max-width: 768px) {
-    .product-img {
-      width: 50px;
-      height: 50px;
-    }
-    h2 {
-      font-size: 1.5rem;
-    }
+    font-size: 0.75rem;
   }
 }

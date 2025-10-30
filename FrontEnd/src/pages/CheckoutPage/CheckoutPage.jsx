@@ -1,6 +1,6 @@
 import { Container, Row, Col, Card } from "react-bootstrap";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { ArrowLeftCircle } from "react-bootstrap-icons";
+import { ArrowLeftCircle, CreditCard } from "react-bootstrap-icons";
 import { useSelector, useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 
@@ -87,54 +87,86 @@ const CheckoutPage = () => {
 
   if (!selectedItems.length) {
     return (
-      <div className="text-center mt-5">
-        <h5>Không có sản phẩm nào để thanh toán!</h5>
-        <Link
-          to={isSingleProduct ? "/" : "/cart"}
-          className="btn btn-primary mt-3"
-        >
-          <ArrowLeftCircle size={20} className="me-1" /> Quay lại
+      <div className="text-center py-5">
+        <h5 className="fw-semibold text-muted mb-3">
+          Không có sản phẩm nào để thanh toán!
+        </h5>
+        <Link to={isSingleProduct ? "/" : "/cart"} className="btn btn-primary">
+          <ArrowLeftCircle size={18} className="me-1" /> Quay lại
         </Link>
       </div>
     );
   }
 
   return (
-    <div className="checkout-page py-5">
+    <div className="checkout-page py-5 bg-light">
       <Container>
-        <nav aria-label="breadcrumb" className="mb-3">
-          <ol className="breadcrumb">
+        {/* Breadcrumb */}
+        <nav aria-label="breadcrumb" className="mb-4">
+          <ol className="breadcrumb mb-0">
             <li className="breadcrumb-item">
-              <Link to="/">Trang chủ</Link>
+              <Link to="/" className="text-decoration-none text-primary">
+                Trang chủ
+              </Link>
             </li>
             {!isSingleProduct && (
               <li className="breadcrumb-item">
-                <Link to="/cart">Giỏ hàng</Link>
+                <Link to="/cart" className="text-decoration-none text-primary">
+                  Giỏ hàng
+                </Link>
               </li>
             )}
-            <li className="breadcrumb-item active">Thanh toán</li>
+            <li className="breadcrumb-item active text-secondary">
+              Thanh toán
+            </li>
           </ol>
         </nav>
 
-        <h2 className="text-center mb-4 fw-bold text-primary">
-          💳 Chi tiết thanh toán
-        </h2>
+        {/* Header */}
+        <div className="text-center mb-5">
+          <h2 className="fw-bold text-uppercase">
+            <CreditCard className="text-primary me-2 mb-1" size={28} />
+            <span style={{ color: "#007bff" }}>Chi tiết</span>{" "}
+            <span className="text-dark">thanh toán</span>
+          </h2>
+          <div
+            className="mx-auto mt-2"
+            style={{
+              width: "100px",
+              height: "3px",
+              background: "linear-gradient(90deg, #007bff 0%, #00b4d8 100%)",
+              borderRadius: "10px",
+            }}
+          ></div>
+        </div>
 
-        <Row>
+        <Row className="gy-4">
           <Col lg={8}>
-            <CheckoutForm
-              user={user}
-              total={total}
-              selectedItems={selectedItems}
-              onOrderComplete={handleOrderComplete}
-              isSingleProduct={isSingleProduct}
-            />
+            <Card className="border-0 rounded-4">
+              <CheckoutForm
+                user={user}
+                total={total}
+                selectedItems={selectedItems}
+                onOrderComplete={handleOrderComplete}
+                isSingleProduct={isSingleProduct}
+              />
+            </Card>
           </Col>
 
           <Col lg={4}>
             <OrderSummary selectedItems={selectedItems} total={total} />
           </Col>
         </Row>
+
+        <div className="text-center mt-5">
+          <Link
+            to={isSingleProduct ? "/" : "/cart"}
+            className="btn btn-outline-primary rounded-pill px-4 py-2 fw-semibold"
+          >
+            <ArrowLeftCircle size={16} className="me-1" />
+            Quay lại giỏ hàng
+          </Link>
+        </div>
       </Container>
     </div>
   );

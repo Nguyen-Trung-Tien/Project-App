@@ -1,5 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { Container, Table, Badge, Button, Spinner } from "react-bootstrap";
+import {
+  Container,
+  Table,
+  Badge,
+  Button,
+  Spinner,
+  Card,
+} from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { Eye } from "react-bootstrap-icons";
 import { getAllOrders } from "../../api/orderApi";
@@ -51,6 +58,29 @@ const OrderHistory = () => {
     }
   };
 
+  const renderPaymentStatus = (status) => {
+    if (!status) return <Badge bg="secondary">Không rõ</Badge>;
+
+    const lower = status.toLowerCase();
+    if (lower === "paid")
+      return (
+        <Badge bg="success" className="px-1">
+          Đã thanh toán
+        </Badge>
+      );
+    if (lower === "unpaid")
+      return (
+        <Badge bg="danger" className="px-1">
+          Chưa thanh toán
+        </Badge>
+      );
+    return (
+      <Badge bg="warning" text="dark" className="px-1">
+        Đang xử lý
+      </Badge>
+    );
+  };
+
   const formatCurrency = (value) =>
     parseFloat(value || 0).toLocaleString("vi-VN") + " ₫";
 
@@ -65,52 +95,68 @@ const OrderHistory = () => {
     );
 
   return (
-    <div className="order-history-page py-2">
+    <div className="order-history-page py-4">
       <Container>
-        <h2 className="text-center mb-4">Lịch sử đơn hàng</h2>
+        <Card className="shadow-sm border-0">
+          <Card.Body>
+            <h3 className="text-center fw-bold mb-4 text-primary">
+              🧾 Lịch sử đơn hàng
+            </h3>
 
-        {orders.length === 0 ? (
-          <p className="text-center text-muted mt-4">
-            Bạn chưa có đơn hàng nào.
-          </p>
-        ) : (
-          <Table responsive bordered hover className="order-table">
-            <thead>
-              <tr className="text-center">
-                <th>#</th>
-                <th>Mã đơn hàng</th>
-                <th>Ngày đặt</th>
-                <th>Tổng tiền</th>
-                <th>Thanh toán</th>
-                <th>Trạng thái</th>
-                <th>Hành động</th>
-              </tr>
-            </thead>
-            <tbody>
-              {orders.map((order, index) => (
-                <tr key={order.id} className="align-middle text-center">
-                  <td>{index + 1}</td>
-                  <td>
-                    <strong> {`DH${order.id}`}</strong>
-                  </td>
-                  <td>{formatDate(order.createdAt)}</td>
-                  <td>{formatCurrency(order.totalPrice)}</td>
-                  <td>{order.paymentStatus?.toUpperCase() || "-"}</td>
-                  <td>{renderStatus(order.status)}</td>
-                  <td>
-                    <Button
-                      variant="outline-primary"
-                      size="sm"
-                      onClick={() => navigate(`/orders-detail/${order.id}`)}
-                    >
-                      <Eye className="me-1" /> Xem
-                    </Button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </Table>
-        )}
+            {orders.length === 0 ? (
+              <p className="text-center text-muted mt-4">
+                Bạn chưa có đơn hàng nào.
+              </p>
+            ) : (
+              <div className="table-responsive">
+                <Table
+                  bordered
+                  hover
+                  striped
+                  className="align-middle shadow-sm rounded"
+                >
+                  <thead className="table-primary text-center align-middle">
+                    <tr>
+                      <th>#</th>
+                      <th>Mã đơn hàng</th>
+                      <th>Ngày đặt</th>
+                      <th>Tổng tiền</th>
+                      <th>Thanh toán</th>
+                      <th>Trạng thái</th>
+                      <th>Hành động</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {orders.map((order, index) => (
+                      <tr key={order.id} className="text-center">
+                        <td>{index + 1}</td>
+                        <td className="fw-semibold text-primary">{`DH${order.id}`}</td>
+                        <td>{formatDate(order.createdAt)}</td>
+                        <td className="text-danger fw-semibold">
+                          {formatCurrency(order.totalPrice)}
+                        </td>
+                        <td>{renderPaymentStatus(order.paymentStatus)}</td>
+                        <td>{renderStatus(order.status)}</td>
+                        <td>
+                          <Button
+                            variant="outline-primary"
+                            size="sm"
+                            className="d-flex align-items-center mx-auto"
+                            onClick={() =>
+                              navigate(`/orders-detail/${order.id}`)
+                            }
+                          >
+                            <Eye className="me-1" /> Xem
+                          </Button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </Table>
+              </div>
+            )}
+          </Card.Body>
+        </Card>
       </Container>
     </div>
   );

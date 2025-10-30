@@ -18,7 +18,6 @@ import {
   removeCartItem,
 } from "../../redux/cartSlice";
 import { toast } from "react-toastify";
-
 import {
   getAllCartItems,
   removeCartItem as removeCartItemApi,
@@ -58,8 +57,7 @@ const CartPage = () => {
       dispatch(removeCartItem(id));
       setSelectedItems((prev) => prev.filter((itemId) => itemId !== id));
       toast.success("Đã xóa sản phẩm khỏi giỏ hàng!");
-    } catch (err) {
-      console.log(err);
+    } catch {
       toast.error("Xóa thất bại!");
     }
   };
@@ -69,8 +67,7 @@ const CartPage = () => {
     try {
       await updateCartItemApi(id, quantity);
       dispatch(updateCartItemQuantity({ id, quantity }));
-    } catch (err) {
-      console.log(err);
+    } catch {
       toast.error("Cập nhật số lượng thất bại!");
     }
   };
@@ -99,40 +96,45 @@ const CartPage = () => {
   };
 
   return (
-    <div className="cart-page py-4">
+    <div className="cart-page py-5">
       <Container>
-        <h2 className="text-center mb-4 fw-bold text-primary">
-          <Cart4 className="me-2" />
-          Giỏ hàng của bạn
-        </h2>
+        {/* Tiêu đề */}
+        <div className="text-center mb-5">
+          <div className="d-inline-flex align-items-center px-4 py-2 rounded-pill cart-title">
+            <Cart4 size={26} className="me-2" />
+            <h2 className="fw-bold mb-0">Giỏ hàng của bạn</h2>
+          </div>
+          <div className="title-underline mx-auto mt-2"></div>
+        </div>
 
+        {/* Nội dung */}
         {loading ? (
-          <div className="text-center my-5">
+          <div className="text-center py-5">
             <Spinner animation="border" variant="primary" />
-            <p className="mt-2 text-muted">Đang tải giỏ hàng...</p>
+            <p className="text-muted mt-2">Đang tải giỏ hàng...</p>
           </div>
         ) : cartItems.length === 0 ? (
           <div className="text-center py-5">
-            <p className="text-muted">Giỏ hàng trống.</p>
+            <img
+              src="/empty-cart.svg"
+              alt="empty cart"
+              className="img-fluid mb-3"
+              style={{ maxWidth: "250px" }}
+            />
+            <p className="text-muted">Giỏ hàng trống. Hãy mua sắm ngay!</p>
             <Link to="/" className="btn btn-primary mt-3 rounded-pill px-4">
               <ArrowLeftCircle size={18} className="me-1" /> Tiếp tục mua sắm
             </Link>
           </div>
         ) : (
           <Row className="g-4">
-            {/* Bảng sản phẩm */}
             <Col lg={8}>
-              <Card className="shadow-sm border-0 rounded-4">
+              <Card className="shadow-lg border-0 rounded-4">
                 <Card.Body>
-                  <Table
-                    responsive
-                    bordered
-                    hover
-                    className="align-middle text-center mb-0"
-                  >
-                    <thead className="bg-light">
+                  <Table responsive hover className="align-middle mb-0">
+                    <thead className="bg-primary text-white rounded-top">
                       <tr>
-                        <th>
+                        <th style={{ width: "50px" }}>
                           <Form.Check
                             type="checkbox"
                             checked={selectedItems.length === cartItems.length}
@@ -160,7 +162,6 @@ const CartPage = () => {
                               (100 - item.product.discount)) /
                             100
                           : item.product?.price || 0;
-
                         return (
                           <tr key={item.id}>
                             <td>
@@ -173,8 +174,8 @@ const CartPage = () => {
                             <td style={{ width: "80px" }}>
                               <img
                                 src={getImage(item.product?.image)}
-                                alt={item.product?.name || "Sản phẩm"}
-                                className="img-fluid rounded shadow-sm"
+                                alt={item.product?.name}
+                                className="img-fluid rounded-3"
                                 style={{
                                   width: "70px",
                                   height: "70px",
@@ -183,7 +184,7 @@ const CartPage = () => {
                               />
                             </td>
                             <td className="text-start fw-semibold">
-                              {item.product?.name || "N/A"}
+                              {item.product?.name}
                             </td>
                             <td className="text-end">
                               {item.product?.discount > 0 ? (
@@ -197,31 +198,31 @@ const CartPage = () => {
                                   </div>
                                 </>
                               ) : (
-                                <div>{price.toLocaleString()}₫</div>
+                                <span>{price.toLocaleString()}₫</span>
                               )}
                             </td>
-                            <td style={{ width: "100px" }}>
+                            <td style={{ width: "110px" }}>
                               <Form.Control
                                 type="number"
                                 min="1"
                                 value={item.quantity || 1}
-                                className="text-center rounded-3"
+                                className="text-center rounded-pill border-primary"
                                 onChange={(e) =>
                                   handleQtyChange(item.id, +e.target.value)
                                 }
                               />
                             </td>
-                            <td className="fw-bold text-end">
+                            <td className="fw-bold text-end text-success">
                               {(price * (item.quantity || 0)).toLocaleString()}₫
                             </td>
                             <td>
                               <Button
                                 variant="outline-danger"
                                 size="sm"
-                                className="rounded-circle"
+                                className="rounded-circle border-0"
                                 onClick={() => handleRemove(item.id)}
                               >
-                                <Trash size={16} />
+                                <Trash size={18} />
                               </Button>
                             </td>
                           </tr>
@@ -233,12 +234,12 @@ const CartPage = () => {
               </Card>
             </Col>
 
-            {/* Tổng kết giỏ hàng */}
+            {/* Cột tổng tiền */}
             <Col lg={4}>
-              <Card className="shadow-sm border-0 rounded-4">
+              <Card className="shadow-lg border-0 rounded-4 p-2">
                 <Card.Body>
-                  <h5 className="fw-bold mb-3 text-center text-primary">
-                    Tổng thanh toán
+                  <h5 className="fw-bold mb-4 text-center text-primary">
+                    Tóm tắt đơn hàng
                   </h5>
                   <div className="d-flex justify-content-between mb-2">
                     <span>Tạm tính:</span>
@@ -258,14 +259,14 @@ const CartPage = () => {
 
                   <Button
                     variant="primary"
-                    className="w-100 mt-3 rounded-pill fw-semibold shadow-sm"
+                    className="w-100 mt-4 rounded-pill fw-semibold shadow-sm py-2"
                     onClick={handleCheckOut}
                   >
                     Tiến hành thanh toán
                   </Button>
                   <Link
                     to="/"
-                    className="btn btn-outline-secondary w-100 mt-2 rounded-pill"
+                    className="btn btn-outline-primary w-100 mt-3 rounded-pill"
                   >
                     <ArrowLeftCircle size={18} className="me-1" />
                     Tiếp tục mua sắm
