@@ -61,10 +61,14 @@ export const deleteProductApi = async (id) => {
   }
 };
 
-export const getProductsByCategoryApi = async (categoryId) => {
+export const getProductsByCategoryApi = async (
+  categoryId,
+  page = 1,
+  limit = 11
+) => {
   try {
     const res = await API.get(
-      `/product/product-by-category?categoryId=${categoryId}`
+      `/product/product-by-category?categoryId=${categoryId}&page=${page}&limit=${limit}`
     );
     return res.data;
   } catch (error) {

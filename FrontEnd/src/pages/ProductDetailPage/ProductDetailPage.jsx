@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import {
   Container,
   Row,
@@ -60,9 +60,49 @@ const ProductDetailPage = () => {
   const [newReview, setNewReview] = useState({ rating: 5, comment: "" });
   const [suggestedProducts, setSuggestedProducts] = useState([]);
   const [suggestedPage, setSuggestedPage] = useState(1);
+  const currentProductId = useRef(Number(id));
   const [suggestedTotalPages, setSuggestedTotalPages] = useState(1);
   const [loadingSuggested, setLoadingSuggested] = useState(false);
-  const suggestedLimit = 4;
+  const suggestedLimit = 7;
+
+  const fetchSuggestedProducts = useCallback(
+    async (categoryId, page = 1, append = false) => {
+      if (!categoryId) return;
+      setLoadingSuggested(true);
+      try {
+        const res = await getProductsByCategoryApi(
+          categoryId,
+          page,
+          suggestedLimit
+        );
+
+        if (res?.errCode === 0 && Array.isArray(res.products)) {
+          const filtered = res.products.filter(
+            (p) => p.id !== currentProductId.current
+          );
+
+          setSuggestedProducts((prev) => {
+            if (append) {
+              const combined = [...prev, ...filtered];
+              return combined.filter(
+                (p, i, arr) => arr.findIndex((x) => x.id === p.id) === i
+              );
+            } else {
+              return filtered;
+            }
+          });
+
+          setSuggestedPage(page);
+          setSuggestedTotalPages(res.totalPages || 1);
+        }
+      } catch (err) {
+        console.error("Lỗi lấy sản phẩm gợi ý:", err);
+      } finally {
+        setLoadingSuggested(false);
+      }
+    },
+    [suggestedLimit]
+  );
 
   const fetchAllData = useCallback(async () => {
     setLoading(true);
@@ -72,7 +112,6 @@ const ProductDetailPage = () => {
         const p = res.product;
         setProduct(p);
         fetchReviews(p.id);
-        fetchSuggestedProducts(p.categoryId);
       } else {
         toast.error("Không tìm thấy sản phẩm!");
       }
@@ -97,42 +136,15 @@ const ProductDetailPage = () => {
     }
   };
 
-  const fetchSuggestedProducts = async (
-    categoryId,
-    page = 1,
-    append = false
-  ) => {
-    if (!categoryId) return;
-    setLoadingSuggested(true);
-    try {
-      const res = await getProductsByCategoryApi(
-        categoryId,
-        page,
-        suggestedLimit
-      );
-      console.log("Dữ liệu gợi ý:", res);
-
-      if (res?.errCode === 0 && Array.isArray(res.products)) {
-        const filtered = res.products.filter((p) => p.id !== Number(id));
-
-        setSuggestedProducts((prev) => {
-          const combined = append ? [...prev, ...filtered] : filtered;
-          const unique = combined.filter(
-            (p, i, arr) => arr.findIndex((x) => x.id === p.id) === i
-          );
-          return unique;
-        });
-
-        setSuggestedPage(page);
-        setSuggestedTotalPages(res.totalPages || 1);
-      }
-    } catch (err) {
-      console.error("Lỗi lấy sản phẩm gợi ý:", err);
-    } finally {
+  useEffect(() => {
+    if (product?.categoryId) {
+      setSuggestedProducts([]);
+      setSuggestedPage(1);
+      setSuggestedTotalPages(1);
       setLoadingSuggested(false);
+      fetchSuggestedProducts(product.categoryId, 1, false);
     }
-  };
-
+  }, [product?.id, product?.categoryId, fetchSuggestedProducts]);
   const handleLoadMoreSuggested = () => {
     if (suggestedPage < suggestedTotalPages) {
       fetchSuggestedProducts(product.categoryId, suggestedPage + 1, true);

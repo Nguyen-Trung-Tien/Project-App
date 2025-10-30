@@ -88,7 +88,7 @@ const deleteProduct = async (id) => {
   }
 };
 
-const getProductsByCategory = async (categoryId, page = 1, limit = 10) => {
+const getProductsByCategory = async (categoryId, page = 1, limit = 11) => {
   const offset = (page - 1) * limit;
   const whereCondition = categoryId ? { categoryId } : {};
 
