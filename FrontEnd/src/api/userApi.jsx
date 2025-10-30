@@ -103,3 +103,40 @@ export const updatePasswordApi = async (data, token) => {
     throw err;
   }
 };
+
+export const forgotPasswordApi = async (email) => {
+  try {
+    const res = await axiosClient.post("/user/forgot-password", { email });
+    return res.data;
+  } catch (err) {
+    console.error("Forgot Password API error:", err);
+    throw err;
+  }
+};
+
+export const verifyResetTokenApi = async (email, token) => {
+  try {
+    const res = await axiosClient.post("/user/verify-reset-token", {
+      email,
+      token,
+    });
+    return res.data;
+  } catch (err) {
+    console.error("Verify Reset Token API error:", err);
+    throw err;
+  }
+};
+
+export const resetPasswordApi = async (email, token, newPassword) => {
+  try {
+    const res = await axiosClient.post("/user/reset-password", {
+      email,
+      token,
+      newPassword,
+    });
+    return res.data;
+  } catch (err) {
+    console.error("Reset Password API error:", err);
+    throw err;
+  }
+};

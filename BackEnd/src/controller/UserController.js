@@ -218,6 +218,67 @@ const changePassword = async (req, res) => {
   );
   return res.status(200).json(result);
 };
+
+const forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email)
+      return res.status(400).json({
+        errCode: 1,
+        errMessage: "Is empty email!",
+      });
+
+    const result = await UserService.forgotPassword(email);
+    return res.status(200).json(result);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({
+      errCode: 2,
+      errMessage: "Error from server!",
+    });
+  }
+};
+
+const verifyResetToken = async (req, res) => {
+  try {
+    const { email, token } = req.body;
+    if (!email || !token)
+      return res.status(400).json({
+        errCode: 1,
+        errMessage: "Is empty email or token!",
+      });
+
+    const result = await UserService.verifyResetToken(email, token);
+    return res.status(200).json(result);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({
+      errCode: 2,
+      errMessage: "Error from server!",
+    });
+  }
+};
+
+const resetPassword = async (req, res) => {
+  try {
+    const { email, token, newPassword } = req.body;
+    if (!email || !token || !newPassword)
+      return res.status(400).json({
+        errCode: 1,
+        errMessage: "Error from server!",
+      });
+
+    const result = await UserService.resetPassword(email, token, newPassword);
+    return res.status(200).json(result);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({
+      errCode: 2,
+      errMessage: "Error from server!",
+    });
+  }
+};
+
 module.exports = {
   handleCreateNewUser,
   handleLogin,
@@ -228,4 +289,7 @@ module.exports = {
   handleDeleteUser,
   handleLogout,
   changePassword,
+  forgotPassword,
+  resetPassword,
+  verifyResetToken,
 };

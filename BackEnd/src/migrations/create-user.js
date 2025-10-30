@@ -30,6 +30,10 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false,
       },
+      resetToken: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
       role: {
         type: Sequelize.ENUM("customer", "admin"),
         defaultValue: "customer",

@@ -44,6 +44,10 @@ module.exports = (sequelize, DataTypes) => {
         defaultValue: "customer",
       },
       avatar: { type: DataTypes.BLOB("long"), allowNull: true },
+      resetToken: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
       isActive: { type: DataTypes.BOOLEAN, defaultValue: true },
     },
     {

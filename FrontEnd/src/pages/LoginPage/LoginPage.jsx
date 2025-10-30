@@ -15,11 +15,13 @@ import { setUser } from "../../redux/userSlice";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 import { getAvatarBase64 } from "../../utils/decodeImage";
+import ForgotPasswordModal from "../../components/ForgotPasswordModal/ForgotPasswordModal";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showForgotModal, setShowForgotModal] = useState(false);
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const handleSubmit = async (e) => {
@@ -88,9 +90,16 @@ const LoginPage = () => {
 
                   <div className="d-flex justify-content-between align-items-center mb-3">
                     <Form.Check type="checkbox" label="Ghi nhớ tôi" />
-                    <a href="#" className="text-decoration-none text-primary">
+                    <a
+                      className="text-decoration-none text-primary"
+                      onClick={() => setShowForgotModal(true)}
+                    >
                       Quên mật khẩu?
                     </a>
+                    <ForgotPasswordModal
+                      show={showForgotModal}
+                      onClose={() => setShowForgotModal(false)}
+                    />
                   </div>
 
                   <Button
