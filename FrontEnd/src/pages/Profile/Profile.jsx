@@ -12,7 +12,11 @@ import {
 } from "react-bootstrap";
 import { useSelector, useDispatch } from "react-redux";
 import { updateUser } from "../../redux/userSlice";
-import { getUserApi, updateUserApi } from "../../api/userApi";
+import {
+  getUserApi,
+  updateUserApi,
+  updatePasswordApi,
+} from "../../api/userApi";
 import { toast } from "react-toastify";
 import Loading from "../../components/Loading/Loading";
 import "./Profile.scss";
@@ -32,6 +36,12 @@ const Profile = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showAvatarModal, setShowAvatarModal] = useState(false);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [passwordData, setPasswordData] = useState({
+    oldPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  });
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -161,6 +171,13 @@ const Profile = () => {
                 >
                   {isEditing ? "Hủy chỉnh sửa" : "Chỉnh sửa thông tin"}
                 </Button>
+                <Button
+                  variant="outline-warning"
+                  className="rounded-pill mt-3"
+                  onClick={() => setShowPasswordModal(true)}
+                >
+                  🔒 Đổi mật khẩu
+                </Button>
               </Card>
             </Col>
 
@@ -237,6 +254,119 @@ const Profile = () => {
               onClick={() => setShowAvatarModal(false)}
             >
               Đóng
+            </Button>
+          </Modal.Footer>
+        </Modal>
+        <Modal
+          show={showPasswordModal}
+          onHide={() => setShowPasswordModal(false)}
+          centered
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>🔒 Đổi mật khẩu</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <Form>
+              <Form.Group className="mb-3">
+                <Form.Label>Mật khẩu cũ</Form.Label>
+                <Form.Control
+                  type="password"
+                  name="oldPassword"
+                  value={passwordData.oldPassword}
+                  onChange={(e) =>
+                    setPasswordData((prev) => ({
+                      ...prev,
+                      oldPassword: e.target.value,
+                    }))
+                  }
+                  placeholder="Nhập mật khẩu hiện tại"
+                />
+              </Form.Group>
+              <Form.Group className="mb-3">
+                <Form.Label>Mật khẩu mới</Form.Label>
+                <Form.Control
+                  type="password"
+                  name="newPassword"
+                  value={passwordData.newPassword}
+                  onChange={(e) =>
+                    setPasswordData((prev) => ({
+                      ...prev,
+                      newPassword: e.target.value,
+                    }))
+                  }
+                  placeholder="Nhập mật khẩu mới"
+                />
+              </Form.Group>
+              <Form.Group className="mb-3">
+                <Form.Label>Xác nhận mật khẩu mới</Form.Label>
+                <Form.Control
+                  type="password"
+                  name="confirmPassword"
+                  value={passwordData.confirmPassword}
+                  onChange={(e) =>
+                    setPasswordData((prev) => ({
+                      ...prev,
+                      confirmPassword: e.target.value,
+                    }))
+                  }
+                  placeholder="Nhập lại mật khẩu mới"
+                />
+              </Form.Group>
+            </Form>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button
+              variant="secondary"
+              onClick={() => setShowPasswordModal(false)}
+            >
+              Hủy
+            </Button>
+            <Button
+              variant="primary"
+              onClick={async () => {
+                if (!passwordData.oldPassword || !passwordData.newPassword) {
+                  toast.warning("Vui lòng nhập đầy đủ thông tin");
+                  return;
+                }
+                if (passwordData.newPassword !== passwordData.confirmPassword) {
+                  toast.error("Mật khẩu xác nhận không khớp!");
+                  return;
+                }
+
+                try {
+                  setLoading(true);
+                  const res = await updatePasswordApi(
+                    {
+                      userId: user.id,
+                      oldPassword: passwordData.oldPassword,
+                      newPassword: passwordData.newPassword,
+                    },
+                    token
+                  );
+                  if (res.errCode === 0) {
+                    toast.success("Đổi mật khẩu thành công!");
+                    setShowPasswordModal(false);
+                    setPasswordData({
+                      oldPassword: "",
+                      newPassword: "",
+                      confirmPassword: "",
+                    });
+                  } else {
+                    toast.error(res.errMessage || "Không thể đổi mật khẩu");
+                  }
+                } catch (err) {
+                  console.log(err);
+                  toast.error("Lỗi máy chủ khi đổi mật khẩu");
+                } finally {
+                  setLoading(false);
+                }
+              }}
+            >
+              {loading ? (
+                <Spinner animation="border" size="sm" />
+              ) : (
+                "Lưu thay đổi"
+              )}
             </Button>
           </Modal.Footer>
         </Modal>

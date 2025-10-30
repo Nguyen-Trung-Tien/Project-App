@@ -88,3 +88,18 @@ export const logoutUserApi = async () => {
     throw err;
   }
 };
+
+export const updatePasswordApi = async (data, token) => {
+  try {
+    const res = await axiosClient.put(`/user/change-password`, data, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+    return res.data;
+  } catch (err) {
+    console.error("Update Password API error:", err);
+    throw err;
+  }
+};

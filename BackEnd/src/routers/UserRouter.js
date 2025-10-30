@@ -8,9 +8,7 @@ const {
 
 router.post("/login", UserController.handleLogin);
 router.post("/create-new-user", UserController.handleCreateNewUser);
-
 router.post("/refresh-token", UserController.handleRefreshToken);
-
 router.get(
   "/get-all-user",
   authenticateToken,
@@ -33,5 +31,10 @@ router.delete(
 );
 
 router.post("/logout", UserController.handleLogout);
+router.put(
+  "/change-password",
+  authenticateToken,
+  UserController.changePassword
+);
 
 module.exports = router;

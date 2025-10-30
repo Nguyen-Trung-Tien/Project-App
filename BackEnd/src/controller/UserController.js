@@ -202,6 +202,22 @@ const handleLogout = async (req, res) => {
   }
 };
 
+const changePassword = async (req, res) => {
+  const { userId, oldPassword, newPassword } = req.body;
+  if (!userId || !oldPassword || !newPassword) {
+    return res.status(400).json({
+      errCode: 1,
+      errMessage: "Missing required parameters",
+    });
+  }
+
+  const result = await UserService.updateUserPassword(
+    userId,
+    oldPassword,
+    newPassword
+  );
+  return res.status(200).json(result);
+};
 module.exports = {
   handleCreateNewUser,
   handleLogin,
@@ -211,4 +227,5 @@ module.exports = {
   handleGetUserById,
   handleDeleteUser,
   handleLogout,
+  changePassword,
 };

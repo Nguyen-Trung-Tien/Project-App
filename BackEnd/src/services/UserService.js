@@ -167,6 +167,31 @@ const deleteUser = async (userId) => {
     throw e;
   }
 };
+
+const updateUserPassword = async (userId, oldPassword, newPassword) => {
+  try {
+    const user = await db.User.findByPk(userId);
+    if (!user) {
+      return { errCode: 1, errMessage: "User not found" };
+    }
+
+    const isPasswordValid = await bcrypt.compare(oldPassword, user.password);
+    if (!isPasswordValid) {
+      return { errCode: 2, errMessage: "Old password is incorrect" };
+    }
+
+    const hashedNewPassword = await hashUserPassword(newPassword);
+    user.password = hashedNewPassword;
+
+    await user.save();
+
+    return { errCode: 0, errMessage: "Password updated successfully" };
+  } catch (error) {
+    console.error("Error updating password:", error);
+    return { errCode: 3, errMessage: "Server error while updating password" };
+  }
+};
+
 module.exports = {
   createNewUser,
   handleUserLogin,
@@ -176,4 +201,5 @@ module.exports = {
   getAllUsers,
   getUserById,
   deleteUser,
+  updateUserPassword,
 };
