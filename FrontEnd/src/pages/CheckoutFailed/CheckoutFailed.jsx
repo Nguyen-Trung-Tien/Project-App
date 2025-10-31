@@ -18,7 +18,7 @@ const CheckoutFailed = () => {
       style={{ maxWidth: "600px" }}
     >
       <XCircleFill color="#dc3545" size={100} className="mb-4" />
-      <h2 className="fw-bold text-danger mb-3">Thanh toán thất bại</h2>
+      <h3 className="fw-bold text-danger mb-3">Thanh toán thất bại</h3>
       <p className="text-muted mb-4">
         Rất tiếc, giao dịch của bạn không thành công.
         <br />

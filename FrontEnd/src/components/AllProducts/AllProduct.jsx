@@ -84,7 +84,7 @@ const AllProducts = () => {
             <Row className="g-3 justify-content-center">
               {products.map((product) => (
                 <Col
-                  key={`${product.id}-${Math.random()}`} // Lưu ý: Nên dùng unique key tốt hơn
+                  key={`${product.id}-${Math.random()}`}
                   lg={2} // 5 cột trên màn hình lớn
                   md={3} // 4 cột trên màn hình trung bình
                   sm={6} // 2 cột trên màn hình nhỏ

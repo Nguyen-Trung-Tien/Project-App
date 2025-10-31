@@ -96,25 +96,32 @@ const CartPage = () => {
   };
 
   return (
-    <div className="cart-page py-5">
+    <div className="cart-page py-4">
       <Container>
-        {/* Tiêu đề */}
-        <div className="text-center mb-5">
+        <div className="text-left">
+          <Link
+            to={"/"}
+            className="btn btn-outline-primary rounded-pill px-3 py-2 fw-semibold"
+          >
+            <ArrowLeftCircle size={16} className="me-1" />
+            Quay lại trang chủ
+          </Link>
+        </div>
+        <div className="text-center mb-3">
           <div className="d-inline-flex align-items-center px-4 py-2 rounded-pill cart-title">
             <Cart4 size={26} className="me-2" />
-            <h2 className="fw-bold mb-0">Giỏ hàng của bạn</h2>
+            <h3 className="fw-bold mb-0">Giỏ hàng của bạn</h3>
           </div>
           <div className="title-underline mx-auto mt-2"></div>
         </div>
 
-        {/* Nội dung */}
         {loading ? (
-          <div className="text-center py-5">
+          <div className="text-center py-3">
             <Spinner animation="border" variant="primary" />
             <p className="text-muted mt-2">Đang tải giỏ hàng...</p>
           </div>
         ) : cartItems.length === 0 ? (
-          <div className="text-center py-5">
+          <div className="text-center py-3">
             <img
               src="/empty-cart.svg"
               alt="empty cart"

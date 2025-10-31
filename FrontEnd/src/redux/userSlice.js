@@ -21,11 +21,20 @@ const saveToStorage = (key, value) => {
   try {
     localStorage.setItem(key, JSON.stringify(value));
   } catch (e) {
-    if (e.name === "QuotaExceededError") {
-      localStorage.clear();
-      localStorage.setItem(key, JSON.stringify(value));
+    if (e.name === "QuotaExceededError" || e.code === 22) {
+      console.warn("LocalStorage đầy — đang dọn dẹp dữ liệu cũ...");
+      try {
+        const preserved = ["user", "accessToken"];
+        Object.keys(localStorage).forEach((k) => {
+          if (!preserved.includes(k)) localStorage.removeItem(k);
+        });
+
+        localStorage.setItem(key, JSON.stringify(value));
+      } catch (err) {
+        console.error("Không thể lưu sau khi dọn dẹp:", err);
+      }
     } else {
-      console.error(`Failed to save ${key}`, e);
+      console.error(`Lỗi khi lưu ${key}:`, e);
     }
   }
 };

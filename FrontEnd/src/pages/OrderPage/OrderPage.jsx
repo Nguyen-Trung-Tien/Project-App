@@ -8,8 +8,8 @@ import {
   Badge,
   Modal,
 } from "react-bootstrap";
-import { Cart4, Eye } from "react-bootstrap-icons";
-import { useNavigate } from "react-router-dom";
+import { ArrowLeftCircle, Cart4, Eye } from "react-bootstrap-icons";
+import { useNavigate, Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { getAllOrders, updateOrderStatus } from "../../api/orderApi";
@@ -174,13 +174,21 @@ const OrderPage = () => {
   return (
     <div className="order-page py-3">
       <Container>
-        <div className="text-center mb-4 position-relative">
-          <div className="text-center mb-4">
+        <div className="text-left">
+          <Link
+            to={"/"}
+            className="btn btn-outline-primary rounded-pill px-3 py-2 fw-semibold"
+          >
+            <ArrowLeftCircle size={16} className="me-1" />
+            Quay lại trang chủ
+          </Link>
+        </div>
+        <div className="text-center mb-3 position-relative">
+          <div className="text-center mb-3">
             <div className="d-inline-flex align-items-center px-4 py-2 rounded-pill order-title">
               <Cart4 size={26} className="me-2" />
-              <h2 className="fw-bold mb-0">Giỏ hàng của bạn</h2>
+              <h4 className="fw-bold mb-0">Đơn hàng</h4>
             </div>
-            <div className="title-underline mx-auto mt-2"></div>
           </div>
 
           <Form.Select

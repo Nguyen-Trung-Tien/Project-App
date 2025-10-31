@@ -130,13 +130,11 @@ const CheckoutPage = () => {
             Quay lại giỏ hàng
           </Link>
         </div>
-        {/* Header */}
         <div className="text-center mb-3">
-          <h2 className="fw-bold text-uppercase">
+          <h3 className="fw-bold text-uppercase">
             <CreditCard className="text-primary me-2 mb-1" size={28} />
-            <span style={{ color: "#007bff" }}>Chi tiết</span>{" "}
-            <span className="text-dark">thanh toán</span>
-          </h2>
+            <span style={{ color: "#007bff" }}>Chi tiết thanh toán</span>
+          </h3>
           <div
             className="mx-auto mt-2"
             style={{

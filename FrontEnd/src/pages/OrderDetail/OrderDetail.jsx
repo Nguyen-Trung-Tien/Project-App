@@ -10,14 +10,14 @@ import {
   Card,
   Spinner,
 } from "react-bootstrap";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import { getOrderById } from "../../api/orderApi";
 import "./OrderDetail.scss";
+import { ArrowLeftCircle } from "react-bootstrap-icons";
 
 const OrderDetail = () => {
   const { id } = useParams();
-  const navigate = useNavigate();
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(false);
 
@@ -145,13 +145,15 @@ const OrderDetail = () => {
   return (
     <div className="order-detail-page py-4">
       <Container>
-        <Button
-          variant="outline-secondary"
-          className="mb-4"
-          onClick={() => navigate("/orders")}
-        >
-          ← Quay lại Lịch sử đơn hàng
-        </Button>
+        <div className="text-left">
+          <Link
+            to={"/orders"}
+            className="btn btn-outline-primary rounded-pill px-3 py-2 fw-semibold"
+          >
+            <ArrowLeftCircle size={16} className="me-1" />
+            Quay lại đơn hàng
+          </Link>
+        </div>
 
         <h3 className="mb-3 text-center fw-bold text-primary">
           Chi tiết đơn hàng #DH{order.id}

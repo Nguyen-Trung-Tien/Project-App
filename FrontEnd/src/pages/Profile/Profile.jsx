@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   Container,
   Row,
@@ -139,7 +139,7 @@ const Profile = () => {
       {loading && <Loading />}
 
       <div
-        className="profile-page py-5"
+        className="profile-page py-3"
         style={{
           background: "linear-gradient(120deg, #e0f7fa 0%, #f1f8ff 100%)",
           minHeight: "100vh",
@@ -157,7 +157,7 @@ const Profile = () => {
           </div>
           <div className="text-center mb-5">
             <div className="d-inline-flex align-items-center px-4 py-2 rounded-pill profile-title">
-              <h2 className="fw-bold mb-0">Hồ sơ của bạn</h2>
+              <h3 className="fw-bold mb-0">Hồ sơ của bạn</h3>
             </div>
             <div className="title-underline mx-auto mt-2"></div>
           </div>
