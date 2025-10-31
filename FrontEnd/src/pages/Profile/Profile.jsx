@@ -8,6 +8,7 @@ import {
   Form,
   Spinner,
   Image,
+  Modal,
 } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
@@ -15,14 +16,14 @@ import { updateUser } from "../../redux/userSlice";
 import { getUserApi, updateUserApi } from "../../api/userApi";
 import { toast } from "react-toastify";
 import Loading from "../../components/Loading/Loading";
-import "./Profile.scss";
 import ChangePasswordModal from "./ChangePasswordModal";
-import AvatarModal from "./AvatarModal";
 import { ArrowLeftCircle } from "react-bootstrap-icons";
+import "./Profile.scss";
 
 const Profile = () => {
   const dispatch = useDispatch();
   const { user, token } = useSelector((state) => state.user);
+
   const [formData, setFormData] = useState({
     username: "",
     email: "",
@@ -30,6 +31,7 @@ const Profile = () => {
     address: "",
     avatar: null,
   });
+
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showAvatarModal, setShowAvatarModal] = useState(false);
@@ -61,17 +63,75 @@ const Profile = () => {
     if (!user?.id || !token) return;
     setLoading(true);
     try {
-      const res = await updateUserApi({ id: user.id, ...formData }, token);
+      const hasFile = formData.avatar instanceof File;
+      let res;
+
+      if (hasFile) {
+        const data = new FormData();
+        data.append("id", user.id);
+        data.append("username", formData.username);
+        data.append("email", formData.email);
+        data.append("phone", formData.phone);
+        data.append("address", formData.address);
+        data.append("avatar", formData.avatar);
+        res = await updateUserApi(data, token, true);
+      } else {
+        res = await updateUserApi({ id: user.id, ...formData }, token);
+      }
+
       if (res.errCode === 0) {
         toast.success("Cập nhật thành công!");
-        dispatch(updateUser(formData));
+        dispatch(updateUser(res.data));
+
         setIsEditing(false);
-      } else toast.error(res.errMessage || "Lỗi server");
-    } catch {
+      } else {
+        toast.error(res.errMessage || "Lỗi server");
+      }
+    } catch (error) {
       toast.error("Không thể cập nhật. Vui lòng thử lại!");
+      console.error(error);
     } finally {
       setLoading(false);
     }
+  };
+
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [preview, setPreview] = useState(formData.avatar);
+  const [avatarLoading, setAvatarLoading] = useState(false);
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setSelectedFile(file);
+      setPreview(URL.createObjectURL(file));
+    }
+  };
+
+  const handleAvatarUpload = async () => {
+    if (!selectedFile) return toast.error("Chưa chọn ảnh!");
+    setAvatarLoading(true);
+
+    const reader = new FileReader();
+    reader.onloadend = async () => {
+      const base64 = reader.result;
+      try {
+        const res = await updateUserApi({ id: user.id, avatar: base64 }, token);
+        if (res.errCode === 0) {
+          toast.success("Cập nhật avatar thành công!");
+          setFormData((prev) => ({ ...prev, avatar: res.data.avatar }));
+          dispatch(updateUser({ ...user, avatar: res.data.avatar }));
+          setShowAvatarModal(false);
+          window.location.reload();
+        } else {
+          toast.error(res.errMessage || "Lỗi cập nhật avatar");
+        }
+      } catch {
+        toast.error("Không thể cập nhật avatar");
+      } finally {
+        setAvatarLoading(false);
+      }
+    };
+    reader.readAsDataURL(selectedFile);
   };
 
   return (
@@ -151,7 +211,6 @@ const Profile = () => {
               </Card>
             </Col>
 
-            {/* RIGHT COLUMN */}
             <Col md={7}>
               <Card className="shadow-lg border-0 rounded-4 p-4 bg-white">
                 <h5 className="text-secondary fw-bold mb-3">
@@ -217,13 +276,46 @@ const Profile = () => {
             </Col>
           </Row>
         </Container>
-
-        {/* Modals */}
-        <AvatarModal
+        <Modal
           show={showAvatarModal}
-          avatar={formData.avatar}
           onHide={() => setShowAvatarModal(false)}
-        />
+          centered
+        >
+          <Modal.Body className="text-center">
+            <Image
+              src={preview || "/images/avatar-default.png"}
+              rounded
+              fluid
+              alt="Avatar Preview"
+            />
+            <Form.Group className="mt-3">
+              <Form.Control
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
+              />
+            </Form.Group>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button
+              variant="secondary"
+              onClick={() => setShowAvatarModal(false)}
+            >
+              Đóng
+            </Button>
+            <Button
+              variant="primary"
+              onClick={handleAvatarUpload}
+              disabled={avatarLoading}
+            >
+              {avatarLoading ? (
+                <Spinner animation="border" size="sm" />
+              ) : (
+                "Cập nhật"
+              )}
+            </Button>
+          </Modal.Footer>
+        </Modal>
         <ChangePasswordModal
           show={showPasswordModal}
           onHide={() => setShowPasswordModal(false)}

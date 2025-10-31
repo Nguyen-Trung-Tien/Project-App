@@ -168,6 +168,7 @@ function Header() {
                     <div className="d-flex align-items-center">
                       <Image
                         src={avatarUrl}
+                        key={avatarUrl}
                         alt="avatar"
                         roundedCircle
                         width="32"
