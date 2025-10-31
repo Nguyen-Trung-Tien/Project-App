@@ -11,6 +11,7 @@ import {
 import { useParams, Link, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
+  ArrowLeftCircle,
   CartPlus,
   CreditCard,
   Star,
@@ -246,12 +247,18 @@ const ProductDetailPage = () => {
       : product.price;
 
   return (
-    <div className="product-detail-page py-5">
+    <div className="product-detail-page py-5 mh-100">
       <Container>
         <ChatBot />
-        <Link to="/" className="btn btn-outline-secondary mb-4">
-          <ArrowLeft size={18} className="me-2" /> Quay lại
-        </Link>
+        <div className="text-left">
+          <Link
+            to={"/"}
+            className="btn btn-outline-primary rounded-pill px-3 py-2 fw-semibold"
+          >
+            <ArrowLeftCircle size={16} className="me-1" />
+            Quay lại giỏ hàng
+          </Link>
+        </div>
 
         <Row className="gy-4 align-items-center">
           <Col md={6} className="text-center">

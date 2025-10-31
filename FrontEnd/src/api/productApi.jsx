@@ -7,9 +7,11 @@ const API = axios.create({
   },
 });
 
-export const getAllProductApi = async () => {
+export const getAllProductApi = async (page = 1, limit = 10, search = "") => {
   try {
-    const res = await API.get("/product/get-all-product");
+    const res = await API.get(`/product/get-all-product`, {
+      params: { page, limit, search },
+    });
     return res.data;
   } catch (err) {
     console.error("Get All Product API error:", err);

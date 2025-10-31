@@ -9,6 +9,7 @@ import {
   Spinner,
   Image,
 } from "react-bootstrap";
+import { Link } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { updateUser } from "../../redux/userSlice";
 import { getUserApi, updateUserApi } from "../../api/userApi";
@@ -17,6 +18,7 @@ import Loading from "../../components/Loading/Loading";
 import "./Profile.scss";
 import ChangePasswordModal from "./ChangePasswordModal";
 import AvatarModal from "./AvatarModal";
+import { ArrowLeftCircle } from "react-bootstrap-icons";
 
 const Profile = () => {
   const dispatch = useDispatch();
@@ -84,6 +86,15 @@ const Profile = () => {
         }}
       >
         <Container>
+          <div className="text-left">
+            <Link
+              to={"/"}
+              className="btn btn-outline-primary rounded-pill px-3 py-2 fw-semibold"
+            >
+              <ArrowLeftCircle size={16} className="me-1" />
+              Quay lại trang chủ
+            </Link>
+          </div>
           <div className="text-center mb-5">
             <div className="d-inline-flex align-items-center px-4 py-2 rounded-pill profile-title">
               <h2 className="fw-bold mb-0">Hồ sơ của bạn</h2>

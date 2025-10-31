@@ -261,7 +261,7 @@ const CheckoutForm = ({ user, total, selectedItems, onOrderComplete }) => {
               variant="primary"
               className="rounded-pill px-4 py-2 fw-semibold shadow-sm d-inline-flex align-items-center justify-content-center"
               style={{
-                fontSize: "0.9rem",
+                fontSize: "1rem",
                 minWidth: "220px",
                 background: "linear-gradient(90deg, #007bff 0%, #00c6ff 100%)",
                 border: "none",

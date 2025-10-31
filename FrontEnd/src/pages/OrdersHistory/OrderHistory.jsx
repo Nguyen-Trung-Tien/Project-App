@@ -7,8 +7,8 @@ import {
   Spinner,
   Card,
 } from "react-bootstrap";
-import { useNavigate } from "react-router-dom";
-import { Eye } from "react-bootstrap-icons";
+import { useNavigate, Link } from "react-router-dom";
+import { ArrowLeftCircle, Eye } from "react-bootstrap-icons";
 import { getAllOrders } from "../../api/orderApi";
 import "./OrderHistory.scss";
 
@@ -97,6 +97,15 @@ const OrderHistory = () => {
   return (
     <div className="order-history-page py-4">
       <Container>
+        <div className="text-left">
+          <Link
+            to={"/orders"}
+            className="btn btn-outline-primary rounded-pill px-3 py-2 mb-3 fw-semibold"
+          >
+            <ArrowLeftCircle size={16} className="me-1" />
+            Quay lại giỏ hàng
+          </Link>
+        </div>
         <Card className="shadow-sm border-0">
           <Card.Body>
             <h3 className="text-center fw-bold mb-4 text-primary">

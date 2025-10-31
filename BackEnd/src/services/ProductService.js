@@ -16,7 +16,7 @@ const createProduct = async (data) => {
   }
 };
 
-const getAllProducts = async (categoryId, page, limit) => {
+const getAllProducts = async (categoryId, page = 1, limit = 10) => {
   const offset = (page - 1) * limit;
   const whereCondition = categoryId ? { categoryId } : {};
 

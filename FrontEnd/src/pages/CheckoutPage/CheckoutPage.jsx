@@ -99,10 +99,9 @@ const CheckoutPage = () => {
   }
 
   return (
-    <div className="checkout-page py-5 bg-light">
+    <div className="checkout-page py-4 bg-light">
       <Container>
-        {/* Breadcrumb */}
-        <nav aria-label="breadcrumb" className="mb-4">
+        <nav aria-label="breadcrumb" className="mb-3">
           <ol className="breadcrumb mb-0">
             <li className="breadcrumb-item">
               <Link to="/" className="text-decoration-none text-primary">
@@ -122,8 +121,17 @@ const CheckoutPage = () => {
           </ol>
         </nav>
 
+        <div className="text-left">
+          <Link
+            to={isSingleProduct ? "/" : "/cart"}
+            className="btn btn-outline-primary rounded-pill px-3 py-2 fw-semibold"
+          >
+            <ArrowLeftCircle size={16} className="me-1" />
+            Quay lại giỏ hàng
+          </Link>
+        </div>
         {/* Header */}
-        <div className="text-center mb-5">
+        <div className="text-center mb-3">
           <h2 className="fw-bold text-uppercase">
             <CreditCard className="text-primary me-2 mb-1" size={28} />
             <span style={{ color: "#007bff" }}>Chi tiết</span>{" "}
@@ -157,16 +165,6 @@ const CheckoutPage = () => {
             <OrderSummary selectedItems={selectedItems} total={total} />
           </Col>
         </Row>
-
-        <div className="text-center mt-5">
-          <Link
-            to={isSingleProduct ? "/" : "/cart"}
-            className="btn btn-outline-primary rounded-pill px-4 py-2 fw-semibold"
-          >
-            <ArrowLeftCircle size={16} className="me-1" />
-            Quay lại giỏ hàng
-          </Link>
-        </div>
       </Container>
     </div>
   );
