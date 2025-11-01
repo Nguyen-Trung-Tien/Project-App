@@ -91,3 +91,21 @@ export const getOrdersByUserId = async (
     throw err;
   }
 };
+
+export const getActiveOrdersByUser = async (
+  userId,
+  token,
+  page = 1,
+  limit = 10
+) => {
+  try {
+    const res = await axiosClient.get(`/order/active/${userId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+      params: { page, limit },
+    });
+    return res.data;
+  } catch (err) {
+    console.error("Error fetching active orders:", err);
+    throw err;
+  }
+};

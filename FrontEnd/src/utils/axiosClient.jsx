@@ -2,6 +2,7 @@ import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import { updateToken, removeUser } from "../redux/userSlice";
 import { store } from "../redux/store";
+import { toast } from "react-toastify";
 
 const axiosClient = axios.create({
   baseURL: "http://localhost:8080/api/v1",
@@ -42,6 +43,8 @@ const scheduleAutoRefresh = (token) => {
           console.log("Token tự động được làm mới!");
         } catch (err) {
           console.error("Auto refresh thất bại:", err);
+          toast.warning("Vui lòng đăng nhập lại!");
+
           store.dispatch(removeUser());
         }
       }, refreshTime);

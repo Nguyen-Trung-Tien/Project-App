@@ -12,7 +12,7 @@ import { ArrowLeftCircle, Cart4, Eye } from "react-bootstrap-icons";
 import { useNavigate, Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
-import { getAllOrders, updateOrderStatus } from "../../api/orderApi";
+import { getActiveOrdersByUser, updateOrderStatus } from "../../api/orderApi";
 import { requestReturn } from "../../api/orderItemApi";
 import "./OrderPage.scss";
 
@@ -61,11 +61,12 @@ const PaymentStatusBadge = ({ status }) => {
 
 const OrderPage = () => {
   const navigate = useNavigate();
-  const user = useSelector((state) => state.user.user);
   const [orders, setOrders] = useState([]);
   const [filter, setFilter] = useState("");
   const [loading, setLoading] = useState(true);
-
+  const { user, token } = useSelector((state) => state.user);
+  const [page, setPage] = useState(1);
+  const limit = 10;
   // Modal trả hàng
   const [showReturnModal, setShowReturnModal] = useState(false);
   const [currentOrder, setCurrentOrder] = useState(null);
@@ -79,23 +80,25 @@ const OrderPage = () => {
   const fetchOrders = async () => {
     try {
       setLoading(true);
-      const res = await getAllOrders();
-      if (res?.errCode === 0 && Array.isArray(res.data)) {
-        setOrders(res.data);
+      const res = await getActiveOrdersByUser(user.id, token, page, limit);
+      if (res?.errCode === 0) {
+        setOrders(res.data || []);
       } else {
-        toast.warning(res?.errMessage || "Không thể tải danh sách đơn hàng");
+        toast.warning(res?.errMessage || "Không thể tải đơn hàng");
       }
     } catch (err) {
-      console.log(err);
-      toast.error("Lỗi khi tải danh sách đơn hàng");
+      console.error(err);
+      toast.error("Lỗi khi tải đơn hàng");
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchOrders();
-  }, []);
+    if (user?.id && token) {
+      fetchOrders();
+    }
+  }, [page, user?.id, token]);
 
   const handleReceiveOrder = async (orderId) => {
     try {
@@ -219,7 +222,6 @@ const OrderPage = () => {
             </Form.Select>
           </div>
         </div>
-
         {loading ? (
           <div className="text-center py-5">
             <Spinner animation="border" variant="primary" />
@@ -233,6 +235,7 @@ const OrderPage = () => {
                   <th>#</th>
                   <th>Mã đơn</th>
                   <th>Ngày đặt</th>
+                  <th>Sản phẩm</th>
                   <th>Tổng tiền</th>
                   <th>Trạng thái</th>
                   <th>Phương thức TT</th>
@@ -249,6 +252,36 @@ const OrderPage = () => {
                         <strong className="text-primary">{`DH${order.id}`}</strong>
                       </td>
                       <td>{formatDate(order.orderDate)}</td>
+                      <td className="text-start">
+                        {order.orderItems?.map((item) => (
+                          <div key={item.id} className="mb-1">
+                            <div className="fw-semibold">
+                              {item.productName}
+                            </div>
+                            <div className="small text-muted">
+                              SL: {item.quantity} ×{" "}
+                              {parseFloat(item.price).toLocaleString("vi-VN")} ₫
+                            </div>
+                            {item.returnStatus !== "none" && (
+                              <Badge
+                                bg={
+                                  item.returnStatus === "approved"
+                                    ? "success"
+                                    : item.returnStatus === "pending"
+                                    ? "warning"
+                                    : "danger"
+                                }
+                              >
+                                {item.returnStatus === "approved"
+                                  ? "Đã duyệt trả hàng"
+                                  : item.returnStatus === "pending"
+                                  ? "Chờ xử lý trả hàng"
+                                  : "Từ chối trả"}
+                              </Badge>
+                            )}
+                          </div>
+                        ))}
+                      </td>
                       <td className="fw-semibold text-success">
                         {formatCurrency(order.totalPrice)}
                       </td>
@@ -316,8 +349,19 @@ const OrderPage = () => {
             </Table>
           </div>
         )}
-
-        {/* Modal trả hàng */}
+        <div className="d-flex justify-content-center mt-3">
+          <Button
+            variant="outline-primary"
+            disabled={page === 1}
+            onClick={() => setPage(page - 1)}
+            className="me-2"
+          >
+            Trang trước
+          </Button>
+          <Button variant="outline-primary" onClick={() => setPage(page + 1)}>
+            Trang sau
+          </Button>
+        </div>
         <Modal
           show={showReturnModal}
           onHide={() => setShowReturnModal(false)}
@@ -369,8 +413,6 @@ const OrderPage = () => {
             </Button>
           </Modal.Footer>
         </Modal>
-
-        {/* Modal xác nhận hủy */}
         <Modal
           show={showCancelModal}
           onHide={() => setShowCancelModal(false)}

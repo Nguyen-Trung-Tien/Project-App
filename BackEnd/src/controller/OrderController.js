@@ -103,6 +103,26 @@ const handleGetOrdersByUserId = async (req, res) => {
     });
   }
 };
+const getActiveOrdersByUserId = async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const { page = 1, limit = 10 } = req.query;
+
+    const result = await OrderService.getActiveOrdersByUserId(
+      userId,
+      +page,
+      +limit
+    );
+
+    return res.status(200).json(result);
+  } catch (e) {
+    console.error("Error in getActiveOrdersByUserId:", e);
+    return res.status(500).json({
+      errCode: -1,
+      errMessage: "Error fetching active orders",
+    });
+  }
+};
 module.exports = {
   handleGetAllOrders,
   handleGetOrderById,
@@ -111,4 +131,5 @@ module.exports = {
   handleDeleteOrder,
   handleUpdatePaymentStatus,
   handleGetOrdersByUserId,
+  getActiveOrdersByUserId,
 };

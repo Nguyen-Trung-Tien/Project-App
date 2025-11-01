@@ -122,12 +122,7 @@ const CartPage = () => {
           </div>
         ) : cartItems.length === 0 ? (
           <div className="text-center py-3">
-            <img
-              src="/empty-cart.svg"
-              alt="empty cart"
-              className="img-fluid mb-3"
-              style={{ maxWidth: "250px" }}
-            />
+            <img className="img-fluid mb-3" style={{ maxWidth: "250px" }} />
             <p className="text-muted">Giỏ hàng trống. Hãy mua sắm ngay!</p>
             <Link to="/" className="btn btn-primary mt-3 rounded-pill px-4">
               <ArrowLeftCircle size={18} className="me-1" /> Tiếp tục mua sắm

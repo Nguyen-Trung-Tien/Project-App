@@ -20,4 +20,9 @@ router.put(
   "/update-payment-status/:id",
   OrderController.handleUpdatePaymentStatus
 );
+router.get(
+  "/active/:userId",
+  authenticateToken,
+  OrderController.getActiveOrdersByUserId
+);
 module.exports = router;
