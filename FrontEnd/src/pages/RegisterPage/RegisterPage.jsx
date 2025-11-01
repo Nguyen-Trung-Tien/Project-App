@@ -5,10 +5,13 @@ import { useNavigate } from "react-router";
 import { registerUser } from "../../api/userApi";
 import { toast } from "react-toastify";
 import Loading from "../../components/Loading/Loading";
+import { Eye, EyeSlash } from "react-bootstrap-icons";
 
 const RegisterPage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
   const navigate = useNavigate();
 
   const handleRegister = async (e) => {
@@ -24,45 +27,44 @@ const RegisterPage = () => {
     const confirmPassword = form.confirmPassword.value;
 
     if (password !== confirmPassword) {
-      setError(" Mật khẩu xác nhận không khớp!");
+      setError("Mật khẩu xác nhận không khớp!");
       setLoading(false);
       return;
     }
+
     try {
       const data = await registerUser({ username, email, phone, password });
-
       if (data.errCode === 0) {
         toast.success("Tạo tài khoản thành công!");
         navigate("/login");
       } else {
-        toast.error("Đăng ký thất bại!");
         setError(data.errMessage || "Đăng ký thất bại!");
+        toast.error("Đăng ký thất bại!");
       }
     } catch (err) {
       console.error(err);
       setError("Có lỗi xảy ra, vui lòng thử lại!");
+    } finally {
+      setLoading(false);
     }
-  };
-
-  const handleBack = () => {
-    navigate("/");
   };
 
   return (
     <>
       {loading && <Loading />}
-      <div className="register-page">
-        <Container className="d-flex justify-content-center align-items-center vh-100">
-          <Row className="w-100 justify-content-center">
-            <Col md={5} lg={5}>
-              <Card className="register-card shadow-lg border-0">
-                <Card.Body>
-                  <h3 className="text-center mb-4 fw-bold text-primary">
-                    Tạo tài khoản
-                  </h3>
+      <div className="register-page py-5">
+        <Container className="d-flex justify-content-center align-items-center min-vh-100">
+          <Card className="shadow-lg border-0 p-4 register-card">
+            <Card.Body>
+              <h3 className="text-center mb-4 fw-bold text-primary">
+                Tạo tài khoản
+              </h3>
 
-                  <Form onSubmit={handleRegister}>
-                    <Form.Group controlId="username" className="mb-1">
+              <Form onSubmit={handleRegister}>
+                {/* Họ tên & Email */}
+                <Row className="g-2">
+                  <Col md={6}>
+                    <Form.Group controlId="username">
                       <Form.Label>Họ và tên</Form.Label>
                       <Form.Control
                         type="text"
@@ -70,8 +72,9 @@ const RegisterPage = () => {
                         required
                       />
                     </Form.Group>
-
-                    <Form.Group controlId="email" className="mb-1">
+                  </Col>
+                  <Col md={6}>
+                    <Form.Group controlId="email">
                       <Form.Label>Email</Form.Label>
                       <Form.Control
                         type="email"
@@ -79,65 +82,91 @@ const RegisterPage = () => {
                         required
                       />
                     </Form.Group>
-                    <Form.Group controlId="phone" className="mb-1">
-                      <Form.Label>Phone number</Form.Label>
+                  </Col>
+                </Row>
+
+                {/* SĐT & Mật khẩu */}
+                <Row className="g-2 mt-2">
+                  <Col md={6}>
+                    <Form.Group controlId="phone">
+                      <Form.Label>Số điện thoại</Form.Label>
                       <Form.Control
                         type="text"
-                        placeholder="Phone number"
+                        placeholder="Nhập số điện thoại"
                         required
                       />
                     </Form.Group>
-
-                    <Form.Group controlId="password" className="mb-1">
-                      <Form.Label>Mật khẩu</Form.Label>
-                      <Form.Control
-                        type="password"
-                        placeholder="Nhập mật khẩu"
-                        required
-                      />
-                    </Form.Group>
-
-                    <Form.Group controlId="confirmPassword" className="mb-3">
-                      <Form.Label>Xác nhận mật khẩu</Form.Label>
-                      <Form.Control
-                        type="password"
-                        placeholder="Nhập lại mật khẩu"
-                        required
-                      />
-                    </Form.Group>
-
-                    {error && <div className="text-danger mb-3">{error}</div>}
-
-                    <Button
-                      variant="primary"
-                      type="submit"
-                      className="w-100 rounded-pill py-2 fw-semibold"
-                      disabled={loading}
+                  </Col>
+                  <Col md={6}>
+                    <Form.Group
+                      controlId="password"
+                      className="position-relative"
                     >
-                      {loading ? "Đang đăng ký..." : "Đăng ký"}
-                    </Button>
-                  </Form>
+                      <Form.Label>Mật khẩu</Form.Label>
+                      <div className="input-group">
+                        <Form.Control
+                          type={showPassword ? "text" : "password"}
+                          placeholder="Nhập mật khẩu"
+                          required
+                        />
+                        <button
+                          type="button"
+                          className="toggle-password"
+                          onClick={() => setShowPassword(!showPassword)}
+                        >
+                          {showPassword ? <EyeSlash /> : <Eye />}
+                        </button>
+                      </div>
+                    </Form.Group>
+                  </Col>
+                </Row>
 
-                  <p className="text-center mt-4 mb-0 text-muted">
-                    Đã có tài khoản?{" "}
-                    <a href="/login" className="text-primary fw-semibold">
-                      Đăng nhập ngay
-                    </a>
-                  </p>
-                </Card.Body>
+                {/* Xác nhận mật khẩu */}
+                <Form.Group
+                  controlId="confirmPassword"
+                  className="mt-2 position-relative"
+                >
+                  <Form.Label>Xác nhận mật khẩu</Form.Label>
+                  <div className="input-group">
+                    <Form.Control
+                      type={showConfirm ? "text" : "password"}
+                      placeholder="Nhập lại mật khẩu"
+                      required
+                    />
+                    <button
+                      type="button"
+                      className="toggle-password"
+                      onClick={() => setShowConfirm(!showConfirm)}
+                    >
+                      {showConfirm ? <EyeSlash /> : <Eye />}
+                    </button>
+                  </div>
+                </Form.Group>
 
-                <Card.Footer className="bg-white border-0 text-center pb-3">
-                  <Button
-                    variant="outline-secondary"
-                    onClick={handleBack}
-                    className="rounded-pill px-3 py-1"
-                  >
-                    ← Quay lại trang chủ
-                  </Button>
-                </Card.Footer>
-              </Card>
-            </Col>
-          </Row>
+                {error && (
+                  <div className="text-danger text-center fw-semibold mt-3">
+                    {error}
+                  </div>
+                )}
+
+                <Button
+                  variant="primary"
+                  type="submit"
+                  className="w-100 rounded-pill py-2 mt-4 fw-semibold"
+                  disabled={loading}
+                >
+                  {loading ? "Đang đăng ký..." : "Đăng ký"}
+                </Button>
+
+                <p className="text-center mt-3 mb-0 text-muted">
+                  Đã có tài khoản?{" "}
+                  <a href="/login" className="text-primary fw-semibold">
+                    Đăng nhập
+                  </a>
+                </p>
+              </Form>
+            </Card.Body>
+          </Card>
         </Container>
       </div>
     </>

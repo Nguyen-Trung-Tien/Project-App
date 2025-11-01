@@ -3,32 +3,42 @@
   min-height: 100vh;
   display: flex;
   align-items: center;
+  justify-content: center;
+  padding: 30px;
 
   .login-card {
     border-radius: 20px;
-    padding: 20px 30px;
-    background: #ffffff;
-    transition: all 0.3s ease-in-out;
+    background: #fff;
+    transition: all 0.3s ease;
+    max-width: 420px;
+    width: 100%;
+    padding: 25px 30px;
 
     &:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+      transform: translateY(-5px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
     }
 
-    h3 {
-      letter-spacing: 0.5px;
-      color: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%) !important;
+    .login-title {
+      background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .form-label {
+      font-weight: 600;
+      color: #495057;
     }
 
     .form-control {
-      border-radius: 10px;
+      border-radius: 12px;
       padding: 10px 14px;
-      border: 1px solid #dee2e6;
-      transition: all 0.2s ease-in-out;
+      border: 1px solid #ced4da;
+      transition: all 0.2s ease;
 
       &:focus {
-        border-color: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
-        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.15);
+        border-color: #4facfe;
+        box-shadow: 0 0 0 0.2rem rgba(79, 172, 254, 0.25);
       }
     }
 
@@ -39,49 +49,56 @@
       box-shadow: 0 4px 10px rgba(0, 123, 255, 0.3);
 
       &:hover {
-        opacity: 0.9;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 14px rgba(0, 123, 255, 0.4);
       }
     }
 
     a {
-      color: #007bff;
+      text-decoration: none;
+
       &:hover {
         text-decoration: underline;
       }
     }
+  }
 
-    .input-icon {
-      position: relative;
+  .input-group {
+    position: relative;
 
-      i {
-        position: absolute;
-        top: 50%;
-        left: 12px;
-        transform: translateY(-50%);
-        color: #6c757d;
-      }
+    .form-control {
+      border-radius: 10px !important;
+      padding-right: 45px;
+      border: 1px solid #ced4da;
+      transition: all 0.2s ease;
 
-      input {
-        padding-left: 35px !important;
+      &:focus {
+        border-color: #4facfe;
+        box-shadow: 0 0 0 0.2rem rgba(79, 172, 254, 0.25);
       }
     }
-    .btn-outline-secondary {
-      border-radius: 30px;
-      font-size: 0.9rem;
-      margin-bottom: 15px;
-    }
-  }
 
-  .btn-link {
-    text-decoration: none !important;
-  }
-  .btn-link:hover {
-    text-decoration: none !important;
-    color: #0d6efd !important; /* màu primary Bootstrap */
-  }
-  @media (max-width: 768px) {
-    .login-card {
-      padding: 15px;
+    .toggle-password {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: transparent;
+      border: none;
+      color: #6c757d;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: color 0.2s ease;
+      border-radius: 50%; // ✅ icon cũng bo nhẹ, đẹp hơn
+
+      &:hover {
+        color: #0d6efd;
+      }
+
+      &:focus {
+        outline: none;
+        box-shadow: none;
+      }
     }
   }
 }

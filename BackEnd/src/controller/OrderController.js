@@ -87,6 +87,22 @@ const handleUpdatePaymentStatus = async (req, res) => {
   }
 };
 
+const handleGetOrdersByUserId = async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+
+    const result = await OrderService.getOrdersByUserId(userId, page, limit);
+    return res.status(200).json(result);
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({
+      errCode: -1,
+      errMessage: "Internal server error",
+    });
+  }
+};
 module.exports = {
   handleGetAllOrders,
   handleGetOrderById,
@@ -94,4 +110,5 @@ module.exports = {
   handleUpdateOrderStatus,
   handleDeleteOrder,
   handleUpdatePaymentStatus,
+  handleGetOrdersByUserId,
 };

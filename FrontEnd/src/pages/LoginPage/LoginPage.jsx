@@ -12,6 +12,7 @@ import "./LoginPage.scss";
 import { useNavigate } from "react-router-dom";
 import { loginUser } from "../../api/userApi";
 import { setUser } from "../../redux/userSlice";
+import { Eye, EyeSlash } from "react-bootstrap-icons";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 import { getAvatarBase64 } from "../../utils/decodeImage";
@@ -21,17 +22,21 @@ const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [showForgotModal, setShowForgotModal] = useState(false);
   const navigate = useNavigate();
   const dispatch = useDispatch();
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setError("");
 
     try {
-      const response = await loginUser(email, password);
-      if (response.errCode === 0 && response.data) {
-        const { user, accessToken } = response.data;
+      const res = await loginUser(email, password);
+      if (res.errCode === 0 && res.data) {
+        const { user, accessToken } = res.data;
         const minimalUser = {
           id: user.id,
           email: user.email,
@@ -42,13 +47,15 @@ const LoginPage = () => {
           avatar: getAvatarBase64(user.avatar),
         };
         dispatch(setUser({ user: minimalUser, token: accessToken }));
-        toast.success("Đăng nhập thành công!");
+        toast.success(res.errMessage);
         navigate("/");
       } else {
-        toast.error(response.errMessage);
+        setError(res.errMessage || "Đăng nhập thất bại");
+        toast.error(res.errMessage);
       }
     } catch (err) {
       console.error("Login error:", err);
+      setError("Lỗi kết nối máy chủ. Vui lòng thử lại sau!");
     } finally {
       setLoading(false);
     }
@@ -56,100 +63,106 @@ const LoginPage = () => {
 
   return (
     <div className="login-page">
-      <Container className="d-flex justify-content-center align-items-center vh-100">
-        <Row className="w-100 justify-content-center">
-          <Col md={5}>
-            <Card className="login-card shadow-lg border-0">
-              <Card.Body>
-                <h3 className="text-center mb-4 fw-bold text-primary">
-                  Đăng nhập
-                </h3>
+      <Container className="d-flex justify-content-center align-items-center min-vh-100">
+        <Card className="login-card shadow-lg border-0 p-4">
+          <Card.Body>
+            <h3 className="text-center mb-4 fw-bold login-title">Đăng nhập</h3>
 
-                <Form onSubmit={handleSubmit}>
-                  <Form.Group controlId="email" className="mb-3">
-                    <Form.Label>Email</Form.Label>
-                    <Form.Control
-                      type="email"
-                      placeholder="Nhập email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                    />
-                  </Form.Group>
+            <Form onSubmit={handleSubmit}>
+              <Form.Group controlId="email" className="mb-3">
+                <Form.Label>Email</Form.Label>
+                <Form.Control
+                  type="email"
+                  placeholder="Nhập email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </Form.Group>
 
-                  <Form.Group controlId="password" className="mb-3">
-                    <Form.Label>Mật khẩu</Form.Label>
-                    <Form.Control
-                      type="password"
-                      placeholder="Nhập mật khẩu"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                    />
-                  </Form.Group>
-
-                  <div className="d-flex justify-content-between align-items-center mb-3">
-                    <div className="form-check">
-                      <input
-                        className="form-check-input"
-                        type="checkbox"
-                        id="rememberMe"
-                      />
-                      <label
-                        className="form-check-label text-secondary"
-                        htmlFor="rememberMe"
-                      >
-                        Ghi nhớ tôi
-                      </label>
-                    </div>
-
-                    <button
-                      type="button"
-                      className="btn btn-link text-gradient fw-semibold p-0"
-                      onClick={() => setShowForgotModal(true)}
-                    >
-                      Quên mật khẩu?
-                    </button>
-                    <ForgotPasswordModal
-                      show={showForgotModal}
-                      onClose={() => setShowForgotModal(false)}
-                    />
-                  </div>
-
-                  <Button
-                    variant="primary"
-                    type="submit"
-                    className="w-100 rounded-pill py-2 fw-semibold"
-                    disabled={loading}
+              <Form.Group
+                controlId="password"
+                className="mb-3 position-relative"
+              >
+                <Form.Label>Mật khẩu</Form.Label>
+                <div className="input-group">
+                  <Form.Control
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Nhập mật khẩu"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                  />
+                  <button
+                    type="button"
+                    className="toggle-password"
+                    onClick={() => setShowPassword(!showPassword)}
+                    aria-label={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
                   >
-                    {loading ? (
-                      <Spinner animation="border" size="sm" />
-                    ) : (
-                      "Đăng nhập"
-                    )}
-                  </Button>
-                </Form>
+                    {showPassword ? <EyeSlash /> : <Eye />}
+                  </button>
+                </div>
+              </Form.Group>
 
-                <p className="text-center mt-4 mb-0 text-muted">
-                  Chưa có tài khoản?{" "}
-                  <a href="/register" className="text-primary fw-semibold">
-                    Đăng ký ngay
-                  </a>
-                </p>
-              </Card.Body>
-
-              <div className="text-center mt-3 mb-3">
-                <Button
-                  variant="outline-secondary"
-                  onClick={() => navigate("/")}
-                  className="rounded-pill px-3 py-1"
+              <div className="d-flex justify-content-between align-items-center mb-3">
+                <Form.Check
+                  type="checkbox"
+                  id="rememberMe"
+                  label="Ghi nhớ tôi"
+                  className="text-secondary"
+                />
+                <button
+                  type="button"
+                  className="btn btn-link text-gradient fw-semibold p-0"
+                  onClick={() => setShowForgotModal(true)}
                 >
-                  ← Quay lại trang chủ
-                </Button>
+                  Quên mật khẩu?
+                </button>
               </div>
-            </Card>
-          </Col>
-        </Row>
+
+              {error && (
+                <div className="text-danger text-center mb-3 fw-semibold">
+                  {error}
+                </div>
+              )}
+
+              <Button
+                variant="primary"
+                type="submit"
+                className="w-100 rounded-pill py-2 fw-semibold"
+                disabled={loading}
+              >
+                {loading ? (
+                  <Spinner animation="border" size="sm" />
+                ) : (
+                  "Đăng nhập"
+                )}
+              </Button>
+
+              <p className="text-center mt-4 mb-0 text-muted">
+                Chưa có tài khoản?{" "}
+                <a href="/register" className="text-primary fw-semibold">
+                  Đăng ký ngay
+                </a>
+              </p>
+            </Form>
+          </Card.Body>
+
+          <div className="text-center mt-3 mb-3">
+            <Button
+              variant="outline-secondary"
+              onClick={() => navigate("/")}
+              className="rounded-pill px-3 py-1"
+            >
+              ← Quay lại trang chủ
+            </Button>
+          </div>
+        </Card>
+
+        <ForgotPasswordModal
+          show={showForgotModal}
+          onClose={() => setShowForgotModal(false)}
+        />
       </Container>
     </div>
   );

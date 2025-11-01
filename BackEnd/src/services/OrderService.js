@@ -59,6 +59,45 @@ const getOrderById = async (id) => {
   }
 };
 
+const getOrdersByUserId = async (userId, page = 1, limit = 10) => {
+  try {
+    const offset = (page - 1) * limit;
+
+    const { count, rows: orders } = await db.Order.findAndCountAll({
+      where: { userId },
+      include: [
+        {
+          model: db.User,
+          as: "user",
+          attributes: ["id", "username", "email", "phone"],
+        },
+        { model: db.OrderItem, as: "orderItems" },
+        { model: db.Payment, as: "payment" },
+      ],
+      order: [["createdAt", "DESC"]],
+      limit,
+      offset,
+    });
+
+    const totalPages = Math.ceil(count / limit);
+
+    return {
+      errCode: 0,
+      errMessage: "OK",
+      data: orders,
+      pagination: {
+        total: count,
+        page,
+        limit,
+        totalPages,
+      },
+    };
+  } catch (e) {
+    console.error("Error in getOrdersByUserId:", e);
+    throw e;
+  }
+};
+
 const createOrder = async (data) => {
   const t = await db.sequelize.transaction();
   try {
@@ -275,4 +314,5 @@ module.exports = {
   updateOrderStatus,
   deleteOrder,
   updatePaymentStatus,
+  getOrdersByUserId,
 };

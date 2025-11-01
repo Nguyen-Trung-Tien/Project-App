@@ -1,4 +1,5 @@
 import axios from "axios";
+import axiosClient from "../utils/axiosClient";
 
 const API = axios.create({
   baseURL: "http://localhost:8080/api/v1",
@@ -70,5 +71,23 @@ export const deleteOrder = async (orderId) => {
   } catch (error) {
     console.error("Error deleting order:", error);
     throw error;
+  }
+};
+
+export const getOrdersByUserId = async (
+  token,
+  userId,
+  page = 1,
+  limit = 10
+) => {
+  try {
+    const res = await axiosClient.get(`/order/user/${userId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+      params: { page, limit },
+    });
+    return res.data;
+  } catch (err) {
+    console.error("Error fetching user orders:", err);
+    throw err;
   }
 };

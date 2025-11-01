@@ -1,22 +1,30 @@
 .register-page {
   background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
   min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 30px;
 
   .register-card {
     border-radius: 20px;
-    overflow: hidden;
     background: #fff;
     transition: all 0.3s ease;
-    padding: 10px 25px;
+    padding: 25px 30px;
+    max-width: 500px;
+    width: 100%;
 
     &:hover {
       transform: translateY(-5px);
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
     }
 
     h3 {
       letter-spacing: 0.5px;
-      color: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%) !important;
+      font-weight: 700;
+      background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent; // ✅ Cách đúng để hiển thị chữ gradient
     }
 
     .form-label {
@@ -31,12 +39,8 @@
       transition: all 0.2s ease;
 
       &:focus {
-        border-color: linear-gradient(
-          90deg,
-          #4facfe 0%,
-          #00f2fe 100%
-        ) !important;
-        box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+        border-color: #4facfe;
+        box-shadow: 0 0 0 0.2rem rgba(79, 172, 254, 0.25);
       }
     }
 
@@ -45,6 +49,11 @@
       border: none;
       transition: 0.3s;
       box-shadow: 0 4px 10px rgba(0, 123, 255, 0.3);
+
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 14px rgba(0, 123, 255, 0.4);
+      }
     }
 
     a {
@@ -52,6 +61,37 @@
 
       &:hover {
         text-decoration: underline;
+      }
+    }
+  }
+
+  .input-group {
+    position: relative;
+
+    .form-control {
+      padding-right: 45px;
+      border-radius: 10px !important;
+    }
+
+    .toggle-password {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: transparent;
+      border: none;
+      color: #6c757d;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: color 0.2s ease;
+
+      &:hover {
+        color: #0d6efd;
+      }
+
+      &:focus {
+        outline: none;
+        box-shadow: none;
       }
     }
   }
