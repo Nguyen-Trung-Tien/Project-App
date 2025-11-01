@@ -13,8 +13,7 @@ const AllProducts = () => {
   const [loadingMore, setLoadingMore] = useState(false);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const limit = 10; // Tăng limit để hiển thị nhiều sản phẩm hơn mỗi trang
-
+  const limit = 10;
   const user = useSelector((state) => state.user.user);
   const userId = user?.id;
 
@@ -37,7 +36,7 @@ const AllProducts = () => {
         const newProducts = res.products || [];
         if (append) setProducts((prev) => [...prev, ...newProducts]);
         else setProducts(newProducts);
-
+        console.log(res.products);
         setTotalPages(res.totalPages || 1);
         setPage(currentPage);
       } else {

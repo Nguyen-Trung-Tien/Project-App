@@ -95,4 +95,16 @@
     border-bottom-right-radius: 8px;
     box-shadow: 0 2px 6px rgba(255, 75, 43, 0.4);
   }
+  .free-ship {
+    color: #28a745;
+    font-weight: 600;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+
+    &::before {
+      content: "🚚";
+    }
+  }
 }

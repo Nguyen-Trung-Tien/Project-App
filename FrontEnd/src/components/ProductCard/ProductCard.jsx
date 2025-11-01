@@ -6,7 +6,13 @@ import { useSelector, useDispatch } from "react-redux";
 import { addCart, getAllCarts, createCart } from "../../api/cartApi";
 import { addCartItem } from "../../redux/cartSlice";
 import { getImage } from "../../utils/decodeImage";
-import { CartPlus, CreditCard } from "react-bootstrap-icons";
+import {
+  CartPlus,
+  CreditCard,
+  Star,
+  StarFill,
+  StarHalf,
+} from "react-bootstrap-icons";
 import "./ProductCard.scss";
 const ProductCard = ({ product }) => {
   const navigate = useNavigate();
@@ -18,6 +24,14 @@ const ProductCard = ({ product }) => {
   const [loadingBuy, setLoadingBuy] = useState(false);
 
   const { id, name, price, discount, stock, sold, image, isActive } = product;
+
+  const { avgRating, totalReviews } = useMemo(() => {
+    const reviews = product.reviews || [];
+    if (reviews.length === 0) return { avgRating: 0, totalReviews: 0 };
+    const avg =
+      reviews.reduce((sum, r) => sum + (r.rating || 0), 0) / reviews.length;
+    return { avgRating: avg, totalReviews: reviews.length };
+  }, [product.reviews]);
 
   const { rawPrice, finalPrice, hasDiscount } = useMemo(() => {
     const p = Number(price) || 0;
@@ -169,7 +183,26 @@ const ProductCard = ({ product }) => {
             Đã bán {sold.toLocaleString("vi-VN")}
           </div>
         )}
-
+        {totalReviews > 0 && (
+          <div className="d-flex align-items-center mb-2">
+            {Array.from({ length: 5 }).map((_, i) => {
+              const starValue = i + 1;
+              return avgRating >= starValue ? (
+                <StarFill key={i} color="#FFD700" size={14} />
+              ) : avgRating >= starValue - 0.5 ? (
+                <StarHalf key={i} color="#FFD700" size={14} />
+              ) : (
+                <Star key={i} color="#FFD700" size={14} />
+              );
+            })}
+            <span className="ms-2 text-muted" style={{ fontSize: "0.75rem" }}>
+              ({totalReviews})
+            </span>
+          </div>
+        )}
+        {finalPrice >= 1000000 && (
+          <span className="free-ship mb-2">Miễn phí vận chuyển</span>
+        )}
         <div className="d-flex gap-2 mt-auto shopee-buttons">
           <Button
             variant="outline-primary"

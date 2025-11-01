@@ -18,7 +18,17 @@
       object-fit: contain;
     }
   }
-
+  .product-info .star-rating span {
+    margin-right: 2px;
+  }
+  .product-rating-summary {
+    background: #fafafa;
+    border-radius: 10px;
+    padding: 16px;
+    max-width: 400px;
+    margin: 0 auto;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  }
   .suggested-products .card {
     transition: transform 0.25s ease, box-shadow 0.25s ease;
     &:hover {

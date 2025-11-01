@@ -58,6 +58,7 @@ const ProductDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [addingCart, setAddingCart] = useState(false);
   const [reviews, setReviews] = useState([]);
+
   const [newReview, setNewReview] = useState({ rating: 5, comment: "" });
   const [suggestedProducts, setSuggestedProducts] = useState([]);
   const [suggestedPage, setSuggestedPage] = useState(1);
@@ -65,7 +66,9 @@ const ProductDetailPage = () => {
   const [suggestedTotalPages, setSuggestedTotalPages] = useState(1);
   const [loadingSuggested, setLoadingSuggested] = useState(false);
   const suggestedLimit = 7;
-
+  const avgRating = reviews.length
+    ? reviews.reduce((sum, r) => sum + (r.rating || 0), 0) / reviews.length
+    : 0;
   const fetchSuggestedProducts = useCallback(
     async (categoryId, page = 1, append = false) => {
       if (!categoryId) return;
@@ -285,6 +288,28 @@ const ProductDetailPage = () => {
                     {formatVND(product.price)}
                   </div>
                 )}
+                <div>
+                  {reviews.length > 0 ? (
+                    <div className="d-flex align-items-center mb-3">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <span key={star}>
+                          {star <= Math.floor(avgRating) ? (
+                            <StarFill color="gold" />
+                          ) : avgRating >= star - 0.5 ? (
+                            <Star color="gold" />
+                          ) : (
+                            <Star color="lightgray" />
+                          )}
+                        </span>
+                      ))}
+                      <span className="ms-2 text-muted small">
+                        {avgRating.toFixed(1)} / 5 ({reviews.length} đánh giá)
+                      </span>
+                    </div>
+                  ) : (
+                    <p className="text-muted small mb-3">Chưa có đánh giá</p>
+                  )}
+                </div>
                 <div className="fw-bold text-danger fs-5">
                   {formatVND(discountedPrice)}
                 </div>
@@ -308,6 +333,15 @@ const ProductDetailPage = () => {
                   <span className="text-primary fw-semibold">
                     {product.sold ?? 0}
                   </span>
+                  {(product?.category?.slug?.includes("dien-thoai") ||
+                    product?.category?.name
+                      ?.toLowerCase()
+                      .includes("điện thoại") ||
+                    discountedPrice >= 2000000) && (
+                    <div className="text-success fw-semibold fs-6 mb-2">
+                      🚚 Miễn phí vận chuyển
+                    </div>
+                  )}
                 </li>
               </ul>
 

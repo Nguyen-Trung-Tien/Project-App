@@ -22,7 +22,10 @@ const getAllProducts = async (categoryId, page = 1, limit = 10) => {
 
   const { count, rows } = await db.Product.findAndCountAll({
     where: whereCondition,
-    include: [{ model: db.Category, as: "category" }],
+    include: [
+      { model: db.Category, as: "category" },
+      { model: db.Review, as: "reviews" },
+    ],
     limit,
     offset,
     order: [["createdAt", "DESC"]],
