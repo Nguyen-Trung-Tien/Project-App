@@ -110,9 +110,8 @@ const CartPage = () => {
         <div className="text-center mb-3">
           <div className="d-inline-flex align-items-center px-4 py-2 rounded-pill cart-title">
             <Cart4 size={26} className="me-2" />
-            <h3 className="fw-bold mb-0">Giỏ hàng của bạn</h3>
+            <h3 className="fw-bold mb-0">Giỏ hàng </h3>
           </div>
-          <div className="title-underline mx-auto mt-2"></div>
         </div>
 
         {loading ? (

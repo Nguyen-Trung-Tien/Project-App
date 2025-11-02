@@ -1,16 +1,37 @@
 import React from "react";
 import Header from "../HeaderComponent/Header";
 import Footer from "../FooterComponent/Footer";
+import { useLocation } from "react-router-dom";
+
 const LayoutComponent = ({
   children,
   isShowHeader = true,
   isShowFooter = true,
 }) => {
+  const location = useLocation();
+
+  const hideFooterPaths = [
+    "/cart",
+    "/checkout",
+    "/checkout-success",
+    "/checkout-failed",
+    "/order-history",
+    "/orders",
+    "/orders-detail",
+    "/profile",
+    "/product-detail",
+    "/product-list",
+  ];
+
+  const shouldHideFooter = hideFooterPaths.some((path) =>
+    location.pathname.startsWith(path)
+  );
+
   return (
     <>
       {isShowHeader && <Header />}
       <main>{children}</main>
-      {isShowFooter && <Footer />}
+      {isShowFooter && !shouldHideFooter && <Footer />}
     </>
   );
 };

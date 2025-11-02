@@ -2,10 +2,12 @@
   background-color: #f8f9fa;
   padding: 10px 0;
   min-height: 100vh;
-  .card {
-    border-radius: 15px;
-  }
 
+  .checkout-title {
+    background: linear-gradient(90deg, #007bff 0%, #00c6ff 100%);
+    color: #fff;
+    box-shadow: 0 3px 8px rgba(0, 123, 255, 0.3);
+  }
   .checkout-img {
     width: 60px;
     height: 60px;

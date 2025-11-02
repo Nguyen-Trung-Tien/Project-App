@@ -3,14 +3,11 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ArrowLeftCircle, CreditCard } from "react-bootstrap-icons";
 import { useSelector, useDispatch } from "react-redux";
 import { toast } from "react-toastify";
-
 import { createOrder } from "../../api/orderApi";
 import { createPayment } from "../../api/paymentApi";
 import { removeCartItem } from "../../redux/cartSlice";
-
 import CheckoutForm from "./CheckoutForm";
 import OrderSummary from "./OrderSummary";
-
 import "./CheckoutPage.scss";
 
 const CheckoutPage = () => {
@@ -102,7 +99,7 @@ const CheckoutPage = () => {
     <div className="checkout-page py-4 bg-light">
       <Container>
         <nav aria-label="breadcrumb" className="mb-3">
-          <ol className="breadcrumb mb-0">
+          <ol className="breadcrumb mb-2">
             <li className="breadcrumb-item">
               <Link to="/" className="text-decoration-none text-primary">
                 Trang chủ
@@ -119,32 +116,22 @@ const CheckoutPage = () => {
               Thanh toán
             </li>
           </ol>
+          <div className="text-left">
+            <Link
+              to={isSingleProduct ? "/" : "/cart"}
+              className="btn btn-outline-primary rounded-pill px-3 py-2 fw-semibold"
+            >
+              <ArrowLeftCircle size={16} className="me-1" />
+              Quay lại giỏ hàng
+            </Link>
+          </div>
+          <div className="text-center mb-3">
+            <div className="d-inline-flex align-items-center px-4 py-2 rounded-pill checkout-title">
+              <CreditCard size={26} className="me-2" />
+              <h3 className="fw-bold mb-0">Thanh toán</h3>
+            </div>
+          </div>
         </nav>
-
-        <div className="text-left">
-          <Link
-            to={isSingleProduct ? "/" : "/cart"}
-            className="btn btn-outline-primary rounded-pill px-3 py-2 fw-semibold"
-          >
-            <ArrowLeftCircle size={16} className="me-1" />
-            Quay lại giỏ hàng
-          </Link>
-        </div>
-        <div className="text-center mb-3">
-          <h3 className="fw-bold text-uppercase">
-            <CreditCard className="text-primary me-2 mb-1" size={28} />
-            <span style={{ color: "#007bff" }}>Chi tiết thanh toán</span>
-          </h3>
-          <div
-            className="mx-auto mt-2"
-            style={{
-              width: "100px",
-              height: "3px",
-              background: "linear-gradient(90deg, #007bff 0%, #00b4d8 100%)",
-              borderRadius: "10px",
-            }}
-          ></div>
-        </div>
 
         <Row className="gy-4">
           <Col lg={8}>
