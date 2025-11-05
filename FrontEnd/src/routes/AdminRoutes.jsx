@@ -5,7 +5,6 @@ import Dashboard from "../Admin/pages/Dashboard";
 import AdminLogin from "../Admin/pages/Login";
 import OrderManage from "../Admin/pages/OrderManage";
 import ProductManage from "../Admin/pages/ProductManage";
-import Settings from "../Admin/pages/Settings";
 import UserManage from "../Admin/pages/UserManage";
 import PrivateRoute from "./PrivateRoute";
 import Revenue from "../Admin/pages/Revenue";
@@ -26,7 +25,6 @@ const AdminRoutes = () => {
           <Route path="users" element={<UserManage />} />
           <Route path="revenue" element={<Revenue />} />
           <Route path="categories" element={<Categories />} />
-          <Route path="settings" element={<Settings />} />
         </Route>
       </Route>
     </Routes>

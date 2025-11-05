@@ -1,9 +1,7 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Card, Row, Col, Form, Button } from "react-bootstrap";
 import { PayPalButtons } from "@paypal/react-paypal-js";
-import { Link } from "react-router-dom";
 import {
-  ArrowLeftCircle,
   Cash,
   CreditCard2Back,
   Paypal,
@@ -230,7 +228,6 @@ const CheckoutForm = ({ user, total, selectedItems, onOrderComplete }) => {
           </Col>
         </Row>
 
-        {/* Khu vực nút thanh toán */}
         {formData.paymentMethod === "paypal" ? (
           <div className="mt-4 text-center">
             <div className="d-inline-block" style={{ width: "180px" }}>

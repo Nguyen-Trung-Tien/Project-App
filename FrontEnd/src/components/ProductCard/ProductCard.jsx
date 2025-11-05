@@ -200,7 +200,7 @@ const ProductCard = ({ product }) => {
             </span>
           </div>
         )}
-        {finalPrice >= 1000000 && (
+        {finalPrice >= 500000 && (
           <span className="free-ship mb-2">Miễn phí vận chuyển</span>
         )}
         <div className="d-flex gap-2 mt-auto shopee-buttons">

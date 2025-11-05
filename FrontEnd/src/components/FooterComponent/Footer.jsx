@@ -62,7 +62,7 @@ const Footer = () => {
                 <a href="/policy">Chính sách bảo hành</a>
               </li>
               <li>
-                <a href="/shipping">Vận chuyển & đổi trả</a>
+                <a href="/shipped">Vận chuyển & đổi trả</a>
               </li>
               <li>
                 <a href="/support">Trung tâm hỗ trợ</a>

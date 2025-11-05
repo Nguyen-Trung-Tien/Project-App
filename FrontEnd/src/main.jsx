@@ -9,20 +9,21 @@ import { store, persistor } from "./redux/store";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 const initialOptions = {
-  "client-id":
-    "ASOubM9TejXmh3c_iisHiPX8n2s9XNOAu7Q0Gz0vSvxXjag1ZWev0JPewseRiERet5pioQNrPZGWhkHy",
-  currency: "USD",
+  "client-id": import.meta.env.VITE_PAYPAL_CLIENT_ID,
+  currency: import.meta.env.VITE_PAYPAL_CURRENCY,
   intent: "capture",
 };
 
 ReactDOM.createRoot(document.getElementById("root")).render(
-  <Provider store={store}>
-    <PersistGate loading={null} persistor={persistor}>
-      <BrowserRouter>
-        <PayPalScriptProvider options={initialOptions}>
-          <App />
-        </PayPalScriptProvider>
-      </BrowserRouter>
-    </PersistGate>
-  </Provider>
+  <React.StrictMode>
+    <Provider store={store}>
+      <PersistGate loading={null} persistor={persistor}>
+        <BrowserRouter>
+          <PayPalScriptProvider options={initialOptions}>
+            <App />
+          </PayPalScriptProvider>
+        </BrowserRouter>
+      </PersistGate>
+    </Provider>
+  </React.StrictMode>
 );

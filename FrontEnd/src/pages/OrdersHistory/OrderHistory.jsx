@@ -29,7 +29,7 @@ const OrderHistory = () => {
       if (!user?.id || !token) return;
       try {
         setLoading(true);
-        const res = await getOrdersByUserId(token, user.id, page, 5); // mỗi trang 5 đơn
+        const res = await getOrdersByUserId(token, user.id, page, 5);
         if (res?.errCode === 0) {
           setOrders(res.data || []);
           setTotalPages(res.pagination?.totalPages || 1);
@@ -56,7 +56,7 @@ const OrderHistory = () => {
       case "confirmed":
         return <Badge bg="info">Đã xác nhận</Badge>;
       case "processing":
-      case "shipping":
+      case "shipped":
         return <Badge bg="primary">Đang giao</Badge>;
       case "delivered":
         return <Badge bg="success">Đã giao</Badge>;

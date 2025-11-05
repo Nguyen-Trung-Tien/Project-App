@@ -11,7 +11,7 @@ const StatusBadge = ({ status }) => {
       );
     case "confirmed":
       return <Badge bg="info">Đã xác nhận</Badge>;
-    case "shipping":
+    case "shipped":
       return <Badge bg="primary">Đang giao</Badge>;
     case "delivered":
       return <Badge bg="success">Đã giao</Badge>;

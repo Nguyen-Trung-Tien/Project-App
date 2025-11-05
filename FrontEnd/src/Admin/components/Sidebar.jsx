@@ -7,7 +7,6 @@ import {
   FiBox,
   FiUsers,
   FiLayers,
-  FiSettings,
   FiLogOut,
   FiBarChart,
 } from "react-icons/fi";
@@ -28,7 +27,6 @@ const Sidebar = () => {
     { to: "/admin/users", icon: <FiUsers />, label: "Người dùng" },
     { to: "/admin/revenue", icon: <FiBarChart />, label: "Doanh thu" },
     { to: "/admin/categories", icon: <FiLayers />, label: "Danh mục" },
-    { to: "/admin/settings", icon: <FiSettings />, label: "Cài đặt" },
   ];
 
   const handleLogout = async () => {

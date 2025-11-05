@@ -20,7 +20,6 @@ const statusLabels = {
   confirmed: "Đã xác nhận",
   processing: "Đang xử lý",
   shipped: "Đang giao",
-  delivered_pending: "Chờ xác nhận giao",
   delivered: "Đã giao",
   cancelled: "Đã hủy",
 };
@@ -44,7 +43,6 @@ const StatusBadge = ({ status }) => {
     confirmed: "info",
     processing: "primary",
     shipped: "primary",
-    delivered_pending: "warning",
     delivered: "success",
     cancelled: "danger",
   };
@@ -248,7 +246,6 @@ const OrderPage = () => {
                           <Eye className="me-1" /> Xem
                         </Button>
 
-                        {/* ✅ Khi đang giao thì hiện “Đang giao...” và bị vô hiệu hóa */}
                         {(order.status === "shipped" ||
                           order.status === "delivered_pending") &&
                           (order.paymentMethod === "cod" ||
