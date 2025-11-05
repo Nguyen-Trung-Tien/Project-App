@@ -6,7 +6,7 @@ const {
   generateRefreshToken,
   verifyRefreshToken,
 } = require("../services/jwtService");
-const sendEmail = require("./sendEmail");
+const { sendForgotPasswordEmail } = require("./sendEmail");
 
 const hashUserPassword = async (password) => {
   const salt = await bcrypt.genSalt(10);
@@ -195,35 +195,15 @@ const updateUserPassword = async (userId, oldPassword, newPassword) => {
 };
 
 const forgotPassword = async (email) => {
-  try {
-    const user = await db.User.findOne({ where: { email } });
-    if (!user) {
-      return { errCode: 1, errMessage: "Email không tồn tại trong hệ thống" };
-    }
+  const user = await db.User.findOne({ where: { email } });
+  if (!user) return { errCode: 1, errMessage: "Email không tồn tại" };
 
-    const resetToken = uuidv4();
-    user.resetToken = resetToken;
-    await user.save();
+  const resetToken = uuidv4();
+  user.resetToken = resetToken;
+  await user.save();
 
-    const subject = "Khôi phục mật khẩu - Xác nhận tài khoản";
-    const htmlContent = `
-      <p>Xin chào ${user.username || "bạn"},</p>
-      <p>Bạn đã yêu cầu đặt lại mật khẩu. Vui lòng sử dụng mã sau để xác nhận:</p>
-      <h3 style="color: #007bff;">${resetToken}</h3>
-      <p>Nếu bạn không thực hiện yêu cầu này, vui lòng bỏ qua email này.</p>
-      <p>Trân trọng,<br>Hệ thống hỗ trợ khách hàng</p>
-    `;
-
-    await sendEmail(user.email, subject, htmlContent);
-
-    return {
-      errCode: 0,
-      errMessage: "Mã xác nhận đã được gửi về email của bạn",
-    };
-  } catch (err) {
-    console.error("forgotPassword error:", err);
-    return { errCode: 2, errMessage: "Error from server!" };
-  }
+  await sendForgotPasswordEmail(user, resetToken);
+  return { errCode: 0, errMessage: "Send email success!" };
 };
 
 const verifyResetToken = async (email, token) => {
@@ -239,7 +219,7 @@ const verifyResetToken = async (email, token) => {
       return { errCode: 3, errMessage: "Mã xác nhận không hợp lệ" };
     }
 
-    return { errCode: 0, errMessage: "Mã xác nhận hợp lệ" };
+    return { errCode: 0, errMessage: "Code is error!" };
   } catch (err) {
     console.error("verifyResetToken error:", err);
     return { errCode: 2, errMessage: "Error from server!" };
@@ -249,12 +229,12 @@ const verifyResetToken = async (email, token) => {
 const resetPassword = async (email, token, newPassword) => {
   try {
     const user = await db.User.findOne({ where: { email } });
-    if (!user) return { errCode: 1, errMessage: "Email không tồn tại" };
+    if (!user) return { errCode: 1, errMessage: "Email not found!" };
 
     if (user.resetToken !== token) {
       return {
         errCode: 2,
-        errMessage: "Mã xác nhận không hợp lệ hoặc đã hết hạn",
+        errMessage: "Token not found!",
       };
     }
 
@@ -263,7 +243,7 @@ const resetPassword = async (email, token, newPassword) => {
     user.resetToken = null;
     await user.save();
 
-    return { errCode: 0, errMessage: "Đổi mật khẩu thành công" };
+    return { errCode: 0, errMessage: "Change password success!" };
   } catch (err) {
     console.error("resetPassword error:", err);
     return { errCode: 2, errMessage: "Error from server!" };

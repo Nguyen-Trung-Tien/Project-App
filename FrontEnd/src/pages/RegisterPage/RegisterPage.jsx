@@ -53,7 +53,7 @@ const RegisterPage = () => {
     <>
       {loading && <Loading />}
       <div className="register-page py-5">
-        <Container className="d-flex justify-content-center align-items-center min-vh-100">
+        <Container className="d-flex justify-content-center align-items-center">
           <Card className="shadow-lg border-0 p-4 register-card">
             <Card.Body>
               <h3 className="text-center mb-4 fw-bold text-primary">
@@ -61,7 +61,6 @@ const RegisterPage = () => {
               </h3>
 
               <Form onSubmit={handleRegister}>
-                {/* Họ tên & Email */}
                 <Row className="g-2">
                   <Col md={6}>
                     <Form.Group controlId="username">

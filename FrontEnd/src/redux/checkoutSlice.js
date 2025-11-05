@@ -21,7 +21,16 @@ const checkoutSlice = createSlice({
     setSelectedIds: (state, action) => {
       state.selectedIds = action.payload;
     },
-    resetCheckout: () => initialState,
+    resetCheckout: (state) => {
+      state.formData = {
+        username: "",
+        phone: "",
+        address: "",
+        email: "",
+        paymentMethod: "COD",
+      };
+      state.selectedIds = [];
+    },
   },
 });
 

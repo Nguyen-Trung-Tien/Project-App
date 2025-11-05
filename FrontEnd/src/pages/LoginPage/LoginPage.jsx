@@ -63,7 +63,7 @@ const LoginPage = () => {
 
   return (
     <div className="login-page">
-      <Container className="d-flex justify-content-center align-items-center min-vh-100">
+      <Container className="d-flex justify-content-center align-items-center">
         <Card className="login-card shadow-lg border-0 p-4">
           <Card.Body>
             <h3 className="text-center mb-4 fw-bold login-title">Đăng nhập</h3>

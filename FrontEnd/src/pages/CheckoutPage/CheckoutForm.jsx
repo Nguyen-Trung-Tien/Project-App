@@ -158,7 +158,7 @@ const CheckoutForm = ({ user, total, selectedItems, onOrderComplete }) => {
                 onChange={handleChange}
                 required
                 className="rounded-3 shadow-sm"
-                placeholder="Nguyễn Văn A"
+                placeholder="Enter user name..."
               />
             </Form.Group>
           </Col>
@@ -174,7 +174,7 @@ const CheckoutForm = ({ user, total, selectedItems, onOrderComplete }) => {
                 onChange={handleChange}
                 required
                 className="rounded-3 shadow-sm"
-                placeholder="090xxxxxxx"
+                placeholder="Enter phone number..."
               />
             </Form.Group>
           </Col>
@@ -190,7 +190,7 @@ const CheckoutForm = ({ user, total, selectedItems, onOrderComplete }) => {
                 onChange={handleChange}
                 required
                 className="rounded-3 shadow-sm"
-                placeholder="Số nhà, đường, phường/xã..."
+                placeholder="Enter address ..."
               />
             </Form.Group>
           </Col>
@@ -205,7 +205,7 @@ const CheckoutForm = ({ user, total, selectedItems, onOrderComplete }) => {
                 value={formData.email}
                 onChange={handleChange}
                 className="rounded-3 shadow-sm"
-                placeholder="example@gmail.com"
+                placeholder="Enter email..."
               />
             </Form.Group>
           </Col>

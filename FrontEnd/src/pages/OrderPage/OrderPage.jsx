@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Container,
   Table,
@@ -13,7 +13,6 @@ import { useNavigate, Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { getActiveOrdersByUser, updateOrderStatus } from "../../api/orderApi";
-import { requestReturn } from "../../api/orderItemApi";
 import "./OrderPage.scss";
 
 const statusLabels = {
@@ -21,6 +20,7 @@ const statusLabels = {
   confirmed: "Đã xác nhận",
   processing: "Đang xử lý",
   shipped: "Đang giao",
+  delivered_pending: "Chờ xác nhận giao",
   delivered: "Đã giao",
   cancelled: "Đã hủy",
 };
@@ -44,6 +44,7 @@ const StatusBadge = ({ status }) => {
     confirmed: "info",
     processing: "primary",
     shipped: "primary",
+    delivered_pending: "warning",
     delivered: "success",
     cancelled: "danger",
   };
@@ -67,11 +68,6 @@ const OrderPage = () => {
   const { user, token } = useSelector((state) => state.user);
   const [page, setPage] = useState(1);
   const limit = 10;
-  // Modal trả hàng
-  const [showReturnModal, setShowReturnModal] = useState(false);
-  const [currentOrder, setCurrentOrder] = useState(null);
-  const [selectedItems, setSelectedItems] = useState([]);
-  const [returnReason, setReturnReason] = useState("");
 
   // Modal xác nhận hủy đơn
   const [showCancelModal, setShowCancelModal] = useState(false);
@@ -127,42 +123,6 @@ const OrderPage = () => {
     }
   };
 
-  const openReturnModal = (order) => {
-    const items =
-      order.orderItems?.filter((i) => i.returnStatus === "none") || [];
-    if (!items.length) return toast.info("Không có sản phẩm nào có thể trả.");
-    setCurrentOrder(order);
-    setSelectedItems(items.map((i) => i.id));
-    setReturnReason("");
-    setShowReturnModal(true);
-  };
-
-  const handleToggleItem = (itemId) => {
-    setSelectedItems((prev) =>
-      prev.includes(itemId)
-        ? prev.filter((id) => id !== itemId)
-        : [...prev, itemId]
-    );
-  };
-
-  const handleSubmitReturn = async () => {
-    if (!returnReason.trim())
-      return toast.warning("Vui lòng nhập lý do trả hàng");
-    if (!selectedItems.length)
-      return toast.warning("Vui lòng chọn sản phẩm để trả");
-
-    try {
-      for (let itemId of selectedItems) {
-        await requestReturn(itemId, returnReason);
-      }
-      toast.success("Đã gửi yêu cầu trả hàng!");
-      fetchOrders();
-      setShowReturnModal(false);
-    } catch {
-      toast.error("Lỗi khi gửi yêu cầu trả hàng");
-    }
-  };
-
   const filteredOrders = orders.filter(
     (order) =>
       (!filter || order.status === filter) &&
@@ -186,6 +146,7 @@ const OrderPage = () => {
             Quay lại trang chủ
           </Link>
         </div>
+
         <div className="text-center mb-3 position-relative">
           <div className="text-center mb-3">
             <div className="d-inline-flex align-items-center px-4 py-2 rounded-pill order-title">
@@ -222,6 +183,7 @@ const OrderPage = () => {
             </Form.Select>
           </div>
         </div>
+
         {loading ? (
           <div className="text-center py-5">
             <Spinner animation="border" variant="primary" />
@@ -262,23 +224,6 @@ const OrderPage = () => {
                               SL: {item.quantity} ×{" "}
                               {parseFloat(item.price).toLocaleString("vi-VN")} ₫
                             </div>
-                            {item.returnStatus !== "none" && (
-                              <Badge
-                                bg={
-                                  item.returnStatus === "approved"
-                                    ? "success"
-                                    : item.returnStatus === "pending"
-                                    ? "warning"
-                                    : "danger"
-                                }
-                              >
-                                {item.returnStatus === "approved"
-                                  ? "Đã duyệt trả hàng"
-                                  : item.returnStatus === "pending"
-                                  ? "Chờ xử lý trả hàng"
-                                  : "Từ chối trả"}
-                              </Badge>
-                            )}
                           </div>
                         ))}
                       </td>
@@ -303,15 +248,22 @@ const OrderPage = () => {
                           <Eye className="me-1" /> Xem
                         </Button>
 
-                        {order.status === "shipped" && (
-                          <Button
-                            variant="success"
-                            size="sm"
-                            onClick={() => handleReceiveOrder(order.id)}
-                          >
-                            Nhận hàng
-                          </Button>
-                        )}
+                        {/* ✅ Khi đang giao thì hiện “Đang giao...” và bị vô hiệu hóa */}
+                        {(order.status === "shipped" ||
+                          order.status === "delivered_pending") &&
+                          (order.paymentMethod === "cod" ||
+                            order.paymentStatus === "paid") && (
+                            <Button
+                              variant="success"
+                              size="sm"
+                              disabled={order.status === "shipped"}
+                              onClick={() => handleReceiveOrder(order.id)}
+                            >
+                              {order.status === "shipped"
+                                ? "Đang giao..."
+                                : "Nhận hàng"}
+                            </Button>
+                          )}
 
                         {order.status === "pending" && (
                           <Button
@@ -322,25 +274,12 @@ const OrderPage = () => {
                             Hủy đơn
                           </Button>
                         )}
-
-                        {order.status === "delivered" &&
-                          order.orderItems?.some(
-                            (item) => item.returnStatus === "none"
-                          ) && (
-                            <Button
-                              size="sm"
-                              variant="warning"
-                              onClick={() => openReturnModal(order)}
-                            >
-                              Trả hàng
-                            </Button>
-                          )}
                       </td>
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="8" className="text-center text-muted py-4">
+                    <td colSpan="9" className="text-center text-muted py-4">
                       Không có đơn hàng nào phù hợp.
                     </td>
                   </tr>
@@ -349,6 +288,7 @@ const OrderPage = () => {
             </Table>
           </div>
         )}
+
         <div className="d-flex justify-content-center mt-3">
           <Button
             variant="outline-primary"
@@ -362,57 +302,7 @@ const OrderPage = () => {
             Trang sau
           </Button>
         </div>
-        <Modal
-          show={showReturnModal}
-          onHide={() => setShowReturnModal(false)}
-          centered
-        >
-          <Modal.Header closeButton>
-            <Modal.Title>🛒 Yêu cầu trả hàng</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            {currentOrder && (
-              <>
-                <Form.Group className="mb-3">
-                  <Form.Label>Lý do trả hàng</Form.Label>
-                  <Form.Control
-                    as="textarea"
-                    rows={3}
-                    value={returnReason}
-                    onChange={(e) => setReturnReason(e.target.value)}
-                    placeholder="Nhập lý do trả hàng..."
-                  />
-                </Form.Group>
 
-                <Form.Label>Chọn sản phẩm muốn trả</Form.Label>
-                <div className="border rounded p-2">
-                  {currentOrder.orderItems
-                    ?.filter((i) => i.returnStatus === "none")
-                    .map((item) => (
-                      <Form.Check
-                        type="checkbox"
-                        key={item.id}
-                        label={`${item.productName} (SL: ${item.quantity})`}
-                        checked={selectedItems.includes(item.id)}
-                        onChange={() => handleToggleItem(item.id)}
-                      />
-                    ))}
-                </div>
-              </>
-            )}
-          </Modal.Body>
-          <Modal.Footer>
-            <Button
-              variant="secondary"
-              onClick={() => setShowReturnModal(false)}
-            >
-              Đóng
-            </Button>
-            <Button variant="primary" onClick={handleSubmitReturn}>
-              Gửi yêu cầu
-            </Button>
-          </Modal.Footer>
-        </Modal>
         <Modal
           show={showCancelModal}
           onHide={() => setShowCancelModal(false)}

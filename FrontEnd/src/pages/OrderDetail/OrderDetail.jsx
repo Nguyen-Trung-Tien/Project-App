@@ -9,10 +9,13 @@ import {
   Button,
   Card,
   Spinner,
+  Form,
+  Modal,
 } from "react-bootstrap";
 import { useParams, Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import { getOrderById } from "../../api/orderApi";
+import { requestReturn } from "../../api/orderItemApi";
 import "./OrderDetail.scss";
 import { ArrowLeftCircle } from "react-bootstrap-icons";
 
@@ -20,6 +23,10 @@ const OrderDetail = () => {
   const { id } = useParams();
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(false);
+
+  const [showReturnModal, setShowReturnModal] = useState(false);
+  const [selectedItems, setSelectedItems] = useState([]);
+  const [returnReason, setReturnReason] = useState("");
 
   const getProgressVariant = (status) => {
     switch (status) {
@@ -75,36 +82,24 @@ const OrderDetail = () => {
 
   const getPaymentBadge = (status) => {
     if (status?.toLowerCase() === "paid") {
-      return (
-        <Badge bg="success" className="fs-7">
-          Đã thanh toán
-        </Badge>
-      );
+      return <Badge bg="success">Đã thanh toán</Badge>;
     }
     if (status?.toLowerCase() === "unpaid") {
-      return (
-        <Badge bg="danger" className="fs-7">
-          Chưa thanh toán
-        </Badge>
-      );
+      return <Badge bg="danger">Chưa thanh toán</Badge>;
     }
-    return (
-      <Badge bg="secondary" className="fs-7">
-        Đang xử lý
-      </Badge>
-    );
+    return <Badge bg="secondary">Đang xử lý</Badge>;
   };
 
   const getReturnBadge = (status) => {
     switch (status) {
       case "none":
         return <Badge bg="secondary">Không trả</Badge>;
-      case "requested":
-        return <Badge bg="warning">Đã yêu cầu</Badge>;
+      case "pending":
+        return <Badge bg="warning">Chờ xử lý</Badge>;
       case "approved":
         return <Badge bg="success">Được duyệt</Badge>;
       case "rejected":
-        return <Badge bg="danger">Bị từ chối</Badge>;
+        return <Badge bg="danger">Từ chối</Badge>;
       case "completed":
         return <Badge bg="primary">Hoàn tất</Badge>;
       default:
@@ -112,25 +107,58 @@ const OrderDetail = () => {
     }
   };
 
+  const fetchOrderDetail = async () => {
+    try {
+      setLoading(true);
+      const res = await getOrderById(id);
+      if (res.errCode === 0) setOrder(res.data);
+      else toast.error(res.errMessage || "Không tìm thấy đơn hàng");
+    } catch (error) {
+      console.error(error);
+      toast.error("Không thể tải thông tin đơn hàng!");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchOrderDetail = async () => {
-      try {
-        setLoading(true);
-        const res = await getOrderById(id);
-        if (res.errCode === 0) {
-          setOrder(res.data);
-        } else {
-          toast.error(res.errMessage || "Không tìm thấy đơn hàng");
-        }
-      } catch (error) {
-        console.error(error);
-        toast.error("Không thể tải thông tin đơn hàng!");
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchOrderDetail();
   }, [id]);
+
+  const openReturnModal = () => {
+    const items =
+      order.orderItems?.filter((i) => i.returnStatus === "none") || [];
+    if (!items.length) return toast.info("Không có sản phẩm nào có thể trả.");
+    setSelectedItems(items.map((i) => i.id));
+    setReturnReason("");
+    setShowReturnModal(true);
+  };
+
+  const handleToggleItem = (itemId) => {
+    setSelectedItems((prev) =>
+      prev.includes(itemId)
+        ? prev.filter((id) => id !== itemId)
+        : [...prev, itemId]
+    );
+  };
+
+  const handleSubmitReturn = async () => {
+    if (!returnReason.trim())
+      return toast.warning("Vui lòng nhập lý do trả hàng");
+    if (!selectedItems.length)
+      return toast.warning("Vui lòng chọn sản phẩm để trả");
+
+    try {
+      for (let itemId of selectedItems) {
+        await requestReturn(itemId, returnReason);
+      }
+      toast.success("Đã gửi yêu cầu trả hàng!");
+      setShowReturnModal(false);
+      fetchOrderDetail();
+    } catch {
+      toast.error("Lỗi khi gửi yêu cầu trả hàng");
+    }
+  };
 
   if (loading)
     return (
@@ -190,12 +218,12 @@ const OrderDetail = () => {
                   <strong>Ngày đặt:</strong>{" "}
                   {new Date(
                     order.orderDate || order.createdAt
-                  ).toLocaleDateString()}
+                  ).toLocaleDateString("vi-VN")}
                 </p>
                 {order.deliveredAt && (
                   <p>
                     <strong>Ngày giao:</strong>{" "}
-                    {new Date(order.deliveredAt).toLocaleDateString()}
+                    {new Date(order.deliveredAt).toLocaleDateString("vi-VN")}
                   </p>
                 )}
                 <p>
@@ -260,14 +288,62 @@ const OrderDetail = () => {
           </tbody>
         </Table>
 
-        <div className="text-end mt-4">
-          <h5 className="fw-bold">
-            Tổng cộng:{" "}
-            <span className="text-danger fs-5">
-              {parseFloat(order.totalPrice).toLocaleString()} ₫
-            </span>
-          </h5>
-        </div>
+        {order.status === "delivered" &&
+          order.orderItems?.some((item) => item.returnStatus === "none") && (
+            <div className="text-end mt-3">
+              <Button variant="warning" onClick={openReturnModal}>
+                Trả hàng
+              </Button>
+            </div>
+          )}
+
+        <Modal
+          show={showReturnModal}
+          onHide={() => setShowReturnModal(false)}
+          centered
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>🛒 Yêu cầu trả hàng</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <Form.Group className="mb-3">
+              <Form.Label>Lý do trả hàng</Form.Label>
+              <Form.Control
+                as="textarea"
+                rows={3}
+                value={returnReason}
+                onChange={(e) => setReturnReason(e.target.value)}
+                placeholder="Nhập lý do trả hàng..."
+              />
+            </Form.Group>
+
+            <Form.Label>Chọn sản phẩm muốn trả</Form.Label>
+            <div className="border rounded p-2">
+              {order.orderItems
+                ?.filter((i) => i.returnStatus === "none")
+                .map((item) => (
+                  <Form.Check
+                    key={item.id}
+                    type="checkbox"
+                    label={`${item.productName} (SL: ${item.quantity})`}
+                    checked={selectedItems.includes(item.id)}
+                    onChange={() => handleToggleItem(item.id)}
+                  />
+                ))}
+            </div>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button
+              variant="secondary"
+              onClick={() => setShowReturnModal(false)}
+            >
+              Đóng
+            </Button>
+            <Button variant="primary" onClick={handleSubmitReturn}>
+              Gửi yêu cầu
+            </Button>
+          </Modal.Footer>
+        </Modal>
       </Container>
     </div>
   );

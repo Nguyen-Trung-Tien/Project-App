@@ -306,6 +306,11 @@ const updateOrderStatus = async (id, status) => {
     }
 
     await order.save({ transaction: t });
+
+    if (status === "delivered") {
+      const user = await db.User.findByPk(order.userId);
+      await sendOrderDeliveredEmail(user, order);
+    }
     await t.commit();
 
     return {
