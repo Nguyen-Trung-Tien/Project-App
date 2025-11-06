@@ -209,17 +209,17 @@ const forgotPassword = async (email) => {
 const verifyResetToken = async (email, token) => {
   try {
     const user = await db.User.findOne({ where: { email } });
-    if (!user) return { errCode: 1, errMessage: "Email không tồn tại" };
+    if (!user) return { errCode: 1, errMessage: "Email not found!" };
 
     if (!user.resetToken) {
-      return { errCode: 2, errMessage: "Không có yêu cầu khôi phục nào" };
+      return { errCode: 2, errMessage: "No recovery required" };
     }
 
     if (user.resetToken !== token) {
-      return { errCode: 3, errMessage: "Mã xác nhận không hợp lệ" };
+      return { errCode: 3, errMessage: "Invalid verification code!" };
     }
 
-    return { errCode: 0, errMessage: "Code is error!" };
+    return { errCode: 0, errMessage: "Valid verification code! " };
   } catch (err) {
     console.error("verifyResetToken error:", err);
     return { errCode: 2, errMessage: "Error from server!" };

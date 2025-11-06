@@ -9,7 +9,6 @@ const OrderItemRouter = require("./OrderItemRouter");
 const PaymentRouter = require("./PaymentRouter");
 const AdminRouter = require("./AdminRoute");
 const ChatRoutes = require("./chatRoutes");
-
 const routes = (app) => {
   app.use("/api/v1/user", UserRouter);
   app.use("/api/v1/product", ProductRouter);

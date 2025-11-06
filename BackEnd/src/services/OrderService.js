@@ -1,5 +1,6 @@
 const db = require("../models");
 const { Op } = require("sequelize");
+const { sendOrderDeliveredEmail } = require("./sendEmail");
 
 const getAllOrders = async (page = 1, limit = 10) => {
   try {
