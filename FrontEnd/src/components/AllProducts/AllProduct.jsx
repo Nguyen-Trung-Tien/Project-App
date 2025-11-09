@@ -1,64 +1,91 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { Container, Row, Col, Spinner, Button, Alert } from "react-bootstrap";
 import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
 import { useSearchParams } from "react-router-dom";
 import ProductCard from "../../components/ProductCard/ProductCard";
+import SkeletonCard from "../SkeletonCard/SkeletonCard";
 import { getAllProductApi, searchProductsApi } from "../../api/productApi";
 import "./AllProducts.scss";
 
-const AllProducts = () => {
+const AllProducts = React.memo(() => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [error, setError] = useState(false);
   const limit = 10;
+
   const user = useSelector((state) => state.user.user);
   const userId = user?.id;
 
   const [searchParams] = useSearchParams();
   const searchQuery = searchParams.get("search") || "";
 
-  const fetchProducts = async (currentPage = 1, append = false) => {
-    try {
-      if (append) setLoadingMore(true);
-      else setLoading(true);
+  const fetchProducts = useCallback(
+    async (currentPage = 1, append = false) => {
+      try {
+        if (append) setLoadingMore(true);
+        else {
+          setLoading(true);
+          setError(false);
+        }
 
-      let res;
-      if (searchQuery) {
-        res = await searchProductsApi(searchQuery, currentPage, limit);
-      } else {
-        res = await getAllProductApi(currentPage, limit);
-      }
+        const res = searchQuery
+          ? await searchProductsApi(searchQuery, currentPage, limit)
+          : await getAllProductApi(currentPage, limit);
 
-      if (res && res.errCode === 0) {
-        const newProducts = res.products || [];
-        if (append) setProducts((prev) => [...prev, ...newProducts]);
-        else setProducts(newProducts);
-        console.log(res.products);
-        setTotalPages(res.totalPages || 1);
-        setPage(currentPage);
-      } else {
-        toast.error("Không thể tải danh sách sản phẩm!");
+        if (res?.errCode === 0) {
+          const newProducts = res.products || [];
+          setProducts((prev) =>
+            append ? [...prev, ...newProducts] : newProducts
+          );
+          setTotalPages(res.totalPages || 1);
+          setPage(currentPage);
+        } else {
+          throw new Error(res?.errMessage || "Lỗi tải sản phẩm");
+        }
+      } catch (err) {
+        console.error("Fetch products error:", err);
+        setError(true);
+        toast.error("Không thể tải sản phẩm. Vui lòng thử lại!");
+      } finally {
+        setLoading(false);
+        setLoadingMore(false);
       }
-    } catch (err) {
-      console.error("Fetch products error:", err);
-      toast.error("Lỗi kết nối máy chủ!");
-    } finally {
-      setLoading(false);
-      setLoadingMore(false);
-    }
-  };
+    },
+    [searchQuery, limit]
+  );
 
   useEffect(() => {
+    setPage(1);
+    setProducts([]);
+    setError(false);
     fetchProducts(1, false);
-  }, [searchQuery]);
+  }, [fetchProducts]);
 
   const handleLoadMore = () => {
-    if (page >= totalPages) return;
+    if (page >= totalPages || loadingMore) return;
     fetchProducts(page + 1, true);
   };
+
+  const renderSkeletons = (count = 10) => (
+    <Row className="g-3 justify-content-center">
+      {Array.from({ length: count }).map((_, i) => (
+        <Col
+          key={`skeleton-${i}`}
+          lg={2}
+          md={3}
+          sm={6}
+          xs={12}
+          className="d-flex justify-content-center"
+        >
+          <SkeletonCard />
+        </Col>
+      ))}
+    </Row>
+  );
 
   return (
     <section className="all-products-section py-5 bg-light">
@@ -69,25 +96,38 @@ const AllProducts = () => {
             : "Tất cả sản phẩm"}
         </h2>
 
-        {loading && !products.length ? (
-          <div className="text-center my-5">
-            <Spinner animation="border" variant="primary" size="lg" />
-            <p className="mt-2 text-muted">Đang tải sản phẩm...</p>
-          </div>
-        ) : products.length === 0 ? (
+        {error && (
+          <Alert variant="danger" className="text-center">
+            Đã có lỗi xảy ra. Vui lòng tải lại trang.
+            <Button
+              variant="link"
+              size="sm"
+              className="ms-2 p-0"
+              onClick={() => fetchProducts(1, false)}
+            >
+              Thử lại
+            </Button>
+          </Alert>
+        )}
+
+        {loading && !products.length && !error && renderSkeletons()}
+
+        {!loading && !error && products.length === 0 && (
           <Alert variant="warning" className="text-center">
             Không tìm thấy sản phẩm nào phù hợp.
           </Alert>
-        ) : (
+        )}
+
+        {!loading && !error && products.length > 0 && (
           <>
             <Row className="g-3 justify-content-center">
               {products.map((product) => (
                 <Col
-                  key={`${product.id}-${Math.random()}`}
-                  lg={2} // 5 cột trên màn hình lớn
-                  md={3} // 4 cột trên màn hình trung bình
-                  sm={6} // 2 cột trên màn hình nhỏ
-                  xs={12} // 1 cột trên màn hình rất nhỏ
+                  key={product.id}
+                  lg={2}
+                  md={3}
+                  sm={6}
+                  xs={12}
                   className="d-flex justify-content-center"
                 >
                   <ProductCard product={product} userId={userId} />
@@ -95,23 +135,17 @@ const AllProducts = () => {
               ))}
             </Row>
 
-            {page < totalPages && (
+            {loadingMore && renderSkeletons(5)}
+
+            {page < totalPages && !loadingMore && (
               <div className="text-center mt-5">
                 <Button
                   variant="outline-primary"
                   size="lg"
-                  className="rounded-pill px-4 py-2"
+                  className="rounded-pill px-5 py-2 shadow-sm"
                   onClick={handleLoadMore}
-                  disabled={loadingMore}
                 >
-                  {loadingMore ? (
-                    <>
-                      <Spinner animation="border" size="sm" className="me-2" />
-                      Đang tải...
-                    </>
-                  ) : (
-                    "Xem thêm sản phẩm"
-                  )}
+                  Xem thêm sản phẩm
                 </Button>
               </div>
             )}
@@ -120,6 +154,6 @@ const AllProducts = () => {
       </Container>
     </section>
   );
-};
+});
 
 export default AllProducts;

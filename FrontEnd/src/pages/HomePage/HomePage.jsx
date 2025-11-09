@@ -28,7 +28,7 @@ const HomePage = () => {
 
   return (
     <>
-      <Container fluid className="homepage px-0">
+      <Container fluid className="homepage">
         <ChatBot />
 
         <HeroSection />

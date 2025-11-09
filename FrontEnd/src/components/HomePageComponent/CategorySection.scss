@@ -1,0 +1,114 @@
+.categories {
+  .section-title {
+    font-weight: 700;
+    color: #2c3e50;
+    position: relative;
+    display: inline-block;
+    left: 50%;
+    transform: translateX(-50%);
+
+    &::after {
+      content: "";
+      position: absolute;
+      bottom: -8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60px;
+      height: 4px;
+      background: linear-gradient(90deg, #3498db, #2980b9);
+      border-radius: 2px;
+    }
+  }
+}
+
+.category-card {
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  height: 160px;
+
+  &:hover {
+    transform: translateY(-8px) scale(1.03);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+
+    .overlay {
+      opacity: 1;
+      background: rgba(52, 152, 219, 0.9);
+    }
+  }
+
+  .image-wrapper {
+    width: 100%;
+    height: 100%;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.4s ease;
+    }
+  }
+
+  .overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(52, 152, 219, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: all 0.3s ease;
+
+    .category-name {
+      color: white;
+      font-weight: 600;
+      font-size: 1rem;
+      text-align: center;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+      margin: 0;
+    }
+  }
+}
+
+// Skeleton
+.category-skeleton {
+  width: 100%;
+  height: 160px;
+  border-radius: 16px;
+  background: #f8f9fa;
+  overflow: hidden;
+  position: relative;
+
+  .skeleton-image {
+    width: 100%;
+    height: 70%;
+    background: linear-gradient(90deg, #eef2f3 25%, #e2e6e9 50%, #eef2f3 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+  }
+
+  .skeleton-text {
+    height: 20px;
+    width: 70%;
+    margin: 12px auto 0;
+    background: linear-gradient(90deg, #eef2f3 25%, #e2e6e9 50%, #eef2f3 75%);
+    background-size: 200% 100%;
+    border-radius: 6px;
+    animation: loading 1.5s infinite;
+  }
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}

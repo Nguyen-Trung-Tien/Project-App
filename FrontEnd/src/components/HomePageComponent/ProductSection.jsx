@@ -42,7 +42,7 @@ const ProductSection = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await getAllProductApi();
+        const res = await getAllProductApi(1, 6);
         if (res?.errCode === 0) {
           const featured = res.products
             ?.filter((p) => p.isActive)
