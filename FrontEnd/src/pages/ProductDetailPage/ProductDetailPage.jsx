@@ -32,20 +32,7 @@ import { getImage } from "../../utils/decodeImage";
 import "./ProductDetailPage.scss";
 import { addCartItem } from "../../redux/cartSlice";
 import ChatBot from "../../components/ChatBot/ChatBot";
-
-const StarRating = ({ rating, onChange, interactive = false }) => (
-  <div className="d-flex align-items-center">
-    {[1, 2, 3, 4, 5].map((star) => (
-      <span
-        key={star}
-        onClick={() => interactive && onChange?.(star)}
-        style={{ cursor: interactive ? "pointer" : "default" }}
-      >
-        {star <= rating ? <StarFill color="gold" /> : <Star color="gray" />}
-      </span>
-    ))}
-  </div>
-);
+import { StarRating } from "../../utils/StarRating";
 
 const ProductDetailPage = () => {
   const user = useSelector((state) => state.user.user);
@@ -58,8 +45,10 @@ const ProductDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [addingCart, setAddingCart] = useState(false);
   const [reviews, setReviews] = useState([]);
-
+  const [page, setPage] = useState(1);
+  const [pagination, setPagination] = useState({ totalPages: 1 });
   const [newReview, setNewReview] = useState({ rating: 5, comment: "" });
+  const limit = 5;
   const [suggestedProducts, setSuggestedProducts] = useState([]);
   const [suggestedPage, setSuggestedPage] = useState(1);
   const currentProductId = useRef(Number(id));
@@ -131,15 +120,23 @@ const ProductDetailPage = () => {
     fetchAllData();
   }, [fetchAllData]);
 
-  const fetchReviews = async (productId) => {
+  const fetchReviews = async (productId, page = 1) => {
     try {
-      const res = await getReviewsByProductApi(productId);
-      if (res?.errCode === 0) setReviews(res.data);
+      const res = await getReviewsByProductApi(productId, page, limit);
+      if (res?.errCode === 0) {
+        setReviews(res.data);
+        setPagination(res.pagination);
+      }
     } catch (err) {
       console.error("Lỗi tải đánh giá:", err);
     }
   };
 
+  useEffect(() => {
+    if (product?.id) {
+      fetchReviews(product.id, page);
+    }
+  }, [page]);
   useEffect(() => {
     if (product?.categoryId) {
       setSuggestedProducts([]);
@@ -259,7 +256,7 @@ const ProductDetailPage = () => {
             className="btn btn-outline-primary rounded-pill px-3 py-2 fw-semibold"
           >
             <ArrowLeftCircle size={16} className="me-1" />
-            Quay lại giỏ hàng
+            Quay lại
           </Link>
         </div>
 
@@ -431,38 +428,72 @@ const ProductDetailPage = () => {
           </div>
 
           {reviews.length > 0 ? (
-            reviews.map((r) => (
-              <div key={r.id} className="review-item border-bottom pb-3 mb-3">
-                <div className="d-flex align-items-center mb-2">
-                  {r.user?.avatar ? (
-                    <img
-                      src={getImage(r.user.avatar)}
-                      alt={r.user.username}
-                      className="rounded-circle me-2"
-                      width={40}
-                      height={40}
-                    />
-                  ) : (
-                    <div
-                      className="rounded-circle bg-secondary text-white d-flex justify-content-center align-items-center me-2"
-                      style={{ width: 40, height: 40 }}
-                    >
-                      {r.user?.username?.[0]?.toUpperCase()}
-                    </div>
-                  )}
-                  <strong>{r.user?.username}</strong>
+            <>
+              {reviews.map((r) => (
+                <div key={r.id} className="review-item border-bottom pb-3 mb-3">
+                  <div className="d-flex align-items-center mb-2">
+                    {r.user?.avatar ? (
+                      <img
+                        src={getImage(r.user.avatar)}
+                        alt={r.user.username}
+                        className="rounded-circle me-2"
+                        width={40}
+                        height={40}
+                      />
+                    ) : (
+                      <div
+                        className="rounded-circle bg-secondary text-white d-flex justify-content-center align-items-center me-2"
+                        style={{ width: 40, height: 40 }}
+                      >
+                        {r.user?.username?.[0]?.toUpperCase()}
+                      </div>
+                    )}
+                    <strong>{r.user?.username}</strong>
+                  </div>
+                  <StarRating rating={r.rating} />
+                  <p className="mb-0">
+                    {r.comment.length > 200
+                      ? r.comment.slice(0, 200) + "..."
+                      : r.comment}
+                  </p>
+                  <small className="text-muted">
+                    {new Date(r.createdAt).toLocaleDateString("vi-VN")}
+                  </small>
                 </div>
-                <StarRating rating={r.rating} />
-                <p className="mb-0">
-                  {r.comment.length > 200
-                    ? r.comment.slice(0, 200) + "..."
-                    : r.comment}
-                </p>
-                <small className="text-muted">
-                  {new Date(r.createdAt).toLocaleDateString("vi-VN")}
-                </small>
+              ))}
+
+              <div className="d-flex justify-content-center align-items-center mt-4 gap-3">
+                <Button
+                  variant="outline-secondary"
+                  size="sm"
+                  disabled={page <= 1}
+                  onClick={() => {
+                    const newPage = page - 1;
+                    setPage(newPage);
+                    fetchReviews(product.id, newPage);
+                  }}
+                >
+                  Trang trước
+                </Button>
+
+                <span className="text-muted">
+                  Trang {page}/{pagination.totalPages}
+                </span>
+
+                <Button
+                  variant="outline-primary"
+                  size="sm"
+                  disabled={page >= pagination.totalPages}
+                  onClick={() => {
+                    const newPage = page + 1;
+                    setPage(newPage);
+                    fetchReviews(product.id, newPage);
+                  }}
+                >
+                  Trang sau
+                </Button>
               </div>
-            ))
+            </>
           ) : (
             <p>Chưa có đánh giá nào cho sản phẩm này.</p>
           )}

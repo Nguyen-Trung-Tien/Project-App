@@ -1,8 +1,10 @@
 const db = require("../models");
 
-const getReviewsByProduct = async (productId) => {
+const getReviewsByProduct = async (productId, page = 1, limit = 10) => {
   try {
-    const reviews = await db.Review.findAll({
+    const offset = (page - 1) * limit;
+
+    const { count, rows } = await db.Review.findAndCountAll({
       where: { productId, isApproved: true },
       include: [
         {
@@ -12,11 +14,23 @@ const getReviewsByProduct = async (productId) => {
         },
       ],
       order: [["createdAt", "DESC"]],
+      limit: limit,
+      offset: offset,
     });
-    return { errCode: 0, data: reviews };
+
+    return {
+      errCode: 0,
+      data: rows,
+      pagination: {
+        total: count,
+        page: page,
+        limit: limit,
+        totalPages: Math.ceil(count / limit),
+      },
+    };
   } catch (error) {
     console.error(error);
-    return { errCode: 1, errMessage: "Lỗi khi lấy đánh giá" };
+    return { errCode: 1, errMessage: "Error from server!" };
   }
 };
 
