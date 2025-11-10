@@ -122,7 +122,7 @@ const CheckoutPage = () => {
               className="btn btn-outline-primary rounded-pill px-3 py-2 fw-semibold"
             >
               <ArrowLeftCircle size={16} className="me-1" />
-              Quay lại giỏ hàng
+              Quay lại
             </Link>
           </div>
           <div className="text-center mb-3">

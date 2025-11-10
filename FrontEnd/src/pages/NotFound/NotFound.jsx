@@ -13,7 +13,7 @@ const NotFound = () => {
         Có vẻ như trang bạn đang tìm kiếm không tồn tại hoặc đã bị di chuyển.
       </p>
       <Link to="/" className="btn btn-primary px-4">
-        ← Quay lại trang chủ
+        ← Quay lại
       </Link>
     </div>
   );

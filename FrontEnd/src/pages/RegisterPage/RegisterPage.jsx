@@ -165,6 +165,15 @@ const RegisterPage = () => {
                 </p>
               </Form>
             </Card.Body>
+            <div className="text-center">
+              <Button
+                variant="outline-secondary"
+                onClick={() => navigate("/")}
+                className="rounded-pill px-3 py-1"
+              >
+                ← Quay lại
+              </Button>
+            </div>
           </Card>
         </Container>
       </div>

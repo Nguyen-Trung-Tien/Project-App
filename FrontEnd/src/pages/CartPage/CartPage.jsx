@@ -104,7 +104,7 @@ const CartPage = () => {
             className="btn btn-outline-primary rounded-pill px-3 py-2 fw-semibold"
           >
             <ArrowLeftCircle size={16} className="me-1" />
-            Quay lại trang chủ
+            Quay lại
           </Link>
         </div>
         <div className="text-center mb-3">
@@ -234,8 +234,6 @@ const CartPage = () => {
                 </Card.Body>
               </Card>
             </Col>
-
-            {/* Cột tổng tiền */}
             <Col lg={4}>
               <Card className="shadow-lg border-0 rounded-4 p-2">
                 <Card.Body>
@@ -257,7 +255,6 @@ const CartPage = () => {
                       {total.toLocaleString()}₫
                     </h5>
                   </div>
-
                   <Button
                     variant="primary"
                     className="w-100 mt-4 rounded-pill fw-semibold shadow-sm py-2"

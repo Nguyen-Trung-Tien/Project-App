@@ -64,7 +64,7 @@ const OrdersReturnPage = () => {
           onClick={handleBack}
           className="rounded-pill px-3 py-1"
         >
-          ← Quay lại trang chủ
+          ← Quay lại
         </Button>
       </Card.Header>
       {!loading && (

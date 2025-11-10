@@ -154,7 +154,7 @@ const LoginPage = () => {
               onClick={() => navigate("/")}
               className="rounded-pill px-3 py-1"
             >
-              ← Quay lại trang chủ
+              ← Quay lại
             </Button>
           </div>
         </Card>

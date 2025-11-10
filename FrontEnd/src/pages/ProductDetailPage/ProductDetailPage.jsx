@@ -97,6 +97,10 @@ const ProductDetailPage = () => {
     [suggestedLimit]
   );
 
+  useEffect(() => {
+    currentProductId.current = Number(id);
+  }, [id]);
+
   const fetchAllData = useCallback(async () => {
     setLoading(true);
     try {
@@ -104,7 +108,7 @@ const ProductDetailPage = () => {
       if (res?.errCode === 0 && res.product) {
         const p = res.product;
         setProduct(p);
-        fetchReviews(p.id);
+        await fetchReviews(p.id);
       } else {
         toast.error("Không tìm thấy sản phẩm!");
       }
@@ -136,7 +140,8 @@ const ProductDetailPage = () => {
     if (product?.id) {
       fetchReviews(product.id, page);
     }
-  }, [page]);
+  }, [page, product?.id]);
+
   useEffect(() => {
     if (product?.categoryId) {
       setSuggestedProducts([]);
@@ -241,10 +246,11 @@ const ProductDetailPage = () => {
       </div>
     );
 
-  const discountedPrice =
+  const discountedPrice = Math.round(
     product.discount > 0
       ? product.price * (1 - product.discount / 100)
-      : product.price;
+      : product.price
+  );
 
   return (
     <div className="product-detail-page py-5 mh-100">
@@ -353,14 +359,17 @@ const ProductDetailPage = () => {
                   min={1}
                   max={product.stock}
                   value={quantity}
-                  onChange={(e) =>
-                    setQuantity(
-                      Math.max(
-                        1,
-                        Math.min(Number(e.target.value), product.stock)
-                      )
-                    )
-                  }
+                  onChange={(e) => {
+                    const input = e.target.value;
+                    if (input === "") {
+                      setQuantity("");
+                      return;
+                    }
+                    const val = Number(input);
+                    if (isNaN(val)) return;
+                    const newQty = Math.max(1, Math.min(val, product.stock));
+                    setQuantity(newQty);
+                  }}
                   style={{ width: "90px" }}
                 />
               </div>

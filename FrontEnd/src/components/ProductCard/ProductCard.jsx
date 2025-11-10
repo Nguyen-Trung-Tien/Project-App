@@ -61,7 +61,8 @@ const ProductCard = ({ product }) => {
     setLoadingCart(true);
     try {
       const cartsRes = await getAllCarts();
-      let cart = cartsRes.data.find((c) => c.userId === userId);
+      const carts = cartsRes?.data || [];
+      let cart = carts.find((c) => c.userId === userId);
       if (!cart) {
         const newCartRes = await createCart(userId);
         cart = newCartRes.data;
@@ -90,16 +91,12 @@ const ProductCard = ({ product }) => {
 
     setLoadingBuy(true);
     try {
-      const cartsRes = await getAllCarts();
-      let cart = cartsRes.data.find((c) => c.userId === userId);
-      if (!cart) {
-        const newCartRes = await createCart(userId);
-        cart = newCartRes.data;
-      }
-      await addCart({ cartId: cart.id, productId: id, quantity: 1 });
-      dispatch(addCartItem({ ...product, quantity: 1 }));
-
-      navigate("/checkout", { state: { product, quantity: 1 } });
+      navigate("/checkout", {
+        state: {
+          product,
+          quantity: 1,
+        },
+      });
     } catch (err) {
       console.error(err);
       toast.error("Không thể mua ngay, vui lòng thử lại!");
