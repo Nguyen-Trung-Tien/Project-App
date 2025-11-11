@@ -35,6 +35,7 @@ const LoginPage = () => {
 
     try {
       const res = await loginUser(email, password);
+
       if (res.errCode === 0 && res.data) {
         const { user, accessToken } = res.data;
         const minimalUser = {
@@ -47,15 +48,14 @@ const LoginPage = () => {
           avatar: getAvatarBase64(user.avatar),
         };
         dispatch(setUser({ user: minimalUser, token: accessToken }));
-        toast.success(res.errMessage);
+        toast.success(res.errMessage || "Đăng nhập thành công!");
         navigate("/");
       } else {
-        setError(res.errMessage || "Đăng nhập thất bại");
-        toast.error(res.errMessage);
+        toast.error(res.errMessage || "Đăng nhập thất bại!");
       }
     } catch (err) {
       console.error("Login error:", err);
-      setError("Lỗi kết nối máy chủ. Vui lòng thử lại sau!");
+      toast.error("Kiểm tra lại mật khẩu và tài khoản!");
     } finally {
       setLoading(false);
     }

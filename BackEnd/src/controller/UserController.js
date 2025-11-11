@@ -16,6 +16,7 @@ const handleCreateNewUser = async (req, res) => {
 const handleLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
+
     if (!email || !password) {
       return res.status(400).json({
         errCode: 3,
@@ -26,7 +27,10 @@ const handleLogin = async (req, res) => {
     const result = await UserService.handleUserLogin(email, password);
 
     if (result.errCode !== 0) {
-      return res.status(401).json(result);
+      return res.status(401).json({
+        errCode: result.errCode,
+        errMessage: result.errMessage,
+      });
     }
 
     res.cookie("refreshToken", result.data.refreshToken, {
@@ -38,17 +42,17 @@ const handleLogin = async (req, res) => {
 
     return res.status(200).json({
       errCode: 0,
-      errMessage: "Login successful",
+      errMessage: "Login successful!",
       data: {
         user: result.data.user,
         accessToken: result.data.accessToken,
       },
     });
   } catch (e) {
-    console.error(e);
+    console.error("Login error:", e);
     return res.status(500).json({
       errCode: -1,
-      errMessage: "Internal server error",
+      errMessage: "Internal server error!",
     });
   }
 };

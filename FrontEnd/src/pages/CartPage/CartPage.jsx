@@ -96,7 +96,7 @@ const CartPage = () => {
   };
 
   return (
-    <div className="cart-page py-4">
+    <div className="cart-page py-3">
       <Container>
         <div className="text-left">
           <Link
@@ -106,11 +106,11 @@ const CartPage = () => {
             <ArrowLeftCircle size={16} className="me-1" />
             Quay lại
           </Link>
-        </div>
-        <div className="text-center mb-3">
-          <div className="d-inline-flex align-items-center px-4 py-2 rounded-pill cart-title">
-            <Cart4 size={26} className="me-2" />
-            <h3 className="fw-bold mb-0">Giỏ hàng </h3>
+          <div className="text-center mb-2">
+            <div className="d-inline-flex align-items-center px-4 py-2 rounded-pill cart-title">
+              <Cart4 size={26} className="me-2" />
+              <h3 className="fw-bold mb-0">Giỏ hàng </h3>
+            </div>
           </div>
         </div>
 
@@ -202,15 +202,18 @@ const CartPage = () => {
                                 <span>{price.toLocaleString()}₫</span>
                               )}
                             </td>
-                            <td style={{ width: "110px" }}>
+                            <td style={{ width: "90px" }}>
                               <Form.Control
                                 type="number"
                                 min="1"
                                 value={item.quantity || 1}
                                 className="text-center rounded-pill border-primary"
-                                onChange={(e) =>
-                                  handleQtyChange(item.id, +e.target.value)
-                                }
+                                onChange={(e) => {
+                                  const value = parseInt(e.target.value);
+                                  if (!isNaN(value) && value >= 1) {
+                                    handleQtyChange(item.id, value);
+                                  }
+                                }}
                               />
                             </td>
                             <td className="fw-bold text-end text-success">

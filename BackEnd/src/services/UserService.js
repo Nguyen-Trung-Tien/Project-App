@@ -51,19 +51,20 @@ const createNewUser = async (data) => {
 
 const handleUserLogin = async (email, password) => {
   try {
-    const user = await db.User.findOne({
-      where: { email },
-    });
+    const user = await db.User.findOne({ where: { email } });
     if (!user) {
       return { errCode: 1, errMessage: "User not found!" };
     }
+
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       return { errCode: 2, errMessage: "Wrong password!" };
     }
+
     const payload = { id: user.id, email: user.email, role: user.role };
     const accessToken = generateAccessToken(payload);
     const refreshToken = generateRefreshToken(payload);
+
     const { password: _, ...userData } = user.toJSON();
     return {
       errCode: 0,
@@ -71,10 +72,8 @@ const handleUserLogin = async (email, password) => {
       data: { user: userData, accessToken, refreshToken },
     };
   } catch (error) {
-    return {
-      errCode: 2,
-      errMessage: "Error from server",
-    };
+    console.error("User login error:", error);
+    return { errCode: -1, errMessage: "Error from server!" };
   }
 };
 

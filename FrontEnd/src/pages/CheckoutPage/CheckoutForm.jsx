@@ -91,7 +91,6 @@ const CheckoutForm = ({ user, total, selectedItems, onOrderComplete }) => {
 
   const handlePayPalApprove = async (data, actions) => {
     const details = await actions.order.capture();
-    toast.success("Thanh toán PayPal thành công!");
     await onOrderComplete(
       { ...buildOrderData(), paymentMethod: "paypal" },
       details
@@ -106,12 +105,7 @@ const CheckoutForm = ({ user, total, selectedItems, onOrderComplete }) => {
             <Cash className="me-2 text-success" /> Thanh toán khi nhận hàng
           </>
         );
-      case "momo":
-        return (
-          <>
-            <Phone className="me-2 text-danger" /> Thanh toán qua MoMo
-          </>
-        );
+
       case "paypal":
         return (
           <>
@@ -219,10 +213,9 @@ const CheckoutForm = ({ user, total, selectedItems, onOrderComplete }) => {
                 onChange={handleChange}
                 className="rounded-3 shadow-sm"
               >
-                <option value="cod">🪙 Thanh toán khi nhận hàng</option>
-                <option value="momo">💗 MOMO</option>
-                <option value="paypal">💰 PayPal</option>
-                <option value="vnpay">💳 VNPay</option>
+                <option value="cod">Thanh toán khi nhận hàng</option>
+                <option value="paypal">PayPal</option>
+                <option value="vnpay">VNPay</option>
               </Form.Select>
             </Form.Group>
           </Col>

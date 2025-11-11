@@ -28,6 +28,8 @@ const OrderDetail = () => {
   const [selectedItems, setSelectedItems] = useState([]);
   const [returnReason, setReturnReason] = useState("");
 
+  const [submitting, setSubmitting] = useState(false);
+
   const getProgressVariant = (status) => {
     switch (status) {
       case "pending":
@@ -126,9 +128,17 @@ const OrderDetail = () => {
   }, [id]);
 
   const openReturnModal = () => {
+    if (order.status !== "delivered") {
+      toast.warning("Chỉ có thể trả hàng khi đơn đã giao.");
+      return;
+    }
     const items =
       order.orderItems?.filter((i) => i.returnStatus === "none") || [];
-    if (!items.length) return toast.info("Không có sản phẩm nào có thể trả.");
+    if (!items.length) {
+      toast.info("Không có sản phẩm nào có thể trả.");
+      return;
+    }
+
     setSelectedItems(items.map((i) => i.id));
     setReturnReason("");
     setShowReturnModal(true);
@@ -143,20 +153,29 @@ const OrderDetail = () => {
   };
 
   const handleSubmitReturn = async () => {
+    if (submitting) return;
     if (!returnReason.trim())
       return toast.warning("Vui lòng nhập lý do trả hàng");
     if (!selectedItems.length)
-      return toast.warning("Vui lòng chọn sản phẩm để trả");
+      return toast.warning("Vui lòng chọn ít nhất 1 sản phẩm");
 
+    setSubmitting(true);
     try {
-      for (let itemId of selectedItems) {
-        await requestReturn(itemId, returnReason);
-      }
-      toast.success("Đã gửi yêu cầu trả hàng!");
+      await Promise.all(
+        selectedItems.map((itemId) =>
+          requestReturn(itemId, returnReason).catch((err) => {
+            console.error(`Lỗi trả hàng ID ${itemId}:`, err);
+            throw err;
+          })
+        )
+      );
+      toast.success("Gửi yêu cầu trả hàng thành công!");
       setShowReturnModal(false);
       fetchOrderDetail();
     } catch {
-      toast.error("Lỗi khi gửi yêu cầu trả hàng");
+      toast.error("Một số sản phẩm không thể trả. Vui lòng thử lại.");
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -195,7 +214,8 @@ const OrderDetail = () => {
                   👤 Thông tin người nhận
                 </h5>
                 <p>
-                  <strong>Họ tên:</strong> {order.user?.username}
+                  <strong>Họ tên:</strong>
+                  {order.user?.username || "Khách hàng"}
                 </p>
                 <p>
                   <strong>Email:</strong> {order.user?.email}
@@ -240,7 +260,11 @@ const OrderDetail = () => {
                 <p className="mt-3">
                   <strong>Tổng tiền:</strong>{" "}
                   <span className="text-danger fw-bold">
-                    {parseFloat(order.totalPrice).toLocaleString()} ₫
+                    {parseFloat(order.totalPrice).toLocaleString("vi-VN", {
+                      minimumFractionDigits: 0,
+                      maximumFractionDigits: 0,
+                    })}
+                    ₫
                   </span>
                 </p>
 
@@ -339,8 +363,18 @@ const OrderDetail = () => {
             >
               Đóng
             </Button>
-            <Button variant="primary" onClick={handleSubmitReturn}>
-              Gửi yêu cầu
+            <Button
+              variant="primary"
+              onClick={handleSubmitReturn}
+              disabled={submitting}
+            >
+              {submitting ? (
+                <>
+                  Đang gửi <Spinner size="sm" />
+                </>
+              ) : (
+                "Gửi yêu cầu"
+              )}
             </Button>
           </Modal.Footer>
         </Modal>
