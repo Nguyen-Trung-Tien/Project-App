@@ -57,6 +57,7 @@ const handleUserLogin = async (email, password) => {
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
+
     if (!isPasswordValid) {
       return { errCode: 2, errMessage: "Wrong password!" };
     }
@@ -68,7 +69,7 @@ const handleUserLogin = async (email, password) => {
     const { password: _, ...userData } = user.toJSON();
     return {
       errCode: 0,
-      errMessage: "OK",
+      errMessage: "Login successful!",
       data: { user: userData, accessToken, refreshToken },
     };
   } catch (error) {
@@ -82,6 +83,12 @@ const updateUser = async (userId, data) => {
     const user = await db.User.findByPk(userId);
     if (!user) return { errCode: 1, errMessage: "User not found" };
 
+    if (data.email && data.email !== user.email) {
+      const emailExists = await checkUserEmail(data.email);
+      if (emailExists) {
+        return { errCode: 1, errMessage: "Email already in use" };
+      }
+    }
     const fields = ["username", "email", "phone", "address", "role"];
     fields.forEach((field) => {
       if (data[field] !== undefined) user[field] = data[field];
@@ -161,6 +168,7 @@ const deleteUser = async (userId) => {
     if (!user) {
       return { errCode: 1, errMessage: "User not found" };
     }
+
     await user.destroy();
     return { errCode: 0, errMessage: "User deleted successfully" };
   } catch (e) {

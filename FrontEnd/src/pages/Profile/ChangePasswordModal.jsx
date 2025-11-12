@@ -1,7 +1,8 @@
 import React, { useState } from "react";
-import { Modal, Form, Button, Spinner } from "react-bootstrap";
+import { Modal, Form, Button, Spinner, InputGroup } from "react-bootstrap";
 import { toast } from "react-toastify";
 import { updatePasswordApi } from "../../api/userApi";
+import { EyeFill, EyeSlashFill } from "react-bootstrap-icons";
 
 const ChangePasswordModal = ({ show, onHide, userId, token }) => {
   const [loading, setLoading] = useState(false);
@@ -10,6 +11,19 @@ const ChangePasswordModal = ({ show, onHide, userId, token }) => {
     newPassword: "",
     confirmPassword: "",
   });
+
+  const [showPassword, setShowPassword] = useState({
+    oldPassword: false,
+    newPassword: false,
+    confirmPassword: false,
+  });
+
+  const toggleShowPassword = (field) => {
+    setShowPassword((prev) => ({
+      ...prev,
+      [field]: !prev[field],
+    }));
+  };
 
   const handleSave = async () => {
     const { oldPassword, newPassword, confirmPassword } = passwordData;
@@ -69,19 +83,32 @@ const ChangePasswordModal = ({ show, onHide, userId, token }) => {
               <Form.Label className="fw-medium text-secondary">
                 {label}
               </Form.Label>
-              <Form.Control
-                type="password"
-                name={name}
-                value={passwordData[name]}
-                onChange={(e) =>
-                  setPasswordData((prev) => ({
-                    ...prev,
-                    [name]: e.target.value,
-                  }))
-                }
-                placeholder={label}
-                className="shadow-sm border-0 bg-light"
-              />
+              <InputGroup>
+                <Form.Control
+                  type={showPassword[name] ? "text" : "password"}
+                  name={name}
+                  value={passwordData[name]}
+                  onChange={(e) =>
+                    setPasswordData((prev) => ({
+                      ...prev,
+                      [name]: e.target.value,
+                    }))
+                  }
+                  placeholder={label}
+                  className="shadow-sm border-0 bg-light"
+                />
+                <Button
+                  variant="light"
+                  className="border-0"
+                  onClick={() => toggleShowPassword(name)}
+                >
+                  {showPassword[name] ? (
+                    <EyeSlashFill className="text-secondary" />
+                  ) : (
+                    <EyeFill className="text-secondary" />
+                  )}
+                </Button>
+              </InputGroup>
             </Form.Group>
           ))}
         </Form>

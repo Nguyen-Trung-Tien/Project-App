@@ -29,7 +29,7 @@ const OrderHistory = () => {
       if (!user?.id || !token) return;
       try {
         setLoading(true);
-        const res = await getOrdersByUserId(token, user.id, page, 5);
+        const res = await getOrdersByUserId(token, user.id, page, 8);
         if (res?.errCode === 0) {
           setOrders(res.data || []);
           setTotalPages(res.pagination?.totalPages || 1);
@@ -45,6 +45,9 @@ const OrderHistory = () => {
     fetchOrders();
   }, [user, token, page]);
 
+  useEffect(() => {
+    setPage(1);
+  }, [user?.id]);
   const renderStatus = (status) => {
     switch (status) {
       case "pending":
@@ -66,10 +69,10 @@ const OrderHistory = () => {
         return <Badge bg="secondary">Không xác định</Badge>;
     }
   };
-
   const handlePageChange = (newPage) => {
-    if (newPage > 0 && newPage <= totalPages) {
+    if (newPage > 0 && newPage <= totalPages && newPage !== page) {
       setPage(newPage);
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
   };
 
@@ -96,6 +99,49 @@ const OrderHistory = () => {
     );
   };
 
+  const renderPaginationItems = () => {
+    const items = [];
+    const delta = 2;
+
+    const left = Math.max(1, page - delta);
+    const right = Math.min(totalPages, page + delta);
+
+    if (left > 1) {
+      items.push(
+        <Pagination.Item key={1} onClick={() => handlePageChange(1)}>
+          1
+        </Pagination.Item>
+      );
+      if (left > 2) items.push(<Pagination.Ellipsis key="start-ellipsis" />);
+    }
+
+    for (let i = left; i <= right; i++) {
+      items.push(
+        <Pagination.Item
+          key={i}
+          active={i === page}
+          onClick={() => handlePageChange(i)}
+        >
+          {i}
+        </Pagination.Item>
+      );
+    }
+
+    if (right < totalPages) {
+      if (right < totalPages - 1)
+        items.push(<Pagination.Ellipsis key="end-ellipsis" />);
+      items.push(
+        <Pagination.Item
+          key={totalPages}
+          onClick={() => handlePageChange(totalPages)}
+        >
+          {totalPages}
+        </Pagination.Item>
+      );
+    }
+
+    return items;
+  };
   if (loading)
     return (
       <div className="text-center mt-5">
@@ -108,20 +154,13 @@ const OrderHistory = () => {
   const formatDate = (dateStr) =>
     dateStr ? new Date(dateStr).toLocaleDateString("vi-VN") : "-";
 
-  if (loading)
-    return (
-      <div className="text-center mt-5">
-        <Spinner animation="border" variant="primary" />
-      </div>
-    );
-
   return (
-    <div className="order-history-page py-4">
+    <div className="order-history-page py-2">
       <Container>
         <div className="text-left">
           <Link
             to={"/orders"}
-            className="btn btn-outline-primary rounded-pill px-3 py-2 mb-3 fw-semibold"
+            className="btn btn-outline-primary rounded-pill px-3 py-2 mb-2 fw-semibold"
           >
             <ArrowLeftCircle size={16} className="me-1" />
             Quay lại
@@ -129,7 +168,7 @@ const OrderHistory = () => {
         </div>
         <Card className="shadow-sm border-0">
           <Card.Body>
-            <h3 className="text-center fw-bold mb-4 text-primary">
+            <h3 className="text-center fw-bold mb-2 text-primary">
               🧾 Lịch sử đơn hàng
             </h3>
 
@@ -188,47 +227,7 @@ const OrderHistory = () => {
           </Card.Body>
         </Card>
         <div className="d-flex justify-content-center mt-3">
-          <Pagination>
-            <Pagination.Prev
-              disabled={page === 1}
-              onClick={() => handlePageChange(page - 1)}
-            />
-
-            {page > 3 && (
-              <>
-                <Pagination.Item onClick={() => handlePageChange(1)}>
-                  1
-                </Pagination.Item>
-                {page > 4 && <Pagination.Ellipsis disabled />}
-              </>
-            )}
-
-            {Array.from({ length: totalPages }, (_, i) => i + 1)
-              .filter((p) => Math.abs(p - page) <= 2)
-              .map((p) => (
-                <Pagination.Item
-                  key={p}
-                  active={p === page}
-                  onClick={() => handlePageChange(p)}
-                >
-                  {p}
-                </Pagination.Item>
-              ))}
-
-            {page < totalPages - 2 && (
-              <>
-                {page < totalPages - 3 && <Pagination.Ellipsis disabled />}
-                <Pagination.Item onClick={() => handlePageChange(totalPages)}>
-                  {totalPages}
-                </Pagination.Item>
-              </>
-            )}
-
-            <Pagination.Next
-              disabled={page === totalPages}
-              onClick={() => handlePageChange(page + 1)}
-            />
-          </Pagination>
+          <Pagination>{renderPaginationItems()}</Pagination>
         </div>
       </Container>
     </div>

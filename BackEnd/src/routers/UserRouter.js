@@ -34,11 +34,11 @@ router.post("/logout", UserController.handleLogout);
 router.put(
   "/change-password",
   authenticateToken,
-  UserController.changePassword
+  UserController.handleChangePassword
 );
 
-router.post("/forgot-password", UserController.forgotPassword);
-router.post("/verify-reset-token", UserController.verifyResetToken);
-router.post("/reset-password", UserController.resetPassword);
+router.post("/forgot-password", UserController.handleForgotPassword);
+router.post("/verify-reset-token", UserController.handleVerifyResetToken);
+router.post("/reset-password", UserController.handleResetPassword);
 
 module.exports = router;

@@ -174,7 +174,9 @@ const handleDeleteUser = async (req, res) => {
   try {
     const { id } = req.params;
     const result = await UserService.deleteUser(id);
-
+    if (req.user.role !== "admin" && req.user.id !== id) {
+      return res.status(403).json({ errCode: 403, errMessage: "Forbidden" });
+    }
     return res.status(200).json(result);
   } catch (e) {
     console.error("Error in handleDeleteUser:", e);
@@ -206,7 +208,7 @@ const handleLogout = async (req, res) => {
   }
 };
 
-const changePassword = async (req, res) => {
+const handleChangePassword = async (req, res) => {
   const { userId, oldPassword, newPassword } = req.body;
   if (!userId || !oldPassword || !newPassword) {
     return res.status(400).json({
@@ -223,7 +225,7 @@ const changePassword = async (req, res) => {
   return res.status(200).json(result);
 };
 
-const forgotPassword = async (req, res) => {
+const handleForgotPassword = async (req, res) => {
   try {
     const { email } = req.body;
     if (!email)
@@ -243,7 +245,7 @@ const forgotPassword = async (req, res) => {
   }
 };
 
-const verifyResetToken = async (req, res) => {
+const handleVerifyResetToken = async (req, res) => {
   try {
     const { email, token } = req.body;
     if (!email || !token)
@@ -263,13 +265,13 @@ const verifyResetToken = async (req, res) => {
   }
 };
 
-const resetPassword = async (req, res) => {
+const handleResetPassword = async (req, res) => {
   try {
     const { email, token, newPassword } = req.body;
     if (!email || !token || !newPassword)
       return res.status(400).json({
         errCode: 1,
-        errMessage: "Error from server!",
+        errMessage: "Missing email, token, or new password!",
       });
 
     const result = await UserService.resetPassword(email, token, newPassword);
@@ -292,8 +294,8 @@ module.exports = {
   handleGetUserById,
   handleDeleteUser,
   handleLogout,
-  changePassword,
-  forgotPassword,
-  resetPassword,
-  verifyResetToken,
+  handleChangePassword,
+  handleForgotPassword,
+  handleResetPassword,
+  handleVerifyResetToken,
 };

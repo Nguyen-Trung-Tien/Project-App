@@ -12,6 +12,8 @@ import {
   KeyFill,
   ArrowLeft,
   ArrowClockwise,
+  EyeFill,
+  EyeSlashFill,
 } from "react-bootstrap-icons";
 
 const ForgotPasswordModal = ({ show, onClose }) => {
@@ -263,27 +265,68 @@ const FormStepNewPassword = ({
   setNewPassword,
   confirmPassword,
   setConfirmPassword,
-}) => (
-  <>
-    <Form.Group className="mb-3">
-      <Form.Label className="fw-semibold">Mật khẩu mới</Form.Label>
-      <Form.Control
-        type="password"
-        placeholder="Nhập mật khẩu mới..."
-        value={newPassword}
-        onChange={(e) => setNewPassword(e.target.value)}
-      />
-    </Form.Group>
-    <Form.Group>
-      <Form.Label className="fw-semibold">Xác nhận mật khẩu</Form.Label>
-      <Form.Control
-        type="password"
-        placeholder="Nhập lại mật khẩu mới..."
-        value={confirmPassword}
-        onChange={(e) => setConfirmPassword(e.target.value)}
-      />
-    </Form.Group>
-  </>
-);
+}) => {
+  const [showPassword, setShowPassword] = useState({
+    newPassword: false,
+    confirmPassword: false,
+  });
+
+  const toggleShowPassword = (field) => {
+    setShowPassword((prev) => ({
+      ...prev,
+      [field]: !prev[field],
+    }));
+  };
+
+  return (
+    <>
+      <Form.Group className="mb-3">
+        <Form.Label className="fw-semibold">Mật khẩu mới</Form.Label>
+        <InputGroup>
+          <Form.Control
+            type={showPassword.newPassword ? "text" : "password"}
+            placeholder="Nhập mật khẩu mới..."
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+          />
+          <Button
+            variant="light"
+            className="border-0"
+            onClick={() => toggleShowPassword("newPassword")}
+          >
+            {showPassword.newPassword ? (
+              <EyeSlashFill className="text-secondary" />
+            ) : (
+              <EyeFill className="text-secondary" />
+            )}
+          </Button>
+        </InputGroup>
+      </Form.Group>
+
+      <Form.Group>
+        <Form.Label className="fw-semibold">Xác nhận mật khẩu</Form.Label>
+        <InputGroup>
+          <Form.Control
+            type={showPassword.confirmPassword ? "text" : "password"}
+            placeholder="Nhập lại mật khẩu mới..."
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+          />
+          <Button
+            variant="light"
+            className="border-0"
+            onClick={() => toggleShowPassword("confirmPassword")}
+          >
+            {showPassword.confirmPassword ? (
+              <EyeSlashFill className="text-secondary" />
+            ) : (
+              <EyeFill className="text-secondary" />
+            )}
+          </Button>
+        </InputGroup>
+      </Form.Group>
+    </>
+  );
+};
 
 export default ForgotPasswordModal;
