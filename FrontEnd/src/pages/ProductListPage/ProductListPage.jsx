@@ -109,11 +109,11 @@ const ProductListPage = () => {
   );
 
   return (
-    <section className="product-list-page py-5 bg-light">
+    <section className="product-list-page py-3 bg-light">
       <Container>
         <ChatBot />
 
-        <h3 className="section-title text-center mb-5 fw-bold fs-2">
+        <h3 className="section-title text-center mb-3 fw-bold fs-2">
           Danh sách sản phẩm
         </h3>
 

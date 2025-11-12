@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import {
   Container,
   Row,
@@ -19,20 +19,19 @@ import {
 } from "react-bootstrap-icons";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
-
 import {
   getProductByIdApi,
   getProductsByCategoryApi,
 } from "../../api/productApi";
 import { addCart, getAllCarts, createCart } from "../../api/cartApi";
 import { createReviewApi, getReviewsByProductApi } from "../../api/reviewApi";
-
 import ProductCard from "../../components/ProductCard/ProductCard";
 import { getImage } from "../../utils/decodeImage";
 import "./ProductDetailPage.scss";
 import { addCartItem } from "../../redux/cartSlice";
 import ChatBot from "../../components/ChatBot/ChatBot";
-import { StarRating } from "../../utils/StarRating";
+import ReviewForm from "../../components/ReviewComponent/ReviewForm";
+import ReviewList from "../../components/ReviewComponent/ReviewList";
 
 const ProductDetailPage = () => {
   const user = useSelector((state) => state.user.user);
@@ -48,7 +47,7 @@ const ProductDetailPage = () => {
   const [page, setPage] = useState(1);
   const [pagination, setPagination] = useState({ totalPages: 1 });
   const [newReview, setNewReview] = useState({ rating: 5, comment: "" });
-  const limit = 5;
+  const limit = 3;
   const [suggestedProducts, setSuggestedProducts] = useState([]);
   const [suggestedPage, setSuggestedPage] = useState(1);
   const currentProductId = useRef(Number(id));
@@ -253,7 +252,7 @@ const ProductDetailPage = () => {
   );
 
   return (
-    <div className="product-detail-page py-5 mh-100">
+    <div className="product-detail-page py-3 mh-90">
       <Container>
         <ChatBot />
         <div className="text-left">
@@ -414,98 +413,21 @@ const ProductDetailPage = () => {
         <div className="reviews-section mt-5 pt-4 border-top">
           <h4 className="fw-bold mb-3">Đánh giá sản phẩm</h4>
 
-          <div className="review-form mb-4">
-            <h6 className="mb-2">Viết đánh giá của bạn:</h6>
-            <StarRating
-              rating={newReview.rating}
-              onChange={(star) => setNewReview((p) => ({ ...p, rating: star }))}
-              interactive
-            />
-            <Form.Control
-              as="textarea"
-              rows={3}
-              placeholder="Nhập bình luận của bạn..."
-              value={newReview.comment}
-              onChange={(e) =>
-                setNewReview((p) => ({ ...p, comment: e.target.value }))
-              }
-              className="my-2"
-            />
-            <Button variant="primary" onClick={handleSubmitReview}>
-              Gửi đánh giá
-            </Button>
-          </div>
+          <ReviewForm
+            newReview={newReview}
+            setNewReview={setNewReview}
+            onSubmit={handleSubmitReview}
+          />
 
-          {reviews.length > 0 ? (
-            <>
-              {reviews.map((r) => (
-                <div key={r.id} className="review-item border-bottom pb-3 mb-3">
-                  <div className="d-flex align-items-center mb-2">
-                    {r.user?.avatar ? (
-                      <img
-                        src={getImage(r.user.avatar)}
-                        alt={r.user.username}
-                        className="rounded-circle me-2"
-                        width={40}
-                        height={40}
-                      />
-                    ) : (
-                      <div
-                        className="rounded-circle bg-secondary text-white d-flex justify-content-center align-items-center me-2"
-                        style={{ width: 40, height: 40 }}
-                      >
-                        {r.user?.username?.[0]?.toUpperCase()}
-                      </div>
-                    )}
-                    <strong>{r.user?.username}</strong>
-                  </div>
-                  <StarRating rating={r.rating} />
-                  <p className="mb-0">
-                    {r.comment.length > 200
-                      ? r.comment.slice(0, 200) + "..."
-                      : r.comment}
-                  </p>
-                  <small className="text-muted">
-                    {new Date(r.createdAt).toLocaleDateString("vi-VN")}
-                  </small>
-                </div>
-              ))}
-
-              <div className="d-flex justify-content-center align-items-center mt-4 gap-3">
-                <Button
-                  variant="outline-secondary"
-                  size="sm"
-                  disabled={page <= 1}
-                  onClick={() => {
-                    const newPage = page - 1;
-                    setPage(newPage);
-                    fetchReviews(product.id, newPage);
-                  }}
-                >
-                  Trang trước
-                </Button>
-
-                <span className="text-muted">
-                  Trang {page}/{pagination.totalPages}
-                </span>
-
-                <Button
-                  variant="outline-primary"
-                  size="sm"
-                  disabled={page >= pagination.totalPages}
-                  onClick={() => {
-                    const newPage = page + 1;
-                    setPage(newPage);
-                    fetchReviews(product.id, newPage);
-                  }}
-                >
-                  Trang sau
-                </Button>
-              </div>
-            </>
-          ) : (
-            <p>Chưa có đánh giá nào cho sản phẩm này.</p>
-          )}
+          <ReviewList
+            reviews={reviews}
+            page={page}
+            pagination={pagination}
+            onPageChange={(newPage) => {
+              setPage(newPage);
+              fetchReviews(product.id, newPage);
+            }}
+          />
         </div>
 
         {suggestedProducts.length > 0 ? (

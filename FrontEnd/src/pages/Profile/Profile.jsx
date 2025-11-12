@@ -139,10 +139,10 @@ const Profile = () => {
       {loading && <Loading />}
 
       <div
-        className="profile-page py-3"
+        className="profile-page py-2"
         style={{
           background: "linear-gradient(120deg, #e0f7fa 0%, #f1f8ff 100%)",
-          minHeight: "100vh",
+          minHeight: "90vh",
         }}
       >
         <Container>
@@ -155,11 +155,10 @@ const Profile = () => {
               Quay lại
             </Link>
           </div>
-          <div className="text-center mb-5">
+          <div className="text-center mb-4">
             <div className="d-inline-flex align-items-center px-4 py-2 rounded-pill profile-title">
               <h3 className="fw-bold mb-0">Hồ sơ của bạn</h3>
             </div>
-            <div className="title-underline mx-auto mt-2"></div>
           </div>
 
           <Row className="justify-content-center g-4">

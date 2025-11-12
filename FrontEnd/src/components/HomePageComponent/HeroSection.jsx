@@ -1,4 +1,3 @@
-import React from "react";
 import { Button } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { ArrowRight } from "react-bootstrap-icons";
@@ -9,8 +8,6 @@ const HeroSection = () => {
 
   return (
     <section className="hero-section position-relative d-flex align-items-center justify-content-center text-center">
-      <div className="hero-overlay"></div>
-
       <div className="hero-content container position-relative text-white">
         <h1 className="hero-title fw-bold mb-3">
           <span style={{ color: "#007bff" }}>T</span>ien-
