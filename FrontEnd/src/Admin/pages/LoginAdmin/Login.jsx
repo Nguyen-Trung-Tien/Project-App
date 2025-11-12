@@ -12,9 +12,9 @@ import { FiLock, FiMail } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
-import { loginUser } from "../../api/userApi";
-import { setUser } from "../../redux/userSlice";
-import Loading from "../../components/Loading/Loading";
+import { loginUser } from "../../../api/userApi";
+import { setUser } from "../../../redux/userSlice";
+import Loading from "../../../components/Loading/Loading";
 
 const AdminLogin = () => {
   const [email, setEmail] = useState("");

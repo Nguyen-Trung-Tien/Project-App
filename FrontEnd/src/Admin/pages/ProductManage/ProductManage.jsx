@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Table,
   Button,
@@ -12,16 +12,36 @@ import {
   Spinner,
   Pagination,
 } from "react-bootstrap";
-import "../Layout.scss";
+import {
+  BoxSeam,
+  PlusCircle,
+  PencilSquare,
+  Trash3,
+  Search,
+  Image as ImageIcon,
+  Tag,
+  CurrencyDollar,
+  Percent,
+  Box,
+  ToggleOn,
+  ToggleOff,
+  ChevronLeft,
+  ChevronRight,
+  ChevronDoubleLeft,
+  ChevronDoubleRight,
+  CheckCircleFill,
+  XCircleFill,
+} from "react-bootstrap-icons";
+import "./ProductManage.scss";
 import { toast } from "react-toastify";
 import {
   createProductApi,
   deleteProductApi,
   getAllProductApi,
   updateProductApi,
-} from "../../api/productApi";
-import { getAllCategoryApi } from "../../api/categoryApi";
-import { getImage } from "../../utils/decodeImage";
+} from "../../../api/productApi";
+import { getAllCategoryApi } from "../../../api/categoryApi";
+import { getImage } from "../../../utils/decodeImage";
 
 const ProductManage = () => {
   const [products, setProducts] = useState([]);
@@ -46,44 +66,59 @@ const ProductManage = () => {
   const limit = 10;
   const [loadingTable, setLoadingTable] = useState(false);
   const [loadingModal, setLoadingModal] = useState(false);
+
+  const searchTimeoutRef = useRef(null);
+  const tableTopRef = useRef(null);
+
   const fetchCategories = async () => {
     try {
       const res = await getAllCategoryApi();
-      if (res.errCode === 0 && Array.isArray(res.data)) setCategories(res.data);
+      if (res.errCode === 0 && Array.isArray(res.data)) {
+        setCategories(res.data);
+      }
     } catch (err) {
       console.error("Fetch categories error:", err);
     }
   };
+
   const fetchProducts = async (currentPage = 1, search = "") => {
     setLoadingTable(true);
     try {
-      const res = await getAllProductApi(currentPage, limit, search);
+      const res = await getAllProductApi(currentPage, limit, search.trim());
       if (res.errCode === 0) {
         setProducts(res.products || []);
         setTotalPages(res.totalPages || 1);
         setPage(currentPage);
-
-        const tableTop = document.getElementById("product-table-top");
-        if (tableTop) tableTop.scrollIntoView({ behavior: "smooth" });
       } else {
         setProducts([]);
         setTotalPages(1);
         setPage(1);
       }
     } catch (err) {
-      console.error(err);
+      console.error("Fetch products error:", err);
+      toast.error("Lỗi tải dữ liệu");
       setProducts([]);
       setTotalPages(1);
       setPage(1);
     } finally {
       setLoadingTable(false);
+      tableTopRef.current?.scrollIntoView({ behavior: "smooth" });
     }
   };
 
   useEffect(() => {
     fetchCategories();
-    fetchProducts(page);
+    fetchProducts(1);
   }, []);
+
+  useEffect(() => {
+    if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
+    searchTimeoutRef.current = setTimeout(() => {
+      setPage(1);
+      fetchProducts(1, searchTerm);
+    }, 500);
+    return () => clearTimeout(searchTimeoutRef.current);
+  }, [searchTerm]);
 
   const handleShowModal = (product = null) => {
     if (product) {
@@ -96,7 +131,7 @@ const ProductManage = () => {
         stock: product.stock || "",
         categoryId: product.categoryId || "",
         isActive: product.isActive ?? true,
-        image: product.image || null,
+        image: null,
       });
       setImagePreview(getImage(product.image));
       setEditProduct(product);
@@ -127,6 +162,10 @@ const ProductManage = () => {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      if (file.size > 2 * 1024 * 1024) {
+        toast.warn("Ảnh không được quá 2MB");
+        return;
+      }
       setFormData({ ...formData, image: file });
       setImagePreview(URL.createObjectURL(file));
     }
@@ -134,21 +173,24 @@ const ProductManage = () => {
 
   const handleSave = async (e) => {
     e.preventDefault();
-    try {
-      setLoadingModal(true);
+    if (!formData.name || !formData.price || !formData.categoryId) {
+      toast.error("Vui lòng điền đầy đủ tên, giá và danh mục!");
+      return;
+    }
 
+    setLoadingModal(true);
+    try {
       const data = new FormData();
       data.append("name", formData.name);
       data.append("sku", formData.sku);
       data.append("description", formData.description);
       data.append("price", formData.price);
-      data.append("discount", formData.discount);
+      data.append("discount", formData.discount || 0);
       data.append("stock", formData.stock);
       data.append("categoryId", formData.categoryId);
-      data.append("isActive", formData.isActive);
-      if (formData.image instanceof File) {
-        data.append("image", formData.image);
-      }
+      data.append("isActive", formData.isActive ? 1 : 0);
+      if (formData.image) data.append("image", formData.image);
+
       let res;
       if (editProduct) {
         res = await updateProductApi(editProduct.id, data);
@@ -181,28 +223,31 @@ const ProductManage = () => {
         toast.success("Đã xóa sản phẩm!");
         const newPage = products.length === 1 && page > 1 ? page - 1 : page;
         fetchProducts(newPage, searchTerm);
-      } else toast.error(res.errMessage);
+      } else {
+        toast.error(res.errMessage || "Không thể xóa");
+      }
     } catch (err) {
-      console.error(err);
-      toast.error("Không thể xóa sản phẩm!");
+      console.log(err);
+      toast.error("Lỗi xóa sản phẩm");
     }
   };
 
-  const filteredProducts = products.filter((p) =>
-    p.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
   const renderPagination = () => {
     if (totalPages <= 1) return null;
+
     const items = [];
-    let startPage = Math.max(1, page - 2);
-    let endPage = Math.min(totalPages, page + 2);
+    const pageNeighbours = 2;
+    const startPage = Math.max(1, page - pageNeighbours);
+    const endPage = Math.min(totalPages, page + pageNeighbours);
+
     if (startPage > 1) {
       items.push(
         <Pagination.First
           key="first"
           onClick={() => fetchProducts(1, searchTerm)}
-        />
+        >
+          <ChevronDoubleLeft />
+        </Pagination.First>
       );
     }
     if (page > 1) {
@@ -210,7 +255,9 @@ const ProductManage = () => {
         <Pagination.Prev
           key="prev"
           onClick={() => fetchProducts(page - 1, searchTerm)}
-        />
+        >
+          <ChevronLeft />
+        </Pagination.Prev>
       );
     }
     for (let i = startPage; i <= endPage; i++) {
@@ -229,7 +276,9 @@ const ProductManage = () => {
         <Pagination.Next
           key="next"
           onClick={() => fetchProducts(page + 1, searchTerm)}
-        />
+        >
+          <ChevronRight />
+        </Pagination.Next>
       );
     }
     if (endPage < totalPages) {
@@ -237,38 +286,46 @@ const ProductManage = () => {
         <Pagination.Last
           key="last"
           onClick={() => fetchProducts(totalPages, searchTerm)}
-        />
+        >
+          <ChevronDoubleRight />
+        </Pagination.Last>
       );
     }
 
     return (
-      <Pagination className="justify-content-center mt-3">{items}</Pagination>
+      <Pagination className="justify-content-center mt-4">{items}</Pagination>
     );
   };
 
   return (
-    <div>
-      <h3 className="mb-4">🛍️ Quản lý sản phẩm</h3>
+    <div className="product-manage">
+      <h3 className="mb-4">
+        <BoxSeam className="me-2" /> Quản lý sản phẩm
+      </h3>
+
       <Card className="shadow-sm">
         <Card.Body>
           <Row className="align-items-center mb-3">
             <Col md={6}>
               <InputGroup>
+                <InputGroup.Text>
+                  <Search size={16} />
+                </InputGroup.Text>
                 <Form.Control
-                  placeholder="🔍 Tìm kiếm sản phẩm..."
+                  placeholder="Tìm kiếm sản phẩm..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </InputGroup>
             </Col>
             <Col md={6} className="text-end">
-              <Button variant="primary" onClick={() => handleShowModal()}>
-                ➕ Thêm sản phẩm
+              <Button variant="success" onClick={() => handleShowModal()}>
+                <PlusCircle className="me-1" /> Thêm sản phẩm
               </Button>
             </Col>
           </Row>
 
-          <div id="product-table-top">
+          <div ref={tableTopRef}>
             <Table
               bordered
               hover
@@ -282,9 +339,9 @@ const ProductManage = () => {
                   <th>Tên sản phẩm</th>
                   <th>SKU</th>
                   <th>Danh mục</th>
-                  <th>Giá (₫)</th>
-                  <th>Giảm giá (%)</th>
-                  <th>Tồn kho</th>
+                  <th>Giá</th>
+                  <th>Giảm</th>
+                  <th>Tồn</th>
                   <th>Trạng thái</th>
                   <th>Thao tác</th>
                 </tr>
@@ -296,56 +353,64 @@ const ProductManage = () => {
                       <Spinner animation="border" variant="primary" />
                     </td>
                   </tr>
-                ) : filteredProducts.length > 0 ? (
-                  filteredProducts.map((p) => (
+                ) : products.length > 0 ? (
+                  products.map((p) => (
                     <tr key={p.id}>
-                      <td>{p.id}</td>
+                      <td>
+                        <strong>#{p.id}</strong>
+                      </td>
                       <td>
                         <Image
                           src={getImage(p.image)}
-                          alt={p.name}
                           rounded
-                          style={{
-                            width: "100px",
-                            height: "100px",
-                            objectFit: "cover",
-                          }}
+                          className="product-img"
                         />
                       </td>
-                      <td>{p.name}</td>
+                      <td className="text-start fw-medium">{p.name}</td>
                       <td>{p.sku || "—"}</td>
-                      <td>{p.category?.name || "Không có"}</td>
-                      <td>{Number(p.price).toLocaleString()}</td>
+                      <td>{p.category?.name || "—"}</td>
+                      <td>{Number(p.price).toLocaleString()}₫</td>
                       <td>{p.discount}%</td>
                       <td>{p.stock}</td>
                       <td>
-                        {p.isActive ? (
-                          <span className="badge bg-success">Hoạt động</span>
-                        ) : (
-                          <span className="badge bg-secondary">Ẩn</span>
-                        )}
+                        <span
+                          className={`badge ${
+                            p.isActive ? "bg-success" : "bg-secondary"
+                          } d-flex align-items-center justify-content-center`}
+                          style={{ width: 80 }}
+                        >
+                          {p.isActive ? (
+                            <CheckCircleFill className="me-1" size={12} />
+                          ) : (
+                            <XCircleFill className="me-1" size={12} />
+                          )}
+                          {p.isActive ? "Hoạt động" : "Ẩn"}
+                        </span>
                       </td>
                       <td>
                         <Button
                           variant="outline-warning"
                           size="sm"
                           onClick={() => handleShowModal(p)}
+                          className="me-1"
+                          title="Sửa"
                         >
-                          ✏️
-                        </Button>{" "}
+                          <PencilSquare size={14} />
+                        </Button>
                         <Button
                           variant="outline-danger"
                           size="sm"
                           onClick={() => handleDelete(p.id)}
+                          title="Xóa"
                         >
-                          🗑️
+                          <Trash3 size={14} />
                         </Button>
                       </td>
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="10" className="text-center text-muted py-3">
+                    <td colSpan="10" className="text-center text-muted py-4">
                       Không có sản phẩm nào
                     </td>
                   </tr>
@@ -357,10 +422,27 @@ const ProductManage = () => {
           {renderPagination()}
         </Card.Body>
       </Card>
-      <Modal show={showModal} onHide={handleCloseModal} centered size="lg">
+
+      {/* Modal */}
+      <Modal
+        show={showModal}
+        onHide={handleCloseModal}
+        centered
+        size="lg"
+        backdrop="static"
+      >
         <Modal.Header closeButton>
           <Modal.Title>
-            {editProduct ? "Chỉnh sửa sản phẩm" : "Thêm sản phẩm mới"}
+            {editProduct ? (
+              <>
+                <PencilSquare className="me-2 text-warning" /> Chỉnh sửa sản
+                phẩm
+              </>
+            ) : (
+              <>
+                <PlusCircle className="me-2 text-success" /> Thêm sản phẩm mới
+              </>
+            )}
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
@@ -368,53 +450,67 @@ const ProductManage = () => {
             <Row>
               <Col md={6}>
                 <Form.Group className="mb-3">
-                  <Form.Label>Tên sản phẩm</Form.Label>
+                  <Form.Label>
+                    <Tag className="me-1" /> Tên sản phẩm *
+                  </Form.Label>
                   <Form.Control
-                    name="name"
                     value={formData.name}
                     onChange={(e) =>
                       setFormData({ ...formData, name: e.target.value })
                     }
                     required
+                    placeholder="Nhập tên sản phẩm"
                   />
                 </Form.Group>
+
                 <Form.Group className="mb-3">
-                  <Form.Label>Mã SKU</Form.Label>
+                  <Form.Label>
+                    <BoxSeam className="me-1" /> Mã SKU
+                  </Form.Label>
                   <Form.Control
-                    name="sku"
                     value={formData.sku}
                     onChange={(e) =>
                       setFormData({ ...formData, sku: e.target.value })
                     }
+                    placeholder="SKU-001"
                   />
                 </Form.Group>
+
                 <Form.Group className="mb-3">
-                  <Form.Label>Giá (₫)</Form.Label>
+                  <Form.Label>
+                    <CurrencyDollar className="me-1" /> Giá (₫) *
+                  </Form.Label>
                   <Form.Control
                     type="number"
-                    name="price"
                     value={formData.price}
                     onChange={(e) =>
                       setFormData({ ...formData, price: e.target.value })
                     }
                     required
+                    min="0"
                   />
                 </Form.Group>
+
                 <Form.Group className="mb-3">
-                  <Form.Label>Giảm giá (%)</Form.Label>
+                  <Form.Label>
+                    <Percent className="me-1" /> Giảm giá (%)
+                  </Form.Label>
                   <Form.Control
                     type="number"
-                    name="discount"
                     value={formData.discount}
                     onChange={(e) =>
                       setFormData({ ...formData, discount: e.target.value })
                     }
+                    min="0"
+                    max="100"
                   />
                 </Form.Group>
+
                 <Form.Group className="mb-3">
-                  <Form.Label>Danh mục</Form.Label>
+                  <Form.Label>
+                    <Tag className="me-1" /> Danh mục *
+                  </Form.Label>
                   <Form.Select
-                    name="categoryId"
                     value={formData.categoryId}
                     onChange={(e) =>
                       setFormData({ ...formData, categoryId: e.target.value })
@@ -430,33 +526,43 @@ const ProductManage = () => {
                   </Form.Select>
                 </Form.Group>
               </Col>
+
               <Col md={6}>
                 <Form.Group className="mb-3">
-                  <Form.Label>Mô tả sản phẩm</Form.Label>
+                  <Form.Label>
+                    <Box className="me-1" /> Mô tả
+                  </Form.Label>
                   <Form.Control
                     as="textarea"
-                    rows={4}
-                    name="description"
+                    rows={3}
                     value={formData.description}
                     onChange={(e) =>
                       setFormData({ ...formData, description: e.target.value })
                     }
+                    placeholder="Mô tả chi tiết..."
                   />
                 </Form.Group>
+
                 <Form.Group className="mb-3">
-                  <Form.Label>Tồn kho</Form.Label>
+                  <Form.Label>
+                    <BoxSeam className="me-1" /> Tồn kho *
+                  </Form.Label>
                   <Form.Control
                     type="number"
-                    name="stock"
                     value={formData.stock}
                     onChange={(e) =>
                       setFormData({ ...formData, stock: e.target.value })
                     }
                     required
+                    min="0"
                   />
                 </Form.Group>
+
                 <Form.Group className="mb-3">
-                  <Form.Label>Ảnh sản phẩm</Form.Label>
+                  <Form.Label>
+                    <ImageIcon className="me-1" /> Ảnh sản phẩm{" "}
+                    {editProduct && "(để trống nếu không đổi)"}
+                  </Form.Label>
                   <Form.Control
                     type="file"
                     accept="image/*"
@@ -467,19 +573,26 @@ const ProductManage = () => {
                       <Image
                         src={imagePreview}
                         rounded
-                        style={{
-                          width: "100px",
-                          height: "100px",
-                          objectFit: "cover",
-                        }}
+                        style={{ width: 100, height: 100, objectFit: "cover" }}
                       />
+                      <small className="text-muted d-block">Preview</small>
                     </div>
                   )}
                 </Form.Group>
+
                 <Form.Group className="mb-3">
                   <Form.Check
-                    type="checkbox"
-                    label="Hoạt động"
+                    type="switch"
+                    label={
+                      <>
+                        {formData.isActive ? (
+                          <ToggleOn className="me-1 text-success" />
+                        ) : (
+                          <ToggleOff className="me-1 text-secondary" />
+                        )}
+                        Hiển thị sản phẩm
+                      </>
+                    }
                     checked={formData.isActive}
                     onChange={(e) =>
                       setFormData({ ...formData, isActive: e.target.checked })
@@ -488,13 +601,20 @@ const ProductManage = () => {
                 </Form.Group>
               </Col>
             </Row>
-            <div className="text-end">
-              <Button variant="secondary" onClick={handleCloseModal}>
+
+            <div className="text-end mt-4">
+              <Button
+                variant="secondary"
+                onClick={handleCloseModal}
+                className="me-2"
+              >
                 Hủy
-              </Button>{" "}
+              </Button>
               <Button variant="primary" type="submit" disabled={loadingModal}>
                 {loadingModal ? (
-                  <Spinner animation="border" size="sm" />
+                  <>
+                    <Spinner animation="border" size="sm" /> Đang lưu...
+                  </>
                 ) : (
                   "Lưu"
                 )}

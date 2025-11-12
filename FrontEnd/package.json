@@ -22,6 +22,7 @@
     "jwt-decode": "^4.0.0",
     "lodash": "^4.17.21",
     "lodash.debounce": "^4.0.8",
+    "motion": "^12.23.24",
     "react": "^19.1.1",
     "react-bootstrap": "^2.10.10",
     "react-bootstrap-icons": "^1.11.6",

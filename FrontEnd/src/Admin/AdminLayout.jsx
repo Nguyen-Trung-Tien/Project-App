@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { Outlet } from "react-router-dom";
-import HeaderAdmin from "../Admin/components/HeaderAdmin";
-import Sidebar from "./components/Sidebar";
 import "./Layout.scss";
+import HeaderAdmin from "./components/HeaderAdminComponent/HeaderAdmin";
+import Sidebar from "./components/SidebarComponent/Sidebar";
 
 const AdminLayout = () => {
   const [collapsed, setCollapsed] = useState(false);

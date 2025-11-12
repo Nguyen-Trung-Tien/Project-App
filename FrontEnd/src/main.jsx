@@ -5,8 +5,8 @@ import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
 import { PayPalScriptProvider } from "@paypal/react-paypal-js";
 import App from "./App";
-import { store, persistor } from "./redux/store";
 import "bootstrap/dist/css/bootstrap.min.css";
+import { store, persistor } from "./redux/store";
 
 const initialOptions = {
   "client-id": import.meta.env.VITE_PAYPAL_CLIENT_ID,

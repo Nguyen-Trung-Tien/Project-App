@@ -190,7 +190,7 @@ const OrderDetail = () => {
     return <p className="text-center mt-5">Không có dữ liệu đơn hàng</p>;
 
   return (
-    <div className="order-detail-page py-4">
+    <div className="order-detail-page py-3">
       <Container>
         <div className="text-left">
           <Link
@@ -198,7 +198,7 @@ const OrderDetail = () => {
             className="btn btn-outline-primary rounded-pill px-3 py-2 fw-semibold"
           >
             <ArrowLeftCircle size={16} className="me-1" />
-            Quay lại đơn hàng
+            Quay lại
           </Link>
         </div>
 

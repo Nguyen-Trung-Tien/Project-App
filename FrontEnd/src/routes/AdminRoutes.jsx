@@ -1,14 +1,14 @@
 import { Routes, Route } from "react-router-dom";
 import AdminLayout from "../Admin/AdminLayout";
-import Categories from "../Admin/pages/Categories";
-import Dashboard from "../Admin/pages/Dashboard";
-import AdminLogin from "../Admin/pages/Login";
-import OrderManage from "../Admin/pages/OrderManage";
-import ProductManage from "../Admin/pages/ProductManage";
-import UserManage from "../Admin/pages/UserManage";
+import Categories from "../Admin/pages/Categories/Categories";
+import Dashboard from "../Admin/pages/Dashboard/Dashboard";
+import AdminLogin from "../Admin/pages/LoginAdmin/Login";
+import OrderManage from "../Admin/pages/OrderManage/OrderManage";
+import ProductManage from "../Admin/pages/ProductManage/ProductManage";
+import UserManage from "../Admin/pages/UserManage/UserManage";
+import Revenue from "../Admin/pages/Revenue/Revenue";
+import OrdersReturnPage from "../Admin/pages/OrdersReturnPage/OrdersReturnPage";
 import PrivateRoute from "./PrivateRoute";
-import Revenue from "../Admin/pages/Revenue";
-import OrdersReturnPage from "../Admin/pages/OrdersReturnPage";
 
 const AdminRoutes = () => {
   return (

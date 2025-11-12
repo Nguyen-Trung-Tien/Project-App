@@ -139,7 +139,7 @@ const Profile = () => {
       {loading && <Loading />}
 
       <div
-        className="profile-page py-2"
+        className="profile-page py-3"
         style={{
           background: "linear-gradient(120deg, #e0f7fa 0%, #f1f8ff 100%)",
           minHeight: "90vh",

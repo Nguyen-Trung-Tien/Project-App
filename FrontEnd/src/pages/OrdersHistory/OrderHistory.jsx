@@ -155,7 +155,7 @@ const OrderHistory = () => {
     dateStr ? new Date(dateStr).toLocaleDateString("vi-VN") : "-";
 
   return (
-    <div className="order-history-page py-2">
+    <div className="order-history-page py-3">
       <Container>
         <div className="text-left">
           <Link
