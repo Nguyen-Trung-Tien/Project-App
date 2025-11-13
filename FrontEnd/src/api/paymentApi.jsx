@@ -79,7 +79,7 @@ export const refundPayment = async (id) => {
 
 export const createVnpayPayment = async (data) => {
   try {
-    const res = await API.post("/payment/create-vnpay-payment", data);
+    const res = await API.post("/vnpay/create-vnpay-payment", data);
     const { errCode, errMessage, data: resData } = res.data;
 
     if (errCode === 0 && resData?.paymentUrl) {

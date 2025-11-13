@@ -9,6 +9,8 @@ const OrderItemRouter = require("./OrderItemRouter");
 const PaymentRouter = require("./PaymentRouter");
 const AdminRouter = require("./AdminRoute");
 const ChatRoutes = require("./chatRoutes");
+const VNpayRoutes = require("./VNpayRouter");
+
 const routes = (app) => {
   app.use("/api/v1/user", UserRouter);
   app.use("/api/v1/product", ProductRouter);
@@ -21,5 +23,6 @@ const routes = (app) => {
   app.use("/api/v1/payment", PaymentRouter);
   app.use("/api/v1/admin", AdminRouter);
   app.use("/api/v1/chat", ChatRoutes);
+  app.use("/api/v1/vnpay", VNpayRoutes);
 };
 module.exports = routes;
