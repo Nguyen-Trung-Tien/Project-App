@@ -1,16 +1,31 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
+  Container,
+  Card,
   Table,
   Button,
   Modal,
   Form,
-  Row,
-  Col,
-  Card,
   Image,
   Spinner,
+  Badge,
+  Pagination,
+  Row,
+  Col,
 } from "react-bootstrap";
-import { FiEdit, FiTrash2, FiPlus, FiImage } from "react-icons/fi";
+import {
+  Plus,
+  Pencil,
+  Trash3,
+  Image as ImageIcon,
+  Tag,
+  Calendar3,
+  ExclamationCircle,
+  ChevronLeft,
+  ChevronRight,
+  ChevronDoubleLeft,
+  ChevronDoubleRight,
+} from "react-bootstrap-icons";
 import { toast } from "react-toastify";
 import {
   getAllCategoryApi,
@@ -21,9 +36,9 @@ import {
 import "./Categories.scss";
 
 const Categories = () => {
-  const [fetching, setFetching] = useState(false);
-  const [saving, setSaving] = useState(false);
   const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [editingCategory, setEditingCategory] = useState(null);
   const [formData, setFormData] = useState({
@@ -32,6 +47,11 @@ const Categories = () => {
     image: "",
   });
   const [preview, setPreview] = useState(null);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const limit = 10;
+
+  const tableTopRef = useRef(null);
 
   const generateSlug = (name) => {
     if (!name) return "";
@@ -61,26 +81,37 @@ const Categories = () => {
     return true;
   };
 
-  useEffect(() => {
-    fetchCategories();
-  }, []);
-
   const fetchCategories = async () => {
+    setLoading(true);
     try {
-      setFetching(true);
       const res = await getAllCategoryApi();
       if (res.errCode === 0) {
-        setCategories(res.data || []);
+        const data = res.data || [];
+        setCategories(data);
+        const total = data.length;
+        const calculatedTotalPages = Math.ceil(total / limit) || 1;
+        setTotalPages(calculatedTotalPages);
+        if (page > calculatedTotalPages && calculatedTotalPages > 0) {
+          setPage(calculatedTotalPages);
+        }
       } else {
         toast.error(res.errMessage || "Lỗi tải danh mục");
+        setCategories([]);
+        setTotalPages(1);
       }
     } catch (err) {
       toast.error("Không thể kết nối server");
       console.error(err);
+      setCategories([]);
+      setTotalPages(1);
     } finally {
-      setFetching(false);
+      setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchCategories();
+  }, []);
 
   const handleShowModal = (category = null) => {
     setEditingCategory(category);
@@ -140,15 +171,15 @@ const Categories = () => {
       setSaving(true);
       if (editingCategory) {
         await updateCategoryApi(editingCategory.id, payload);
-        toast.success("Cập nhật thành công");
+        toast.success("Cập nhật danh mục thành công!");
       } else {
         await createCategoryApi(payload);
-        toast.success("Thêm thành công");
+        toast.success("Thêm danh mục thành công!");
       }
       await fetchCategories();
       handleCloseModal();
     } catch (err) {
-      const msg = err.response?.data?.errMessage || "Lỗi khi lưu";
+      const msg = err.response?.data?.errMessage || "Lỗi khi lưu danh mục";
       toast.error(msg);
     } finally {
       setSaving(false);
@@ -157,133 +188,272 @@ const Categories = () => {
 
   const handleDelete = async (id) => {
     if (!window.confirm("Xóa danh mục này? Dữ liệu sẽ mất vĩnh viễn.")) return;
+
     try {
-      setFetching(true);
+      setLoading(true);
       await deleteCategoryApi(id);
-      toast.success("Xóa thành công");
+      toast.success("Xóa danh mục thành công!");
       await fetchCategories();
     } catch (err) {
       console.log(err);
-      toast.error("Không thể xóa (có thể đang có sản phẩm)");
+      toast.error("Không thể xóa (có thể đang có sản phẩm liên kết)");
     } finally {
-      setFetching(false);
+      setLoading(false);
     }
   };
 
+  const handlePageChange = (newPage) => {
+    if (newPage < 1 || newPage > totalPages || newPage === page) return;
+    setPage(newPage);
+    tableTopRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const paginatedCategories = categories.slice(
+    (page - 1) * limit,
+    page * limit
+  );
+
+  const renderPagination = () => {
+    if (totalPages <= 1) return null;
+
+    const items = [];
+    const neighbours = 1;
+    const start = Math.max(1, page - neighbours);
+    const end = Math.min(totalPages, page + neighbours);
+
+    if (start > 1) {
+      items.push(
+        <Pagination.First key="first" onClick={() => handlePageChange(1)}>
+          <ChevronDoubleLeft />
+        </Pagination.First>
+      );
+    }
+    if (page > 1) {
+      items.push(
+        <Pagination.Prev key="prev" onClick={() => handlePageChange(page - 1)}>
+          <ChevronLeft />
+        </Pagination.Prev>
+      );
+    }
+
+    for (let i = start; i <= end; i++) {
+      items.push(
+        <Pagination.Item
+          key={i}
+          active={i === page}
+          onClick={() => handlePageChange(i)}
+        >
+          {i}
+        </Pagination.Item>
+      );
+    }
+
+    if (page < totalPages) {
+      items.push(
+        <Pagination.Next key="next" onClick={() => handlePageChange(page + 1)}>
+          <ChevronRight />
+        </Pagination.Next>
+      );
+    }
+    if (end < totalPages) {
+      items.push(
+        <Pagination.Last
+          key="last"
+          onClick={() => handlePageChange(totalPages)}
+        >
+          <ChevronDoubleRight />
+        </Pagination.Last>
+      );
+    }
+
+    return (
+      <Pagination className="justify-content-center mt-4">{items}</Pagination>
+    );
+  };
+
   return (
-    <div className="categories-container p-4">
-      <div className="d-flex justify-content-between align-items-center mb-3">
-        <h3 className="fw-bold mb-0">📂 Quản lý danh mục</h3>
-        <Button variant="primary" onClick={() => handleShowModal()}>
-          <FiPlus className="me-1" /> Thêm danh mục
+    <Container className="py-4 categories-page">
+      <div className="d-flex align-items-center justify-content-between mb-4">
+        <h3 className="m-0 d-flex align-items-center gap-2">
+          <Tag className="text-primary" /> Quản lý danh mục
+        </h3>
+        <Button
+          variant="success"
+          onClick={() => handleShowModal()}
+          className="d-flex align-items-center gap-1"
+        >
+          <Plus /> Thêm danh mục
         </Button>
       </div>
-      <Card className="shadow-sm border-0 rounded-4">
+
+      <Card className="shadow-sm border-0">
         <Card.Body>
-          <Table striped bordered hover responsive>
-            <thead className="table-light">
-              <tr>
-                <th>ID</th>
-                <th>Hình ảnh</th>
-                <th>Tên</th>
-                <th>Slug</th>
-                <th>Mô tả</th>
-                <th>Ngày tạo</th>
-                <th>Hành động</th>
-              </tr>
-            </thead>
-            <tbody>
-              {fetching ? (
+          <Row className="mb-3">
+            <Col className="text-end">
+              <Badge bg="info" className="fs-6">
+                {categories.length} danh mục
+              </Badge>
+            </Col>
+          </Row>
+
+          <div ref={tableTopRef}>
+            <Table
+              striped
+              bordered
+              hover
+              responsive
+              className="align-middle text-center"
+            >
+              <thead className="table-light">
                 <tr>
-                  <td colSpan="7" className="text-center py-5">
-                    <Spinner animation="border" variant="primary" />
-                  </td>
+                  <th>ID</th>
+                  <th>
+                    <ImageIcon className="me-1" /> Hình ảnh
+                  </th>
+                  <th>Tên danh mục</th>
+                  <th>Slug</th>
+                  <th>Mô tả</th>
+                  <th>
+                    <Calendar3 className="me-1" /> Ngày tạo
+                  </th>
+                  <th>Hành động</th>
                 </tr>
-              ) : categories.length > 0 ? (
-                categories.map((cat) => (
-                  <tr key={cat.id}>
-                    <td>{cat.id}</td>
-                    <td>
-                      {cat.image ? (
-                        <Image
-                          src={`data:image/jpeg;base64,${cat.image}`}
-                          alt={cat.name}
-                          rounded
-                          style={{ width: 50, height: 50, objectFit: "cover" }}
-                        />
-                      ) : (
-                        <span className="text-muted fst-italic">
-                          Không có ảnh
-                        </span>
-                      )}
-                    </td>
-                    <td className="fw-semibold text-primary">{cat.name}</td>
-                    <td>{cat.slug || "—"}</td>
-                    <td>{cat.description || "—"}</td>
-                    <td>
-                      {new Date(cat.createdAt).toLocaleDateString("vi-VN")}
-                    </td>
-                    <td>
-                      <Button
-                        variant="outline-warning"
-                        size="sm"
-                        className="me-2"
-                        onClick={() => handleShowModal(cat)}
-                        title="Chỉnh sửa"
-                      >
-                        <FiEdit />
-                      </Button>
-                      <Button
-                        variant="outline-danger"
-                        size="sm"
-                        onClick={() => handleDelete(cat.id)}
-                        title="Xóa"
-                      >
-                        <FiTrash2 />
-                      </Button>
+              </thead>
+              <tbody>
+                {loading ? (
+                  <tr>
+                    <td colSpan="7" className="text-center py-5">
+                      <Spinner animation="border" variant="primary" />
                     </td>
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="7" className="text-center text-muted py-4">
-                    Chưa có danh mục nào
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </Table>
+                ) : categories.length === 0 ? (
+                  <tr>
+                    <td colSpan="7" className="text-center text-muted py-4">
+                      <ExclamationCircle className="me-2" />
+                      Chưa có danh mục nào
+                    </td>
+                  </tr>
+                ) : (
+                  paginatedCategories.map((cat) => (
+                    <tr key={cat.id}>
+                      <td>
+                        <strong>#{cat.id}</strong>
+                      </td>
+                      <td>
+                        {cat.image ? (
+                          <Image
+                            src={`data:image/jpeg;base64,${cat.image}`}
+                            alt={cat.name}
+                            rounded
+                            style={{
+                              width: 50,
+                              height: 50,
+                              objectFit: "cover",
+                            }}
+                          />
+                        ) : (
+                          <div
+                            className="bg-light border rounded d-flex align-items-center justify-content-center"
+                            style={{ width: 50, height: 50 }}
+                          >
+                            <ImageIcon size={20} className="text-muted" />
+                          </div>
+                        )}
+                      </td>
+                      <td className="fw-semibold text-primary">{cat.name}</td>
+                      <td>
+                        <code className="text-success small">
+                          {cat.slug || "—"}
+                        </code>
+                      </td>
+                      <td className="text-start">
+                        {cat.description ? (
+                          <span
+                            style={{
+                              display: "-webkit-box",
+                              WebkitLineClamp: 2,
+                              WebkitBoxOrient: "vertical",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                            }}
+                            title={cat.description}
+                          >
+                            {cat.description}
+                          </span>
+                        ) : (
+                          "—"
+                        )}
+                      </td>
+                      <td>
+                        {new Date(cat.createdAt).toLocaleDateString("vi-VN")}
+                      </td>
+                      <td>
+                        <div className="d-flex gap-1 justify-content-center">
+                          <Button
+                            size="sm"
+                            variant="outline-warning"
+                            onClick={() => handleShowModal(cat)}
+                            title="Chỉnh sửa"
+                            className="d-flex align-items-center"
+                          >
+                            <Pencil size={14} />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline-danger"
+                            onClick={() => handleDelete(cat.id)}
+                            title="Xóa"
+                            className="d-flex align-items-center"
+                          >
+                            <Trash3 size={14} />
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </Table>
+          </div>
+
+          {renderPagination()}
         </Card.Body>
       </Card>
 
-      {/* Modal */}
-      <Modal show={showModal} onHide={handleCloseModal} centered>
+      <Modal
+        show={showModal}
+        onHide={handleCloseModal}
+        size="lg"
+        centered
+        backdrop="static"
+      >
         <Modal.Header closeButton>
-          <Modal.Title>
+          <Modal.Title className="d-flex align-items-center gap-2">
+            <Tag className="text-primary" />
             {editingCategory ? "Chỉnh sửa danh mục" : "Thêm danh mục mới"}
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form>
-            <Row className="mb-3">
-              <Col>
-                <Form.Label>Tên danh mục *</Form.Label>
+            <Row className="g-3">
+              <Col md={6}>
+                <Form.Label>
+                  Tên danh mục <span className="text-danger">*</span>
+                </Form.Label>
                 <Form.Control
                   type="text"
                   value={formData.name}
                   onChange={(e) =>
                     setFormData({ ...formData, name: e.target.value })
                   }
-                  placeholder="Nhập tên..."
+                  placeholder="Ví dụ: Điện thoại, Laptop..."
                 />
-                <Form.Text className="text-muted d-block mt-1">
+                <Form.Text className="text-muted">
                   Slug: <strong>{generateSlug(formData.name) || "—"}</strong>
                 </Form.Text>
               </Col>
-            </Row>
 
-            <Row className="mb-3">
-              <Col>
+              <Col md={6}>
                 <Form.Label>Mô tả</Form.Label>
                 <Form.Control
                   as="textarea"
@@ -292,15 +462,13 @@ const Categories = () => {
                   onChange={(e) =>
                     setFormData({ ...formData, description: e.target.value })
                   }
-                  placeholder="Mô tả ngắn gọn..."
+                  placeholder="Mô tả ngắn gọn về danh mục..."
                 />
               </Col>
-            </Row>
 
-            <Row>
-              <Col>
+              <Col md={12}>
                 <Form.Label>
-                  <FiImage className="me-2" /> Ảnh danh mục
+                  <ImageIcon className="me-1" /> Ảnh danh mục
                 </Form.Label>
                 <Form.Control
                   type="file"
@@ -314,10 +482,10 @@ const Categories = () => {
                       alt="Preview"
                       rounded
                       style={{
-                        width: 100,
-                        height: 100,
+                        maxWidth: 120,
+                        maxHeight: 120,
                         objectFit: "cover",
-                        border: "1px solid #ddd",
+                        border: "2px solid #4361ee",
                       }}
                     />
                   </div>
@@ -326,7 +494,6 @@ const Categories = () => {
             </Row>
           </Form>
         </Modal.Body>
-
         <Modal.Footer>
           <Button
             variant="secondary"
@@ -335,19 +502,25 @@ const Categories = () => {
           >
             Hủy
           </Button>
-          <Button variant="primary" onClick={handleSave} disabled={saving}>
+          <Button
+            variant="primary"
+            onClick={handleSave}
+            disabled={saving}
+            className="d-flex align-items-center gap-1"
+          >
             {saving ? (
               <>
-                <Spinner size="sm" className="me-2" />
-                Đang lưu...
+                <Spinner animation="border" size="sm" /> Đang lưu...
               </>
             ) : (
-              "Lưu"
+              <>
+                <Tag /> Lưu danh mục
+              </>
             )}
           </Button>
         </Modal.Footer>
       </Modal>
-    </div>
+    </Container>
   );
 };
 

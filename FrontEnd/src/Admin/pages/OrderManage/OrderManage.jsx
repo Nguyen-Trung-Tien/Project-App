@@ -24,14 +24,12 @@ import {
   Truck,
   CheckCircleFill,
   XCircleFill,
-  ClockFill,
   ArrowCounterclockwise,
   CurrencyDollar,
   PersonFill,
   Calendar3,
   GeoAltFill,
   InfoCircle,
-  ArrowRepeat,
   ExclamationTriangleFill,
 } from "react-bootstrap-icons";
 import { useNavigate } from "react-router-dom";

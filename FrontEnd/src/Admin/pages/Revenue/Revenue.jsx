@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import {
   Container,
   Row,
@@ -10,18 +10,22 @@ import {
   Form,
   Button,
   InputGroup,
+  Pagination,
 } from "react-bootstrap";
 import {
   BarChart,
   PieChart,
   GraphUp,
   BoxSeam,
-  Calendar3,
   Funnel,
   ArrowClockwise,
   CurrencyDollar,
   Cart,
   People,
+  ChevronLeft,
+  ChevronRight,
+  ChevronDoubleLeft,
+  ChevronDoubleRight,
 } from "react-bootstrap-icons";
 import {
   CartesianGrid,
@@ -33,7 +37,6 @@ import {
   PieChart as RechartsPieChart,
   Pie,
   Cell,
-  Legend,
   ResponsiveContainer,
 } from "recharts";
 import "./Revenue.scss";
@@ -68,6 +71,11 @@ const Revenue = () => {
   const [ordersByStatus, setOrdersByStatus] = useState([]);
   const [dateFilter, setDateFilter] = useState("7days");
   const [searchTerm, setSearchTerm] = useState("");
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const limit = 10;
+
+  const tableTopRef = useRef(null);
 
   const formatCurrency = (value) =>
     new Intl.NumberFormat("vi-VN", {
@@ -92,7 +100,6 @@ const Revenue = () => {
         setOrders(orderList);
       }
 
-      // Ưu tiên dashboard từ backend
       if (dashboardRes?.errCode === 0 && Array.isArray(dashboardRes.data)) {
         const backendData = dashboardRes.data.map((item) => ({
           name: item.day || item.date || "N/A",
@@ -114,7 +121,6 @@ const Revenue = () => {
         setRevenueData(revenueArray);
       }
 
-      // Top 5 sản phẩm
       if (orderItemsRes?.errCode === 0 && Array.isArray(orderItemsRes.data)) {
         const items = orderItemsRes.data;
         const productMap = {};
@@ -129,7 +135,6 @@ const Revenue = () => {
         setProductsData(productArray);
       }
 
-      // Đơn hàng theo trạng thái
       const statusMap = {};
       orderList.forEach((order) => {
         const status = order.status || "unknown";
@@ -188,6 +193,86 @@ const Revenue = () => {
     return { totalRevenue, totalOrders, avgOrderValue, deliveredCount };
   }, [filteredOrders]);
 
+  useEffect(() => {
+    const total = filteredOrders.length;
+    const calculatedTotalPages = Math.ceil(total / limit) || 1;
+    setTotalPages(calculatedTotalPages);
+
+    if (page > calculatedTotalPages) {
+      setPage(1);
+    }
+  }, [filteredOrders, limit, page]);
+
+  const handlePageChange = (newPage) => {
+    if (newPage < 1 || newPage > totalPages || newPage === page) return;
+    setPage(newPage);
+    tableTopRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const paginatedOrders = useMemo(() => {
+    const start = (page - 1) * limit;
+    const end = start + limit;
+    return filteredOrders.slice(start, end);
+  }, [filteredOrders, page, limit]);
+
+  const renderPagination = () => {
+    if (totalPages <= 1) return null;
+
+    const items = [];
+    const pageNeighbours = 1;
+    const startPage = Math.max(1, page - pageNeighbours);
+    const endPage = Math.min(totalPages, page + pageNeighbours);
+
+    if (startPage > 1) {
+      items.push(
+        <Pagination.First key="first" onClick={() => handlePageChange(1)}>
+          <ChevronDoubleLeft />
+        </Pagination.First>
+      );
+    }
+    if (page > 1) {
+      items.push(
+        <Pagination.Prev key="prev" onClick={() => handlePageChange(page - 1)}>
+          <ChevronLeft />
+        </Pagination.Prev>
+      );
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      items.push(
+        <Pagination.Item
+          key={i}
+          active={i === page}
+          onClick={() => handlePageChange(i)}
+        >
+          {i}
+        </Pagination.Item>
+      );
+    }
+
+    if (page < totalPages) {
+      items.push(
+        <Pagination.Next key="next" onClick={() => handlePageChange(page + 1)}>
+          <ChevronRight />
+        </Pagination.Next>
+      );
+    }
+    if (endPage < totalPages) {
+      items.push(
+        <Pagination.Last
+          key="last"
+          onClick={() => handlePageChange(totalPages)}
+        >
+          <ChevronDoubleRight />
+        </Pagination.Last>
+      );
+    }
+
+    return (
+      <Pagination className="justify-content-center mt-3">{items}</Pagination>
+    );
+  };
+
   return (
     <div className="revenue-page">
       <Container fluid className="p-4">
@@ -205,7 +290,6 @@ const Revenue = () => {
           </Button>
         </div>
 
-        {/* Stats Cards */}
         <Row className="mb-4 g-3">
           <Col md={3}>
             <Card className="stat-card border-0 shadow-sm h-100">
@@ -263,10 +347,10 @@ const Revenue = () => {
           </Col>
         </Row>
 
-        {/* Filters */}
+        {/* Filter */}
         <Card className="mb-4 shadow-sm">
           <Card.Body>
-            <Row className="align-items-center">
+            <Row className="align-items-center g-3">
               <Col md={4}>
                 <InputGroup size="sm">
                   <InputGroup.Text>
@@ -274,7 +358,10 @@ const Revenue = () => {
                   </InputGroup.Text>
                   <Form.Select
                     value={dateFilter}
-                    onChange={(e) => setDateFilter(e.target.value)}
+                    onChange={(e) => {
+                      setDateFilter(e.target.value);
+                      setPage(1);
+                    }}
                   >
                     <option value="7days">7 ngày gần nhất</option>
                     <option value="30days">30 ngày gần nhất</option>
@@ -288,7 +375,10 @@ const Revenue = () => {
                   <Form.Control
                     placeholder="Mã đơn, khách hàng..."
                     value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
+                    onChange={(e) => {
+                      setSearchTerm(e.target.value);
+                      setPage(1);
+                    }}
                   />
                 </InputGroup>
               </Col>
@@ -382,60 +472,67 @@ const Revenue = () => {
             <h5 className="d-flex align-items-center gap-2 mb-3">
               <BoxSeam className="text-info" /> Danh sách đơn hàng
             </h5>
-            <div className="table-responsive">
-              <Table striped bordered hover>
-                <thead className="table-light">
-                  <tr>
-                    <th>#</th>
-                    <th>Mã đơn</th>
-                    <th>Khách hàng</th>
-                    <th>Ngày</th>
-                    <th>Tổng tiền</th>
-                    <th>Trạng thái</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {loading ? (
+            <div ref={tableTopRef}>
+              <div className="table-responsive">
+                <Table striped bordered hover>
+                  <thead className="table-light">
                     <tr>
-                      <td colSpan="6" className="text-center py-5">
-                        <Spinner animation="border" />
-                      </td>
+                      <th>#</th>
+                      <th>Mã đơn</th>
+                      <th>Khách hàng</th>
+                      <th>Ngày</th>
+                      <th>Tổng tiền</th>
+                      <th>Trạng thái</th>
                     </tr>
-                  ) : filteredOrders.length === 0 ? (
-                    <tr>
-                      <td colSpan="6" className="text-center text-muted py-4">
-                        Không có đơn hàng
-                      </td>
-                    </tr>
-                  ) : (
-                    filteredOrders.slice(0, 10).map((order, idx) => (
-                      <tr key={order.id}>
-                        <td>{idx + 1}</td>
-                        <td>
-                          <strong>DH{order.id}</strong>
-                        </td>
-                        <td>{order.user?.username || "Ẩn danh"}</td>
-                        <td>
-                          {new Date(order.createdAt).toLocaleDateString(
-                            "vi-VN"
-                          )}
-                        </td>
-                        <td className="fw-bold text-danger">
-                          {formatCurrency(order.totalPrice)}
-                        </td>
-                        <td>
-                          <Badge
-                            bg={STATUS_COLORS[order.status] || "secondary"}
-                            className="px-3 py-2 rounded-pill text-uppercase"
-                          >
-                            {STATUS_LABELS[order.status] || "N/A"}
-                          </Badge>
+                  </thead>
+                  <tbody>
+                    {loading ? (
+                      <tr>
+                        <td colSpan="6" className="text-center py-5">
+                          <Spinner animation="border" />
                         </td>
                       </tr>
-                    ))
-                  )}
-                </tbody>
-              </Table>
+                    ) : paginatedOrders.length === 0 ? (
+                      <tr>
+                        <td colSpan="6" className="text-center text-muted py-4">
+                          Không có đơn hàng
+                        </td>
+                      </tr>
+                    ) : (
+                      paginatedOrders.map((order, idx) => {
+                        const displayIndex = (page - 1) * limit + idx + 1;
+                        return (
+                          <tr key={order.id}>
+                            <td>{displayIndex}</td>
+                            <td>
+                              <strong>DH{order.id}</strong>
+                            </td>
+                            <td>{order.user?.username || "Ẩn danh"}</td>
+                            <td>
+                              {new Date(order.createdAt).toLocaleDateString(
+                                "vi-VN"
+                              )}
+                            </td>
+                            <td className="fw-bold text-danger">
+                              {formatCurrency(order.totalPrice)}
+                            </td>
+                            <td>
+                              <Badge
+                                bg={STATUS_COLORS[order.status] || "secondary"}
+                                className="px-3 py-2 rounded-pill text-uppercase"
+                              >
+                                {STATUS_LABELS[order.status] || "N/A"}
+                              </Badge>
+                            </td>
+                          </tr>
+                        );
+                      })
+                    )}
+                  </tbody>
+                </Table>
+              </div>
+
+              {renderPagination()}
             </div>
           </Card.Body>
         </Card>

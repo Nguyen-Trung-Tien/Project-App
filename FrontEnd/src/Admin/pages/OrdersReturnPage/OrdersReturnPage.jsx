@@ -8,14 +8,11 @@ import {
   Card,
   Spinner,
   Pagination,
-  InputGroup,
-  Form,
   Row,
   Col,
 } from "react-bootstrap";
 import {
   ArrowLeft,
-  Search,
   CheckCircleFill,
   XCircleFill,
   ExclamationTriangleFill,
@@ -41,26 +38,37 @@ const OrdersReturnPage = () => {
   const [loadingAction, setLoadingAction] = useState(false);
   const [modalShow, setModalShow] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
-  const [searchTerm, setSearchTerm] = useState("");
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const limit = 10;
 
   const navigate = useNavigate();
-  const searchTimeoutRef = useRef(null);
   const tableTopRef = useRef(null);
 
-  const fetchOrders = async (currentPage = 1, search = "") => {
+  const fetchOrders = async (currentPage = 1) => {
     setLoading(true);
     try {
-      const res = await getAllOrders(currentPage, limit, search.trim());
+      const res = await getAllOrders(currentPage, limit);
       if (res.errCode === 0) {
-        const filtered = (res.data || []).filter((o) =>
-          o.orderItems?.some((i) => i.returnStatus === "requested")
+        const allOrders = res.data || [];
+
+        const filteredOrders = allOrders.filter((order) =>
+          order.orderItems?.some((item) => item.returnStatus === "requested")
         );
-        setOrders(filtered);
-        setPage(res.pagination?.currentPage || currentPage);
-        setTotalPages(res.pagination?.totalPages || 1);
+
+        setOrders(filteredOrders);
+
+        const totalFiltered = filteredOrders.length;
+        const calculatedTotalPages = Math.ceil(totalFiltered / limit) || 1;
+
+        setTotalPages(calculatedTotalPages);
+
+        if (currentPage > calculatedTotalPages && calculatedTotalPages > 0) {
+          setPage(calculatedTotalPages);
+          setTimeout(() => fetchOrders(calculatedTotalPages), 0);
+        } else {
+          setPage(currentPage);
+        }
       } else {
         toast.error(res.errMessage || "Lỗi tải dữ liệu");
         setOrders([]);
@@ -70,6 +78,7 @@ const OrdersReturnPage = () => {
       console.error(err);
       toast.error("Lỗi kết nối server");
       setOrders([]);
+      setTotalPages(1);
     } finally {
       setLoading(false);
       tableTopRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -80,14 +89,11 @@ const OrdersReturnPage = () => {
     fetchOrders(1);
   }, []);
 
-  useEffect(() => {
-    if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
-    searchTimeoutRef.current = setTimeout(() => {
-      setPage(1);
-      fetchOrders(1, searchTerm);
-    }, 600);
-    return () => clearTimeout(searchTimeoutRef.current);
-  }, [searchTerm]);
+  const handlePageChange = (newPage) => {
+    if (newPage < 1 || newPage > totalPages || newPage === page) return;
+    setPage(newPage);
+    fetchOrders(newPage);
+  };
 
   const handleProcessReturn = async (orderId, status) => {
     if (!selectedOrder) return;
@@ -106,7 +112,8 @@ const OrdersReturnPage = () => {
           ? "Đã duyệt trả hàng!"
           : "Đã từ chối yêu cầu trả hàng!"
       );
-      await fetchOrders(page, searchTerm);
+
+      await fetchOrders(page);
       setModalShow(false);
     } catch (err) {
       console.error(err);
@@ -120,61 +127,59 @@ const OrdersReturnPage = () => {
     value ? Number(value).toLocaleString("vi-VN") + " ₫" : "0 ₫";
 
   const renderPagination = () => {
-    if (totalPages <= 1) return null;
+    if (orders.length === 0 || totalPages <= 1) return null;
+
     const items = [];
-    const pageNeighbours = 2;
+    const pageNeighbours = 1;
     const startPage = Math.max(1, page - pageNeighbours);
     const endPage = Math.min(totalPages, page + pageNeighbours);
 
-    if (startPage > 1)
+    if (startPage > 1) {
       items.push(
-        <Pagination.First
-          key="first"
-          onClick={() => fetchOrders(1, searchTerm)}
-        >
+        <Pagination.First key="first" onClick={() => handlePageChange(1)}>
           <ChevronDoubleLeft />
         </Pagination.First>
       );
-    if (page > 1)
+    }
+
+    if (page > 1) {
       items.push(
-        <Pagination.Prev
-          key="prev"
-          onClick={() => fetchOrders(page - 1, searchTerm)}
-        >
+        <Pagination.Prev key="prev" onClick={() => handlePageChange(page - 1)}>
           <ChevronLeft />
         </Pagination.Prev>
       );
+    }
 
     for (let i = startPage; i <= endPage; i++) {
       items.push(
         <Pagination.Item
           key={i}
           active={i === page}
-          onClick={() => fetchOrders(i, searchTerm)}
+          onClick={() => handlePageChange(i)}
         >
           {i}
         </Pagination.Item>
       );
     }
 
-    if (page < totalPages)
+    if (page < totalPages) {
       items.push(
-        <Pagination.Next
-          key="next"
-          onClick={() => fetchOrders(page + 1, searchTerm)}
-        >
+        <Pagination.Next key="next" onClick={() => handlePageChange(page + 1)}>
           <ChevronRight />
         </Pagination.Next>
       );
-    if (endPage < totalPages)
+    }
+
+    if (endPage < totalPages) {
       items.push(
         <Pagination.Last
           key="last"
-          onClick={() => fetchOrders(totalPages, searchTerm)}
+          onClick={() => handlePageChange(totalPages)}
         >
           <ChevronDoubleRight />
         </Pagination.Last>
       );
+    }
 
     return (
       <Pagination className="justify-content-center mt-4">{items}</Pagination>
@@ -198,20 +203,8 @@ const OrdersReturnPage = () => {
 
       <Card className="shadow-sm">
         <Card.Body>
-          <Row className="align-items-center mb-3">
-            <Col md={6}>
-              <InputGroup>
-                <InputGroup.Text>
-                  <Search size={16} />
-                </InputGroup.Text>
-                <Form.Control
-                  placeholder="Tìm theo mã đơn, tên khách..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </InputGroup>
-            </Col>
-            <Col md={6} className="text-end">
+          <Row className="mb-3">
+            <Col className="text-end">
               <Badge bg="warning" className="fs-6">
                 {orders.length} yêu cầu trả hàng
               </Badge>
@@ -230,21 +223,17 @@ const OrdersReturnPage = () => {
                 <tr>
                   <th>Mã đơn</th>
                   <th>
-                    <PersonFill className="me-1" />
-                    Khách hàng
+                    <PersonFill className="me-1" /> Khách hàng
                   </th>
                   <th>
-                    <Calendar3 className="me-1" />
-                    Ngày đặt
+                    <Calendar3 className="me-1" /> Ngày đặt
                   </th>
                   <th>
-                    <CurrencyDollar className="me-1" />
-                    Tổng tiền
+                    <CurrencyDollar className="me-1" /> Tổng tiền
                   </th>
                   <th>Trạng thái</th>
                   <th>
-                    <ExclamationTriangleFill className="me-1" />
-                    Yêu cầu
+                    <ExclamationTriangleFill className="me-1" /> Yêu cầu
                   </th>
                   <th>Hành động</th>
                 </tr>
@@ -322,7 +311,6 @@ const OrdersReturnPage = () => {
         </Card.Body>
       </Card>
 
-      {/* Modal Xử lý trả hàng */}
       <Modal
         show={modalShow}
         onHide={() => setModalShow(false)}
