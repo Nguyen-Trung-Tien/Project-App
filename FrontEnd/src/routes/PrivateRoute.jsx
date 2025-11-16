@@ -54,7 +54,7 @@ const PrivateRoute = ({ requiredRole }) => {
   if (!valid) {
     return (
       <Navigate
-        to={requiredRole === "admin" ? "/admin/login-admin" : "/login"}
+        to={requiredRole === "admin" ? "/admin/login" : "/login"}
         replace
       />
     );

@@ -50,7 +50,7 @@ const HeaderAdmin = () => {
       localStorage.removeItem("user");
       dispatch(removeUser());
       dispatch(clearCart());
-      navigate("/admin/login-admin", { replace: true });
+      navigate("/admin/login", { replace: true });
     } catch (err) {
       console.error("Logout error:", err);
     } finally {

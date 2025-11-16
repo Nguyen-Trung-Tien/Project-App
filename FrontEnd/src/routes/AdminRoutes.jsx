@@ -13,7 +13,7 @@ import PrivateRoute from "./PrivateRoute";
 const AdminRoutes = () => {
   return (
     <Routes>
-      <Route path="login-admin" element={<AdminLogin />} />
+      <Route path="login" element={<AdminLogin />} />
 
       <Route element={<PrivateRoute requiredRole="admin" />}>
         <Route element={<AdminLayout />}>
