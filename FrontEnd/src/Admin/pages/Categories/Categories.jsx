@@ -51,6 +51,10 @@ const Categories = () => {
   const [totalPages, setTotalPages] = useState(1);
   const limit = 10;
 
+  // Modal xóa
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deletingCategory, setDeletingCategory] = useState(null);
+
   const tableTopRef = useRef(null);
 
   const generateSlug = (name) => {
@@ -186,19 +190,33 @@ const Categories = () => {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm("Xóa danh mục này? Dữ liệu sẽ mất vĩnh viễn.")) return;
+  // Mở modal xóa
+  const handleShowDeleteModal = (category) => {
+    setDeletingCategory(category);
+    setShowDeleteModal(true);
+  };
+
+  // Đóng modal xóa
+  const handleCloseDeleteModal = () => {
+    setDeletingCategory(null);
+    setShowDeleteModal(false);
+  };
+
+  // Xác nhận xóa
+  const confirmDelete = async () => {
+    if (!deletingCategory) return;
 
     try {
       setLoading(true);
-      await deleteCategoryApi(id);
+      await deleteCategoryApi(deletingCategory.id);
       toast.success("Xóa danh mục thành công!");
       await fetchCategories();
     } catch (err) {
-      console.log(err);
+      console.error(err);
       toast.error("Không thể xóa (có thể đang có sản phẩm liên kết)");
     } finally {
       setLoading(false);
+      handleCloseDeleteModal();
     }
   };
 
@@ -401,7 +419,7 @@ const Categories = () => {
                           <Button
                             size="sm"
                             variant="outline-danger"
-                            onClick={() => handleDelete(cat.id)}
+                            onClick={() => handleShowDeleteModal(cat)}
                             title="Xóa"
                             className="d-flex align-items-center"
                           >
@@ -420,6 +438,7 @@ const Categories = () => {
         </Card.Body>
       </Card>
 
+      {/* Modal Thêm / Sửa */}
       <Modal
         show={showModal}
         onHide={handleCloseModal}
@@ -517,6 +536,29 @@ const Categories = () => {
                 <Tag /> Lưu danh mục
               </>
             )}
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      <Modal
+        show={showDeleteModal}
+        onHide={handleCloseDeleteModal}
+        centered
+        backdrop="static"
+      >
+        <Modal.Header closeButton className="bg-warning text-dark">
+          <Modal.Title>Xác nhận xóa</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          Bạn có chắc chắn muốn xóa danh mục{" "}
+          <strong>{deletingCategory?.name}</strong>? Dữ liệu sẽ mất vĩnh viễn.
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleCloseDeleteModal}>
+            Hủy
+          </Button>
+          <Button variant="danger" onClick={confirmDelete}>
+            Xóa
           </Button>
         </Modal.Footer>
       </Modal>

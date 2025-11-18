@@ -1,12 +1,30 @@
-require("dotenv").config();
 const PaymentService = require("../services/PaymentService");
 
 const handleGetAllPayments = async (req, res) => {
   try {
-    const result = await PaymentService.getAllPayments();
+    const {
+      page = 1,
+      limit = 10,
+      status,
+      search,
+      orderBy = "createdAt",
+      order = "DESC",
+    } = req.query;
+
+    const statusFilter = status === "all" ? null : status;
+
+    const result = await PaymentService.getAllPayments({
+      page: parseInt(page),
+      limit: parseInt(limit),
+      status: statusFilter,
+      search: search?.trim() || "",
+      orderBy,
+      order: order.toUpperCase(),
+    });
+
     return res.status(200).json(result);
   } catch (e) {
-    console.error(e);
+    console.error("handleGetAllPayments error:", e);
     return res.status(500).json({
       errCode: -1,
       errMessage: "Internal server error",
@@ -85,10 +103,8 @@ const handleCompletePayment = async (req, res) => {
 
 const handleRefundPayment = async (req, res) => {
   try {
-    const result = await PaymentService.refundPayment(
-      req.params.id,
-      req.body.note
-    );
+    const note = req.body?.note || "";
+    const result = await PaymentService.refundPayment(req.params.id, note);
     return res.status(200).json(result);
   } catch (e) {
     console.error(e);

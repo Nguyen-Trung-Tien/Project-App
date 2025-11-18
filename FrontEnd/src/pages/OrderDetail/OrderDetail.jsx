@@ -59,6 +59,8 @@ const OrderDetail = () => {
         return 75;
       case "delivered":
         return 100;
+      case "cancelled":
+        return 100;
       default:
         return 0;
     }
@@ -88,6 +90,9 @@ const OrderDetail = () => {
     }
     if (status?.toLowerCase() === "unpaid") {
       return <Badge bg="danger">Chưa thanh toán</Badge>;
+    }
+    if (status?.toLowerCase() === "refunded") {
+      return <Badge bg="warning">Đã hoàn tiền</Badge>;
     }
     return <Badge bg="secondary">Đang xử lý</Badge>;
   };

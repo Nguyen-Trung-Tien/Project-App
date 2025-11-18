@@ -67,20 +67,25 @@ const ProductManage = () => {
   const [loadingTable, setLoadingTable] = useState(false);
   const [loadingModal, setLoadingModal] = useState(false);
 
+  const [confirmModal, setConfirmModal] = useState({
+    show: false,
+    productId: null,
+  });
+
   const searchTimeoutRef = useRef(null);
   const tableTopRef = useRef(null);
 
+  // Fetch categories
   const fetchCategories = async () => {
     try {
       const res = await getAllCategoryApi();
-      if (res.errCode === 0 && Array.isArray(res.data)) {
-        setCategories(res.data);
-      }
+      if (res.errCode === 0 && Array.isArray(res.data)) setCategories(res.data);
     } catch (err) {
       console.error("Fetch categories error:", err);
     }
   };
 
+  // Fetch products
   const fetchProducts = async (currentPage = 1, search = "") => {
     setLoadingTable(true);
     try {
@@ -95,7 +100,7 @@ const ProductManage = () => {
         setPage(1);
       }
     } catch (err) {
-      console.error("Fetch products error:", err);
+      console.error(err);
       toast.error("Lỗi tải dữ liệu");
       setProducts([]);
       setTotalPages(1);
@@ -111,6 +116,7 @@ const ProductManage = () => {
     fetchProducts(1);
   }, []);
 
+  // Search debounce
   useEffect(() => {
     if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
     searchTimeoutRef.current = setTimeout(() => {
@@ -120,6 +126,7 @@ const ProductManage = () => {
     return () => clearTimeout(searchTimeoutRef.current);
   }, [searchTerm]);
 
+  // Modal show/hide
   const handleShowModal = (product = null) => {
     if (product) {
       setFormData({
@@ -152,7 +159,6 @@ const ProductManage = () => {
     }
     setShowModal(true);
   };
-
   const handleCloseModal = () => {
     setShowModal(false);
     setEditProduct(null);
@@ -171,6 +177,7 @@ const ProductManage = () => {
     }
   };
 
+  // Save product
   const handleSave = async (e) => {
     e.preventDefault();
     if (!formData.name || !formData.price || !formData.categoryId) {
@@ -215,10 +222,15 @@ const ProductManage = () => {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm("Bạn có chắc muốn xóa sản phẩm này?")) return;
+  // Xóa sản phẩm với Modal confirm
+  const handleDeleteClick = (id) => {
+    setConfirmModal({ show: true, productId: id });
+  };
+  const handleConfirmDelete = async () => {
+    const { productId } = confirmModal;
+    if (!productId) return;
     try {
-      const res = await deleteProductApi(id);
+      const res = await deleteProductApi(productId);
       if (res.errCode === 0) {
         toast.success("Đã xóa sản phẩm!");
         const newPage = products.length === 1 && page > 1 ? page - 1 : page;
@@ -227,11 +239,14 @@ const ProductManage = () => {
         toast.error(res.errMessage || "Không thể xóa");
       }
     } catch (err) {
-      console.log(err);
+      console.error(err);
       toast.error("Lỗi xóa sản phẩm");
+    } finally {
+      setConfirmModal({ show: false, productId: null });
     }
   };
 
+  // Pagination
   const renderPagination = () => {
     if (totalPages <= 1) return null;
 
@@ -305,6 +320,7 @@ const ProductManage = () => {
 
       <Card className="shadow-sm">
         <Card.Body>
+          {/* Search + Add */}
           <Row className="align-items-center mb-3">
             <Col md={6}>
               <InputGroup>
@@ -325,6 +341,7 @@ const ProductManage = () => {
             </Col>
           </Row>
 
+          {/* Table */}
           <div ref={tableTopRef}>
             <Table
               bordered
@@ -400,7 +417,7 @@ const ProductManage = () => {
                         <Button
                           variant="outline-danger"
                           size="sm"
-                          onClick={() => handleDelete(p.id)}
+                          onClick={() => handleDeleteClick(p.id)}
                           title="Xóa"
                         >
                           <Trash3 size={14} />
@@ -423,7 +440,7 @@ const ProductManage = () => {
         </Card.Body>
       </Card>
 
-      {/* Modal */}
+      {/* Modal Thêm/Sửa */}
       <Modal
         show={showModal}
         onHide={handleCloseModal}
@@ -446,8 +463,10 @@ const ProductManage = () => {
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
+          {/* Form */}
           <Form onSubmit={handleSave}>
             <Row>
+              {/* Left */}
               <Col md={6}>
                 <Form.Group className="mb-3">
                   <Form.Label>
@@ -527,6 +546,7 @@ const ProductManage = () => {
                 </Form.Group>
               </Col>
 
+              {/* Right */}
               <Col md={6}>
                 <Form.Group className="mb-3">
                   <Form.Label>
@@ -622,6 +642,29 @@ const ProductManage = () => {
             </div>
           </Form>
         </Modal.Body>
+      </Modal>
+
+      {/* Modal Confirm Delete */}
+      <Modal
+        show={confirmModal.show}
+        onHide={() => setConfirmModal({ show: false, productId: null })}
+        centered
+      >
+        <Modal.Header closeButton className="bg-warning text-dark">
+          <Modal.Title>Xác nhận xóa</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>Bạn có chắc muốn xóa sản phẩm này không?</Modal.Body>
+        <Modal.Footer>
+          <Button
+            variant="secondary"
+            onClick={() => setConfirmModal({ show: false, productId: null })}
+          >
+            Hủy
+          </Button>
+          <Button variant="danger" onClick={handleConfirmDelete}>
+            Xác nhận
+          </Button>
+        </Modal.Footer>
       </Modal>
     </div>
   );

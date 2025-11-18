@@ -7,9 +7,21 @@ const API = axios.create({
   },
 });
 
-export const getAllPayments = async () => {
+export const getAllPayments = async ({
+  page = 1,
+  limit = 10,
+  status = "all",
+  search = "",
+}) => {
   try {
-    const res = await API.get("/payment/get-all-payment");
+    const params = new URLSearchParams({
+      page,
+      limit,
+      ...(status !== "all" && { status }),
+      ...(search && { search }),
+    });
+
+    const res = await API.get(`/payment/get-all-payment?${params}`);
     return res.data;
   } catch (error) {
     console.error("Error getting all payments:", error);
@@ -57,9 +69,11 @@ export const deletePayment = async (id) => {
   }
 };
 
-export const completePayment = async (id) => {
+export const completePayment = async (id, transactionId) => {
   try {
-    const res = await API.put(`/payment/payment-complete/${id}/complete`);
+    const res = await API.put(`/payment/payment-complete/${id}/complete`, {
+      transactionId,
+    });
     return res.data;
   } catch (error) {
     console.error("Error completing payment:", error);
@@ -67,9 +81,9 @@ export const completePayment = async (id) => {
   }
 };
 
-export const refundPayment = async (id) => {
+export const refundPayment = async (id, note) => {
   try {
-    const res = await API.put(`/payment/payment-refund/${id}/refund`);
+    const res = await API.put(`/payment/payment-refund/${id}/refund`, { note });
     return res.data;
   } catch (error) {
     console.error("Error refunding payment:", error);

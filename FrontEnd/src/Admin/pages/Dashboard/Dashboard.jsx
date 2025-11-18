@@ -21,7 +21,6 @@ const Dashboard = () => {
         if (res?.errCode === 0 && res?.data) {
           let data = res.data;
 
-          // Xử lý cả object và array
           if (Array.isArray(data)) {
             data = data[0] || {};
           }

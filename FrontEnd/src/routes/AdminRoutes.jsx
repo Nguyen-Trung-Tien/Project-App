@@ -9,6 +9,7 @@ import UserManage from "../Admin/pages/UserManage/UserManage";
 import Revenue from "../Admin/pages/Revenue/Revenue";
 import OrdersReturnPage from "../Admin/pages/OrdersReturnPage/OrdersReturnPage";
 import PrivateRoute from "./PrivateRoute";
+import PaymentPage from "../Admin/pages/Payment/PaymentPage";
 
 const AdminRoutes = () => {
   return (
@@ -25,6 +26,7 @@ const AdminRoutes = () => {
           <Route path="users" element={<UserManage />} />
           <Route path="revenue" element={<Revenue />} />
           <Route path="categories" element={<Categories />} />
+          <Route path="payment" element={<PaymentPage />} />
         </Route>
       </Route>
     </Routes>

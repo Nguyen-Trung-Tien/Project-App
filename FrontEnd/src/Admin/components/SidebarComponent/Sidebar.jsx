@@ -9,6 +9,7 @@ import {
   FiLayers,
   FiLogOut,
   FiBarChart,
+  FiDollarSign,
 } from "react-icons/fi";
 import { useDispatch, useSelector } from "react-redux";
 import { logoutUserApi } from "../../../api/userApi";
@@ -22,6 +23,11 @@ const MENU_ITEMS = [
   { to: "/admin/products", icon: <FiBox />, label: "Sản phẩm" },
   { to: "/admin/users", icon: <FiUsers />, label: "Người dùng" },
   { to: "/admin/revenue", icon: <FiBarChart />, label: "Doanh thu" },
+  {
+    to: "/admin/payment",
+    icon: <FiDollarSign />,
+    label: "Phương thức thanh toán",
+  },
   { to: "/admin/categories", icon: <FiLayers />, label: "Danh mục" },
 ];
 

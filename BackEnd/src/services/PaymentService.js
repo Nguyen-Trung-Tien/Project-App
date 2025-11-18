@@ -1,25 +1,70 @@
 const db = require("../models");
 const ProductService = require("./ProductService");
 
-const getAllPayments = async () => {
+const getAllPayments = async ({
+  page = 1,
+  limit = 10,
+  status = null,
+  search = "",
+  orderBy = "createdAt",
+  order = "DESC",
+}) => {
   try {
-    const payments = await db.Payment.findAll({
+    const offset = (page - 1) * limit;
+
+    let where = {};
+    if (status && status !== "all") where.status = status;
+
+    if (search) {
+      where[db.Sequelize.Op.or] = [
+        { id: { [db.Sequelize.Op.like]: `%${search}%` } },
+        { orderId: { [db.Sequelize.Op.like]: `%${search}%` } },
+        { "$user.name$": { [db.Sequelize.Op.like]: `%${search}%` } },
+        { "$user.email$": { [db.Sequelize.Op.like]: `%${search}%` } },
+      ];
+    }
+
+    const orderArray = orderBy.startsWith("user.")
+      ? [[{ model: db.User, as: "user" }, orderBy.split(".")[1], order]]
+      : [[orderBy, order]];
+
+    const { count, rows } = await db.Payment.findAndCountAll({
+      where,
       include: [
         {
           model: db.Order,
           as: "order",
           attributes: ["id", "status", "totalPrice"],
+          required: false,
         },
         {
           model: db.User,
           as: "user",
-          attributes: ["id", "name", "email", "phone"],
+          attributes: ["id", "username", "email", "phone"],
+          required: false,
         },
       ],
-      order: [["createdAt", "DESC"]],
+      order: orderArray,
+      limit,
+      offset,
+      distinct: true,
     });
 
-    return { errCode: 0, errMessage: "OK", data: payments };
+    const totalPages = Math.ceil(count / limit);
+
+    return {
+      errCode: 0,
+      errMessage: "OK",
+      data: rows,
+      pagination: {
+        currentPage: +page,
+        pageSize: +limit,
+        totalItems: count,
+        totalPages,
+        hasNext: +page < totalPages,
+        hasPrev: +page > 1,
+      },
+    };
   } catch (e) {
     console.error("Error getAllPayments:", e);
     throw e;
@@ -50,7 +95,7 @@ const getPaymentById = async (id) => {
 
 const createPayment = async (data) => {
   try {
-    const { orderId, userId, amount, method, note, transactionId } = data;
+    const { orderId, userId, amount, method, note } = data;
 
     if (!orderId || !amount) {
       return { errCode: 2, errMessage: "Missing required fields" };
@@ -61,21 +106,25 @@ const createPayment = async (data) => {
       return { errCode: 3, errMessage: "Order not found" };
     }
 
+    const transactionId = `DH${orderId}`;
+
     const autoPaidMethods = ["momo", "paypal", "vnpay", "bank"];
     const isAutoPaid = autoPaidMethods.includes(method);
 
     const payment = await db.Payment.create({
       orderId,
-      userId,
+      userId: userId || order.userId,
       amount,
       method,
       note,
       transactionId,
       status: isAutoPaid ? "completed" : "pending",
     });
+
     if (isAutoPaid) {
       await order.update({ paymentStatus: "paid" });
     }
+
     return {
       errCode: 0,
       errMessage: "Payment created successfully",
@@ -178,8 +227,10 @@ const completePayment = async (id, transactionId) => {
     const payment = await db.Payment.findByPk(id);
     if (!payment) return { errCode: 1, errMessage: "Payment not found" };
 
+    payment.transactionId =
+      transactionId || payment.transactionId || `DH${payment.orderId}`;
+
     payment.status = "completed";
-    payment.transactionId = transactionId || payment.transactionId;
     payment.paymentDate = new Date();
     await payment.save();
 
@@ -203,22 +254,27 @@ const completePayment = async (id, transactionId) => {
   }
 };
 
-const refundPayment = async (id, note) => {
+const refundPayment = async (id, note = "") => {
   try {
     const payment = await db.Payment.findByPk(id);
-    if (!payment) return { errCode: 1, errMessage: "Payment not found" };
+    if (!payment) {
+      return { errCode: 1, errMessage: "Payment not found" };
+    }
+
     payment.status = "refunded";
-    payment.note = note || payment.note;
+    payment.note = note || payment.note || "";
     await payment.save();
+
     const order = await db.Order.findByPk(payment.orderId);
     if (order) {
       order.paymentStatus = "refunded";
       await order.save();
     }
+
     return { errCode: 0, errMessage: "Payment refunded", data: payment };
   } catch (e) {
     console.error("Error refundPayment:", e);
-    throw e;
+    return { errCode: 1, errMessage: e.message || "Error refunding payment" };
   }
 };
 

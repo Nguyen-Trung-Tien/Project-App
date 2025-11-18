@@ -46,6 +46,11 @@ const UserManage = ({ token }) => {
   const [totalPages, setTotalPages] = useState(1);
   const limit = 6;
 
+  const [confirmModal, setConfirmModal] = useState({
+    show: false,
+    userId: null,
+  });
+
   const searchTimeoutRef = useRef(null);
 
   const fetchUsers = async (page = 1, searchQuery = "") => {
@@ -85,39 +90,36 @@ const UserManage = ({ token }) => {
   }, [token]);
 
   useEffect(() => {
-    if (searchTimeoutRef.current) {
-      clearTimeout(searchTimeoutRef.current);
-    }
-
+    if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
     searchTimeoutRef.current = setTimeout(() => {
       setCurrentPage(1);
       fetchUsers(1, search);
     }, 500);
-
-    return () => {
-      if (searchTimeoutRef.current) {
-        clearTimeout(searchTimeoutRef.current);
-      }
-    };
+    return () => clearTimeout(searchTimeoutRef.current);
   }, [search]);
 
   const handleShowModal = (user = null) => {
     setEditUser(user);
     setShowModal(true);
   };
-
   const handleCloseModal = () => {
     setShowModal(false);
     setEditUser(null);
   };
 
+  const fileToBase64 = (file) =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = (error) => reject(error);
+    });
+
   const handleCreateUser = async (formData) => {
     const username = formData.get("username")?.trim();
     const email = formData.get("email")?.trim();
-
-    if (!username || !email) {
+    if (!username || !email)
       return toast.error("Tên và email không được để trống!");
-    }
 
     const data = {
       username,
@@ -129,14 +131,8 @@ const UserManage = ({ token }) => {
     };
 
     const avatarFile = formData.get("avatar");
-    if (avatarFile && avatarFile.size > 0) {
-      try {
-        data.avatar = await fileToBase64(avatarFile);
-      } catch (err) {
-        console.error("Convert avatar error:", err);
-        return toast.error("Lỗi xử lý ảnh đại diện");
-      }
-    }
+    if (avatarFile && avatarFile.size > 0)
+      data.avatar = await fileToBase64(avatarFile);
 
     try {
       const res = await registerUser(data, token);
@@ -144,30 +140,18 @@ const UserManage = ({ token }) => {
         toast.success("Thêm người dùng thành công!");
         fetchUsers(currentPage, search);
         handleCloseModal();
-      } else {
-        toast.error(res.errMessage || "Có lỗi xảy ra");
-      }
+      } else toast.error(res.errMessage || "Có lỗi xảy ra");
     } catch (err) {
-      console.log(err);
+      console.error(err);
       toast.error("Lỗi khi thêm người dùng");
     }
-  };
-  const fileToBase64 = (file) => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = (error) => reject(error);
-    });
   };
 
   const handleUpdateUser = async (formData, editUserId) => {
     const username = formData.get("username")?.trim();
     const email = formData.get("email")?.trim();
-
-    if (!username || !email) {
+    if (!username || !email)
       return toast.error("Tên và email không được để trống!");
-    }
 
     const data = {
       id: editUserId,
@@ -179,14 +163,8 @@ const UserManage = ({ token }) => {
     };
 
     const avatarFile = formData.get("avatar");
-    if (avatarFile && avatarFile.size > 0) {
-      try {
-        data.avatar = await fileToBase64(avatarFile);
-      } catch (err) {
-        console.error("Convert avatar error:", err);
-        return toast.error("Lỗi xử lý ảnh đại diện");
-      }
-    }
+    if (avatarFile && avatarFile.size > 0)
+      data.avatar = await fileToBase64(avatarFile);
 
     try {
       const res = await updateUserApi(data, token);
@@ -194,9 +172,7 @@ const UserManage = ({ token }) => {
         toast.success("Cập nhật thành công!");
         fetchUsers(currentPage, search);
         handleCloseModal();
-      } else {
-        toast.error(res.errMessage || "Lỗi khi cập nhật");
-      }
+      } else toast.error(res.errMessage || "Lỗi khi cập nhật");
     } catch (err) {
       console.error("Update user error:", err);
       toast.error("Lỗi khi cập nhật người dùng");
@@ -206,43 +182,35 @@ const UserManage = ({ token }) => {
   const handleSave = (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
-
-    if (editUser) {
-      formData.append("id", editUser.id);
-      handleUpdateUser(formData, editUser.id);
-    } else {
-      formData.append("password", "123456");
-      handleCreateUser(formData);
-    }
+    if (editUser) handleUpdateUser(formData, editUser.id);
+    else handleCreateUser(formData);
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm("Bạn có chắc muốn xóa người dùng này?")) return;
+  // **Modal confirm xóa**
+  const handleDeleteClick = (id) => setConfirmModal({ show: true, userId: id });
+
+  const handleConfirmDelete = async () => {
+    const id = confirmModal.userId;
+    if (!id) return;
 
     try {
       const res = await deleteUserApi(id, token);
       if (res.errCode === 0) {
         toast.success("Xóa người dùng thành công!");
-        setUsers((prev) => prev.filter((u) => u.id !== id));
-        if (users.length === 1 && currentPage > 1) {
-          setCurrentPage((p) => p - 1);
-          fetchUsers(currentPage - 1, search);
-        }
-      } else {
-        toast.error(res.errMessage || "Lỗi khi xóa");
-      }
+        fetchUsers(currentPage, search);
+      } else toast.error(res.errMessage || "Lỗi khi xóa");
     } catch (err) {
       console.error(err);
       toast.error("Lỗi khi xóa người dùng");
+    } finally {
+      setConfirmModal({ show: false, userId: null });
     }
   };
 
   const toggleStatus = async (id) => {
     const user = users.find((u) => u.id === id);
-    if (!user || user.role === "admin") {
-      toast.warn("Không thể thay đổi trạng thái Admin!");
-      return;
-    }
+    if (!user || user.role === "admin")
+      return toast.warn("Không thể thay đổi trạng thái Admin!");
 
     try {
       const isActive = user.status === "active";
@@ -251,7 +219,6 @@ const UserManage = ({ token }) => {
       formData.append("isActive", !isActive);
 
       const res = await updateUserApi(formData, token);
-
       if (res.errCode === 0) {
         setUsers((prev) =>
           prev.map((u) =>
@@ -259,9 +226,7 @@ const UserManage = ({ token }) => {
           )
         );
         toast.success("Cập nhật trạng thái thành công!");
-      } else {
-        toast.error(res.errMessage || "Lỗi khi cập nhật trạng thái");
-      }
+      } else toast.error(res.errMessage || "Lỗi khi cập nhật trạng thái");
     } catch (err) {
       console.error("Toggle status error:", err);
       toast.error("Lỗi khi cập nhật trạng thái");
@@ -270,20 +235,18 @@ const UserManage = ({ token }) => {
 
   const renderPagination = () => {
     if (totalPages <= 1) return null;
-
     const items = [];
     const pageNeighbours = 2;
     const startPage = Math.max(1, currentPage - pageNeighbours);
     const endPage = Math.min(totalPages, currentPage + pageNeighbours);
 
-    if (startPage > 1) {
+    if (startPage > 1)
       items.push(
         <Pagination.First key="first" onClick={() => fetchUsers(1, search)}>
           <ChevronDoubleLeft />
         </Pagination.First>
       );
-    }
-    if (currentPage > 1) {
+    if (currentPage > 1)
       items.push(
         <Pagination.Prev
           key="prev"
@@ -292,9 +255,7 @@ const UserManage = ({ token }) => {
           <ChevronLeft />
         </Pagination.Prev>
       );
-    }
-
-    for (let i = startPage; i <= endPage; i++) {
+    for (let i = startPage; i <= endPage; i++)
       items.push(
         <Pagination.Item
           key={i}
@@ -304,9 +265,7 @@ const UserManage = ({ token }) => {
           {i}
         </Pagination.Item>
       );
-    }
-
-    if (currentPage < totalPages) {
+    if (currentPage < totalPages)
       items.push(
         <Pagination.Next
           key="next"
@@ -315,8 +274,7 @@ const UserManage = ({ token }) => {
           <ChevronRight />
         </Pagination.Next>
       );
-    }
-    if (endPage < totalPages) {
+    if (endPage < totalPages)
       items.push(
         <Pagination.Last
           key="last"
@@ -325,7 +283,6 @@ const UserManage = ({ token }) => {
           <ChevronDoubleRight />
         </Pagination.Last>
       );
-    }
 
     return (
       <Pagination className="justify-content-center mt-3">{items}</Pagination>
@@ -336,8 +293,7 @@ const UserManage = ({ token }) => {
     <>
       <div className="user-manage">
         <h3 className="mb-4">
-          <PersonFill className="me-2" />
-          Quản lý người dùng
+          <PersonFill className="me-2" /> Quản lý người dùng
         </h3>
         <Card className="shadow-sm">
           <Card.Body>
@@ -384,7 +340,7 @@ const UserManage = ({ token }) => {
                 {loading ? (
                   <tr>
                     <td colSpan="9" className="text-center py-5">
-                      <Spinner animation="border" variant="primary" />
+                      <Spinner animation="border" />
                     </td>
                   </tr>
                 ) : users.length === 0 ? (
@@ -465,31 +421,28 @@ const UserManage = ({ token }) => {
                           variant="outline-warning"
                           size="sm"
                           onClick={() => handleShowModal(u)}
-                          title="Chỉnh sửa"
                           className="me-1"
                         >
                           <PencilSquare size={14} />
-                        </Button>{" "}
+                        </Button>
                         {u.role !== "admin" && (
-                          <Button
-                            variant="outline-danger"
-                            size="sm"
-                            onClick={() => handleDelete(u.id)}
-                            title="Xóa"
-                            className="me-1"
-                          >
-                            <Trash3 size={14} />
-                          </Button>
-                        )}{" "}
-                        {u.role !== "admin" && (
-                          <Button
-                            variant="outline-info"
-                            size="sm"
-                            onClick={() => toggleStatus(u.id)}
-                            title="Đổi trạng thái"
-                          >
-                            <ArrowRepeat size={14} />
-                          </Button>
+                          <>
+                            <Button
+                              variant="outline-danger"
+                              size="sm"
+                              onClick={() => handleDeleteClick(u.id)}
+                              className="me-1"
+                            >
+                              <Trash3 size={14} />
+                            </Button>
+                            <Button
+                              variant="outline-info"
+                              size="sm"
+                              onClick={() => toggleStatus(u.id)}
+                            >
+                              <ArrowRepeat size={14} />
+                            </Button>
+                          </>
                         )}
                       </td>
                     </tr>
@@ -502,6 +455,7 @@ const UserManage = ({ token }) => {
           </Card.Body>
         </Card>
 
+        {/* Modal thêm/sửa người dùng */}
         <Modal
           show={showModal}
           onHide={handleCloseModal}
@@ -531,10 +485,8 @@ const UserManage = ({ token }) => {
                   name="username"
                   defaultValue={editUser?.name || ""}
                   required
-                  placeholder="username"
                 />
               </Form.Group>
-
               <Form.Group className="mb-3">
                 <Form.Label>Email *</Form.Label>
                 <Form.Control
@@ -542,30 +494,24 @@ const UserManage = ({ token }) => {
                   name="email"
                   defaultValue={editUser?.email || ""}
                   required
-                  placeholder="email"
                 />
               </Form.Group>
-
               <Form.Group className="mb-3">
                 <Form.Label>Số điện thoại</Form.Label>
                 <Form.Control
                   type="text"
                   name="phone"
                   defaultValue={editUser?.phone || ""}
-                  placeholder="phone number"
                 />
               </Form.Group>
-
               <Form.Group className="mb-3">
                 <Form.Label>Địa chỉ</Form.Label>
                 <Form.Control
                   type="text"
                   name="address"
                   defaultValue={editUser?.address || ""}
-                  placeholder="123 Đường ABC, Quận 1"
                 />
               </Form.Group>
-
               <Form.Group className="mb-3">
                 <Form.Label>Vai trò</Form.Label>
                 <Form.Select
@@ -576,7 +522,6 @@ const UserManage = ({ token }) => {
                   <option value="admin">Admin</option>
                 </Form.Select>
               </Form.Group>
-
               {editUser && (
                 <Form.Group className="mb-3">
                   <Form.Label>Avatar (để trống nếu không thay đổi)</Form.Label>
@@ -589,12 +534,11 @@ const UserManage = ({ token }) => {
                         width="60"
                         className="rounded border"
                       />
-                      <small className="text-muted d-block">Ảnh hiện tại</small>
+                      <small className="d-block text-muted">Ảnh hiện tại</small>
                     </div>
                   )}
                 </Form.Group>
               )}
-
               <div className="text-end mt-4">
                 <Button
                   variant="secondary"
@@ -602,13 +546,36 @@ const UserManage = ({ token }) => {
                   className="me-2"
                 >
                   Hủy
-                </Button>{" "}
+                </Button>
                 <Button variant="primary" type="submit">
                   {editUser ? "Cập nhật" : "Thêm mới"}
                 </Button>
               </div>
             </Form>
           </Modal.Body>
+        </Modal>
+
+        {/* Modal confirm xóa */}
+        <Modal
+          show={confirmModal.show}
+          onHide={() => setConfirmModal({ show: false, userId: null })}
+          centered
+        >
+          <Modal.Header closeButton className="bg-warning text-dark">
+            <Modal.Title>Xác nhận xóa</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>Bạn có chắc muốn xóa người dùng này không?</Modal.Body>
+          <Modal.Footer>
+            <Button
+              variant="secondary"
+              onClick={() => setConfirmModal({ show: false, userId: null })}
+            >
+              Hủy
+            </Button>
+            <Button variant="danger" onClick={handleConfirmDelete}>
+              Xác nhận
+            </Button>
+          </Modal.Footer>
         </Modal>
       </div>
     </>
