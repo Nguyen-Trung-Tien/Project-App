@@ -46,8 +46,9 @@ import {
 import { StatusBadge } from "../../../utils/StatusBadge";
 
 const OrderManage = () => {
-  const navigate = useNavigate();
   const user = useSelector((state) => state.user.user);
+  const token = user?.accessToken;
+  const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadingId, setLoadingId] = useState(null);
@@ -62,7 +63,7 @@ const OrderManage = () => {
   const fetchOrders = async (currentPage = 1, search = "") => {
     setLoading(true);
     try {
-      const res = await getAllOrders(currentPage, limit, search.trim());
+      const res = await getAllOrders(currentPage, limit, search.trim(), token);
       if (res?.errCode === 0) {
         setOrders(res.data || []);
         setPage(res.pagination?.currentPage || currentPage);
@@ -98,7 +99,7 @@ const OrderManage = () => {
   const handleUpdateStatus = async (orderId, status) => {
     try {
       setLoadingId(orderId);
-      const res = await updateOrderStatus(orderId, status);
+      const res = await updateOrderStatus(orderId, status, token);
 
       if (res?.errCode === 0) {
         toast.success(`Cập nhật: ${statusMap[status]?.label}`);
@@ -116,9 +117,13 @@ const OrderManage = () => {
           order.paymentStatus === "paid"
         ) {
           try {
-            const refundRes = await updatePayment(orderId, {
-              paymentStatus: "refunded",
-            });
+            const refundRes = await updatePayment(
+              orderId,
+              {
+                paymentStatus: "refunded",
+              },
+              token
+            );
             if (refundRes?.errCode === 0) {
               toast.success(`Đơn ${orderId} đã hoàn tiền!`);
               await fetchOrders(page, searchTerm);
@@ -160,7 +165,11 @@ const OrderManage = () => {
 
     try {
       setLoadingId(order.id);
-      const res = await updatePayment(order.id, { paymentStatus: status });
+      const res = await updatePayment(
+        order.id,
+        { paymentStatus: status },
+        token
+      );
       if (res?.errCode === 0) {
         toast.success(`Thanh toán: ${paymentStatusMap[status]?.label}`);
         await fetchOrders(page, searchTerm);

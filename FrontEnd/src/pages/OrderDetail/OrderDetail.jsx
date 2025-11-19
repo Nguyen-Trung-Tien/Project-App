@@ -18,12 +18,14 @@ import { getOrderById } from "../../api/orderApi";
 import { requestReturn } from "../../api/orderItemApi";
 import "./OrderDetail.scss";
 import { ArrowLeftCircle } from "react-bootstrap-icons";
+import { useSelector } from "react-redux";
 
 const OrderDetail = () => {
+  const user = useSelector((state) => state.user.user);
+  const token = user?.accessToken;
   const { id } = useParams();
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(false);
-
   const [showReturnModal, setShowReturnModal] = useState(false);
   const [selectedItems, setSelectedItems] = useState([]);
   const [returnReason, setReturnReason] = useState("");
@@ -117,7 +119,7 @@ const OrderDetail = () => {
   const fetchOrderDetail = async () => {
     try {
       setLoading(true);
-      const res = await getOrderById(id);
+      const res = await getOrderById(id, token);
       if (res.errCode === 0) setOrder(res.data);
       else toast.error(res.errMessage || "Không tìm thấy đơn hàng");
     } catch (error) {
@@ -168,7 +170,7 @@ const OrderDetail = () => {
     try {
       await Promise.all(
         selectedItems.map((itemId) =>
-          requestReturn(itemId, returnReason).catch((err) => {
+          requestReturn(itemId, token, returnReason).catch((err) => {
             console.error(`Lỗi trả hàng ID ${itemId}:`, err);
             throw err;
           })

@@ -27,6 +27,8 @@ import { getImage } from "../../utils/decodeImage";
 import "./CartPage.scss";
 
 const CartPage = () => {
+  const user = useSelector((state) => state.user.user);
+  const token = user?.accessToken;
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const cartItems = useSelector((state) => state.cart.cartItems);
@@ -36,7 +38,7 @@ const CartPage = () => {
   const fetchCart = async () => {
     try {
       setLoading(true);
-      const res = await getAllCartItems();
+      const res = await getAllCartItems(token);
       const items = res.data || [];
       dispatch(setCartItems(items));
       setSelectedItems(items.map((item) => item.id));
@@ -53,7 +55,7 @@ const CartPage = () => {
 
   const handleRemove = async (id) => {
     try {
-      await removeCartItemApi(id);
+      await removeCartItemApi(id, token);
       dispatch(removeCartItem(id));
       setSelectedItems((prev) => prev.filter((itemId) => itemId !== id));
       toast.success("Đã xóa sản phẩm khỏi giỏ hàng!");
@@ -65,7 +67,7 @@ const CartPage = () => {
   const handleQtyChange = async (id, quantity) => {
     if (quantity < 1) return;
     try {
-      await updateCartItemApi(id, quantity);
+      await updateCartItemApi(id, quantity, token);
       dispatch(updateCartItemQuantity({ id, quantity }));
     } catch {
       toast.error("Cập nhật số lượng thất bại!");

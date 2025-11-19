@@ -1,15 +1,10 @@
-import axios from "axios";
+import axiosClient from "../utils/axiosClient";
 
-const API = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
-
-export const getDashboard = async () => {
+export const getDashboard = async (token) => {
   try {
-    const res = await API.get("/admin/dashboard");
+    const res = await axiosClient.get("/admin/dashboard", {
+      headers: { Authorization: `Bearer ${token}` },
+    });
     return res.data;
   } catch (error) {
     console.error("Error getting dashboard:", error);

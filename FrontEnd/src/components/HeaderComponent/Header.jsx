@@ -6,7 +6,6 @@ import {
   NavDropdown,
   Badge,
   Image,
-  Button,
 } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
 import { Cart, PersonCircle, Search } from "react-bootstrap-icons";
@@ -24,6 +23,8 @@ function Header() {
   const [searchInput, setSearchInput] = useState("");
 
   const user = useSelector((state) => state.user.user);
+  const token = user?.accessToken;
+
   const cartItemCount = useSelector(
     (state) =>
       state.cart.cartItems?.reduce((sum, i) => sum + (i.quantity || 0), 0) || 0
@@ -36,7 +37,7 @@ function Header() {
       if (!user?.id) return;
 
       try {
-        const res = await getAllCarts();
+        const res = await getAllCarts(token);
         const userCart = res.data.find((c) => c.userId === user.id);
 
         if (userCart && userCart.items) {

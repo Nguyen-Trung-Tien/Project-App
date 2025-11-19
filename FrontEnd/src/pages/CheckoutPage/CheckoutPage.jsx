@@ -10,7 +10,7 @@ import CheckoutForm from "./CheckoutForm";
 import OrderSummary from "./OrderSummary";
 import "./CheckoutPage.scss";
 
-const CheckoutPage = () => {
+const CheckoutPage = ({ token }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -44,29 +44,32 @@ const CheckoutPage = () => {
 
   const handleOrderComplete = async (orderData, paypalDetails = null) => {
     try {
-      const orderRes = await createOrder(orderData);
+      const orderRes = await createOrder(orderData, token);
       if (orderRes.errCode !== 0)
         return toast.error(orderRes.errMessage || "Lỗi khi tạo đơn hàng!");
 
       const orderId = orderRes.data.id;
 
-      const paymentRes = await createPayment({
-        orderId,
-        userId: user.id,
-        amount: total,
-        method: orderData.paymentMethod,
-        paymentStatus: paypalDetails
-          ? "paid"
-          : orderData.paymentMethod === "cod"
-          ? "unpaid"
-          : "paid",
-        status: paypalDetails
-          ? "completed"
-          : orderData.paymentMethod === "cod"
-          ? "pending"
-          : "completed",
-        paypalInfo: paypalDetails,
-      });
+      const paymentRes = await createPayment(
+        {
+          orderId,
+          userId: user.id,
+          amount: total,
+          method: orderData.paymentMethod,
+          paymentStatus: paypalDetails
+            ? "paid"
+            : orderData.paymentMethod === "cod"
+            ? "unpaid"
+            : "paid",
+          status: paypalDetails
+            ? "completed"
+            : orderData.paymentMethod === "cod"
+            ? "pending"
+            : "completed",
+          paypalInfo: paypalDetails,
+        },
+        token
+      );
 
       if (paymentRes.errCode && paymentRes.errCode !== 0)
         return toast.error(paymentRes.errMessage || "Thanh toán thất bại!");

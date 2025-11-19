@@ -31,8 +31,11 @@ import "./OrdersReturnPage.scss";
 import { processReturn } from "../../../api/orderItemApi";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import { useSelector } from "react-redux";
 
 const OrdersReturnPage = () => {
+  const user = useSelector((state) => state.user.user);
+  const token = user?.accessToken;
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadingAction, setLoadingAction] = useState(false);
@@ -104,7 +107,7 @@ const OrdersReturnPage = () => {
       );
 
       for (let item of itemsToProcess) {
-        await processReturn(item.id, status);
+        await processReturn(item.id, status, token);
       }
 
       toast.success(

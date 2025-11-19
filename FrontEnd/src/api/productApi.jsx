@@ -1,4 +1,5 @@
 import axios from "axios";
+import axiosClient from "../utils/axiosClient";
 
 const API = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
@@ -29,10 +30,13 @@ export const getProductByIdApi = async (id) => {
   }
 };
 
-export const createProductApi = async (data) => {
+export const createProductApi = async (data, token) => {
   try {
-    const res = await API.post(`/product/create-new-product`, data, {
-      headers: { "Content-Type": "multipart/form-data" },
+    const res = await axiosClient.post(`/product/create-new-product`, data, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "multipart/form-data",
+      },
     });
     return res.data;
   } catch (err) {
@@ -41,10 +45,13 @@ export const createProductApi = async (data) => {
   }
 };
 
-export const updateProductApi = async (id, data) => {
+export const updateProductApi = async (id, data, token) => {
   try {
-    const res = await API.put(`/product/update-product/${id}`, data, {
-      headers: { "Content-Type": "multipart/form-data" },
+    const res = await axiosClient.put(`/product/update-product/${id}`, data, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "multipart/form-data",
+      },
     });
     return res.data;
   } catch (err) {
@@ -53,9 +60,11 @@ export const updateProductApi = async (id, data) => {
   }
 };
 
-export const deleteProductApi = async (id) => {
+export const deleteProductApi = async (id, token) => {
   try {
-    const res = await API.delete(`/product/delete-product/${id}`);
+    const res = await axiosClient.delete(`/product/delete-product/${id}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
     return res.data;
   } catch (err) {
     console.error("Delete product API error:", err);

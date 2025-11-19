@@ -6,8 +6,11 @@ import "./Dashboard.scss";
 import StatsCard from "../../components/StatsCardComponent/StatsCard";
 import ChartCard from "../../components/ChartCardComponent/ChartCard";
 import { getDashboard } from "../../../api/adminApi";
+import { useSelector } from "react-redux";
 
 const Dashboard = () => {
+  const user = useSelector((state) => state.user.user);
+  const token = user?.accessToken;
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState([]);
   const [error, setError] = useState(null);
@@ -126,7 +129,7 @@ const Dashboard = () => {
 
               <Row>
                 <Col md={12}>
-                  <ChartCard />
+                  <ChartCard token={token} />
                 </Col>
               </Row>
             </>

@@ -33,6 +33,7 @@ import {
 
 import "./PaymentPage.scss";
 import { toast } from "react-toastify";
+import { useSelector } from "react-redux";
 
 const STATUS_LABELS = {
   pending: { text: "Chờ xử lý", class: "status-pending" },
@@ -49,6 +50,8 @@ const METHOD_BADGE = {
 };
 
 const PaymentPage = () => {
+  const user = useSelector((state) => state.user.user);
+  const token = user?.accessToken;
   const [payments, setPayments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filterStatus, setFilterStatus] = useState("all");
@@ -70,12 +73,15 @@ const PaymentPage = () => {
     async (page = 1) => {
       setLoading(true);
       try {
-        const res = await getAllPayments({
-          status: filterStatus,
-          page,
-          limit: pageSize,
-          search: searchTerm,
-        });
+        const res = await getAllPayments(
+          {
+            status: filterStatus,
+            page,
+            limit: pageSize,
+            search: searchTerm,
+          },
+          token
+        );
 
         if (res.errCode === 0) {
           setPayments(res.data || []);
@@ -119,10 +125,10 @@ const PaymentPage = () => {
 
     try {
       if (actionModal.actionFn === refundPayment) {
-        await actionModal.actionFn(actionModal.paymentId, refundNote);
+        await actionModal.actionFn(actionModal.paymentId, refundNote, token);
         setRefundNote("");
       } else {
-        await actionModal.actionFn(actionModal.paymentId);
+        await actionModal.actionFn(actionModal.paymentId, token);
       }
       loadPayments(currentPage);
       toast.success(`${actionName} thành công.`);

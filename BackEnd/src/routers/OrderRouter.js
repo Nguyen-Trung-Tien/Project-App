@@ -1,28 +1,57 @@
 const express = require("express");
 const router = express.Router();
 const OrderController = require("../controller/OrderController");
-const { authenticateToken } = require("../middleware/authMiddleware");
+const {
+  authenticateToken,
+  authorizeRole,
+} = require("../middleware/authMiddleware");
 
-router.get("/get-all-orders", OrderController.handleGetAllOrders);
-router.get("/get-order/:id", OrderController.handleGetOrderById);
+router.get(
+  "/get-all-orders",
+  authenticateToken,
+  authorizeRole(["admin", "customer"]),
+  OrderController.handleGetAllOrders
+);
+router.get(
+  "/get-order/:id",
+  authenticateToken,
+  authorizeRole(["admin", "customer"]),
+  OrderController.handleGetOrderById
+);
 router.get(
   "/user/:userId",
   authenticateToken,
+  authorizeRole(["admin", "customer"]),
   OrderController.handleGetOrdersByUserId
 );
-router.post("/create-new-order", OrderController.handleCreateOrder);
+router.post(
+  "/create-new-order",
+  authenticateToken,
+  authorizeRole(["admin", "customer"]),
+  OrderController.handleCreateOrder
+);
 router.put(
   "/update-status-order/:id/status",
+  authenticateToken,
+  authorizeRole(["admin", "customer"]),
   OrderController.handleUpdateOrderStatus
 );
-router.delete("/delete-order/:id", OrderController.handleDeleteOrder);
+router.delete(
+  "/delete-order/:id",
+  authenticateToken,
+  authorizeRole(["admin", "customer"]),
+  OrderController.handleDeleteOrder
+);
 router.put(
   "/update-payment-status/:id",
+  authenticateToken,
+  authorizeRole(["admin", "customer"]),
   OrderController.handleUpdatePaymentStatus
 );
 router.get(
   "/active/:userId",
   authenticateToken,
+  authorizeRole(["admin", "customer"]),
   OrderController.getActiveOrdersByUserId
 );
 module.exports = router;

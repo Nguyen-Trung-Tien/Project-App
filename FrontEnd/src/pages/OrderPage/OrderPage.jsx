@@ -67,7 +67,6 @@ const OrderPage = () => {
   const [page, setPage] = useState(1);
   const limit = 10;
 
-  // Modal xác nhận hủy đơn
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [orderToCancel, setOrderToCancel] = useState(null);
 

@@ -1,15 +1,10 @@
-import axios from "axios";
+import axiosClient from "../utils/axiosClient";
 
-const API = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
-
-export const getAllOrderItems = async () => {
+export const getAllOrderItems = async (token) => {
   try {
-    const res = await API.get("/order-item/get-order-item");
+    const res = await axiosClient.get("/order-item/get-order-item", {
+      headers: { Authorization: `Bearer ${token}` },
+    });
     return res.data;
   } catch (error) {
     console.error("Error getting all order items:", error);
@@ -17,9 +12,11 @@ export const getAllOrderItems = async () => {
   }
 };
 
-export const getOrderItemById = async (id) => {
+export const getOrderItemById = async (id, token) => {
   try {
-    const res = await API.get(`/order-item/order-item/${id}`);
+    const res = await axiosClient.get(`/order-item/order-item/${id}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
     return res.data;
   } catch (error) {
     console.error(`Error getting order item with id ${id}:`, error);
@@ -27,9 +24,15 @@ export const getOrderItemById = async (id) => {
   }
 };
 
-export const createOrderItem = async (data) => {
+export const createOrderItem = async (data, token) => {
   try {
-    const res = await API.post("/order-item/create-new-order-item", data);
+    const res = await axiosClient.post(
+      "/order-item/create-new-order-item",
+      data,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
     return res.data;
   } catch (error) {
     console.error("Error creating order item:", error);
@@ -37,9 +40,15 @@ export const createOrderItem = async (data) => {
   }
 };
 
-export const updateOrderItem = async (id, data) => {
+export const updateOrderItem = async (id, data, token) => {
   try {
-    const res = await API.put(`/order-item/update-order-item/${id}`, data);
+    const res = await axiosClient.put(
+      `/order-item/update-order-item/${id}`,
+      data,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
     return res.data;
   } catch (error) {
     console.error(`Error updating order item ${id}:`, error);
@@ -47,9 +56,14 @@ export const updateOrderItem = async (id, data) => {
   }
 };
 
-export const deleteOrderItem = async (id) => {
+export const deleteOrderItem = async (id, token) => {
   try {
-    const res = await API.delete(`/order-item/delete-order-item/${id}`);
+    const res = await axiosClient.delete(
+      `/order-item/delete-order-item/${id}`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
     return res.data;
   } catch (error) {
     console.error(`Error deleting order item ${id}:`, error);
@@ -57,11 +71,13 @@ export const deleteOrderItem = async (id) => {
   }
 };
 
-export const requestReturn = async (id, reason) => {
+export const requestReturn = async (id, reason, token) => {
   try {
-    const res = await API.put(`/order-item/request/${id}/request-return`, {
-      reason,
-    });
+    const res = await axiosClient.put(
+      `/order-item/request/${id}/request-return`,
+      { reason },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
     return res.data;
   } catch (error) {
     console.error(`Error requesting return for order item ${id}:`, error);
@@ -69,11 +85,13 @@ export const requestReturn = async (id, reason) => {
   }
 };
 
-export const processReturn = async (id, status) => {
+export const processReturn = async (id, status, token) => {
   try {
-    const res = await API.put(`/order-item/process/${id}/process-return`, {
-      status,
-    });
+    const res = await axiosClient.put(
+      `/order-item/process/${id}/process-return`,
+      { status },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
     return res.data;
   } catch (error) {
     console.error(`Error processing return for order item ${id}:`, error);

@@ -35,10 +35,14 @@ import {
   registerUser,
   updateUserApi,
 } from "../../../api/userApi";
+import { useSelector } from "react-redux";
 
-const UserManage = ({ token }) => {
+const UserManage = () => {
+  const user = useSelector((state) => state.user.user);
+  const token = user?.accessToken;
   const [users, setUsers] = useState([]);
   const [search, setSearch] = useState("");
+
   const [showModal, setShowModal] = useState(false);
   const [editUser, setEditUser] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -186,7 +190,6 @@ const UserManage = ({ token }) => {
     else handleCreateUser(formData);
   };
 
-  // **Modal confirm xóa**
   const handleDeleteClick = (id) => setConfirmModal({ show: true, userId: id });
 
   const handleConfirmDelete = async () => {

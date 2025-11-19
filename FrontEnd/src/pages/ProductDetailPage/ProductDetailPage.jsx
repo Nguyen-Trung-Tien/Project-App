@@ -37,6 +37,7 @@ const ProductDetailPage = () => {
   const user = useSelector((state) => state.user.user);
   const userId = user?.id;
   const { id } = useParams();
+  const token = user?.accessToken;
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [product, setProduct] = useState(null);
@@ -163,17 +164,20 @@ const ProductDetailPage = () => {
     }
     try {
       setAddingCart(true);
-      const cartsRes = await getAllCarts();
+      const cartsRes = await getAllCarts(token);
       let cart = cartsRes.data.find((c) => c.userId === userId);
       if (!cart) {
-        const newCartRes = await createCart(userId);
+        const newCartRes = await createCart(token, userId);
         cart = newCartRes.data;
       }
-      const res = await addCart({
-        cartId: cart.id,
-        productId: product.id,
-        quantity,
-      });
+      const res = await addCart(
+        {
+          cartId: cart.id,
+          productId: product.id,
+          quantity,
+        },
+        token
+      );
       if (res.errCode === 0) {
         dispatch(addCartItem({ ...product, quantity }));
 
@@ -205,7 +209,7 @@ const ProductDetailPage = () => {
     }
     try {
       const payload = { userId, productId: product.id, ...newReview };
-      const res = await createReviewApi(payload);
+      const res = await createReviewApi(payload, token);
       if (res?.errCode === 0) {
         toast.success("Gửi đánh giá thành công!");
         setNewReview({ rating: 5, comment: "" });

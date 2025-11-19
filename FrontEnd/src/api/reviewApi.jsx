@@ -1,4 +1,6 @@
 import axios from "axios";
+import axiosClient from "../utils/axiosClient";
+
 const API_URL = import.meta.env.VITE_API_URL;
 
 export const getReviewsByProductApi = async (
@@ -17,9 +19,11 @@ export const getReviewsByProductApi = async (
   }
 };
 
-export const createReviewApi = async (payload) => {
+export const createReviewApi = async (payload, token) => {
   try {
-    const res = await axios.post(`${API_URL}/review/create`, payload);
+    const res = await axiosClient.post(`${API_URL}/review/create`, payload, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
     return res.data;
   } catch (err) {
     console.error(err);

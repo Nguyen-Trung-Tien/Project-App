@@ -19,9 +19,15 @@ router.get(
 router.get(
   "/get-user/:id",
   authenticateToken,
+  authorizeRole(["admin", "customer"]),
   UserController.handleGetUserById
 );
-router.put("/update-user", authenticateToken, UserController.handleUpdateUser);
+router.put(
+  "/update-user",
+  authenticateToken,
+  authorizeRole(["admin", "customer"]),
+  UserController.handleUpdateUser
+);
 
 router.delete(
   "/delete/:id",

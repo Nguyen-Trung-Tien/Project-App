@@ -50,7 +50,7 @@ const formatCurrency = (value) => {
   return value.toLocaleString("vi-VN");
 };
 
-const ChartCard = () => {
+const ChartCard = ({ token }) => {
   const [type, setType] = useState(PERIOD.WEEK);
   const [loading, setLoading] = useState(false);
   const [dashboardData, setDashboardData] = useState({
@@ -63,7 +63,7 @@ const ChartCard = () => {
   const fetchDashboard = async () => {
     try {
       setLoading(true);
-      const res = await getDashboard();
+      const res = await getDashboard(token);
 
       if (res?.errCode === 0 && res.data) {
         setDashboardData({

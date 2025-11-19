@@ -19,6 +19,7 @@ const ProductCard = ({ product }) => {
   const dispatch = useDispatch();
   const user = useSelector((state) => state.user.user);
   const userId = user?.id;
+  const token = user?.accessToken;
 
   const [loadingCart, setLoadingCart] = useState(false);
   const [loadingBuy, setLoadingBuy] = useState(false);
@@ -60,14 +61,14 @@ const ProductCard = ({ product }) => {
 
     setLoadingCart(true);
     try {
-      const cartsRes = await getAllCarts();
+      const cartsRes = await getAllCarts(token);
       const carts = cartsRes?.data || [];
       let cart = carts.find((c) => c.userId === userId);
       if (!cart) {
-        const newCartRes = await createCart(userId);
+        const newCartRes = await createCart(token, userId);
         cart = newCartRes.data;
       }
-      await addCart({ cartId: cart.id, productId: id, quantity: 1 });
+      await addCart({ cartId: cart.id, productId: id, quantity: 1 }, token);
       dispatch(addCartItem({ ...product, quantity: 1 }));
       toast.success(`Đã thêm "${name}" vào giỏ hàng`);
     } catch (err) {

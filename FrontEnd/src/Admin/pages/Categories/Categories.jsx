@@ -34,8 +34,11 @@ import {
   deleteCategoryApi,
 } from "../../../api/categoryApi";
 import "./Categories.scss";
+import { useSelector } from "react-redux";
 
 const Categories = () => {
+  const user = useSelector((state) => state.user.user);
+  const token = user?.accessToken;
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -88,7 +91,7 @@ const Categories = () => {
   const fetchCategories = async () => {
     setLoading(true);
     try {
-      const res = await getAllCategoryApi();
+      const res = await getAllCategoryApi(token);
       if (res.errCode === 0) {
         const data = res.data || [];
         setCategories(data);
@@ -174,10 +177,10 @@ const Categories = () => {
     try {
       setSaving(true);
       if (editingCategory) {
-        await updateCategoryApi(editingCategory.id, payload);
+        await updateCategoryApi(editingCategory.id, payload, token);
         toast.success("Cập nhật danh mục thành công!");
       } else {
-        await createCategoryApi(payload);
+        await createCategoryApi(payload, token);
         toast.success("Thêm danh mục thành công!");
       }
       await fetchCategories();
@@ -208,7 +211,7 @@ const Categories = () => {
 
     try {
       setLoading(true);
-      await deleteCategoryApi(deletingCategory.id);
+      await deleteCategoryApi(deletingCategory.id, token);
       toast.success("Xóa danh mục thành công!");
       await fetchCategories();
     } catch (err) {

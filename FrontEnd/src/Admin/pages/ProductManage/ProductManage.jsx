@@ -42,8 +42,12 @@ import {
 } from "../../../api/productApi";
 import { getAllCategoryApi } from "../../../api/categoryApi";
 import { getImage } from "../../../utils/decodeImage";
+import { useSelector } from "react-redux";
 
 const ProductManage = () => {
+  const user = useSelector((state) => state.user.user);
+  const token = user?.accessToken;
+
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [showModal, setShowModal] = useState(false);
@@ -200,9 +204,9 @@ const ProductManage = () => {
 
       let res;
       if (editProduct) {
-        res = await updateProductApi(editProduct.id, data);
+        res = await updateProductApi(editProduct.id, data, token);
       } else {
-        res = await createProductApi(data);
+        res = await createProductApi(data, token);
       }
 
       if (res.errCode === 0) {
@@ -230,7 +234,7 @@ const ProductManage = () => {
     const { productId } = confirmModal;
     if (!productId) return;
     try {
-      const res = await deleteProductApi(productId);
+      const res = await deleteProductApi(productId, token);
       if (res.errCode === 0) {
         toast.success("Đã xóa sản phẩm!");
         const newPage = products.length === 1 && page > 1 ? page - 1 : page;

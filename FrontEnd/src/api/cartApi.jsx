@@ -1,15 +1,10 @@
-import axios from "axios";
+import axiosClient from "../utils/axiosClient";
 
-const API = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
-
-export const getAllCarts = async () => {
+export const getAllCarts = async (token) => {
   try {
-    const res = await API.get("/cart/get-all-cart");
+    const res = await axiosClient.get("/cart/get-all-cart", {
+      headers: { Authorization: `Bearer ${token}` },
+    });
     return res.data;
   } catch (error) {
     console.error("Error getting all carts:", error);
@@ -17,9 +12,11 @@ export const getAllCarts = async () => {
   }
 };
 
-export const getCartById = async (id) => {
+export const getCartById = async (id, token) => {
   try {
-    const res = await API.get(`/cart/get-cart/${id}`);
+    const res = await axiosClient.get(`/cart/get-cart/${id}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
     return res.data;
   } catch (error) {
     console.error("Error getting cart by id:", error);
@@ -27,9 +24,15 @@ export const getCartById = async (id) => {
   }
 };
 
-export const createCart = async (userId) => {
+export const createCart = async (userId, token) => {
   try {
-    const res = await API.post("/cart/create-cart", { userId });
+    const res = await axiosClient.post(
+      "/cart/create-cart",
+      { userId },
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
     return res.data;
   } catch (error) {
     console.error("Error creating cart:", error);
@@ -37,9 +40,11 @@ export const createCart = async (userId) => {
   }
 };
 
-export const updateCart = async (id, data) => {
+export const updateCart = async (id, data, token) => {
   try {
-    const res = await API.put(`/cart/update-cart/${id}`, data);
+    const res = await axiosClient.put(`/cart/update-cart/${id}`, data, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
     return res.data;
   } catch (error) {
     console.error("Error updating cart:", error);
@@ -47,9 +52,11 @@ export const updateCart = async (id, data) => {
   }
 };
 
-export const deleteCart = async (id) => {
+export const deleteCart = async (id, token) => {
   try {
-    const res = await API.delete(`/cart/delete-cart/${id}`);
+    const res = await axiosClient.delete(`/cart/delete-cart/${id}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
     return res.data;
   } catch (error) {
     console.error("Error deleting cart:", error);
@@ -57,9 +64,11 @@ export const deleteCart = async (id) => {
   }
 };
 
-export const getAllCartItems = async () => {
+export const getAllCartItems = async (token) => {
   try {
-    const res = await API.get("/cartItem/get-all-cartItem");
+    const res = await axiosClient.get("/cartItem/get-all-cartItem", {
+      headers: { Authorization: `Bearer ${token}` },
+    });
     return res.data;
   } catch (error) {
     console.error("Error getting all cart items:", error);
@@ -67,9 +76,11 @@ export const getAllCartItems = async () => {
   }
 };
 
-export const getCartItemById = async (id) => {
+export const getCartItemById = async (id, token) => {
   try {
-    const res = await API.get(`/cartItem/get-cartItem/${id}`);
+    const res = await axiosClient.get(`/cartItem/get-cartItem/${id}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
     return res.data;
   } catch (error) {
     console.error("Error getting cart item by id:", error);
@@ -77,13 +88,15 @@ export const getCartItemById = async (id) => {
   }
 };
 
-export const addCart = async ({ cartId, productId, quantity = 1 }) => {
+export const addCart = async ({ cartId, productId, quantity = 1 }, token) => {
   try {
-    const res = await API.post("/cartItem/create-cartItem", {
-      cartId,
-      productId,
-      quantity,
-    });
+    const res = await axiosClient.post(
+      "/cartItem/create-cartItem",
+      { cartId, productId, quantity },
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
     return res.data;
   } catch (error) {
     console.error("Error adding cart item:", error);
@@ -91,9 +104,15 @@ export const addCart = async ({ cartId, productId, quantity = 1 }) => {
   }
 };
 
-export const updateCartItem = async (id, quantity) => {
+export const updateCartItem = async (id, quantity, token) => {
   try {
-    const res = await API.put(`/cartItem/update-cartItem/${id}`, { quantity });
+    const res = await axiosClient.put(
+      `/cartItem/update-cartItem/${id}`,
+      { quantity },
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
     return res.data;
   } catch (error) {
     console.error("Error updating cart item:", error);
@@ -101,9 +120,11 @@ export const updateCartItem = async (id, quantity) => {
   }
 };
 
-export const removeCartItem = async (id) => {
+export const removeCartItem = async (id, token) => {
   try {
-    const res = await API.delete(`/cartItem/delete-cartItem/${id}`);
+    const res = await axiosClient.delete(`/cartItem/delete-cartItem/${id}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
     return res.data;
   } catch (error) {
     console.error("Error removing cart item:", error);
