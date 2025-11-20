@@ -65,6 +65,7 @@ const AdminLogin = () => {
         username: user.username,
         role: user.role,
         phone: user.phone,
+        address: user.address,
         avatar: getAvatarBase64(user.avatar),
       };
 
