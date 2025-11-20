@@ -26,7 +26,7 @@ const MENU_ITEMS = [
   {
     to: "/admin/payment",
     icon: <FiDollarSign />,
-    label: "Phương thức thanh toán",
+    label: "Thanh toán",
   },
   { to: "/admin/categories", icon: <FiLayers />, label: "Danh mục" },
 ];

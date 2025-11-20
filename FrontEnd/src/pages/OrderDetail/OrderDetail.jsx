@@ -170,7 +170,7 @@ const OrderDetail = () => {
     try {
       await Promise.all(
         selectedItems.map((itemId) =>
-          requestReturn(itemId, token, returnReason).catch((err) => {
+          requestReturn(itemId, returnReason, token).catch((err) => {
             console.error(`Lỗi trả hàng ID ${itemId}:`, err);
             throw err;
           })
