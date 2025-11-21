@@ -3,7 +3,7 @@
     <img src="https://media.giphy.com/media/YourGifOrLogoLinkHere/giphy.gif" alt="Logo" width="80" height="80">
   </a>
 
-  <h1 align="center">🛒 E-Commerce Platform</h1>
+  <h1 align="center">🛒TIEN_TECH Shop</h1>
 
   <p align="center">
     Hệ thống thương mại điện tử Full-stack hiện đại, mạnh mẽ và thân thiện.
@@ -105,8 +105,6 @@ Dự án này được phát triển nhằm mục đích áp dụng các kiến 
 ![Admin Dashboard](https://via.placeholder.com/800x400?text=Hinh+Anh+Admin)
 *Giao diện Dashboard quản lý doanh thu và đơn hàng*
 
-> *Lưu ý: Bạn có thể xem thêm hình ảnh chi tiết trong thư mục `/screenshots`.*
-
 ---
 
 ## ⚡ Cài đặt & Hướng dẫn sử dụng
@@ -120,5 +118,46 @@ Dự án này được phát triển nhằm mục đích áp dụng các kiến 
 ### Bước 1: Clone dự án
 
 ```bash
-git clone [https://github.com/username/ten-du-an.git](https://github.com/username/ten-du-an.git)
-cd ten-du-an
+git clone https://github.com/Nguyen-Trung-Tien/Project-App.git
+
+````
+Bước 2: Cài đặt Backend (Server)
+```bash
+cd backend
+npm install
+```
+Cấu hình biến môi trường (.env): Tạo file .env trong thư mục backend và điền thông tin:
+```bash
+PORT=5000
+DB_HOST=localhost
+DB_USER=root
+DB_PASS=your_password
+DB_NAME=ecommerce_db
+JWT_SECRET=your_secret_key
+```
+Chạy Server:
+```bash
+npm start
+# Server sẽ chạy tại http://localhost:8080
+```
+Bước 3: Cài đặt Frontend (Client)
+Mở một terminal mới:
+```bash
+cd frontend
+npm install
+npm start
+# Ứng dụng sẽ chạy tại http://localhost:5173
+```
+💾 Cấu trúc Cơ sở dữ liệu
+Hệ thống sử dụng MySQL với các bảng chính:
+
+Users: Lưu trữ thông tin người dùng và Admin.
+
+Products: Lưu trữ thông tin sản phẩm.
+
+Categories: Danh mục sản phẩm.
+
+Orders: Thông tin đơn hàng.
+
+Order_Details: Chi tiết sản phẩm trong đơn hàng.
+
