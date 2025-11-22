@@ -13,6 +13,7 @@ import {
   Pagination,
   InputGroup,
   Form,
+  Modal,
 } from "react-bootstrap";
 import {
   BoxSeamFill,
@@ -35,7 +36,11 @@ import {
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
-import { getAllOrders, updateOrderStatus } from "../../../api/orderApi";
+import {
+  getAllOrders,
+  updateOrderStatus,
+  deleteOrder,
+} from "../../../api/orderApi";
 import { updatePayment } from "../../../api/paymentApi";
 import "./OrderManage.scss";
 import {
@@ -50,6 +55,8 @@ const OrderManage = () => {
   const token = user?.accessToken;
   const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
+  const [showDelete, setShowDelete] = useState(false);
+  const [selectedOrderId, setSelectedOrderId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [loadingId, setLoadingId] = useState(null);
   const [page, setPage] = useState(1);
@@ -59,7 +66,15 @@ const OrderManage = () => {
 
   const searchTimeoutRef = useRef(null);
   const tableTopRef = useRef(null);
+  const openDeleteModal = (orderId) => {
+    setSelectedOrderId(orderId);
+    setShowDelete(true);
+  };
 
+  const closeDeleteModal = () => {
+    setSelectedOrderId(null);
+    setShowDelete(false);
+  };
   const fetchOrders = async (currentPage = 1, search = "") => {
     setLoading(true);
     try {
@@ -143,6 +158,29 @@ const OrderManage = () => {
       toast.error("Lỗi cập nhật");
     } finally {
       setLoadingId(null);
+    }
+  };
+
+  const handleDeleteOrder = async () => {
+    if (!selectedOrderId) return;
+
+    try {
+      setLoadingId(selectedOrderId);
+
+      const res = await deleteOrder(selectedOrderId, token);
+
+      if (res?.errCode === 0) {
+        toast.success(`Đã xóa đơn DH${selectedOrderId}!`);
+        await fetchOrders(page, searchTerm);
+      } else {
+        toast.error(res?.errMessage || "Xóa đơn thất bại");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Lỗi kết nối khi xóa đơn");
+    } finally {
+      setLoadingId(null);
+      closeDeleteModal();
     }
   };
 
@@ -521,7 +559,14 @@ const OrderManage = () => {
                           >
                             <InfoCircle /> Chi tiết
                           </Button>
-
+                          <Button
+                            variant="outline-danger"
+                            size="sm"
+                            onClick={() => openDeleteModal(order.id)}
+                          >
+                            <XCircleFill className="me-1" />
+                            Xóa
+                          </Button>
                           {order.orderItems?.some(
                             (i) => i.returnStatus === "requested"
                           ) && (
@@ -547,6 +592,33 @@ const OrderManage = () => {
           {renderPagination()}
         </Card.Body>
       </Card>
+      <Modal show={showDelete} onHide={closeDeleteModal} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Xác nhận xoá đơn hàng</Modal.Title>
+        </Modal.Header>
+
+        <Modal.Body>
+          Bạn có chắc chắn muốn xóa đơn <strong>DH{selectedOrderId}</strong>?
+          <br />
+          <span className="text-danger">
+            Hành động này không thể khôi phục!
+          </span>
+        </Modal.Body>
+
+        <Modal.Footer>
+          <Button variant="secondary" onClick={closeDeleteModal}>
+            Hủy
+          </Button>
+
+          <Button
+            variant="danger"
+            onClick={handleDeleteOrder}
+            disabled={loadingId === selectedOrderId}
+          >
+            {loadingId === selectedOrderId ? <Spinner size="sm" /> : "Xóa"}
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 };
