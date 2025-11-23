@@ -24,7 +24,12 @@ import {
   getProductsByCategoryApi,
 } from "../../api/productApi";
 import { addCart, getAllCarts, createCart } from "../../api/cartApi";
-import { createReviewApi, getReviewsByProductApi } from "../../api/reviewApi";
+import {
+  createReviewApi,
+  deleteReviewApi,
+  getReviewsByProductApi,
+  updateReviewApi,
+} from "../../api/reviewApi";
 import ProductCard from "../../components/ProductCard/ProductCard";
 import { getImage } from "../../utils/decodeImage";
 import "./ProductDetailPage.scss";
@@ -174,6 +179,36 @@ const ProductDetailPage = () => {
       fetchSuggestedProducts(product.categoryId, 1, false);
     }
   }, [product?.id, product?.categoryId, fetchSuggestedProducts]);
+
+  const handleUpdateReview = async (reviewId, payload) => {
+    try {
+      const res = await updateReviewApi(reviewId, payload, token);
+      if (res.errCode === 0) {
+        toast.success("Cập nhật đánh giá thành công!");
+        fetchReviews(product.id, page);
+      } else {
+        toast.error(res.errMessage || "Cập nhật thất bại!");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Lỗi khi cập nhật đánh giá!");
+    }
+  };
+
+  const handleDeleteReview = async (reviewId) => {
+    try {
+      const res = await deleteReviewApi(reviewId, token);
+      if (res.errCode === 0) {
+        toast.success("Xóa đánh giá thành công!");
+        fetchReviews(product.id, page);
+      } else {
+        toast.error(res.errMessage || "Xóa thất bại!");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Lỗi khi xóa đánh giá!");
+    }
+  };
   const handleLoadMoreSuggested = () => {
     if (suggestedPage < suggestedTotalPages) {
       fetchSuggestedProducts(product.categoryId, suggestedPage + 1, true);
@@ -456,6 +491,8 @@ const ProductDetailPage = () => {
             }}
             onReplySubmit={handleReplySubmit}
             user={user}
+            onUpdateReview={handleUpdateReview}
+            onDeleteReview={handleDeleteReview}
           />
         </div>
 

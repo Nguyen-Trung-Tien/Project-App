@@ -7,6 +7,7 @@ import {
   Pagination,
   Modal,
   InputGroup,
+  Card,
 } from "react-bootstrap";
 import {
   Trash3,
@@ -22,6 +23,8 @@ import {
   deleteReplyApi,
 } from "../../../api/reviewReplyApi";
 import { useSelector } from "react-redux";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import "./ReviewPage.scss";
 
 const ReviewPage = () => {
@@ -29,9 +32,8 @@ const ReviewPage = () => {
   const [loading, setLoading] = useState(false);
   const [selectedReview, setSelectedReview] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [replyContent, setReplyContent] = useState("");
-  const [replies, setReplies] = useState({}); // { reviewId: [reply1, reply2] }
-
+  const [replies, setReplies] = useState({});
+  const [replyInputs, setReplyInputs] = useState({});
   const user = useSelector((state) => state.user.user);
   const token = user?.accessToken;
 
@@ -56,7 +58,6 @@ const ReviewPage = () => {
       setReviews(res.data || []);
       setPagination(res.pagination || pagination);
 
-      // Load replies cho các review
       const newReplies = {};
       for (let r of res.data) {
         const replyRes = await getRepliesByReviewApi(r.id);
@@ -64,7 +65,8 @@ const ReviewPage = () => {
       }
       setReplies(newReplies);
     } catch (e) {
-      console.error("Error fetching reviews:", e);
+      console.error(e);
+      toast.error("Lấy dữ liệu thất bại");
     } finally {
       setLoading(false);
     }
@@ -79,33 +81,49 @@ const ReviewPage = () => {
       await deleteReviewApi(selectedReview.id, token);
       setShowDeleteModal(false);
       fetchReviews();
+      toast.success("Xóa bình luận thành công");
     } catch (e) {
-      console.error("Error deleting review:", e);
+      console.error(e);
+      toast.error("Xóa bình luận thất bại");
     }
   };
 
   const handleCreateReply = async (reviewId) => {
-    if (!replyContent.trim()) return;
-    const res = await createReplyApi(
-      { reviewId, comment: replyContent },
-      token
-    );
-    if (res.errCode === 0) {
-      setReplies((prev) => ({
-        ...prev,
-        [reviewId]: [...(prev[reviewId] || []), res.data],
-      }));
-      setReplyContent("");
+    const content = replyInputs[reviewId]?.trim();
+    if (!content) return;
+    try {
+      const res = await createReplyApi({ reviewId, comment: content }, token);
+      if (res.errCode === 0) {
+        setReplies((prev) => ({
+          ...prev,
+          [reviewId]: [...(prev[reviewId] || []), res.data],
+        }));
+        setReplyInputs((prev) => ({ ...prev, [reviewId]: "" }));
+        toast.success("Trả lời thành công");
+      } else {
+        toast.error("Trả lời thất bại");
+      }
+    } catch (e) {
+      console.error(e);
+      toast.error("Trả lời thất bại");
     }
   };
 
   const handleDeleteReply = async (reviewId, replyId) => {
-    const res = await deleteReplyApi(replyId, token);
-    if (res.errCode === 0) {
-      setReplies((prev) => ({
-        ...prev,
-        [reviewId]: prev[reviewId].filter((r) => r.id !== replyId),
-      }));
+    try {
+      const res = await deleteReplyApi(replyId, token);
+      if (res.errCode === 0) {
+        setReplies((prev) => ({
+          ...prev,
+          [reviewId]: prev[reviewId].filter((r) => r.id !== replyId),
+        }));
+        toast.success("Xóa trả lời thành công");
+      } else {
+        toast.error("Xóa trả lời thất bại");
+      }
+    } catch (e) {
+      console.error(e);
+      toast.error("Xóa trả lời thất bại");
     }
   };
 
@@ -126,166 +144,139 @@ const ReviewPage = () => {
   };
 
   return (
-    <div className="admin-reviews container-fluid">
-      <div className="card p-3 shadow-sm rounded-3">
-        <h4 className="mb-3">Quản lý bình luận</h4>
+    <div className="review-page container-fluid">
+      <h3 className="mb-4">Quản lý bình luận</h3>
 
-        {/* FILTERS */}
-        <div className="review-filters mb-3 row g-3">
-          <div className="col-md-3">
-            <Form.Select
-              value={filters.rating}
-              onChange={(e) =>
-                setFilters({ ...filters, rating: e.target.value })
-              }
-            >
-              <option value="">Lọc theo số sao</option>
-              <option value="5">5 sao</option>
-              <option value="4">4 sao</option>
-              <option value="3">3 sao</option>
-              <option value="2">2 sao</option>
-              <option value="1">1 sao</option>
-            </Form.Select>
-          </div>
+      {/* Filters */}
+      <Card className="mb-4 p-3 filter-card shadow-sm">
+        <div className="d-flex flex-wrap gap-3">
+          <Form.Select
+            className="filter-select"
+            value={filters.rating}
+            onChange={(e) => setFilters({ ...filters, rating: e.target.value })}
+          >
+            <option value="">Lọc theo số sao</option>
+            {[5, 4, 3, 2, 1].map((r) => (
+              <option key={r} value={r}>
+                {r} sao
+              </option>
+            ))}
+          </Form.Select>
 
-          <div className="col-md-3">
-            <Form.Select
-              value={filters.status}
-              onChange={(e) =>
-                setFilters({ ...filters, status: e.target.value })
-              }
-            >
-              <option value="">Trạng thái</option>
-              <option value="approved">Đã duyệt</option>
-              <option value="pending">Chờ duyệt</option>
-            </Form.Select>
-          </div>
+          <Form.Select
+            className="filter-select"
+            value={filters.status}
+            onChange={(e) => setFilters({ ...filters, status: e.target.value })}
+          >
+            <option value="">Trạng thái</option>
+            <option value="approved">Đã duyệt</option>
+            <option value="pending">Chờ duyệt</option>
+          </Form.Select>
 
-          <div className="col-md-3">
-            <Button
-              variant="secondary"
-              onClick={() => setFilters({ rating: "", status: "" })}
-            >
-              Reset bộ lọc
-            </Button>
-          </div>
+          <Button
+            variant="secondary"
+            onClick={() => setFilters({ rating: "", status: "" })}
+          >
+            Reset bộ lọc
+          </Button>
         </div>
+      </Card>
 
-        {/* TABLE */}
-        <div className="table-responsive">
-          <Table bordered hover className="review-table">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Người dùng</th>
-                <th>Sản phẩm</th>
-                <th>Số sao</th>
-                <th>Bình luận</th>
-                <th>Ngày tạo</th>
-                <th>Hành động</th>
-              </tr>
-            </thead>
-            <tbody>
-              {loading ? (
-                <tr>
-                  <td colSpan="7" className="text-center py-4">
-                    <Spinner animation="border" />
-                  </td>
-                </tr>
-              ) : reviews.length === 0 ? (
-                <tr>
-                  <td colSpan="7" className="text-center py-4 text-muted">
-                    <InfoCircle size={18} /> Không có bình luận nào
-                  </td>
-                </tr>
-              ) : (
-                reviews.map((review) => (
-                  <React.Fragment key={review.id}>
-                    <tr>
-                      <td>{review.id}</td>
-                      <td>
-                        <PersonFill className="me-1" />
-                        {review?.user?.username || "Unknown"}
-                      </td>
-                      <td>{review?.product?.name}</td>
-                      <td>
-                        {Array.from({ length: review.rating }).map((_, i) => (
-                          <StarFill key={i} className="text-warning me-1" />
-                        ))}
-                      </td>
-                      <td>{review.comment}</td>
-                      <td>
-                        <Calendar3 className="me-1" />
-                        {new Date(review.createdAt).toLocaleDateString("vi-VN")}
-                      </td>
-                      <td className="text-center">
-                        <Button
-                          variant="danger"
-                          size="sm"
-                          onClick={() => {
-                            setSelectedReview(review);
-                            setShowDeleteModal(true);
-                          }}
-                        >
-                          <Trash3 />
-                        </Button>
-                      </td>
-                    </tr>
-
-                    {/* REPLIES */}
-                    {(replies[review.id] || []).map((rep) => (
-                      <tr key={rep.id} className="reply-row">
-                        <td></td>
-                        <td>
-                          <PersonFill className="me-1" />
-                          {rep.user.username || "Unknown"}
-                        </td>
-                        <td colSpan={4}>{rep.comment}</td>
-                        <td className="text-center">
-                          <Button
-                            variant="danger"
-                            size="sm"
-                            onClick={() => handleDeleteReply(review.id, rep.id)}
-                          >
-                            <Trash3 />
-                          </Button>
-                        </td>
-                      </tr>
+      {/* Reviews */}
+      <div className="reviews-list">
+        {loading ? (
+          <div className="text-center py-5">
+            <Spinner animation="border" />
+          </div>
+        ) : reviews.length === 0 ? (
+          <div className="text-center py-5 text-muted">
+            <InfoCircle size={20} /> Không có bình luận nào
+          </div>
+        ) : (
+          reviews.map((review) => (
+            <Card key={review.id} className="mb-3 shadow-sm review-card">
+              <Card.Body>
+                <div className="d-flex justify-content-between align-items-start mb-2">
+                  <div className="d-flex align-items-center gap-2">
+                    <PersonFill />{" "}
+                    <strong>{review.user?.username || "Unknown"}</strong>
+                    <span className="ms-2 text-muted">
+                      - {review.product?.name}
+                    </span>
+                  </div>
+                  <div className="d-flex align-items-center gap-2">
+                    {Array.from({ length: review.rating }).map((_, i) => (
+                      <StarFill key={i} className="text-warning" />
                     ))}
+                    <Button
+                      variant="outline-danger"
+                      size="sm"
+                      onClick={() => {
+                        setSelectedReview(review);
+                        setShowDeleteModal(true);
+                      }}
+                    >
+                      <Trash3 size={14} />
+                    </Button>
+                  </div>
+                </div>
+                <div className="review-comment mb-2">{review.comment}</div>
+                <div className="review-date text-muted mb-2">
+                  <Calendar3 className="me-1" />
+                  {new Date(review.createdAt).toLocaleDateString("vi-VN")}
+                </div>
 
-                    {/* ADD REPLY */}
-                    <tr className="reply-add-row">
-                      <td></td>
-                      <td colSpan={6}>
-                        <InputGroup>
-                          <Form.Control
-                            placeholder="Trả lời bình luận..."
-                            value={replyContent}
-                            onChange={(e) => setReplyContent(e.target.value)}
-                          />
-                          <Button
-                            variant="primary"
-                            onClick={() => handleCreateReply(review.id)}
-                          >
-                            Trả lời
-                          </Button>
-                        </InputGroup>
-                      </td>
-                    </tr>
-                  </React.Fragment>
-                ))
-              )}
-            </tbody>
-          </Table>
-        </div>
+                {/* Replies */}
+                {(replies[review.id] || []).map((rep) => (
+                  <Card key={rep.id} className="mb-2 reply-card p-2">
+                    <div className="d-flex justify-content-between align-items-center">
+                      <div>
+                        <PersonFill />{" "}
+                        <strong>{rep.user.username || "Unknown"}</strong>:{" "}
+                        {rep.comment}
+                      </div>
+                      <Button
+                        variant="outline-danger"
+                        size="sm"
+                        onClick={() => handleDeleteReply(review.id, rep.id)}
+                      >
+                        <Trash3 size={14} />
+                      </Button>
+                    </div>
+                  </Card>
+                ))}
 
-        {/* PAGINATION */}
-        <Pagination className="justify-content-center mt-3">
-          {renderPagination()}
-        </Pagination>
+                {/* Add reply */}
+                <InputGroup className="mt-2">
+                  <Form.Control
+                    placeholder="Trả lời bình luận..."
+                    value={replyInputs[review.id] || ""}
+                    onChange={(e) =>
+                      setReplyInputs((prev) => ({
+                        ...prev,
+                        [review.id]: e.target.value,
+                      }))
+                    }
+                  />
+                  <Button
+                    variant="primary"
+                    onClick={() => handleCreateReply(review.id)}
+                  >
+                    Trả lời
+                  </Button>
+                </InputGroup>
+              </Card.Body>
+            </Card>
+          ))
+        )}
       </div>
 
-      {/* DELETE REVIEW MODAL */}
+      {/* Pagination */}
+      <Pagination className="justify-content-center mt-4">
+        {renderPagination()}
+      </Pagination>
+
+      {/* Delete Modal */}
       <Modal show={showDeleteModal} onHide={() => setShowDeleteModal(false)}>
         <Modal.Header closeButton>
           <Modal.Title>Xóa bình luận</Modal.Title>

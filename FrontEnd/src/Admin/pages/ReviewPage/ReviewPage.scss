@@ -1,38 +1,52 @@
-.admin-reviews {
-  .review-filters {
-    select {
-      border-radius: 8px;
-      padding: 8px;
+.review-page {
+  h4 {
+    font-weight: 600;
+  }
+
+  .filter-card {
+    background: #f8f9fa;
+    border-radius: 0.5rem;
+  }
+
+  .filter-select {
+    min-width: 150px;
+  }
+
+  .reviews-list {
+    .review-card {
+      border-radius: 0.5rem;
+      transition: all 0.2s;
+      &:hover {
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+      }
+
+      .review-comment {
+        font-size: 0.95rem;
+      }
+
+      .review-date {
+        font-size: 0.85rem;
+      }
+
+      .reply-card {
+        background: #f1f3f5;
+        border-radius: 0.5rem;
+        font-size: 0.9rem;
+      }
+
+      input {
+        border-radius: 0.3rem;
+      }
+
+      .btn-primary {
+        border-radius: 0.3rem;
+      }
     }
   }
 
-  .review-table {
-    th {
-      background: #f8f9fa;
-      font-weight: 600;
-      text-align: center;
+  .pagination {
+    li {
+      margin: 0 2px;
     }
-
-    td {
-      vertical-align: middle;
-    }
-
-    td:first-child {
-      text-align: center;
-      font-weight: 600;
-    }
-  }
-
-  .text-warning {
-    color: #ffc107 !important;
-  }
-
-  .modal-content {
-    border-radius: 12px;
-  }
-
-  .pagination .page-item .page-link {
-    border-radius: 6px;
-    margin: 0 2px;
   }
 }
