@@ -21,11 +21,54 @@ export const getReviewsByProductApi = async (
 
 export const createReviewApi = async (payload, token) => {
   try {
-    const res = await axiosClient.post(`${API_URL}/review/create`, payload, {
+    const res = await axiosClient.post(`/review/create`, payload, {
       headers: { Authorization: `Bearer ${token}` },
     });
     return res.data;
   } catch (err) {
     console.error(err);
+  }
+};
+
+export const updateReviewApi = async (reviewId, payload, token) => {
+  try {
+    const res = await axiosClient.put(`review/update/${reviewId}`, payload, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return res.data;
+  } catch (err) {
+    console.error("Lỗi cập nhật đánh giá:", err);
+    return { errCode: 1, errMessage: "Cập nhật đánh giá thất bại" };
+  }
+};
+
+export const deleteReviewApi = async (reviewId, token) => {
+  try {
+    const res = await axiosClient.delete(`review/delete/${reviewId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return res.data;
+  } catch (err) {
+    console.error("Lỗi xóa đánh giá:", err);
+    return { errCode: 1, errMessage: "Xóa đánh giá thất bại" };
+  }
+};
+
+export const getAllReviewsApi = async (
+  page = 1,
+  limit = 10,
+  rating = "",
+  status = "",
+  token
+) => {
+  try {
+    const res = await axiosClient.get(`/review/get-all`, {
+      params: { page, limit, rating, status },
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return res.data;
+  } catch (err) {
+    console.error("Lỗi khi lấy tất cả đánh giá:", err);
+    return { errCode: 1, errMessage: "Không thể tải đánh giá" };
   }
 };

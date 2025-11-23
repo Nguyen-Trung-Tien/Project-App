@@ -10,6 +10,7 @@ import {
   FiLogOut,
   FiBarChart,
   FiDollarSign,
+  FiHelpCircle,
 } from "react-icons/fi";
 import { useDispatch, useSelector } from "react-redux";
 import { logoutUserApi } from "../../../api/userApi";
@@ -29,6 +30,7 @@ const MENU_ITEMS = [
     label: "Thanh toán",
   },
   { to: "/admin/categories", icon: <FiLayers />, label: "Danh mục" },
+  { to: "/admin/reviews", icon: <FiHelpCircle />, label: "Phản hồi" },
 ];
 
 const Sidebar = () => {

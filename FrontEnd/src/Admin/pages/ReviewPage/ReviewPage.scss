@@ -1,0 +1,38 @@
+.admin-reviews {
+  .review-filters {
+    select {
+      border-radius: 8px;
+      padding: 8px;
+    }
+  }
+
+  .review-table {
+    th {
+      background: #f8f9fa;
+      font-weight: 600;
+      text-align: center;
+    }
+
+    td {
+      vertical-align: middle;
+    }
+
+    td:first-child {
+      text-align: center;
+      font-weight: 600;
+    }
+  }
+
+  .text-warning {
+    color: #ffc107 !important;
+  }
+
+  .modal-content {
+    border-radius: 12px;
+  }
+
+  .pagination .page-item .page-link {
+    border-radius: 6px;
+    margin: 0 2px;
+  }
+}

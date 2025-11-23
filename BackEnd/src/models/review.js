@@ -19,6 +19,8 @@ module.exports = (sequelize, DataTypes) => {
         onDelete: "CASCADE",
         onUpdate: "CASCADE",
       });
+
+      Review.hasMany(models.ReviewReply, { as: "replies" });
     }
   }
 

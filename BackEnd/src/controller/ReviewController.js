@@ -34,4 +34,49 @@ const handleCreateReview = async (req, res) => {
   }
 };
 
-module.exports = { handleGetReviewsByProduct, handleCreateReview };
+const handleUpdateReview = async (req, res) => {
+  const reviewId = req.params.id;
+  const data = req.body;
+  const user = req.user;
+
+  const result = await ReviewService.updateReview(reviewId, data, user);
+  return res.status(200).json(result);
+};
+
+const handleDeleteReview = async (req, res) => {
+  const reviewId = req.params.id;
+  const user = req.user;
+
+  const result = await ReviewService.deleteReview(reviewId, user);
+  return res.status(200).json(result);
+};
+
+const handleGetAllReviewsAdmin = async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const rating = req.query.rating || "";
+    const status = req.query.status || "";
+
+    const data = await ReviewService.getAllReviewsAdmin(
+      page,
+      limit,
+      rating,
+      status
+    );
+    return res.status(200).json(data);
+  } catch (e) {
+    console.error("Error getAllReviewsAdmin:", e);
+    return res.status(500).json({
+      errCode: -1,
+      errMessage: "Error from server",
+    });
+  }
+};
+module.exports = {
+  handleGetReviewsByProduct,
+  handleCreateReview,
+  handleDeleteReview,
+  handleUpdateReview,
+  handleGetAllReviewsAdmin,
+};

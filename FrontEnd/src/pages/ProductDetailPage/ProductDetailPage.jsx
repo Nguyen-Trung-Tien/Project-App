@@ -32,6 +32,10 @@ import { addCartItem } from "../../redux/cartSlice";
 import ChatBot from "../../components/ChatBot/ChatBot";
 import ReviewForm from "../../components/ReviewComponent/ReviewForm";
 import ReviewList from "../../components/ReviewComponent/ReviewList";
+import {
+  createReplyApi,
+  getRepliesByReviewApi,
+} from "../../api/reviewReplyApi";
 
 const ProductDetailPage = () => {
   const user = useSelector((state) => state.user.user);
@@ -48,6 +52,7 @@ const ProductDetailPage = () => {
   const [page, setPage] = useState(1);
   const [pagination, setPagination] = useState({ totalPages: 1 });
   const [newReview, setNewReview] = useState({ rating: 5, comment: "" });
+
   const limit = 3;
   const [suggestedProducts, setSuggestedProducts] = useState([]);
   const [suggestedPage, setSuggestedPage] = useState(1);
@@ -128,20 +133,38 @@ const ProductDetailPage = () => {
     try {
       const res = await getReviewsByProductApi(productId, page, limit);
       if (res?.errCode === 0) {
-        setReviews(res.data);
+        const reviewsWithReplies = await Promise.all(
+          res.data.map(async (r) => {
+            const replyRes = await getRepliesByReviewApi(r.id);
+            return { ...r, ReviewReplies: replyRes?.data || [] };
+          })
+        );
+        setReviews(reviewsWithReplies);
         setPagination(res.pagination);
       }
     } catch (err) {
       console.error("Lỗi tải đánh giá:", err);
     }
   };
-
   useEffect(() => {
     if (product?.id) {
       fetchReviews(product.id, page);
     }
   }, [page, product?.id]);
 
+  const handleReplySubmit = async (reviewId, content) => {
+    if (!content?.trim()) return;
+    const res = await createReplyApi({ reviewId, comment: content }, token);
+    if (res.errCode === 0) {
+      setReviews((prev) =>
+        prev.map((r) =>
+          r.id === reviewId
+            ? { ...r, ReviewReplies: [...(r.ReviewReplies || []), res.data] }
+            : r
+        )
+      );
+    }
+  };
   useEffect(() => {
     if (product?.categoryId) {
       setSuggestedProducts([]);
@@ -431,6 +454,8 @@ const ProductDetailPage = () => {
               setPage(newPage);
               fetchReviews(product.id, newPage);
             }}
+            onReplySubmit={handleReplySubmit}
+            user={user}
           />
         </div>
 
