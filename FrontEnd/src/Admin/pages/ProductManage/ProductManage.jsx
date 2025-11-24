@@ -413,7 +413,7 @@ const ProductManage = () => {
                           variant="outline-warning"
                           size="sm"
                           onClick={() => handleShowModal(p)}
-                          className="me-1"
+                          className="me-1 m-1"
                           title="Sửa"
                         >
                           <PencilSquare size={14} />
@@ -421,6 +421,7 @@ const ProductManage = () => {
                         <Button
                           variant="outline-danger"
                           size="sm"
+                          className="me-1 m-1"
                           onClick={() => handleDeleteClick(p.id)}
                           title="Xóa"
                         >

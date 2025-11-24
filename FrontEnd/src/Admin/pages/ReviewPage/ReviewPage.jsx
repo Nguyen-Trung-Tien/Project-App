@@ -8,13 +8,16 @@ import {
   Modal,
   InputGroup,
   Card,
+  Badge,
 } from "react-bootstrap";
 import {
   Trash3,
   StarFill,
   PersonFill,
   Calendar3,
-  InfoCircle,
+  ReplyFill,
+  SendFill,
+  FilterSquare,
 } from "react-bootstrap-icons";
 import { deleteReviewApi, getAllReviewsApi } from "../../../api/reviewApi";
 import {
@@ -24,7 +27,6 @@ import {
 } from "../../../api/reviewReplyApi";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 import "./ReviewPage.scss";
 
 const ReviewPage = () => {
@@ -34,6 +36,7 @@ const ReviewPage = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [replies, setReplies] = useState({});
   const [replyInputs, setReplyInputs] = useState({});
+
   const user = useSelector((state) => state.user.user);
   const token = user?.accessToken;
 
@@ -55,18 +58,19 @@ const ReviewPage = () => {
         filters.status,
         token
       );
+
       setReviews(res.data || []);
       setPagination(res.pagination || pagination);
 
       const newReplies = {};
       for (let r of res.data) {
-        const replyRes = await getRepliesByReviewApi(r.id);
-        if (replyRes.errCode === 0) newReplies[r.id] = replyRes.data;
+        const rep = await getRepliesByReviewApi(r.id);
+        if (rep.errCode === 0) newReplies[r.id] = rep.data;
       }
       setReplies(newReplies);
     } catch (e) {
       console.error(e);
-      toast.error("Lấy dữ liệu thất bại");
+      toast.error("Không thể tải bình luận");
     } finally {
       setLoading(false);
     }
@@ -81,16 +85,17 @@ const ReviewPage = () => {
       await deleteReviewApi(selectedReview.id, token);
       setShowDeleteModal(false);
       fetchReviews();
-      toast.success("Xóa bình luận thành công");
+      toast.success("Đã xóa bình luận");
     } catch (e) {
-      console.error(e);
-      toast.error("Xóa bình luận thất bại");
+      console.log(e);
+      toast.error("Xóa thất bại");
     }
   };
 
   const handleCreateReply = async (reviewId) => {
     const content = replyInputs[reviewId]?.trim();
     if (!content) return;
+
     try {
       const res = await createReplyApi({ reviewId, comment: content }, token);
       if (res.errCode === 0) {
@@ -98,14 +103,12 @@ const ReviewPage = () => {
           ...prev,
           [reviewId]: [...(prev[reviewId] || []), res.data],
         }));
-        setReplyInputs((prev) => ({ ...prev, [reviewId]: "" }));
-        toast.success("Trả lời thành công");
-      } else {
-        toast.error("Trả lời thất bại");
+        setReplyInputs((p) => ({ ...p, [reviewId]: "" }));
       }
+      toast.success("Đã phản hồi");
     } catch (e) {
-      console.error(e);
-      toast.error("Trả lời thất bại");
+      console.log(e);
+      toast.error("Phản hồi thất bại");
     }
   };
 
@@ -115,47 +118,33 @@ const ReviewPage = () => {
       if (res.errCode === 0) {
         setReplies((prev) => ({
           ...prev,
-          [reviewId]: prev[reviewId].filter((r) => r.id !== replyId),
+          [reviewId]: prev[reviewId].filter((x) => x.id !== replyId),
         }));
-        toast.success("Xóa trả lời thành công");
-      } else {
-        toast.error("Xóa trả lời thất bại");
+        toast.success("Đã xóa phản hồi");
       }
-    } catch (e) {
-      console.error(e);
-      toast.error("Xóa trả lời thất bại");
+    } catch {
+      toast.error("Xóa phản hồi thất bại");
     }
-  };
-
-  const renderPagination = () => {
-    const pages = [];
-    for (let i = 1; i <= pagination.totalPages; i++) {
-      pages.push(
-        <Pagination.Item
-          key={i}
-          active={i === pagination.page}
-          onClick={() => setPagination((p) => ({ ...p, page: i }))}
-        >
-          {i}
-        </Pagination.Item>
-      );
-    }
-    return pages;
   };
 
   return (
     <div className="review-page container-fluid">
-      <h3 className="mb-4">Quản lý bình luận</h3>
+      <h3 className="fw-semibold mb-4">
+        <FilterSquare className="me-2" color="#0d6efd" size={28} />
+        Quản lý đánh giá
+      </h3>
 
       {/* Filters */}
-      <Card className="mb-4 p-3 filter-card shadow-sm">
-        <div className="d-flex flex-wrap gap-3">
+      <Card className="mb-4 p-3 shadow-sm filter-card">
+        <div className="d-flex flex-wrap gap-3 align-items-center">
           <Form.Select
             className="filter-select"
             value={filters.rating}
-            onChange={(e) => setFilters({ ...filters, rating: e.target.value })}
+            onChange={(e) =>
+              setFilters((p) => ({ ...p, rating: e.target.value }))
+            }
           >
-            <option value="">Lọc theo số sao</option>
+            <option value="">Lọc theo sao</option>
             {[5, 4, 3, 2, 1].map((r) => (
               <option key={r} value={r}>
                 {r} sao
@@ -166,7 +155,9 @@ const ReviewPage = () => {
           <Form.Select
             className="filter-select"
             value={filters.status}
-            onChange={(e) => setFilters({ ...filters, status: e.target.value })}
+            onChange={(e) =>
+              setFilters((p) => ({ ...p, status: e.target.value }))
+            }
           >
             <option value="">Trạng thái</option>
             <option value="approved">Đã duyệt</option>
@@ -177,103 +168,114 @@ const ReviewPage = () => {
             variant="secondary"
             onClick={() => setFilters({ rating: "", status: "" })}
           >
-            Reset bộ lọc
+            Reset
           </Button>
         </div>
       </Card>
 
-      {/* Reviews */}
-      <div className="reviews-list">
-        {loading ? (
-          <div className="text-center py-5">
-            <Spinner animation="border" />
-          </div>
-        ) : reviews.length === 0 ? (
-          <div className="text-center py-5 text-muted">
-            <InfoCircle size={20} /> Không có bình luận nào
-          </div>
-        ) : (
-          reviews.map((review) => (
-            <Card key={review.id} className="mb-3 shadow-sm review-card">
-              <Card.Body>
-                <div className="d-flex justify-content-between align-items-start mb-2">
-                  <div className="d-flex align-items-center gap-2">
-                    <PersonFill />{" "}
-                    <strong>{review.user?.username || "Unknown"}</strong>
-                    <span className="ms-2 text-muted">
-                      - {review.product?.name}
-                    </span>
-                  </div>
-                  <div className="d-flex align-items-center gap-2">
-                    {Array.from({ length: review.rating }).map((_, i) => (
-                      <StarFill key={i} className="text-warning" />
-                    ))}
+      {/* Review List */}
+      {loading ? (
+        <div className="text-center py-5">
+          <Spinner animation="border" />
+        </div>
+      ) : (
+        reviews.map((review) => (
+          <Card key={review.id} className="review-card shadow-sm mb-3">
+            <Card.Body>
+              {/* Header */}
+              <div className="d-flex justify-content-between align-items-start mb-2">
+                <div className="d-flex align-items-center gap-2">
+                  <PersonFill className="text-primary" />
+                  <strong>{review.user?.username || "Unknown"}</strong>
+
+                  <Badge bg="light" text="dark" className="ms-2">
+                    {review.product?.name}
+                  </Badge>
+                </div>
+
+                <div className="d-flex align-items-center gap-2">
+                  {[...Array(review.rating)].map((_, i) => (
+                    <StarFill key={i} className="text-warning" />
+                  ))}
+
+                  <Button
+                    variant="outline-danger"
+                    size="sm"
+                    onClick={() => {
+                      setSelectedReview(review);
+                      setShowDeleteModal(true);
+                    }}
+                  >
+                    <Trash3 size={14} />
+                  </Button>
+                </div>
+              </div>
+
+              {/* Comment */}
+              <div className="review-comment mb-2 px-1">{review.comment}</div>
+
+              {/* Date */}
+              <div className="review-date text-muted small mb-3">
+                <Calendar3 className="me-1" />
+                {new Date(review.createdAt).toLocaleDateString("vi-VN")}
+              </div>
+
+              {/* Replies */}
+              {(replies[review.id] || []).map((rep) => (
+                <Card key={rep.id} className="reply-card p-2 mb-2">
+                  <div className="d-flex justify-content-between align-items-center">
+                    <div>
+                      <ReplyFill className="text-info me-1" />
+                      <strong>{rep.user.username}</strong>: {rep.comment}
+                    </div>
+
                     <Button
                       variant="outline-danger"
                       size="sm"
-                      onClick={() => {
-                        setSelectedReview(review);
-                        setShowDeleteModal(true);
-                      }}
+                      onClick={() => handleDeleteReply(review.id, rep.id)}
                     >
                       <Trash3 size={14} />
                     </Button>
                   </div>
-                </div>
-                <div className="review-comment mb-2">{review.comment}</div>
-                <div className="review-date text-muted mb-2">
-                  <Calendar3 className="me-1" />
-                  {new Date(review.createdAt).toLocaleDateString("vi-VN")}
-                </div>
+                </Card>
+              ))}
 
-                {/* Replies */}
-                {(replies[review.id] || []).map((rep) => (
-                  <Card key={rep.id} className="mb-2 reply-card p-2">
-                    <div className="d-flex justify-content-between align-items-center">
-                      <div>
-                        <PersonFill />{" "}
-                        <strong>{rep.user.username || "Unknown"}</strong>:{" "}
-                        {rep.comment}
-                      </div>
-                      <Button
-                        variant="outline-danger"
-                        size="sm"
-                        onClick={() => handleDeleteReply(review.id, rep.id)}
-                      >
-                        <Trash3 size={14} />
-                      </Button>
-                    </div>
-                  </Card>
-                ))}
+              {/* Add reply */}
+              <InputGroup className="mt-2">
+                <Form.Control
+                  placeholder="Nhập phản hồi..."
+                  value={replyInputs[review.id] || ""}
+                  onChange={(e) =>
+                    setReplyInputs((prev) => ({
+                      ...prev,
+                      [review.id]: e.target.value,
+                    }))
+                  }
+                />
 
-                {/* Add reply */}
-                <InputGroup className="mt-2">
-                  <Form.Control
-                    placeholder="Trả lời bình luận..."
-                    value={replyInputs[review.id] || ""}
-                    onChange={(e) =>
-                      setReplyInputs((prev) => ({
-                        ...prev,
-                        [review.id]: e.target.value,
-                      }))
-                    }
-                  />
-                  <Button
-                    variant="primary"
-                    onClick={() => handleCreateReply(review.id)}
-                  >
-                    Trả lời
-                  </Button>
-                </InputGroup>
-              </Card.Body>
-            </Card>
-          ))
-        )}
-      </div>
+                <Button
+                  variant="primary"
+                  onClick={() => handleCreateReply(review.id)}
+                >
+                  <SendFill />
+                </Button>
+              </InputGroup>
+            </Card.Body>
+          </Card>
+        ))
+      )}
 
       {/* Pagination */}
       <Pagination className="justify-content-center mt-4">
-        {renderPagination()}
+        {[...Array(pagination.totalPages)].map((_, i) => (
+          <Pagination.Item
+            key={i + 1}
+            active={i + 1 === pagination.page}
+            onClick={() => setPagination((p) => ({ ...p, page: i + 1 }))}
+          >
+            {i + 1}
+          </Pagination.Item>
+        ))}
       </Pagination>
 
       {/* Delete Modal */}

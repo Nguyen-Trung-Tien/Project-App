@@ -39,6 +39,7 @@ import ReviewForm from "../../components/ReviewComponent/ReviewForm";
 import ReviewList from "../../components/ReviewComponent/ReviewList";
 import {
   createReplyApi,
+  deleteReplyApi,
   getRepliesByReviewApi,
 } from "../../api/reviewReplyApi";
 
@@ -209,6 +210,26 @@ const ProductDetailPage = () => {
       toast.error("Lỗi khi xóa đánh giá!");
     }
   };
+  const handleDeleteReply = async (replyId) => {
+    try {
+      const res = await deleteReplyApi(replyId, token);
+      if (res.errCode === 0) {
+        toast.success("Xóa trả lời thành công!");
+        setReviews((prev) =>
+          prev.map((r) => ({
+            ...r,
+            ReviewReplies: r.ReviewReplies.filter((rep) => rep.id !== replyId),
+          }))
+        );
+      } else {
+        toast.error(res.errMessage || "Xóa trả lời thất bại!");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Lỗi khi xóa trả lời!");
+    }
+  };
+
   const handleLoadMoreSuggested = () => {
     if (suggestedPage < suggestedTotalPages) {
       fetchSuggestedProducts(product.categoryId, suggestedPage + 1, true);
@@ -491,6 +512,7 @@ const ProductDetailPage = () => {
             }}
             onReplySubmit={handleReplySubmit}
             user={user}
+            onDeleteReply={handleDeleteReply}
             onUpdateReview={handleUpdateReview}
             onDeleteReview={handleDeleteReview}
           />
