@@ -1,6 +1,8 @@
 require("dotenv").config();
 const OpenAI = require("openai");
-const { Product, Order, Category } = require("../models");
+const { Product, Order, Category, OrderItem } = require("../models");
+const { Op } = require("sequelize");
+
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
@@ -13,52 +15,73 @@ const handleChat = async (req, res) => {
       return res.status(400).json({ error: "Thiếu nội dung câu hỏi." });
     }
 
+    const intentResult = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+        {
+          role: "system",
+          content: `
+Bạn là bộ phân loại ý định. Chỉ trả về JSON.  
+Các intent hợp lệ:
+- product_search
+- product_price
+- product_stock
+- product_compare
+- product_suggestion
+- order_status
+- order_by_id
+- warranty
+- shipping
+- return_policy
+- payment_method
+- smalltalk
+- other
+
+Hãy phân tích câu hỏi và trả về:
+{ "intent": "...", "product": "..." }
+Nếu không có sản phẩm, đặt product = "".
+`,
+        },
+        { role: "user", content: message },
+      ],
+      temperature: 0,
+    });
+
+    const parsedIntent = JSON.parse(intentResult.choices[0].message.content);
+    const intent = parsedIntent.intent;
+    const productNameAI = parsedIntent.product?.trim() || "";
+
     let dbContext = "";
+    let product = null;
 
-    const lowerMsg = message.toLowerCase().trim();
+    if (productNameAI) {
+      product = await Product.findOne({
+        where: { name: { [Op.like]: `%${productNameAI}%` }, isActive: true },
+        include: [{ model: Category, as: "category" }],
+      });
 
-    if (
-      lowerMsg.includes("sản phẩm") ||
-      lowerMsg.includes("mua") ||
-      lowerMsg.includes("giá")
-    ) {
-      const productName = extractProductName(message);
-      if (productName) {
-        const product = await Product.findOne({
-          where: {
-            name: { [require("sequelize").Op.like]: `%${productName}%` },
-            isActive: true,
-          },
-          include: [{ model: Category, as: "category" }],
-        });
+      if (product) {
+        const discountPrice = product.price * (1 - product.discount / 100);
 
-        if (product) {
-          const discountPrice = product.price * (1 - product.discount / 100);
-          dbContext = `
-Sản phẩm tìm thấy:
+        dbContext += `
+Sản phẩm:
 - Tên: ${product.name}
 - Giá gốc: ${formatPrice(product.price)} ₫
 - Giảm giá: ${product.discount}% → Giá hiện tại: ${formatPrice(discountPrice)} ₫
-- Kho: ${product.stock > 0 ? `${product.stock} sản phẩm` : "Hết hàng"}
-- Danh mục: ${product.category?.name || "Chưa phân loại"}
+- Kho: ${product.stock > 0 ? product.stock : "Hết hàng"}
+- Danh mục: ${product.category?.name || "Không có"}
 - Mô tả: ${product.description?.substring(0, 150) || "Không có mô tả"}...
-          `.trim();
-        } else {
-          dbContext = `Không tìm thấy sản phẩm nào phù hợp với "${productName}".`;
-        }
+        `.trim();
       }
     }
 
-    if (
-      userId &&
-      (lowerMsg.includes("đơn hàng") || lowerMsg.includes("đơn của tôi"))
-    ) {
+    if (intent === "order_status" && userId) {
       const order = await Order.findOne({
         where: { userId },
         order: [["createdAt", "DESC"]],
         include: [
           {
-            model: require("../models").OrderItem,
+            model: OrderItem,
             as: "orderItems",
             include: [Product],
           },
@@ -67,9 +90,12 @@ Sản phẩm tìm thấy:
 
       if (order) {
         const items = order.orderItems
-          .map((item) => `${item.quantity}x ${item.Product.name}`)
+          .map((i) => `${i.quantity}x ${i.Product.name}`)
           .join(", ");
-        dbContext += `\n\nĐơn hàng gần nhất của bạn:
+
+        dbContext += `
+
+Đơn hàng gần nhất:
 - Mã đơn: #${order.id}
 - Trạng thái: ${translateStatus(order.status)}
 - Tổng tiền: ${formatPrice(order.totalPrice)} ₫
@@ -77,18 +103,53 @@ Sản phẩm tìm thấy:
 - Địa chỉ: ${order.shippingAddress}
         `.trim();
       } else {
-        dbContext += `\n\nBạn chưa có đơn hàng nào.`;
+        dbContext += "\nBạn chưa có đơn hàng nào.";
+      }
+    }
+
+    if (intent === "order_by_id") {
+      const orderId = message.match(/\d+/)?.[0];
+
+      if (orderId) {
+        const order = await Order.findOne({
+          where: { id: orderId },
+          include: [
+            {
+              model: OrderItem,
+              as: "orderItems",
+              include: [Product],
+            },
+          ],
+        });
+
+        if (order) {
+          const items = order.orderItems
+            .map((i) => `${i.quantity}x ${i.Product.name}`)
+            .join(", ");
+
+          dbContext += `
+Thông tin đơn #${order.id}:
+- Trạng thái: ${translateStatus(order.status)}
+- Tổng tiền: ${formatPrice(order.totalPrice)} ₫
+- Sản phẩm: ${items}
+- Địa chỉ: ${order.shippingAddress}
+          `.trim();
+        } else {
+          dbContext += `Không tìm thấy đơn hàng #${orderId}.`;
+        }
       }
     }
 
     const systemPrompt = `
-Bạn là trợ lý AI thân thiện của website "TienTech Shop".
-Hỗ trợ khách hàng về: sản phẩm, giá cả, khuyến mãi, đơn hàng, đổi trả, vận chuyển.
-Trả lời bằng tiếng Việt, ngắn gọn, tự nhiên, thân thiện.
-Dùng dữ liệu sau nếu phù hợp (không cần nói "dựa trên dữ liệu"):
+Bạn là trợ lý AI của TienTech Shop.
+Trả lời thân thiện, tự nhiên, rõ ràng.
+Nếu có dữ liệu trong DB thì dùng để trả lời nhưng **không nói “dựa theo dữ liệu bạn gửi”**.
 
-${dbContext}
-    `.trim();
+Dữ liệu truy vấn:
+${dbContext || "(không có dữ liệu)"}
+
+Luôn trả lời bằng tiếng Việt.
+`.trim();
 
     const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",
@@ -97,30 +158,17 @@ ${dbContext}
         { role: "user", content: message },
       ],
       temperature: 0.7,
-      max_tokens: 300,
+      max_tokens: 350,
     });
 
     const reply = completion.choices[0].message.content;
+
     res.json({ reply });
   } catch (error) {
     console.error("Lỗi chatbot:", error);
-    res.status(500).json({
-      error: "Lỗi khi xử lý yêu cầu AI.",
-      details: error.message,
-    });
+    res.status(500).json({ error: "Lỗi khi xử lý yêu cầu AI." });
   }
 };
-
-function extractProductName(message) {
-  const keywords = ["mua", "giá", "sản phẩm", "có", "bán", "là"];
-  const words = message.split(" ").filter((w) => w.length > 2);
-  for (let word of words) {
-    if (!keywords.includes(word.toLowerCase())) {
-      return word.replace(/[^a-zA-Z0-9À-ỹ\s]/g, "");
-    }
-  }
-  return null;
-}
 
 function formatPrice(price) {
   return parseFloat(price).toLocaleString("vi-VN");

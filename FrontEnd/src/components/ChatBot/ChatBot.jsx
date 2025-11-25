@@ -8,54 +8,94 @@ const ChatBot = () => {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [hasGreeted, setHasGreeted] = useState(false);
+  const [typingText, setTypingText] = useState("");
+
   const messagesEndRef = useRef(null);
+  const userId = localStorage.getItem("userId") || null;
+
+  const quickSuggestions = [
+    "Tìm sản phẩm",
+    "Giá giảm hôm nay",
+    "Kiểm tra đơn hàng",
+    "Chính sách đổi trả",
+    "Gợi ý theo nhu cầu",
+  ];
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  }, [messages, typingText]);
 
-  const toggleChat = () => setIsOpen(!isOpen);
-
+  // Tin nhắn chào với gợi ý
   useEffect(() => {
     if (isOpen && !hasGreeted) {
       setMessages([
         {
           role: "assistant",
-          content:
-            "Xin chào! Tôi là trợ lý TienTech. Tôi có thể giúp gì cho bạn hôm nay?",
+          content: `Xin chào! 👋 Tôi là trợ lý TienTech.
+Tôi có thể giúp bạn với:
+• 🔍 Tìm sản phẩm
+• 💰 Xem giá, khuyến mãi
+• 📦 Kiểm tra đơn hàng
+• 📋 Chính sách đổi trả – bảo hành
+• 🚚 Vận chuyển – thanh toán
+
+Bạn muốn hỏi gì hôm nay? 😊`,
           time: new Date(),
         },
       ]);
       setHasGreeted(true);
     }
   }, [isOpen, hasGreeted]);
+
+  const toggleChat = () => setIsOpen(!isOpen);
+
+  const typeEffect = async (text) => {
+    setTypingText("");
+    for (let i = 0; i < text.length; i++) {
+      await new Promise((r) => setTimeout(r, 15));
+      setTypingText((prev) => prev + text[i]);
+    }
+    setTypingText("");
+    setMessages((prev) => [
+      ...prev,
+      { role: "assistant", content: text, time: new Date() },
+    ]);
+  };
+
   const handleSend = async (e) => {
     e.preventDefault();
-    if (!input.trim()) return;
+    if (!input.trim() || loading) return;
 
-    const userMsg = { role: "user", content: input, time: new Date() };
-    setMessages((prev) => [...prev, userMsg]);
+    const userMessage = {
+      role: "user",
+      content: input,
+      time: new Date(),
+    };
+
+    setMessages((prev) => [...prev, userMessage]);
     setInput("");
     setLoading(true);
 
     try {
-      const reply = await sendMessage(input);
-      setMessages((prev) => [
-        ...prev,
-        { role: "assistant", content: reply, time: new Date() },
-      ]);
-    } catch {
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: "assistant",
-          content: "Xin lỗi, tôi không thể trả lời lúc này.",
-          time: new Date(),
-        },
-      ]);
-    } finally {
-      setLoading(false);
+      const reply = await sendMessage(input, userId);
+
+      const enhancedReply =
+        reply.includes("Xin lỗi") || reply.includes("không hiểu")
+          ? `${reply}\n\nMình chưa hiểu rõ câu hỏi lắm 😅\nBạn có thể hỏi:
+• Thông tin sản phẩm
+• Tra cứu đơn hàng
+• Kiểm tra giá – giảm giá
+• Tư vấn chọn sản phẩm
+• Chính sách giao hàng / bảo hành`
+          : reply;
+
+      await typeEffect(enhancedReply);
+    } catch (err) {
+      console.log(err);
+      await typeEffect("Xin lỗi, tôi không thể trả lời lúc này.");
     }
+
+    setLoading(false);
   };
 
   const formatTime = (date) =>
@@ -66,27 +106,23 @@ const ChatBot = () => {
       {/* Nút mở chat */}
       <div
         onClick={toggleChat}
+        className="chat-toggle-btn"
         style={{
           position: "fixed",
-          bottom: "15px",
-          right: "15px",
+          bottom: "20px",
+          right: "18px",
           zIndex: 9999,
           cursor: "pointer",
-          transition: "transform 0.2s",
         }}
-        className="chat-toggle-btn"
       >
         <div
           style={{
-            background: "linear-gradient(90deg, #4facfe 0%, #00f2fe 100%)",
+            background: "linear-gradient(135deg, #4facfe, #00f2fe)",
             color: "#fff",
-            padding: "14px",
+            padding: "15px",
             borderRadius: "50%",
-            boxShadow: "0 4px 12px rgba(0,0,0,0.25)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            transition: "transform 0.2s, box-shadow 0.2s",
+            boxShadow: "0 4px 14px rgba(0,0,0,0.28)",
+            transition: "0.25s",
           }}
           className="hover-scale"
         >
@@ -99,7 +135,7 @@ const ChatBot = () => {
         <div
           style={{
             position: "fixed",
-            bottom: "70px",
+            bottom: "85px",
             right: "20px",
             width: "360px",
             height: "480px",
@@ -107,39 +143,35 @@ const ChatBot = () => {
             display: "flex",
             flexDirection: "column",
             backgroundColor: "#fff",
-            borderRadius: "16px",
-            boxShadow: "0 10px 30px rgba(0,0,0,0.2)",
+            borderRadius: "18px",
+            boxShadow: "0 12px 34px rgba(0,0,0,0.25)",
+            animation: "chatOpen 0.25s ease",
             overflow: "hidden",
-            fontFamily: "'Segoe UI', sans-serif",
           }}
         >
           {/* Header */}
           <div
             style={{
-              display: "flex",
-              alignItems: "center",
-              padding: "12px 16px",
+              padding: "14px 16px",
               background: "linear-gradient(90deg, #4facfe 0%, #00f2fe 100%)",
               color: "#fff",
               fontWeight: "600",
-              fontSize: "1rem",
-              boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
+              fontSize: "1.05rem",
+              display: "flex",
+              alignItems: "center",
             }}
           >
             <FaRobot className="me-2" />
             TienTech Trợ lý
           </div>
 
-          {/* Messages */}
+          {/* Messages List */}
           <div
             style={{
               flex: 1,
               padding: "12px",
               overflowY: "auto",
-              backgroundColor: "#f9f9f9",
-              display: "flex",
-              flexDirection: "column",
-              gap: "8px",
+              background: "#f6f8fa",
             }}
           >
             {messages.map((msg, i) => (
@@ -149,42 +181,33 @@ const ChatBot = () => {
                   display: "flex",
                   justifyContent:
                     msg.role === "user" ? "flex-end" : "flex-start",
+                  marginBottom: "8px",
                 }}
               >
                 <div
                   style={{
                     background:
                       msg.role === "user"
-                        ? "linear-gradient(90deg, #4facfe 0%, #00f2fe 100%)"
-                        : "#e2e3e5",
+                        ? "linear-gradient(135deg,#4facfe,#00d0fe)"
+                        : "#e9ecef",
                     color: msg.role === "user" ? "#fff" : "#333",
+                    borderRadius: "16px",
                     padding: "10px 14px",
-                    borderRadius: "14px",
-                    maxWidth: "75%",
+                    maxWidth: "78%",
                     wordBreak: "break-word",
                     boxShadow:
                       msg.role === "user"
-                        ? "0 2px 8px rgba(0,0,0,0.15)"
-                        : "0 1px 4px rgba(0,0,0,0.1)",
-                    position: "relative",
-                    transition: "all 0.2s",
+                        ? "0 2px 10px rgba(0,0,0,0.2)"
+                        : "0 2px 6px rgba(0,0,0,0.1)",
                   }}
-                  className="chat-message"
                 >
                   <div
                     style={{
-                      display: "flex",
-                      alignItems: "center",
                       fontSize: "0.75rem",
                       marginBottom: "4px",
                       opacity: 0.8,
                     }}
                   >
-                    {msg.role === "user" ? (
-                      <FaUser className="me-1" />
-                    ) : (
-                      <FaRobot className="me-1" />
-                    )}
                     {msg.role === "user" ? "Bạn" : "AI"} •{" "}
                     {formatTime(msg.time)}
                   </div>
@@ -192,43 +215,84 @@ const ChatBot = () => {
                 </div>
               </div>
             ))}
-            {loading && (
+
+            {/* Typing effect */}
+            {typingText && (
               <div
                 style={{
-                  textAlign: "center",
-                  color: "#888",
-                  fontSize: "0.8rem",
+                  background: "#e9ecef",
+                  padding: "10px 14px",
+                  borderRadius: "12px",
+                  width: "fit-content",
+                  marginBottom: "10px",
+                  color: "#333",
                 }}
               >
+                {typingText}
+              </div>
+            )}
+
+            {/* Loading */}
+            {loading && !typingText && (
+              <div style={{ color: "#999", fontSize: "0.85rem" }}>
                 AI đang trả lời...
               </div>
             )}
+
             <div ref={messagesEndRef} />
+          </div>
+
+          {/* Quick suggestion buttons */}
+          <div
+            style={{
+              padding: "6px 12px",
+              display: "flex",
+              gap: "8px",
+              flexWrap: "wrap",
+            }}
+          >
+            {quickSuggestions.map((q) => (
+              <div
+                key={q}
+                onClick={() => setInput(q)}
+                style={{
+                  background: "#eef3f7",
+                  padding: "6px 12px",
+                  borderRadius: "14px",
+                  fontSize: "0.82rem",
+                  cursor: "pointer",
+                  border: "1px solid #dde3e8",
+                }}
+              >
+                {q}
+              </div>
+            ))}
           </div>
 
           {/* Input */}
           <form
             onSubmit={handleSend}
             style={{
-              display: "flex",
               padding: "12px",
               borderTop: "1px solid #ddd",
-              backgroundColor: "#fff",
+              background: "#fff",
+              display: "flex",
+              gap: "8px",
             }}
           >
             <input
               type="text"
-              className="form-control me-2"
+              className="form-control"
               placeholder="Nhập tin nhắn..."
               value={input}
-              onChange={(e) => setInput(e.target.value)}
               disabled={loading}
+              onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === "Enter" && !e.shiftKey) handleSend(e);
               }}
               style={{
                 borderRadius: "20px",
-                padding: "8px 16px",
+                padding: "10px 16px",
                 border: "1px solid #ccc",
               }}
             />
@@ -236,13 +300,13 @@ const ChatBot = () => {
               type="submit"
               disabled={loading}
               style={{
-                background: "linear-gradient(90deg, #4facfe 0%, #00f2fe 100%)",
+                background: "linear-gradient(135deg,#4facfe,#00f2fe)",
                 color: "#fff",
                 border: "none",
+                padding: "10px 16px",
                 borderRadius: "20px",
-                padding: "8px 16px",
-                boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
-                transition: "all 0.2s",
+                fontWeight: "600",
+                transition: "0.2s",
               }}
               className="hover-scale"
             >
@@ -251,16 +315,16 @@ const ChatBot = () => {
           </form>
         </div>
       )}
-      {/* Hover effect */}
+
       <style>
         {`
-          .hover-scale:hover {
-            transform: scale(1.05);
-            box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+          @keyframes chatOpen {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
           }
-          .chat-message:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+          .hover-scale:hover {
+            transform: scale(1.07);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.25);
           }
         `}
       </style>
