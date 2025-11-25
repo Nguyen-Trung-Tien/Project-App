@@ -1,6 +1,6 @@
 require("dotenv").config();
 const OpenAI = require("openai");
-const { Product, Order, Category, OrderItem } = require("../models");
+const { Product, Order, Category, OrderItem, User } = require("../models");
 const { Op } = require("sequelize");
 
 const openai = new OpenAI({
@@ -15,54 +15,19 @@ const handleChat = async (req, res) => {
       return res.status(400).json({ error: "Thiếu nội dung câu hỏi." });
     }
 
-    const intentResult = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
-      messages: [
-        {
-          role: "system",
-          content: `
-Bạn là bộ phân loại ý định. Chỉ trả về JSON.  
-Các intent hợp lệ:
-- product_search
-- product_price
-- product_stock
-- product_compare
-- product_suggestion
-- order_status
-- order_by_id
-- warranty
-- shipping
-- return_policy
-- payment_method
-- smalltalk
-- other
-
-Hãy phân tích câu hỏi và trả về:
-{ "intent": "...", "product": "..." }
-Nếu không có sản phẩm, đặt product = "".
-`,
-        },
-        { role: "user", content: message },
-      ],
-      temperature: 0,
-    });
-
-    const parsedIntent = JSON.parse(intentResult.choices[0].message.content);
-    const intent = parsedIntent.intent;
-    const productNameAI = parsedIntent.product?.trim() || "";
-
     let dbContext = "";
     let product = null;
 
-    if (productNameAI) {
+    const productMatch = message.match(/(?:sản phẩm|sp|mua|tìm) (.+)/i);
+    if (productMatch) {
+      const productName = productMatch[1].trim();
       product = await Product.findOne({
-        where: { name: { [Op.like]: `%${productNameAI}%` }, isActive: true },
+        where: { name: { [Op.like]: `%${productName}%` }, isActive: true },
         include: [{ model: Category, as: "category" }],
       });
 
       if (product) {
         const discountPrice = product.price * (1 - product.discount / 100);
-
         dbContext += `
 Sản phẩm:
 - Tên: ${product.name}
@@ -75,7 +40,7 @@ Sản phẩm:
       }
     }
 
-    if (intent === "order_status" && userId) {
+    if (userId) {
       const order = await Order.findOne({
         where: { userId },
         order: [["createdAt", "DESC"]],
@@ -83,23 +48,30 @@ Sản phẩm:
           {
             model: OrderItem,
             as: "orderItems",
-            include: [Product],
+            include: [{ model: Product, as: "product" }],
+          },
+          {
+            model: User,
+            as: "user",
+            attributes: ["id", "username", "email"],
           },
         ],
       });
 
       if (order) {
         const items = order.orderItems
-          .map((i) => `${i.quantity}x ${i.Product.name}`)
+          .map((i) => `${i.product.name} x${i.quantity}`) // dùng alias 'product'
           .join(", ");
-
         dbContext += `
-
 Đơn hàng gần nhất:
 - Mã đơn: #${order.id}
 - Trạng thái: ${translateStatus(order.status)}
 - Tổng tiền: ${formatPrice(order.totalPrice)} ₫
 - Sản phẩm: ${items}
+- Người đặt: ${order.user?.username || "Không có"} (ID: ${
+          order.user?.id || "N/A"
+        })
+- Email: ${order.user?.email || "N/A"}
 - Địa chỉ: ${order.shippingAddress}
         `.trim();
       } else {
@@ -107,62 +79,40 @@ Sản phẩm:
       }
     }
 
-    if (intent === "order_by_id") {
-      const orderId = message.match(/\d+/)?.[0];
-
-      if (orderId) {
-        const order = await Order.findOne({
-          where: { id: orderId },
-          include: [
-            {
-              model: OrderItem,
-              as: "orderItems",
-              include: [Product],
-            },
-          ],
-        });
-
-        if (order) {
-          const items = order.orderItems
-            .map((i) => `${i.quantity}x ${i.Product.name}`)
-            .join(", ");
-
-          dbContext += `
-Thông tin đơn #${order.id}:
-- Trạng thái: ${translateStatus(order.status)}
-- Tổng tiền: ${formatPrice(order.totalPrice)} ₫
-- Sản phẩm: ${items}
-- Địa chỉ: ${order.shippingAddress}
-          `.trim();
-        } else {
-          dbContext += `Không tìm thấy đơn hàng #${orderId}.`;
-        }
-      }
-    }
-
     const systemPrompt = `
 Bạn là trợ lý AI của TienTech Shop.
-Trả lời thân thiện, tự nhiên, rõ ràng.
+Phân tích câu hỏi của người dùng, xác định intent và trả lời thân thiện, tự nhiên, rõ ràng.
 Nếu có dữ liệu trong DB thì dùng để trả lời nhưng **không nói “dựa theo dữ liệu bạn gửi”**.
 
 Dữ liệu truy vấn:
 ${dbContext || "(không có dữ liệu)"}
 
 Luôn trả lời bằng tiếng Việt.
-`.trim();
+`;
 
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: message },
-      ],
-      temperature: 0.7,
-      max_tokens: 350,
-    });
+    let completion;
+    try {
+      completion = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: message },
+        ],
+        temperature: 0.7,
+        max_tokens: 400,
+      });
+    } catch (err) {
+      if (err.code === "rate_limit_exceeded") {
+        return res.json({
+          reply:
+            "Hiện tại AI đang bận vì quá nhiều yêu cầu, vui lòng thử lại sau 20 giây ⏳",
+        });
+      } else {
+        throw err;
+      }
+    }
 
     const reply = completion.choices[0].message.content;
-
     res.json({ reply });
   } catch (error) {
     console.error("Lỗi chatbot:", error);

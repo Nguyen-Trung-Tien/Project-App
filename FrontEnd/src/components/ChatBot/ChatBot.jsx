@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
-import { FaRobot, FaUser, FaComments, FaTimes } from "react-icons/fa";
+import { FaRobot, FaComments, FaTimes } from "react-icons/fa";
+import { useSelector } from "react-redux"; // lấy user từ Redux
 import { sendMessage } from "../../api/chatApi";
 
 const ChatBot = () => {
@@ -11,7 +12,10 @@ const ChatBot = () => {
   const [typingText, setTypingText] = useState("");
 
   const messagesEndRef = useRef(null);
-  const userId = localStorage.getItem("userId") || null;
+
+  // Lấy user từ Redux store
+  const user = useSelector((state) => state.user.user);
+  const userId = user?.id || null;
 
   const quickSuggestions = [
     "Tìm sản phẩm",
@@ -25,13 +29,14 @@ const ChatBot = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, typingText]);
 
-  // Tin nhắn chào với gợi ý
   useEffect(() => {
     if (isOpen && !hasGreeted) {
-      setMessages([
+      const greetMsg = [
         {
           role: "assistant",
-          content: `Xin chào! 👋 Tôi là trợ lý TienTech.
+          content: `Xin chào${
+            user ? `, ${user.name}` : ""
+          }! 👋 Tôi là trợ lý TienTech.
 Tôi có thể giúp bạn với:
 • 🔍 Tìm sản phẩm
 • 💰 Xem giá, khuyến mãi
@@ -42,10 +47,11 @@ Tôi có thể giúp bạn với:
 Bạn muốn hỏi gì hôm nay? 😊`,
           time: new Date(),
         },
-      ]);
+      ];
+      setMessages(greetMsg);
       setHasGreeted(true);
     }
-  }, [isOpen, hasGreeted]);
+  }, [isOpen, hasGreeted, user]);
 
   const toggleChat = () => setIsOpen(!isOpen);
 
@@ -103,10 +109,8 @@ Bạn muốn hỏi gì hôm nay? 😊`,
 
   return (
     <>
-      {/* Nút mở chat */}
       <div
         onClick={toggleChat}
-        className="chat-toggle-btn"
         style={{
           position: "fixed",
           bottom: "20px",
@@ -124,13 +128,11 @@ Bạn muốn hỏi gì hôm nay? 😊`,
             boxShadow: "0 4px 14px rgba(0,0,0,0.28)",
             transition: "0.25s",
           }}
-          className="hover-scale"
         >
           {isOpen ? <FaTimes size={22} /> : <FaComments size={26} />}
         </div>
       </div>
 
-      {/* Khung chat */}
       {isOpen && (
         <div
           style={{
@@ -149,7 +151,6 @@ Bạn muốn hỏi gì hôm nay? 😊`,
             overflow: "hidden",
           }}
         >
-          {/* Header */}
           <div
             style={{
               padding: "14px 16px",
@@ -161,11 +162,9 @@ Bạn muốn hỏi gì hôm nay? 😊`,
               alignItems: "center",
             }}
           >
-            <FaRobot className="me-2" />
-            TienTech Trợ lý
+            <FaRobot className="me-2" /> TienTech Trợ lý
           </div>
 
-          {/* Messages List */}
           <div
             style={{
               flex: 1,
@@ -216,7 +215,6 @@ Bạn muốn hỏi gì hôm nay? 😊`,
               </div>
             ))}
 
-            {/* Typing effect */}
             {typingText && (
               <div
                 style={{
@@ -232,7 +230,6 @@ Bạn muốn hỏi gì hôm nay? 😊`,
               </div>
             )}
 
-            {/* Loading */}
             {loading && !typingText && (
               <div style={{ color: "#999", fontSize: "0.85rem" }}>
                 AI đang trả lời...
@@ -242,7 +239,6 @@ Bạn muốn hỏi gì hôm nay? 😊`,
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Quick suggestion buttons */}
           <div
             style={{
               padding: "6px 12px",
@@ -269,7 +265,6 @@ Bạn muốn hỏi gì hôm nay? 😊`,
             ))}
           </div>
 
-          {/* Input */}
           <form
             onSubmit={handleSend}
             style={{
@@ -308,7 +303,6 @@ Bạn muốn hỏi gì hôm nay? 😊`,
                 fontWeight: "600",
                 transition: "0.2s",
               }}
-              className="hover-scale"
             >
               Gửi
             </button>
@@ -321,10 +315,6 @@ Bạn muốn hỏi gì hôm nay? 😊`,
           @keyframes chatOpen {
             from { opacity: 0; transform: scale(0.9); }
             to { opacity: 1; transform: scale(1); }
-          }
-          .hover-scale:hover {
-            transform: scale(1.07);
-            box-shadow: 0 4px 16px rgba(0,0,0,0.25);
           }
         `}
       </style>
