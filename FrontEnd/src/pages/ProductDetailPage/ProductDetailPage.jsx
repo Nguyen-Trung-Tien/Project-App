@@ -519,7 +519,7 @@ const ProductDetailPage = () => {
         </div>
 
         {suggestedProducts.length > 0 ? (
-          <div className="suggested-products mt-5 pt-4 border-top">
+          <div className="suggested-products mt-3 pt-3 border-top">
             <h4 className="fw-bold mb-3">Sản phẩm gợi ý</h4>
             <Row className="g-4">
               {suggestedProducts.map((p) => (
@@ -533,7 +533,7 @@ const ProductDetailPage = () => {
               {suggestedPage < suggestedTotalPages ? (
                 <Button
                   variant="outline-primary"
-                  size="lg"
+                  size="ms"
                   className="rounded-pill px-4 py-2"
                   onClick={handleLoadMoreSuggested}
                   disabled={loadingSuggested}
@@ -555,7 +555,7 @@ const ProductDetailPage = () => {
             </div>
           </div>
         ) : (
-          <div className="text-center mt-5 pt-4 border-top">
+          <div className="text-center mt-3 pt-3 border-top">
             <p className="text-muted fst-italic">
               Không có sản phẩm gợi ý nào.
             </p>

@@ -75,23 +75,22 @@
   }
 
   .status-pending {
-    background-color: #ffc107;
-    color: #212529;
+    background-color: #ffc107 !important;
+    color: #212529 !important;
   }
-
   .status-completed {
-    background-color: #198754;
-    color: #fff;
+    background-color: #198754 !important; // xanh lá
+    color: #fff !important;
   }
 
   .status-failed {
-    background-color: #dc3545;
-    color: #fff;
+    background-color: #dc3545 !important; // đỏ
+    color: #fff !important;
   }
 
   .status-refunded {
-    background-color: #0dcaf0;
-    color: #212529;
+    background-color: #0dcaf0; // xanh dương
+    color: #000; // chữ đậm hơn
   }
 
   /* Modal styling */
@@ -172,4 +171,20 @@
       font-size: 0.85rem;
     }
   }
+}
+.status-pending {
+  background-color: #ffc107 !important;
+  color: #000 !important;
+}
+.status-completed {
+  background-color: #198754 !important;
+  color: #000;
+}
+.status-failed {
+  background-color: #dc3545 !important;
+  color: #000 !important;
+}
+.status-refunded {
+  background-color: #0dcaf0 !important;
+  color: #000 !important;
 }

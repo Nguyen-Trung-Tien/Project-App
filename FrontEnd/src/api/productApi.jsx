@@ -101,3 +101,15 @@ export const searchProductsApi = async (query, page = 1, limit = 10) => {
     throw err;
   }
 };
+
+export const getDiscountedProductsApi = async (page = 1, limit = 6) => {
+  try {
+    const res = await API.get(`/product/discounted`, {
+      params: { page, limit },
+    });
+    return res.data;
+  } catch (err) {
+    console.error("Get discounted products API error:", err);
+    throw err;
+  }
+};

@@ -15,7 +15,7 @@ const AllProducts = React.memo(() => {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [error, setError] = useState(false);
-  const limit = 10;
+  const limit = 12;
 
   const user = useSelector((state) => state.user.user);
   const userId = user?.id;
@@ -88,9 +88,9 @@ const AllProducts = React.memo(() => {
   );
 
   return (
-    <section className="all-products-section py-5 bg-light">
+    <section className="all-products-section py-3 bg-light">
       <Container>
-        <h2 className="section-title text-center mb-5 fw-bold fs-3">
+        <h2 className="section-title text-center mb-3 fw-bold fs-3">
           {searchQuery
             ? `Kết quả tìm kiếm: "${searchQuery}"`
             : "Tất cả sản phẩm"}
@@ -138,11 +138,11 @@ const AllProducts = React.memo(() => {
             {loadingMore && renderSkeletons(5)}
 
             {page < totalPages && !loadingMore && (
-              <div className="text-center mt-5">
+              <div className="text-center mt-3">
                 <Button
                   variant="outline-primary"
-                  size="lg"
-                  className="rounded-pill px-5 py-2 shadow-sm"
+                  size="ms"
+                  className="rounded-pill px-3 py-2 shadow-sm"
                   onClick={handleLoadMore}
                 >
                   Xem thêm sản phẩm

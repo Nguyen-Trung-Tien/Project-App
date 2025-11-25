@@ -150,6 +150,28 @@ const updateProductSold = async (productId, quantity) => {
   }
 };
 
+const getDiscountedProducts = async (page = 1, limit = 10) => {
+  const offset = (page - 1) * limit;
+
+  const { count, rows } = await db.Product.findAndCountAll({
+    where: {
+      discount: { [db.Sequelize.Op.gt]: 0 },
+      isActive: true,
+    },
+    include: [{ model: db.Category, as: "category" }],
+    limit,
+    offset,
+    order: [["createdAt", "DESC"]],
+  });
+
+  return {
+    errCode: 0,
+    products: rows.map((p) => ({ ...p.toJSON(), image: p.image || null })),
+    totalItems: count,
+    currentPage: page,
+    totalPages: Math.ceil(count / limit),
+  };
+};
 module.exports = {
   createProduct,
   getAllProducts,
@@ -159,4 +181,5 @@ module.exports = {
   getProductsByCategory,
   searchProducts,
   updateProductSold,
+  getDiscountedProducts,
 };

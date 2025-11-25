@@ -155,8 +155,14 @@ function Header() {
                     <NavDropdown.Item as={Link} to="/admin/users">
                       Quản lý người dùng
                     </NavDropdown.Item>
+                    <NavDropdown.Item as={Link} to="/admin/payment">
+                      Quản lý thanh toán
+                    </NavDropdown.Item>
                     <NavDropdown.Item as={Link} to="/admin/categories">
                       Quản lý danh mục
+                    </NavDropdown.Item>
+                    <NavDropdown.Item as={Link} to="/admin/reviews">
+                      Quản lý phản hồi
                     </NavDropdown.Item>
                     <NavDropdown.Item as={Link} to="/admin/revenue">
                       Báo cáo

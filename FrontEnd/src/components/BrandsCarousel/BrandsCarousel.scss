@@ -1,0 +1,26 @@
+.brands-carousel {
+  .brands-wrap {
+    display: flex;
+    gap: 20px;
+    overflow-x: auto;
+    padding: 12px 6px;
+
+    .brand-item {
+      flex: 0 0 auto;
+      width: 120px;
+      height: 64px;
+      background: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+
+      img {
+        max-width: 100%;
+        max-height: 70%;
+        object-fit: contain;
+      }
+    }
+  }
+}

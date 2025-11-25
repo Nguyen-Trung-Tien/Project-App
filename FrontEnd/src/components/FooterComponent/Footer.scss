@@ -1,6 +1,6 @@
 .footer {
   background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%) !important;
-  color: #333;
+  color: #fff !important;
   font-size: 0.95rem;
 
   .footer__title {
@@ -22,7 +22,7 @@
     }
   }
   .footer__desc {
-    color: #555;
+    color: #fff !important;
     line-height: 1.6;
   }
 
@@ -30,7 +30,7 @@
     font-weight: 600;
     font-size: 1.1rem;
     margin-bottom: 0.5rem;
-    color: #222;
+    color: #fff !important;
   }
 
   .footer__links {
@@ -42,7 +42,7 @@
       margin-bottom: 0.3rem;
 
       a {
-        color: #555;
+        color: #fff !important;
         text-decoration: none;
         transition: color 0.2s ease;
 
@@ -62,7 +62,7 @@
       margin-bottom: 0.4rem;
       display: flex;
       align-items: center;
-      color: #555;
+      color: #fff !important;
 
       .icon {
         color: #0d6efd;

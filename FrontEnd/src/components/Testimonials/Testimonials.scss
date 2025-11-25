@@ -1,0 +1,17 @@
+.testimonials {
+  .test-card {
+    border-radius: 10px;
+
+    .avatar {
+      width: 56px;
+      height: 56px;
+      object-fit: cover;
+      border-radius: 50%;
+    }
+
+    .stars {
+      color: #f5a623;
+      font-size: 14px;
+    }
+  }
+}

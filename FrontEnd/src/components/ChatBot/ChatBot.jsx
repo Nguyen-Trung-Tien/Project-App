@@ -22,7 +22,7 @@ const ChatBot = () => {
         {
           role: "assistant",
           content:
-            "🤖 Xin chào! Tôi là trợ lý TienTech. Tôi có thể giúp gì cho bạn hôm nay?",
+            "Xin chào! Tôi là trợ lý TienTech. Tôi có thể giúp gì cho bạn hôm nay?",
           time: new Date(),
         },
       ]);

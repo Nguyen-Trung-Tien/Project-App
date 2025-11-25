@@ -183,11 +183,11 @@ const ProductListPage = () => {
 
             {loadingMore && renderSkeletons(5)}
             {currentPage < totalPages && !loadingMore && (
-              <div className="text-center mt-5">
+              <div className="text-center mt-3">
                 <Button
                   variant="outline-primary"
-                  size="lg"
-                  className="rounded-pill px-5 py-2 shadow-sm"
+                  size="ms"
+                  className="rounded-pill px-3 py-2 shadow-sm"
                   onClick={handleLoadMore}
                 >
                   Xem thêm sản phẩm

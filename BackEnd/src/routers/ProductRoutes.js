@@ -33,4 +33,5 @@ router.delete(
   ProductController.handleDeleteProduct
 );
 
+router.get("/discounted", ProductController.handleGetDiscountedProducts);
 module.exports = router;

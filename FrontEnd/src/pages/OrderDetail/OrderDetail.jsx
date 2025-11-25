@@ -221,7 +221,7 @@ const OrderDetail = () => {
                   👤 Thông tin người nhận
                 </h5>
                 <p>
-                  <strong>Họ tên:</strong>
+                  <strong>Họ tên: </strong>
                   {order.user?.username || "Khách hàng"}
                 </p>
                 <p>

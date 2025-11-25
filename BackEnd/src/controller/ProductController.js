@@ -146,6 +146,21 @@ const handleSearchProducts = async (req, res) => {
   }
 };
 
+const handleGetDiscountedProducts = async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+
+    const result = await ProductService.getDiscountedProducts(page, limit);
+    return res.status(200).json(result);
+  } catch (e) {
+    console.error("Error in handleGetDiscountedProducts:", e);
+    return res.status(500).json({
+      errCode: -1,
+      errMessage: "Internal server error",
+    });
+  }
+};
 module.exports = {
   handleCreateProduct,
   handleGetAllProducts,
@@ -154,4 +169,5 @@ module.exports = {
   handleDeleteProduct,
   getProductsByCategory,
   handleSearchProducts,
+  handleGetDiscountedProducts,
 };

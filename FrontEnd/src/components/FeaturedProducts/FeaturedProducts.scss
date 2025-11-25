@@ -1,0 +1,44 @@
+.featured-products {
+  .section-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 18px;
+
+    h3 {
+      font-weight: 700;
+    }
+    .muted {
+      color: #777;
+      font-size: 14px;
+    }
+  }
+
+  .product-card {
+    border-radius: 12px;
+    overflow: hidden;
+    transition: transform 0.2s;
+
+    .thumb img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+    }
+
+    .title {
+      font-size: 14px;
+      height: 38px;
+      overflow: hidden;
+    }
+    .price {
+      color: #ff4d4f;
+      font-weight: 700;
+      margin: 8px 0;
+    }
+
+    &:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+    }
+  }
+}

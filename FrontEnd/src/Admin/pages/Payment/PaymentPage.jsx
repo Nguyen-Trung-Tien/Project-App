@@ -293,7 +293,7 @@ const PaymentPage = () => {
                   <tr key={p.id}>
                     <td>{p.id}</td>
                     <td>
-                      <a href={`/orders-detail/${p.orderId}`}>#DH{p.orderId}</a>
+                      <a href={`/orders-detail/${p.orderId}`}>DH{p.orderId}</a>
                     </td>
                     <td>
                       <PersonFill className="me-1" />
@@ -402,10 +402,14 @@ const PaymentPage = () => {
                 {selectedPayment.user?.username || "—"}
               </div>
               <div className="col-md-6">
+                <strong>Số điện thoại:</strong>{" "}
+                {selectedPayment.user?.phone || "—"}
+              </div>
+              <div className="col-md-6">
                 <strong>Email:</strong> {selectedPayment.user?.email || "—"}
               </div>
               <div className="col-md-6">
-                <strong>Đơn hàng:</strong> #{selectedPayment.orderId}
+                <strong>Đơn hàng:</strong> DH{selectedPayment.orderId}
               </div>
               <div className="col-md-6">
                 <strong>Số tiền:</strong>{" "}
@@ -427,12 +431,14 @@ const PaymentPage = () => {
                 <strong>Trạng thái:</strong>{" "}
                 <span
                   className={`badge ${
-                    STATUS_LABELS[selectedPayment.status]?.class
+                    STATUS_LABELS[selectedPayment.status]?.class || "bg-dark"
                   }`}
                 >
-                  {STATUS_LABELS[selectedPayment.status]?.text}
+                  {STATUS_LABELS[selectedPayment.status]?.text ||
+                    selectedPayment.status}
                 </span>
               </div>
+
               <div className="col-md-6">
                 <strong>Mã giao dịch:</strong>{" "}
                 {selectedPayment.transactionId || "—"}

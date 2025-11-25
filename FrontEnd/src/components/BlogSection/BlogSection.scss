@@ -1,0 +1,16 @@
+.blog-section {
+  .blog-card {
+    border-radius: 10px;
+    overflow: hidden;
+
+    img {
+      height: 160px;
+      object-fit: cover;
+    }
+
+    .excerpt {
+      color: #666;
+      font-size: 14px;
+    }
+  }
+}
