@@ -7,28 +7,7 @@ import { addCart, createCart, getAllCarts } from "../../api/cartApi";
 import { addCartItem } from "../../redux/cartSlice";
 import { getImage } from "../../utils/decodeImage";
 import ProductCard from "../../components/ProductCard/ProductCard";
-
-const SkeletonCard = () => (
-  <div
-    className="product-card shadow-sm border-0 rounded-3 overflow-hidden bg-white"
-    style={{ maxWidth: "220px", height: "300px" }}
-  >
-    <div
-      className="bg-secondary bg-opacity-10 rounded mb-3"
-      style={{ width: "100%", height: "180px" }}
-    />
-    <div className="p-3">
-      <div
-        className="bg-secondary bg-opacity-10 rounded mb-2"
-        style={{ height: "20px" }}
-      />
-      <div
-        className="bg-secondary bg-opacity-10 rounded w-50"
-        style={{ height: "20px" }}
-      />
-    </div>
-  </div>
-);
+import SkeletonCard from "../SkeletonCard/SkeletonCard";
 
 const ProductSection = () => {
   const dispatch = useDispatch();

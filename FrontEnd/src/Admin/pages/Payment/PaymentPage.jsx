@@ -226,9 +226,10 @@ const PaymentPage = () => {
         </h3>
       </div>
 
-      <div className="d-flex gap-2 mb-4 flex-wrap">
+      <div className="filter-row d-flex align-items-center gap-2 mb-4">
         <Form.Select
           value={filterStatus}
+          className="filter-select"
           onChange={(e) => setFilterStatus(e.target.value)}
         >
           <option value="all">Tất cả trạng thái</option>
@@ -242,12 +243,14 @@ const PaymentPage = () => {
           type="text"
           placeholder="Tìm kiếm ID, Order, User"
           value={searchTerm}
+          className="filter-input"
           onChange={(e) => setSearchTerm(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && loadPayments(1)}
         />
 
         <Form.Select
           value={pageSize}
+          className="filter-select"
           onChange={(e) => setPageSize(Number(e.target.value))}
         >
           {[5, 10, 20, 50].map((n) => (
@@ -257,7 +260,9 @@ const PaymentPage = () => {
           ))}
         </Form.Select>
 
-        <Button onClick={() => loadPayments(1)}>Áp dụng</Button>
+        <Button className="filter-btn" onClick={() => loadPayments(1)}>
+          Áp dụng
+        </Button>
       </div>
 
       {/* Loading */}

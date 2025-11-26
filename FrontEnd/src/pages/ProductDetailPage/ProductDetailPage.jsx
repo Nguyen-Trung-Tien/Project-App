@@ -24,12 +24,7 @@ import {
   getProductsByCategoryApi,
 } from "../../api/productApi";
 import { addCart, getAllCarts, createCart } from "../../api/cartApi";
-import {
-  createReviewApi,
-  deleteReviewApi,
-  getReviewsByProductApi,
-  updateReviewApi,
-} from "../../api/reviewApi";
+import { createReviewApi, getReviewsByProductApi } from "../../api/reviewApi";
 import ProductCard from "../../components/ProductCard/ProductCard";
 import { getImage } from "../../utils/decodeImage";
 import "./ProductDetailPage.scss";
@@ -37,11 +32,7 @@ import { addCartItem } from "../../redux/cartSlice";
 import ChatBot from "../../components/ChatBot/ChatBot";
 import ReviewForm from "../../components/ReviewComponent/ReviewForm";
 import ReviewList from "../../components/ReviewComponent/ReviewList";
-import {
-  createReplyApi,
-  deleteReplyApi,
-  getRepliesByReviewApi,
-} from "../../api/reviewReplyApi";
+import { getRepliesByReviewApi } from "../../api/reviewReplyApi";
 
 const ProductDetailPage = () => {
   const user = useSelector((state) => state.user.user);
@@ -158,19 +149,6 @@ const ProductDetailPage = () => {
     }
   }, [page, product?.id]);
 
-  const handleReplySubmit = async (reviewId, content) => {
-    if (!content?.trim()) return;
-    const res = await createReplyApi({ reviewId, comment: content }, token);
-    if (res.errCode === 0) {
-      setReviews((prev) =>
-        prev.map((r) =>
-          r.id === reviewId
-            ? { ...r, ReviewReplies: [...(r.ReviewReplies || []), res.data] }
-            : r
-        )
-      );
-    }
-  };
   useEffect(() => {
     if (product?.categoryId) {
       setSuggestedProducts([]);
@@ -180,55 +158,6 @@ const ProductDetailPage = () => {
       fetchSuggestedProducts(product.categoryId, 1, false);
     }
   }, [product?.id, product?.categoryId, fetchSuggestedProducts]);
-
-  const handleUpdateReview = async (reviewId, payload) => {
-    try {
-      const res = await updateReviewApi(reviewId, payload, token);
-      if (res.errCode === 0) {
-        toast.success("Cập nhật đánh giá thành công!");
-        fetchReviews(product.id, page);
-      } else {
-        toast.error(res.errMessage || "Cập nhật thất bại!");
-      }
-    } catch (err) {
-      console.error(err);
-      toast.error("Lỗi khi cập nhật đánh giá!");
-    }
-  };
-
-  const handleDeleteReview = async (reviewId) => {
-    try {
-      const res = await deleteReviewApi(reviewId, token);
-      if (res.errCode === 0) {
-        toast.success("Xóa đánh giá thành công!");
-        fetchReviews(product.id, page);
-      } else {
-        toast.error(res.errMessage || "Xóa thất bại!");
-      }
-    } catch (err) {
-      console.error(err);
-      toast.error("Lỗi khi xóa đánh giá!");
-    }
-  };
-  const handleDeleteReply = async (replyId) => {
-    try {
-      const res = await deleteReplyApi(replyId, token);
-      if (res.errCode === 0) {
-        toast.success("Xóa trả lời thành công!");
-        setReviews((prev) =>
-          prev.map((r) => ({
-            ...r,
-            ReviewReplies: r.ReviewReplies.filter((rep) => rep.id !== replyId),
-          }))
-        );
-      } else {
-        toast.error(res.errMessage || "Xóa trả lời thất bại!");
-      }
-    } catch (err) {
-      console.error(err);
-      toast.error("Lỗi khi xóa trả lời!");
-    }
-  };
 
   const handleLoadMoreSuggested = () => {
     if (suggestedPage < suggestedTotalPages) {
@@ -510,11 +439,7 @@ const ProductDetailPage = () => {
               setPage(newPage);
               fetchReviews(product.id, newPage);
             }}
-            onReplySubmit={handleReplySubmit}
             user={user}
-            onDeleteReply={handleDeleteReply}
-            onUpdateReview={handleUpdateReview}
-            onDeleteReview={handleDeleteReview}
           />
         </div>
 

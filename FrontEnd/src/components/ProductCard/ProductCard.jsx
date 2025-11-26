@@ -14,6 +14,7 @@ import {
   StarHalf,
 } from "react-bootstrap-icons";
 import "./ProductCard.scss";
+
 const ProductCard = ({ product }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -24,15 +25,16 @@ const ProductCard = ({ product }) => {
   const [loadingCart, setLoadingCart] = useState(false);
   const [loadingBuy, setLoadingBuy] = useState(false);
 
-  const { id, name, price, discount, stock, sold, image, isActive } = product;
+  const { id, name, price, discount, stock, sold, image, isActive, reviews } =
+    product;
 
   const { avgRating, totalReviews } = useMemo(() => {
-    const reviews = product.reviews || [];
-    if (reviews.length === 0) return { avgRating: 0, totalReviews: 0 };
+    if (!reviews || reviews.length === 0)
+      return { avgRating: 0, totalReviews: 0 };
     const avg =
       reviews.reduce((sum, r) => sum + (r.rating || 0), 0) / reviews.length;
     return { avgRating: avg, totalReviews: reviews.length };
-  }, [product.reviews]);
+  }, [reviews]);
 
   const { rawPrice, finalPrice, hasDiscount } = useMemo(() => {
     const p = Number(price) || 0;
@@ -50,20 +52,14 @@ const ProductCard = ({ product }) => {
 
   const handleAddToCart = async (e) => {
     e.stopPropagation();
-    if (!userId) {
-      toast.warn("Bạn cần đăng nhập để thêm sản phẩm vào giỏ hàng!");
-      return;
-    }
-    if (!isActive || stock < 1) {
-      toast.error("Sản phẩm không khả dụng!");
-      return;
-    }
+    if (!userId)
+      return toast.warn("Bạn cần đăng nhập để thêm sản phẩm vào giỏ hàng!");
+    if (!isActive || stock < 1) return toast.error("Sản phẩm không khả dụng!");
 
     setLoadingCart(true);
     try {
       const cartsRes = await getAllCarts(token);
-      const carts = cartsRes?.data || [];
-      let cart = carts.find((c) => c.userId === userId);
+      let cart = cartsRes?.data?.find((c) => c.userId === userId);
       if (!cart) {
         const newCartRes = await createCart(token, userId);
         cart = newCartRes.data;
@@ -79,53 +75,21 @@ const ProductCard = ({ product }) => {
     }
   };
 
-  const handleBuyNow = async (e) => {
-    e.stopPropagation();
-    if (!userId) {
-      toast.warn("Vui lòng đăng nhập để mua hàng!");
-      return;
-    }
-    if (!isActive || stock < 1) {
-      toast.error("Sản phẩm không khả dụng!");
-      return;
-    }
-
+  const handleBuyNow = (e) => {
     setLoadingBuy(true);
-    try {
-      navigate("/checkout", {
-        state: {
-          product,
-          quantity: 1,
-        },
-      });
-    } catch (err) {
-      console.error(err);
-      toast.error("Không thể mua ngay, vui lòng thử lại!");
-    } finally {
-      setLoadingBuy(false);
-    }
+    e.stopPropagation();
+    if (!userId) return toast.warn("Vui lòng đăng nhập để mua hàng!");
+    if (!isActive || stock < 1) return toast.error("Sản phẩm không khả dụng!");
+    navigate("/checkout", { state: { product, quantity: 1 } });
   };
 
   return (
     <Card
       className={`product-card shadow-sm border-0 rounded-3 overflow-hidden ${
         !isActive ? "opacity-75" : ""
-      } h-100`}
+      }`}
       onClick={() => navigate(`/product-detail/${id}`)}
-      style={{
-        cursor: "pointer",
-        transition: "transform 0.2s ease, box-shadow 0.2s ease",
-        maxWidth: "200px",
-        minWidth: "200px",
-      }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.transform = "scale(1.03)";
-        e.currentTarget.style.boxShadow = "0 4px 12px rgba(0,0,0,0.1)";
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.transform = "scale(1)";
-        e.currentTarget.style.boxShadow = "none";
-      }}
+      style={{ cursor: "pointer", maxWidth: "200px", minWidth: "200px" }}
     >
       <div
         className="image-wrapper position-relative bg-white d-flex align-items-center justify-content-center"
@@ -135,15 +99,8 @@ const ProductCard = ({ product }) => {
           variant="top"
           src={getImage(image)}
           alt={name}
-          className="p-2"
-          style={{
-            width: "100%",
-            height: "100%",
-            objectFit: "contain",
-            transition: "transform 0.3s ease",
-          }}
-          onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.1)")}
-          onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
+          className="p-2 img-hover-zoom"
+          style={{ width: "100%", height: "100%", objectFit: "contain" }}
         />
         {hasDiscount && (
           <span className="position-absolute top-0 start-0 sale-badge">
@@ -175,12 +132,12 @@ const ProductCard = ({ product }) => {
         <div className="text-muted fs-6 mb-2">
           {stock > 0 ? `Còn ${stock} sản phẩm` : "Hết hàng"}
         </div>
-
         {sold !== undefined && (
           <div className="text-secondary fs-6 mb-2">
             Đã bán {sold.toLocaleString("vi-VN")}
           </div>
         )}
+
         {totalReviews > 0 && (
           <div className="d-flex align-items-center mb-2">
             {Array.from({ length: 5 }).map((_, i) => {
@@ -198,9 +155,11 @@ const ProductCard = ({ product }) => {
             </span>
           </div>
         )}
+
         {finalPrice >= 500000 && (
           <span className="free-ship mb-2">Miễn phí vận chuyển</span>
         )}
+
         <div className="d-flex gap-2 mt-auto shopee-buttons">
           <Button
             variant="outline-primary"
@@ -211,9 +170,7 @@ const ProductCard = ({ product }) => {
             {loadingCart ? (
               <Spinner size="sm" animation="border" />
             ) : (
-              <>
-                <CartPlus className="me-1" size={22} />
-              </>
+              <CartPlus className="me-1" size={22} />
             )}
           </Button>
 

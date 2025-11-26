@@ -64,9 +64,8 @@ const CheckoutForm = ({ user, total, selectedItems, onOrderComplete }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.address || !formData.phone) {
+    if (!formData.address || !formData.phone)
       return toast.warning("Vui lòng nhập đầy đủ thông tin giao hàng!");
-    }
 
     const orderData = buildOrderData();
 
@@ -105,7 +104,6 @@ const CheckoutForm = ({ user, total, selectedItems, onOrderComplete }) => {
             <Cash className="me-2 text-success" /> Thanh toán khi nhận hàng
           </>
         );
-
       case "paypal":
         return (
           <>
@@ -150,7 +148,7 @@ const CheckoutForm = ({ user, total, selectedItems, onOrderComplete }) => {
                 onChange={handleChange}
                 required
                 className="rounded-3 shadow-sm"
-                placeholder="Enter user name..."
+                placeholder="Nhập họ và tên..."
               />
             </Form.Group>
           </Col>
@@ -166,7 +164,7 @@ const CheckoutForm = ({ user, total, selectedItems, onOrderComplete }) => {
                 onChange={handleChange}
                 required
                 className="rounded-3 shadow-sm"
-                placeholder="Enter phone number..."
+                placeholder="Nhập số điện thoại..."
               />
             </Form.Group>
           </Col>
@@ -182,7 +180,7 @@ const CheckoutForm = ({ user, total, selectedItems, onOrderComplete }) => {
                 onChange={handleChange}
                 required
                 className="rounded-3 shadow-sm"
-                placeholder="Enter address ..."
+                placeholder="Nhập địa chỉ ..."
               />
             </Form.Group>
           </Col>
@@ -197,7 +195,7 @@ const CheckoutForm = ({ user, total, selectedItems, onOrderComplete }) => {
                 value={formData.email}
                 onChange={handleChange}
                 className="rounded-3 shadow-sm"
-                placeholder="Enter email..."
+                placeholder="Nhập email..."
               />
             </Form.Group>
           </Col>
@@ -248,14 +246,20 @@ const CheckoutForm = ({ user, total, selectedItems, onOrderComplete }) => {
           <div className="text-center mt-4">
             <Button
               type="submit"
-              variant="primary"
               className="rounded-pill px-4 py-2 fw-semibold shadow-sm d-inline-flex align-items-center justify-content-center"
               style={{
                 fontSize: "1rem",
                 minWidth: "220px",
                 background: "linear-gradient(90deg, #007bff 0%, #00c6ff 100%)",
                 border: "none",
+                transition: "0.3s",
               }}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.filter = "brightness(1.1)")
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.filter = "brightness(1)")
+              }
             >
               {renderPaymentLabel(formData.paymentMethod)}
             </Button>

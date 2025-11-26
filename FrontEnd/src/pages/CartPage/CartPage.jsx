@@ -25,6 +25,7 @@ import {
 } from "../../api/cartApi";
 import { getImage } from "../../utils/decodeImage";
 import "./CartPage.scss";
+import { setSelectedIds } from "../../redux/checkoutSlice";
 
 const CartPage = () => {
   const user = useSelector((state) => state.user.user);
@@ -94,7 +95,10 @@ const CartPage = () => {
       toast.warning("Vui lòng chọn ít nhất 1 sản phẩm để thanh toán!");
       return;
     }
-    navigate("/checkout", { state: { selectedIds: selectedItems } });
+
+    dispatch(setSelectedIds(selectedItems));
+
+    navigate("/checkout");
   };
 
   return (

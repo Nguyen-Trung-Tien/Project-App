@@ -7,12 +7,9 @@ const OrderSummary = ({ selectedItems, total }) => (
   <Card className="shadow-sm border-0 rounded-4 overflow-hidden">
     <Card.Header
       className="bg-primary text-white fw-bold py-3 text-center"
-      style={{
-        background: "linear-gradient(90deg, #007bff 0%, #00b4d8 100%)",
-      }}
+      style={{ background: "linear-gradient(90deg, #007bff 0%, #00b4d8 100%)" }}
     >
-      <Wallet2 className="me-2 mb-1" size={18} />
-      Tóm tắt đơn hàng
+      <Wallet2 className="me-2 mb-1" size={18} /> Tóm tắt đơn hàng
     </Card.Header>
 
     <Card.Body className="p-4">
@@ -65,10 +62,7 @@ const OrderSummary = ({ selectedItems, total }) => (
           <span className="fw-bold text-dark">Tổng cộng:</span>
           <span
             className="fw-bold"
-            style={{
-              color: "#007bff",
-              fontSize: "1.1rem",
-            }}
+            style={{ color: "#007bff", fontSize: "1.1rem" }}
           >
             {total.toLocaleString("vi-VN")}₫
           </span>
@@ -77,8 +71,7 @@ const OrderSummary = ({ selectedItems, total }) => (
     </Card.Body>
 
     <Card.Footer className="bg-light text-center py-3 small text-muted">
-      <BoxSeam className="me-1" />
-      Đảm bảo giao hàng nhanh & an toàn
+      <BoxSeam className="me-1" /> Đảm bảo giao hàng nhanh & an toàn
     </Card.Footer>
   </Card>
 );

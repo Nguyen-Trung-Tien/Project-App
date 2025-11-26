@@ -55,8 +55,8 @@ const HomePage = () => {
         </div>
         {/* <div className="my-5">
           <FeaturedProducts categories={categories} />
-        </div>
-        <div className="my-4">
+        </div> */}
+        {/* <div className="my-4">
           <MidBanner />
         </div> */}
         <div className="my-3">
@@ -75,16 +75,16 @@ const HomePage = () => {
 
         {/* <div className="my-4">
           <Testimonials />
-        </div>
-        <div className="my-3">
+        </div> */}
+        {/* <div className="my-3">
           <BrandsCarousel />
-        </div>
+        </div> */}
 
-        <div className="my-4">
+        {/* <div className="my-4">
           <BlogSection />
-        </div>
+        </div> */}
 
-        <div className="my-4">
+        {/* <div className="my-4">
           <Newsletter />
         </div> */}
       </Container>

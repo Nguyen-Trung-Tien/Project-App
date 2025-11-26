@@ -1,30 +1,58 @@
-import { Container, Row, Col, Card } from "react-bootstrap";
+import { useEffect, useState } from "react";
+import { Container, Row, Col, Card, Spinner } from "react-bootstrap";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ArrowLeftCircle, CreditCard } from "react-bootstrap-icons";
 import { useSelector, useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 import { createOrder } from "../../api/orderApi";
 import { createPayment } from "../../api/paymentApi";
-import { removeCartItem } from "../../redux/cartSlice";
+import { getAllCartItems } from "../../api/cartApi";
+import { setCartItems, removeCartItem } from "../../redux/cartSlice";
+import { setSelectedIds, resetCheckout } from "../../redux/checkoutSlice";
 import CheckoutForm from "./CheckoutForm";
 import OrderSummary from "./OrderSummary";
 import "./CheckoutPage.scss";
 
-const CheckoutPage = ({ token }) => {
+const CheckoutPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const user = useSelector((state) => state.user.user);
+  const token = user?.accessToken;
 
   const cartItems = useSelector((state) => state.cart.cartItems);
-  const user = useSelector((state) => state.user.user);
+  const checkoutState = useSelector((state) => state.checkout);
 
-  const {
-    selectedIds,
-    product: singleProduct,
-    quantity: singleQuantity,
-  } = location.state || {};
-
+  const { product: singleProduct, quantity: singleQuantity } =
+    location.state || {};
   const isSingleProduct = !!singleProduct;
+
+  const [loading, setLoading] = useState(
+    !isSingleProduct && cartItems.length === 0
+  );
+
+  // Fetch cart if empty (reload case)
+  useEffect(() => {
+    const fetchCart = async () => {
+      if (!isSingleProduct && cartItems.length === 0) {
+        setLoading(true);
+        try {
+          const res = await getAllCartItems(token);
+          const items = res.data || [];
+          dispatch(setCartItems(items));
+          dispatch(setSelectedIds(items.map((item) => item.id)));
+        } catch (err) {
+          console.error("Error fetching cart:", err);
+          toast.error("Không thể tải giỏ hàng. Vui lòng thử lại!");
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+    fetchCart();
+  }, [isSingleProduct, cartItems.length, dispatch, token]);
+
+  // Selected items based on single product or checkout state
   const selectedItems = isSingleProduct
     ? [
         {
@@ -33,7 +61,7 @@ const CheckoutPage = ({ token }) => {
           quantity: singleQuantity,
         },
       ]
-    : cartItems.filter((item) => selectedIds?.includes(item.id));
+    : cartItems.filter((item) => checkoutState.selectedIds.includes(item.id));
 
   const total = selectedItems.reduce((acc, item) => {
     const price = item.product?.discount
@@ -47,7 +75,6 @@ const CheckoutPage = ({ token }) => {
       const orderRes = await createOrder(orderData, token);
       if (orderRes.errCode !== 0)
         return toast.error(orderRes.errMessage || "Lỗi khi tạo đơn hàng!");
-
       const orderId = orderRes.data.id;
 
       const paymentRes = await createPayment(
@@ -77,15 +104,24 @@ const CheckoutPage = ({ token }) => {
       if (!isSingleProduct)
         selectedItems.forEach((item) => dispatch(removeCartItem(item.id)));
 
+      dispatch(resetCheckout());
       toast.success("Đặt hàng thành công!");
       navigate(`/checkout-success/${orderId}`);
     } catch (error) {
-      console.error("Checkout error:", error);
+      console.error(error);
       toast.error("Thanh toán thất bại, vui lòng thử lại!");
     }
   };
 
-  if (!selectedItems.length) {
+  if (loading)
+    return (
+      <div className="text-center py-5">
+        <Spinner animation="border" variant="primary" />
+        <p className="text-muted mt-2">Đang tải sản phẩm...</p>
+      </div>
+    );
+
+  if (!selectedItems.length)
     return (
       <div className="text-center py-5">
         <h5 className="fw-semibold text-muted mb-3">
@@ -96,49 +132,29 @@ const CheckoutPage = ({ token }) => {
         </Link>
       </div>
     );
-  }
 
   return (
     <div className="checkout-page py-4 bg-light">
       <Container>
-        <nav aria-label="breadcrumb" className="mb-3">
-          <ol className="breadcrumb mb-2">
-            <li className="breadcrumb-item">
-              <Link to="/" className="text-decoration-none text-primary">
-                Trang chủ
-              </Link>
-            </li>
-            {!isSingleProduct && (
-              <li className="breadcrumb-item">
-                <Link to="/cart" className="text-decoration-none text-primary">
-                  Giỏ hàng
-                </Link>
-              </li>
-            )}
-            <li className="breadcrumb-item active text-secondary">
-              Thanh toán
-            </li>
-          </ol>
-          <div className="text-left">
-            <Link
-              to={isSingleProduct ? "/" : "/cart"}
-              className="btn btn-outline-primary rounded-pill px-3 py-2 fw-semibold"
-            >
-              <ArrowLeftCircle size={16} className="me-1" />
-              Quay lại
-            </Link>
+        <div className="text-left mb-3">
+          <Link
+            to={isSingleProduct ? "/" : "/cart"}
+            className="btn btn-outline-primary rounded-pill px-3 py-2 fw-semibold"
+          >
+            <ArrowLeftCircle size={16} className="me-1" /> Quay lại
+          </Link>
+        </div>
+
+        <div className="text-center mb-4">
+          <div className="d-inline-flex align-items-center px-4 py-2 rounded-pill checkout-title">
+            <CreditCard size={26} className="me-2" />
+            <h3 className="fw-bold mb-0">Thanh toán</h3>
           </div>
-          <div className="text-center mb-3">
-            <div className="d-inline-flex align-items-center px-4 py-2 rounded-pill checkout-title">
-              <CreditCard size={26} className="me-2" />
-              <h3 className="fw-bold mb-0">Thanh toán</h3>
-            </div>
-          </div>
-        </nav>
+        </div>
 
         <Row className="gy-4">
           <Col lg={8}>
-            <Card className="border-0 rounded-4">
+            <Card className="border-0 rounded-4 shadow-sm">
               <CheckoutForm
                 user={user}
                 total={total}
@@ -148,7 +164,6 @@ const CheckoutPage = ({ token }) => {
               />
             </Card>
           </Col>
-
           <Col lg={4}>
             <OrderSummary selectedItems={selectedItems} total={total} />
           </Col>
