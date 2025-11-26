@@ -38,8 +38,8 @@ const ReviewItem = ({
         {new Date(review.createdAt).toLocaleString("vi-VN")}
       </div>
 
-      {/* EDIT */}
-      {(user?.id === review.userId || user?.role === "admin") && (
+      {/* EDIT: chỉ cho phép chủ review sửa */}
+      {user?.id === review.userId && (
         <>
           <Form.Control
             ref={editRef}
@@ -69,6 +69,17 @@ const ReviewItem = ({
             </Button>
           </div>
         </>
+      )}
+
+      {/* ADMIN: chỉ được xoá */}
+      {user?.role === "admin" && user?.id !== review.userId && (
+        <Button
+          variant="danger"
+          size="sm"
+          onClick={() => onDeleteReview(review.id)}
+        >
+          Xóa
+        </Button>
       )}
 
       {/* REPLY input */}

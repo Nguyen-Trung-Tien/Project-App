@@ -35,7 +35,7 @@ const ChatBot = () => {
         {
           role: "assistant",
           content: `Xin chào${
-            user ? `, ${user.name}` : ""
+            user ? `, ${user.username}` : "bạn"
           }! 👋 Tôi là trợ lý TienTech.
 Tôi có thể giúp bạn với:
 • 🔍 Tìm sản phẩm
