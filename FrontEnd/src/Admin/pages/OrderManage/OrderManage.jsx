@@ -334,9 +334,15 @@ const OrderManage = () => {
                   </th>
                   <th>SĐT</th>
                   <th>
+                    <GeoAltFill className="me-1" />
+                    Địa chỉ
+                  </th>
+                  <th>
                     <Calendar3 className="me-1" />
                     Ngày
                   </th>
+
+                  <th>Sản phẩm</th>
                   <th>
                     <CurrencyDollar className="me-1" />
                     Tổng
@@ -344,14 +350,6 @@ const OrderManage = () => {
                   <th>TT</th>
                   <th>Trạng thái</th>
                   <th>Thanh toán</th>
-                  <th>
-                    <GeoAltFill className="me-1" />
-                    Địa chỉ
-                  </th>
-                  <th>
-                    <Truck className="me-1" />
-                    Trả hàng
-                  </th>
                   <th>Hành động</th>
                 </tr>
               </thead>
@@ -378,7 +376,37 @@ const OrderManage = () => {
                         {order.user?.username || "—"}
                       </td>
                       <td>{order.user?.phone || "—"}</td>
+                      <td className="text-start">
+                        <OverlayTrigger
+                          placement="top"
+                          overlay={<Tooltip>{order.shippingAddress}</Tooltip>}
+                        >
+                          <div
+                            className="text-truncate"
+                            style={{ maxWidth: 180 }}
+                          >
+                            {order.shippingAddress || "—"}
+                          </div>
+                        </OverlayTrigger>
+                      </td>
                       <td>{formatDate(order.createdAt)}</td>
+                      <td className="text-start">
+                        {order.orderItems?.length > 0 ? (
+                          order.orderItems.map((item, idx) => (
+                            <div key={idx} className="small mb-1">
+                              <strong>{item.productName}</strong> x
+                              {item.quantity}
+                              {item.returnStatus !== "none" && (
+                                <Badge bg="warning" className="ms-1">
+                                  {returnStatusMap[item.returnStatus]?.label}
+                                </Badge>
+                              )}
+                            </div>
+                          ))
+                        ) : (
+                          <span>—</span>
+                        )}
+                      </td>
                       <td className="fw-bold text-danger">
                         {formatCurrency(order.totalPrice)}
                       </td>
@@ -423,46 +451,7 @@ const OrderManage = () => {
                           </Badge>
                         )}
                       </td>
-                      <td className="text-start">
-                        <OverlayTrigger
-                          placement="top"
-                          overlay={<Tooltip>{order.shippingAddress}</Tooltip>}
-                        >
-                          <div
-                            className="text-truncate"
-                            style={{ maxWidth: 180 }}
-                          >
-                            {order.shippingAddress || "—"}
-                          </div>
-                        </OverlayTrigger>
-                      </td>
-                      <td className="text-start">
-                        {order.orderItems?.filter(
-                          (i) => i.returnStatus !== "none"
-                        ).length > 0 ? (
-                          order.orderItems
-                            .filter((i) => i.returnStatus !== "none")
-                            .map((item, idx) => (
-                              <div key={idx} className="small mb-1">
-                                <StatusBadge
-                                  map={returnStatusMap}
-                                  status={item.returnStatus}
-                                />
-                                <div>
-                                  <strong>{item.productName}</strong> x
-                                  {item.quantity}
-                                </div>
-                                <div className="text-muted">
-                                  {item.returnReason}
-                                </div>
-                              </div>
-                            ))
-                        ) : (
-                          <Badge bg="light" text="dark">
-                            —
-                          </Badge>
-                        )}
-                      </td>
+
                       <td>
                         <div className="d-flex flex-column gap-1">
                           <Dropdown>

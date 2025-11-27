@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { FaRobot, FaComments, FaTimes } from "react-icons/fa";
-import { useSelector } from "react-redux"; // lấy user từ Redux
+import { useSelector } from "react-redux";
 import { sendMessage } from "../../api/chatApi";
 
 const ChatBot = () => {

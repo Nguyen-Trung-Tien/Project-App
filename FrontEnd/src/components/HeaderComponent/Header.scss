@@ -1,5 +1,5 @@
 .header {
-  background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%) !important;
+  background: linear-gradient(90deg, #00c6ff 0%, #0072ff 100%) !important;
   transition: all 0.3s ease;
 
   .navbar-brand {
@@ -9,7 +9,7 @@
 
     .brand-highlight {
       color: #fff;
-      text-shadow: 0 0 6px rgba(255, 255, 255, 0.6);
+      text-shadow: 0 0 8px rgba(0, 198, 255, 0.8);
     }
   }
 
@@ -17,29 +17,33 @@
     color: #fff !important;
     font-weight: 500;
     transition: color 0.2s ease;
+
     &:hover {
-      color: #ffe600 !important;
+      color: #00ffe0 !important; // neon xanh mint
     }
   }
 
   .search-wrapper {
     position: relative;
+
     .form-control {
       border-radius: 50px;
       padding-left: 2.5rem;
       border: none;
-      box-shadow: 0 0 4px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 0 6px rgba(0, 0, 0, 0.1);
       transition: all 0.2s ease;
+
       &:focus {
         outline: none;
-        box-shadow: 0 0 6px rgba(79, 172, 254, 0.8);
+        box-shadow: 0 0 8px rgba(0, 198, 255, 0.6);
       }
     }
+
     .search-icon {
       top: 50%;
       left: 15px;
       transform: translateY(-50%);
-      color: #6c757d;
+      color: #e0f7ff;
     }
   }
 
@@ -49,9 +53,11 @@
       font-weight: 500;
       transition: color 0.3s ease;
       position: relative;
+
       &:hover {
-        color: #ffe600 !important;
+        color: #00ffe0 !important;
       }
+
       .cart-badge {
         position: absolute;
         top: -5px;
@@ -63,8 +69,9 @@
     .dropdown-toggle {
       color: #fff !important;
       font-weight: 500;
+
       &:hover {
-        color: #ffe600 !important;
+        color: #00ffe0 !important;
       }
     }
   }
