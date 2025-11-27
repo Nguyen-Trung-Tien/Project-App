@@ -31,7 +31,6 @@ const CheckoutPage = () => {
     !isSingleProduct && cartItems.length === 0
   );
 
-  // Fetch cart if empty (reload case)
   useEffect(() => {
     const fetchCart = async () => {
       if (!isSingleProduct && cartItems.length === 0) {
@@ -52,7 +51,6 @@ const CheckoutPage = () => {
     fetchCart();
   }, [isSingleProduct, cartItems.length, dispatch, token]);
 
-  // Selected items based on single product or checkout state
   const selectedItems = isSingleProduct
     ? [
         {

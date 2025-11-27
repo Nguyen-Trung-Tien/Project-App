@@ -49,6 +49,7 @@ const ProductDetailPage = () => {
   const [page, setPage] = useState(1);
   const [pagination, setPagination] = useState({ totalPages: 1 });
   const [newReview, setNewReview] = useState({ rating: 5, comment: "" });
+  const [showFullDesc, setShowFullDesc] = useState(false);
 
   const limit = 3;
   const [suggestedProducts, setSuggestedProducts] = useState([]);
@@ -263,6 +264,11 @@ const ProductDetailPage = () => {
       : product.price
   );
 
+  const shortDescription =
+    product.description && product.description.length > 250
+      ? product.description.slice(0, 250) + "..."
+      : product.description;
+
   return (
     <div className="product-detail-page py-3 mh-90">
       <Container>
@@ -359,9 +365,20 @@ const ProductDetailPage = () => {
                 </li>
               </ul>
 
-              <p className="text-secondary mb-4" style={{ lineHeight: "1.6" }}>
-                {product.description || "Chưa có mô tả sản phẩm."}
-              </p>
+              <div className="product-description mb-4">
+                <p className="text-secondary" style={{ lineHeight: "1.6" }}>
+                  {showFullDesc ? product.description : shortDescription}
+                </p>
+
+                {product.description?.length > 250 && (
+                  <button
+                    className="btn btn-link p-0 mt-2 fw-semibold"
+                    onClick={() => setShowFullDesc(!showFullDesc)}
+                  >
+                    {showFullDesc ? "Thu gọn ▲" : "Xem thêm ▼"}
+                  </button>
+                )}
+              </div>
 
               <div className="d-flex align-items-center gap-3 mb-4">
                 <Form.Label className="fw-semibold mb-0">Số lượng:</Form.Label>
