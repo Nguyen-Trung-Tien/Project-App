@@ -120,11 +120,20 @@ const OrderDetail = () => {
     try {
       setLoading(true);
       const res = await getOrderById(id, token);
-      if (res.errCode === 0) setOrder(res.data);
-      else toast.error(res.errMessage || "Không tìm thấy đơn hàng");
+
+      if (res.errCode === 0) {
+        setOrder(res.data);
+      } else if (res.errCode === 2) {
+        toast.error("Bạn không có quyền xem đơn hàng này");
+      } else {
+        toast.error(res.errMessage);
+      }
     } catch (error) {
-      console.error(error);
-      toast.error("Không thể tải thông tin đơn hàng!");
+      if (error.response?.status === 403) {
+        toast.error("Bạn không được phép xem đơn hàng này");
+      } else {
+        toast.error("Lỗi khi tải đơn hàng");
+      }
     } finally {
       setLoading(false);
     }

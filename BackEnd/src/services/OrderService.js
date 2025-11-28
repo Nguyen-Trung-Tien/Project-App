@@ -40,7 +40,7 @@ const getAllOrders = async (page = 1, limit = 10) => {
   }
 };
 
-const getOrderById = async (id) => {
+const getOrderById = async (id, user) => {
   try {
     const order = await db.Order.findByPk(id, {
       include: [
@@ -55,7 +55,18 @@ const getOrderById = async (id) => {
     });
 
     if (!order) {
-      return { errCode: 1, errMessage: "Order not found" };
+      return { errCode: 1, errMessage: "Order not found", status: 404 };
+    }
+
+    const isAdmin = user.role === "admin";
+    const isOwner = order.userId === user.id;
+
+    if (!isAdmin && !isOwner) {
+      return {
+        errCode: 2,
+        errMessage: "Forbidden: You do not have permission to view this order",
+        status: 403,
+      };
     }
 
     return { errCode: 0, errMessage: "OK", data: order };
