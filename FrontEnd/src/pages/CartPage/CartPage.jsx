@@ -105,13 +105,13 @@ const CartPage = () => {
     <div className="cart-page py-3">
       <Container>
         <div className="text-left">
-          <Link
+          {/* <Link
             to={"/"}
             className="btn btn-outline-primary rounded-pill px-3 py-2 fw-semibold"
           >
             <ArrowLeftCircle size={16} className="me-1" />
             Quay lại
-          </Link>
+          </Link> */}
           <div className="text-center mb-2">
             <div className="d-inline-flex align-items-center px-4 py-2 rounded-pill cart-title">
               <Cart4 size={26} className="me-2" />

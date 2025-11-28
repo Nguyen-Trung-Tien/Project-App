@@ -199,7 +199,7 @@ const OrderDetail = () => {
   return (
     <div className="order-detail-page py-3">
       <Container>
-        <div className="text-left">
+        {/* <div className="text-left">
           <Link
             to={"/orders"}
             className="btn btn-outline-primary rounded-pill px-3 py-2 fw-semibold"
@@ -207,7 +207,7 @@ const OrderDetail = () => {
             <ArrowLeftCircle size={16} className="me-1" />
             Quay lại
           </Link>
-        </div>
+        </div> */}
 
         <h3 className="mb-3 text-center fw-bold text-primary">
           Chi tiết đơn hàng #DH{order.id}
@@ -223,6 +223,10 @@ const OrderDetail = () => {
                 <p>
                   <strong>Họ tên: </strong>
                   {order.user?.username || "Khách hàng"}
+                </p>
+                <p>
+                  <strong>SĐT: </strong>
+                  {order.user?.phone}
                 </p>
                 <p>
                   <strong>Email:</strong> {order.user?.email}

@@ -134,14 +134,14 @@ const CheckoutPage = () => {
   return (
     <div className="checkout-page py-4 bg-light">
       <Container>
-        <div className="text-left mb-3">
+        {/* <div className="text-left mb-3">
           <Link
             to={isSingleProduct ? "/" : "/cart"}
             className="btn btn-outline-primary rounded-pill px-3 py-2 fw-semibold"
           >
             <ArrowLeftCircle size={16} className="me-1" /> Quay lại
           </Link>
-        </div>
+        </div> */}
 
         <div className="text-center mb-4">
           <div className="d-inline-flex align-items-center px-4 py-2 rounded-pill checkout-title">

@@ -157,7 +157,7 @@ const OrderHistory = () => {
   return (
     <div className="order-history-page py-3">
       <Container>
-        <div className="text-left">
+        {/* <div className="text-left">
           <Link
             to={"/orders"}
             className="btn btn-outline-primary rounded-pill px-3 py-2 mb-2 fw-semibold"
@@ -165,7 +165,7 @@ const OrderHistory = () => {
             <ArrowLeftCircle size={16} className="me-1" />
             Quay lại
           </Link>
-        </div>
+        </div> */}
         <Card className="shadow-sm border-0">
           <Card.Body>
             <h3 className="text-center fw-bold mb-2 text-primary">

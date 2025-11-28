@@ -44,7 +44,11 @@ const getOrderById = async (id) => {
   try {
     const order = await db.Order.findByPk(id, {
       include: [
-        { model: db.User, as: "user", attributes: ["id", "username", "email"] },
+        {
+          model: db.User,
+          as: "user",
+          attributes: ["id", "username", "email", "phone"],
+        },
         { model: db.OrderItem, as: "orderItems" },
         { model: db.Payment, as: "payment" },
       ],

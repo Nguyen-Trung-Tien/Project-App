@@ -19,6 +19,7 @@ const CheckoutForm = ({ user, total, selectedItems, onOrderComplete }) => {
     phone: user?.phone || "",
     address: user?.address || "",
     email: user?.email || "",
+    note: user.note || "",
     paymentMethod: "cod",
   });
 
@@ -29,6 +30,7 @@ const CheckoutForm = ({ user, total, selectedItems, onOrderComplete }) => {
         phone: user.phone || "",
         address: user.address || "",
         email: user.email || "",
+        note: user.note || "",
         paymentMethod: "cod",
       });
     }
@@ -57,7 +59,7 @@ const CheckoutForm = ({ user, total, selectedItems, onOrderComplete }) => {
       totalPrice: total,
       shippingAddress: formData.address,
       paymentMethod: formData.paymentMethod,
-      note: "",
+      note: formData.note || "",
       orderItems,
     };
   };
@@ -169,7 +171,7 @@ const CheckoutForm = ({ user, total, selectedItems, onOrderComplete }) => {
             </Form.Group>
           </Col>
 
-          <Col md={12}>
+          <Col md={6}>
             <Form.Group>
               <Form.Label className="fw-semibold small">
                 <GeoAlt className="me-1" /> Địa chỉ
@@ -196,6 +198,20 @@ const CheckoutForm = ({ user, total, selectedItems, onOrderComplete }) => {
                 onChange={handleChange}
                 className="rounded-3 shadow-sm"
                 placeholder="Nhập email..."
+              />
+            </Form.Group>
+          </Col>
+          <Col md={6}>
+            <Form.Group>
+              <Form.Label className="fw-semibold small">
+                <Envelope className="me-1" /> Lời nhắn (nêu có)
+              </Form.Label>
+              <Form.Control
+                name="note"
+                value={formData.note}
+                onChange={handleChange}
+                className="rounded-3 shadow-sm"
+                placeholder="Nhập lời nhắn (nếu có)..."
               />
             </Form.Group>
           </Col>
