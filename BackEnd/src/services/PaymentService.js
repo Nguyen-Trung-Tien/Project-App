@@ -106,6 +106,13 @@ const createPayment = async (data) => {
       return { errCode: 3, errMessage: "Order not found" };
     }
 
+    if (order.paymentStatus === "paid" || order.status === "completed") {
+      return {
+        errCode: 4,
+        errMessage: "Order has already been paid. Please create a new order.",
+      };
+    }
+
     const transactionId = `DH${orderId}`;
 
     const autoPaidMethods = ["momo", "paypal", "vnpay", "bank"];

@@ -41,6 +41,7 @@ import {
   updateProductApi,
 } from "../../../api/productApi";
 import { getAllCategoryApi } from "../../../api/categoryApi";
+import { getAllBrandApi } from "../../../api/brandApi";
 import { getImage } from "../../../utils/decodeImage";
 import { useSelector } from "react-redux";
 
@@ -48,6 +49,7 @@ const ProductManage = () => {
   const user = useSelector((state) => state.user.user);
   const token = user?.accessToken;
 
+  const [brands, setBrands] = useState([]);
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [showModal, setShowModal] = useState(false);
@@ -63,6 +65,7 @@ const ProductManage = () => {
     categoryId: "",
     isActive: true,
     image: null,
+    brandId: "",
   });
   const [imagePreview, setImagePreview] = useState(null);
   const [page, setPage] = useState(1);
@@ -115,8 +118,20 @@ const ProductManage = () => {
     }
   };
 
+  const fetchBrands = async () => {
+    try {
+      const res = await getAllBrandApi();
+      if (res.errCode === 0 && Array.isArray(res.brands)) {
+        setBrands(res.brands);
+      }
+    } catch (err) {
+      console.error("Fetch brands error:", err);
+    }
+  };
+
   useEffect(() => {
     fetchCategories();
+    fetchBrands();
     fetchProducts(1);
   }, []);
 
@@ -142,6 +157,7 @@ const ProductManage = () => {
         stock: product.stock || "",
         categoryId: product.categoryId || "",
         isActive: product.isActive ?? true,
+        brandId: product.brandId || "",
         image: null,
       });
       setImagePreview(getImage(product.image));
@@ -155,6 +171,7 @@ const ProductManage = () => {
         discount: "",
         stock: "",
         categoryId: "",
+        brandId: "",
         isActive: true,
         image: null,
       });
@@ -200,6 +217,7 @@ const ProductManage = () => {
       data.append("stock", formData.stock);
       data.append("categoryId", formData.categoryId);
       data.append("isActive", formData.isActive ? 1 : 0);
+      data.append("brandId", formData.brandId);
       if (formData.image) data.append("image", formData.image);
 
       let res;
@@ -359,6 +377,7 @@ const ProductManage = () => {
                   <th>Ảnh</th>
                   <th>Tên sản phẩm</th>
                   <th>SKU</th>
+                  <th>Thương hiệu</th>
                   <th>Danh mục</th>
                   <th>Giá</th>
                   <th>Giảm</th>
@@ -389,6 +408,7 @@ const ProductManage = () => {
                       </td>
                       <td className="text-start fw-medium">{p.name}</td>
                       <td>{p.sku || "—"}</td>
+                      <td>{p.brand?.name || "—"}</td>
                       <td>{p.category?.name || "—"}</td>
                       <td>{Number(p.price).toLocaleString()}₫</td>
                       <td>{p.discount}%</td>
@@ -545,6 +565,26 @@ const ProductManage = () => {
                     {categories.map((cat) => (
                       <option key={cat.id} value={cat.id}>
                         {cat.name}
+                      </option>
+                    ))}
+                  </Form.Select>
+                </Form.Group>
+
+                <Form.Group className="mb-3">
+                  <Form.Label>
+                    <Tag className="me-1" /> Thương hiệu *
+                  </Form.Label>
+                  <Form.Select
+                    value={formData.brandId}
+                    onChange={(e) =>
+                      setFormData({ ...formData, brandId: e.target.value })
+                    }
+                    required
+                  >
+                    <option value="">-- Chọn thương hiệu --</option>
+                    {brands.map((brand) => (
+                      <option key={brand.id} value={brand.id}>
+                        {brand.name}
                       </option>
                     ))}
                   </Form.Select>

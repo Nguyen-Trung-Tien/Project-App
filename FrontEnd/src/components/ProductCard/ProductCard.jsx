@@ -25,25 +25,34 @@ const ProductCard = ({ product }) => {
   const [loadingCart, setLoadingCart] = useState(false);
   const [loadingBuy, setLoadingBuy] = useState(false);
 
-  const { id, name, price, discount, stock, sold, image, isActive, reviews } =
-    product;
+  const {
+    id,
+    name,
+    price,
+    discount = 0,
+    stock,
+    sold,
+    image,
+    isActive,
+    reviews = [],
+  } = product;
 
+  // Tính rating
   const { avgRating, totalReviews } = useMemo(() => {
-    if (!reviews || reviews.length === 0)
-      return { avgRating: 0, totalReviews: 0 };
+    if (reviews.length === 0) return { avgRating: 0, totalReviews: 0 };
     const avg =
       reviews.reduce((sum, r) => sum + (r.rating || 0), 0) / reviews.length;
     return { avgRating: avg, totalReviews: reviews.length };
   }, [reviews]);
 
+  // Tính giá
   const { rawPrice, finalPrice, hasDiscount } = useMemo(() => {
     const p = Number(price) || 0;
-    const d = Number(discount) || 0;
-    const discounted = d > 0 ? p * (1 - d / 100) : p;
+    const discounted = discount > 0 ? p * (1 - discount / 100) : p;
     return {
       rawPrice: Math.round(p),
       finalPrice: Math.round(discounted),
-      hasDiscount: d > 0,
+      hasDiscount: discount > 0,
     };
   }, [price, discount]);
 
@@ -61,7 +70,7 @@ const ProductCard = ({ product }) => {
       const cartsRes = await getAllCarts(token);
       let cart = cartsRes?.data?.find((c) => c.userId === userId);
       if (!cart) {
-        const newCartRes = await createCart(token, userId);
+        const newCartRes = await createCart(userId, token);
         cart = newCartRes.data;
       }
       await addCart({ cartId: cart.id, productId: id, quantity: 1 }, token);
@@ -76,10 +85,10 @@ const ProductCard = ({ product }) => {
   };
 
   const handleBuyNow = (e) => {
-    setLoadingBuy(true);
     e.stopPropagation();
     if (!userId) return toast.warn("Vui lòng đăng nhập để mua hàng!");
     if (!isActive || stock < 1) return toast.error("Sản phẩm không khả dụng!");
+    setLoadingBuy(true);
     navigate("/checkout", { state: { product, quantity: 1 } });
   };
 
@@ -91,6 +100,7 @@ const ProductCard = ({ product }) => {
       onClick={() => navigate(`/product-detail/${id}`)}
       style={{ cursor: "pointer", maxWidth: "200px", minWidth: "200px" }}
     >
+      {/* Hình ảnh */}
       <div
         className="image-wrapper position-relative bg-white d-flex align-items-center justify-content-center"
         style={{ width: "100%", height: "150px" }}
@@ -110,6 +120,7 @@ const ProductCard = ({ product }) => {
       </div>
 
       <Card.Body className="d-flex flex-column p-3">
+        {/* Tên sản phẩm */}
         <Card.Title
           className="mb-2 text-truncate-2-lines"
           title={name}
@@ -118,6 +129,7 @@ const ProductCard = ({ product }) => {
           {name}
         </Card.Title>
 
+        {/* Giá */}
         <div className="price-section mb-2">
           {hasDiscount && (
             <div className="text-muted text-decoration-line-through fs-6">
@@ -129,6 +141,7 @@ const ProductCard = ({ product }) => {
           </div>
         </div>
 
+        {/* Kho */}
         <div className="text-muted fs-6 mb-2">
           {stock > 0 ? `Còn ${stock} sản phẩm` : "Hết hàng"}
         </div>
@@ -138,6 +151,7 @@ const ProductCard = ({ product }) => {
           </div>
         )}
 
+        {/* Rating */}
         {totalReviews > 0 && (
           <div className="d-flex align-items-center mb-2">
             {Array.from({ length: 5 }).map((_, i) => {
@@ -175,6 +189,7 @@ const ProductCard = ({ product }) => {
           </Button>
 
           <Button
+            variant="outline-success"
             disabled={!isActive || stock < 1 || loadingBuy}
             onClick={handleBuyNow}
             className="flex-fill btn-shopee-buy btn-shopee-small d-flex align-items-center justify-content-center"

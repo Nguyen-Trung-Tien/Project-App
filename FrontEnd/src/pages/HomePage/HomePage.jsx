@@ -38,12 +38,12 @@ const HomePage = () => {
     <>
       <Container fluid className="homepage">
         <ChatBot />
-
         <HeroSection />
 
         <div className="my-1">
           <SmallBanner />
         </div>
+
         <div className="my-3">
           <CategorySection
             categories={categories}

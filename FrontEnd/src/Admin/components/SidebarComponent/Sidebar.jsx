@@ -11,6 +11,7 @@ import {
   FiBarChart,
   FiDollarSign,
   FiHelpCircle,
+  FiTag,
 } from "react-icons/fi";
 import { useDispatch, useSelector } from "react-redux";
 import { logoutUserApi } from "../../../api/userApi";
@@ -22,6 +23,7 @@ const MENU_ITEMS = [
   { to: "/admin/dashboard", icon: <FiHome />, label: "Dashboard" },
   { to: "/admin/orders", icon: <FiShoppingCart />, label: "Đơn hàng" },
   { to: "/admin/products", icon: <FiBox />, label: "Sản phẩm" },
+  { to: "/admin/brands", icon: <FiTag />, label: "Thương hiệu" },
   { to: "/admin/users", icon: <FiUsers />, label: "Người dùng" },
   { to: "/admin/revenue", icon: <FiBarChart />, label: "Doanh thu" },
   {

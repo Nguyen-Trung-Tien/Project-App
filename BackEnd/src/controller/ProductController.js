@@ -21,6 +21,7 @@ const uploadToCloudinary = (buffer) => {
 const handleCreateProduct = async (req, res) => {
   try {
     const data = { ...req.body };
+    if (data.brandId) data.brandId = parseInt(data.brandId);
     if (req.file) {
       const result = await uploadToCloudinary(req.file.buffer);
       data.image = result.secure_url;

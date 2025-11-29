@@ -11,9 +11,12 @@ const AdminRouter = require("./AdminRoute");
 const ChatRoutes = require("./chatRoutes");
 const VNpayRoutes = require("./VNpayRouter");
 const ReviewReply = require("./ReviewReply");
+const BrandRouter = require("./BrandRouter");
+
 const routes = (app) => {
   app.use("/api/v1/user", UserRouter);
   app.use("/api/v1/product", ProductRouter);
+  app.use("/api/v1/brand", BrandRouter);
   app.use("/api/v1/category", CategoryRouter);
   app.use("/api/v1/review", ReviewRouter);
   app.use("/api/v1/review-reply", ReviewReply);

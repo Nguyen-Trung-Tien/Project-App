@@ -28,6 +28,13 @@ module.exports = (sequelize, DataTypes) => {
         as: "reviews",
         onDelete: "CASCADE",
       });
+
+      Product.belongsTo(models.Brand, {
+        foreignKey: "brandId",
+        as: "brand",
+        onDelete: "SET NULL",
+        onUpdate: "CASCADE",
+      });
     }
   }
 
@@ -51,6 +58,13 @@ module.exports = (sequelize, DataTypes) => {
       },
       discount: { type: DataTypes.DECIMAL(5, 2), defaultValue: 0.0 },
       isActive: { type: DataTypes.BOOLEAN, defaultValue: true },
+      brandId: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: { model: "Brands", key: "id" },
+        onDelete: "SET NULL",
+        onUpdate: "CASCADE",
+      },
       categoryId: {
         type: DataTypes.INTEGER,
         allowNull: true,

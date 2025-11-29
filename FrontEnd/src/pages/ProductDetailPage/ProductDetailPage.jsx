@@ -334,7 +334,11 @@ const ProductDetailPage = () => {
                   {formatVND(discountedPrice)}
                 </div>
               </div>
-
+              {product.brand?.name && (
+                <p className="mb-2 text-secondary">
+                  <strong>Thương hiệu:</strong> {product.brand.name}
+                </p>
+              )}
               <ul className="list-unstyled mb-3 small">
                 <li>
                   <strong>Danh mục:</strong>{" "}

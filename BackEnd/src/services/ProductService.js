@@ -24,6 +24,7 @@ const getAllProducts = async (categoryId, page = 1, limit = 10) => {
     where: whereCondition,
     include: [
       { model: db.Category, as: "category" },
+      { model: db.Brand, as: "brand" },
       { model: db.Review, as: "reviews" },
     ],
     limit,
@@ -43,7 +44,10 @@ const getAllProducts = async (categoryId, page = 1, limit = 10) => {
 const getProductById = async (id) => {
   try {
     const product = await db.Product.findByPk(id, {
-      include: [{ model: db.Category, as: "category" }],
+      include: [
+        { model: db.Category, as: "category" },
+        { model: db.Brand, as: "brand" },
+      ],
     });
 
     if (!product) return { errCode: 1, errMessage: "Product not found" };
@@ -97,7 +101,10 @@ const getProductsByCategory = async (categoryId, page = 1, limit = 11) => {
 
   const { count, rows } = await db.Product.findAndCountAll({
     where: whereCondition,
-    include: [{ model: db.Category, as: "category" }],
+    include: [
+      { model: db.Category, as: "category" },
+      { model: db.Brand, as: "brand" },
+    ],
     limit,
     offset,
     order: [["createdAt", "DESC"]],
@@ -121,7 +128,10 @@ const searchProducts = async (query, page = 1, limit = 10) => {
 
   const { count, rows } = await db.Product.findAndCountAll({
     where: whereCondition,
-    include: [{ model: db.Category, as: "category" }],
+    include: [
+      { model: db.Category, as: "category" },
+      { model: db.Brand, as: "brand" },
+    ],
     limit,
     offset,
     order: [["createdAt", "DESC"]],
@@ -158,7 +168,10 @@ const getDiscountedProducts = async (page = 1, limit = 10) => {
       discount: { [db.Sequelize.Op.gt]: 0 },
       isActive: true,
     },
-    include: [{ model: db.Category, as: "category" }],
+    include: [
+      { model: db.Category, as: "category" },
+      { model: db.Brand, as: "brand" },
+    ],
     limit,
     offset,
     order: [["createdAt", "DESC"]],
