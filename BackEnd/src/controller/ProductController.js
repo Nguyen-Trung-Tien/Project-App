@@ -166,6 +166,7 @@ const handleFilterProducts = async (req, res) => {
   try {
     const {
       brandId,
+      categoryId,
       minPrice,
       maxPrice,
       search,
@@ -176,6 +177,7 @@ const handleFilterProducts = async (req, res) => {
 
     const filters = {
       brandId,
+      categoryId,
       minPrice,
       maxPrice,
       search,

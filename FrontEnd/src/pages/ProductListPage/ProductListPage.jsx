@@ -17,7 +17,7 @@ const ProductListPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [error, setError] = useState("");
-  const [appliedFilters, setAppliedFilters] = useState({}); // lưu filter hiện tại
+  const [appliedFilters, setAppliedFilters] = useState({});
 
   const [searchParams, setSearchParams] = useSearchParams();
   const limit = 12;
@@ -29,23 +29,21 @@ const ProductListPage = () => {
       try {
         const res = await getAllCategoryApi();
         if (res.errCode === 0) setCategories(res.data || []);
-        else setError("Không thể tải danh mục");
       } catch (err) {
         console.error(err);
-        setError("Lỗi kết nối");
       }
     };
     fetchCategories();
   }, []);
 
-  // Fetch products (có hỗ trợ filter + pagination)
+  // Fetch products with filters & pagination
   const fetchProducts = useCallback(
     async (page = 1, filters = {}, append = false) => {
       try {
         append ? setLoadingMore(true) : setLoading(true);
         setError("");
 
-        let res = await filterProductsApi({
+        const res = await filterProductsApi({
           brandId: filters.brands?.length > 0 ? filters.brands.join(",") : "",
           categoryId: filters.category || categoryIdParam || "",
           minPrice: filters.price?.[0] ?? 0,
@@ -60,7 +58,7 @@ const ProductListPage = () => {
           setProducts((prev) =>
             append ? [...prev, ...newProducts] : newProducts
           );
-          setCurrentPage(res.currentPage || res.page || page);
+          setCurrentPage(res.currentPage || page);
           setTotalPages(res.totalPages || 1);
         } else {
           throw new Error(res.errMessage || "Lỗi tải sản phẩm");
@@ -77,7 +75,7 @@ const ProductListPage = () => {
     [categoryIdParam]
   );
 
-  // Load products khi categoryParam thay đổi
+  // Load initial products
   useEffect(() => {
     const initialFilters = appliedFilters.category
       ? { ...appliedFilters }
@@ -85,18 +83,15 @@ const ProductListPage = () => {
     fetchProducts(1, initialFilters, false);
   }, [categoryIdParam, appliedFilters, fetchProducts]);
 
-  // Click chọn category trên filter bar
   const handleCategoryClick = (catId) => {
     const newParams = catId ? { category: catId } : {};
     setSearchParams(newParams);
 
-    // Cập nhật filter và fetch sản phẩm
     const newFilters = { ...appliedFilters, category: catId || "" };
     setAppliedFilters(newFilters);
     fetchProducts(1, newFilters, false);
   };
 
-  // Load thêm sản phẩm
   const handleLoadMore = () => {
     if (currentPage >= totalPages || loadingMore) return;
     fetchProducts(currentPage + 1, appliedFilters, true);
@@ -124,27 +119,22 @@ const ProductListPage = () => {
       <Container>
         <ChatBot />
 
-        {/* Product Filter */}
-        <ProductFilter
-          onFilterChange={(filters) => {
-            setAppliedFilters(filters); // lưu filter
-            fetchProducts(1, filters, false);
-          }}
-        />
-
-        <h3 className="section-title text-center mb-3 fw-bold fs-2">
-          Danh sách sản phẩm
-        </h3>
-
         {/* Category Filter Bar */}
         <div className="filter-bar mb-4 d-flex flex-wrap gap-2 align-items-center">
+          {/* Product Filter */}
+          <ProductFilter
+            onFilterChange={(filters) => {
+              setAppliedFilters(filters);
+              fetchProducts(1, filters, false);
+            }}
+          />
           <span className="fw-semibold text-muted">Lọc theo:</span>
           {categories.map((cat) => (
             <Button
               key={cat.id}
               size="sm"
               variant={
-                (appliedFilters.category || categoryIdParam) === cat.id
+                (appliedFilters.category || categoryIdParam) == cat.id
                   ? "primary"
                   : "outline-secondary"
               }
@@ -215,7 +205,6 @@ const ProductListPage = () => {
               <div className="text-center mt-3">
                 <Button
                   variant="outline-primary"
-                  size="ms"
                   className="rounded-pill px-3 py-2 shadow-sm"
                   onClick={handleLoadMore}
                 >

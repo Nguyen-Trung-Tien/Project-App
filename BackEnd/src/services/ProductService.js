@@ -189,6 +189,7 @@ const getDiscountedProducts = async (page = 1, limit = 10) => {
 
 const filterProducts = async ({
   brandId,
+  categoryId,
   minPrice = 0,
   maxPrice = 99999999,
   search = "",
@@ -203,7 +204,7 @@ const filterProducts = async ({
     };
 
     if (brandId) conditions.brandId = brandId;
-
+    if (categoryId) conditions.categoryId = categoryId;
     if (search) conditions.name = { [Op.iLike]: `%${search}%` };
 
     // SORT
@@ -216,7 +217,10 @@ const filterProducts = async ({
 
     const products = await db.Product.findAndCountAll({
       where: conditions,
-      include: [{ model: db.Brand, as: "brand" }],
+      include: [
+        { model: db.Brand, as: "brand" },
+        { model: db.Category, as: "category" },
+      ],
       order,
       limit,
       offset,
