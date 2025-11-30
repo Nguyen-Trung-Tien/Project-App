@@ -1,0 +1,49 @@
+.brand-logos {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 60px);
+  gap: 10px;
+}
+
+.brand-logos .item {
+  border: 1px solid #ddd;
+  padding: 5px;
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.brand-logos .item.active {
+  border-color: #007bff;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
+.brand-logos {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 70px);
+  gap: 10px;
+  justify-content: start;
+}
+
+.brand-logos .item {
+  border: 1px solid #ddd;
+  padding: 5px;
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.brand-logos .item.active {
+  border-color: #007bff;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
+.brand-logos .item img {
+  display: block;
+}

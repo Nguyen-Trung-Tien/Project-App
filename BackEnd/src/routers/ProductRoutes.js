@@ -34,4 +34,6 @@ router.delete(
 );
 
 router.get("/discounted", ProductController.handleGetDiscountedProducts);
+router.get("/filter", ProductController.handleFilterProducts);
+
 module.exports = router;

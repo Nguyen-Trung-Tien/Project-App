@@ -113,3 +113,32 @@ export const getDiscountedProductsApi = async (page = 1, limit = 6) => {
     throw err;
   }
 };
+
+export const filterProductsApi = async ({
+  brandId = "",
+  categoryId = "",
+  minPrice = 0,
+  maxPrice = 999999999,
+  search = "",
+  page = 1,
+  limit = 10,
+}) => {
+  try {
+    const res = await API.get("/product/filter", {
+      params: {
+        brandId,
+        categoryId,
+        minPrice,
+        maxPrice,
+        search,
+        page,
+        limit,
+      },
+    });
+
+    return res.data;
+  } catch (err) {
+    console.error("Filter products API error:", err);
+    throw err;
+  }
+};

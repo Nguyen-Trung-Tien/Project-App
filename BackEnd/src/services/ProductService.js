@@ -1,5 +1,6 @@
 const db = require("../models");
 const fs = require("fs");
+const { Op } = require("sequelize");
 
 const createProduct = async (data) => {
   try {
@@ -185,6 +186,55 @@ const getDiscountedProducts = async (page = 1, limit = 10) => {
     totalPages: Math.ceil(count / limit),
   };
 };
+
+const filterProducts = async ({
+  brandId,
+  minPrice = 0,
+  maxPrice = 99999999,
+  search = "",
+  sort,
+  page = 1,
+  limit = 12,
+}) => {
+  try {
+    const conditions = {
+      price: { [Op.between]: [minPrice, maxPrice] },
+      isActive: true,
+    };
+
+    if (brandId) conditions.brandId = brandId;
+
+    if (search) conditions.name = { [Op.iLike]: `%${search}%` };
+
+    // SORT
+    let order = [];
+    if (sort === "price_asc") order = [["price", "ASC"]];
+    if (sort === "price_desc") order = [["price", "DESC"]];
+    if (sort === "newest") order = [["createdAt", "DESC"]];
+
+    const offset = (page - 1) * limit;
+
+    const products = await db.Product.findAndCountAll({
+      where: conditions,
+      include: [{ model: db.Brand, as: "brand" }],
+      order,
+      limit,
+      offset,
+    });
+
+    return {
+      errCode: 0,
+      data: products.rows,
+      total: products.count,
+      page,
+      totalPages: Math.ceil(products.count / limit),
+    };
+  } catch (error) {
+    console.error(error);
+    return { errCode: 1, errMessage: error.message };
+  }
+};
+
 module.exports = {
   createProduct,
   getAllProducts,
@@ -195,4 +245,5 @@ module.exports = {
   searchProducts,
   updateProductSold,
   getDiscountedProducts,
+  filterProducts,
 };

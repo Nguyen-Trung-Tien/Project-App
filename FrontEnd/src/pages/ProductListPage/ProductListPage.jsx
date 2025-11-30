@@ -10,6 +10,7 @@ import {
 import ChatBot from "../../components/ChatBot/ChatBot";
 import SkeletonCard from "../../components/SkeletonCard/SkeletonCard";
 import "./ProductListPage.scss";
+import ProductFilter from "../../components/ProductFilter/ProductFilter";
 
 const ProductListPage = () => {
   const [categories, setCategories] = useState([]);
@@ -112,6 +113,12 @@ const ProductListPage = () => {
     <section className="product-list-page py-3 bg-light">
       <Container>
         <ChatBot />
+        <ProductFilter
+          onFilterChange={(filters) => {
+            console.log("Filter áp dụng:", filters);
+            fetchProducts(filters);
+          }}
+        />
 
         <h3 className="section-title text-center mb-3 fw-bold fs-2">
           Danh sách sản phẩm

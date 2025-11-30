@@ -162,6 +162,39 @@ const handleGetDiscountedProducts = async (req, res) => {
     });
   }
 };
+const handleFilterProducts = async (req, res) => {
+  try {
+    const {
+      brandId,
+      minPrice,
+      maxPrice,
+      search,
+      sort,
+      page = 1,
+      limit = 12,
+    } = req.query;
+
+    const filters = {
+      brandId,
+      minPrice,
+      maxPrice,
+      search,
+      sort,
+      page: Number(page),
+      limit: Number(limit),
+    };
+
+    const result = await ProductService.filterProducts(filters);
+    return res.status(200).json(result);
+  } catch (error) {
+    console.error("Error filtering products:", error);
+    return res.status(500).json({
+      errCode: -1,
+      errMessage: "Internal server error",
+    });
+  }
+};
+
 module.exports = {
   handleCreateProduct,
   handleGetAllProducts,
@@ -171,4 +204,5 @@ module.exports = {
   getProductsByCategory,
   handleSearchProducts,
   handleGetDiscountedProducts,
+  handleFilterProducts,
 };
