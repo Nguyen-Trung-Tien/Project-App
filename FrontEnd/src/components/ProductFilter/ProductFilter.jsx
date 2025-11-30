@@ -1,36 +1,47 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import Offcanvas from "react-bootstrap/Offcanvas";
 import Button from "react-bootstrap/Button";
+import Form from "react-bootstrap/Form";
 import { getAllBrandApi } from "../../api/brandApi";
-import { getImage } from "../../utils/decodeImage"; // dùng hàm như trong BrandManage
+import { getAllCategoryApi } from "../../api/categoryApi";
+import { getImage } from "../../utils/decodeImage";
 import "./ProductFilter.scss";
 
 function ProductFilter({ onFilterChange }) {
   const [show, setShow] = useState(false);
   const [brands, setBrands] = useState([]);
-
+  const [categories, setCategories] = useState([]);
   const [filters, setFilters] = useState({
     brands: [],
-    ram: [],
-    rom: [],
-    screen: [],
-    battery: [],
-    sort: null,
+    category: "",
     price: [0, 60000000],
+    sort: "",
   });
 
+  // Load brands
   useEffect(() => {
     const fetchBrands = async () => {
       try {
         const res = await getAllBrandApi();
-        if (res.errCode === 0) {
-          setBrands(res.brands || []);
-        }
+        if (res.errCode === 0) setBrands(res.brands || []);
       } catch (err) {
-        console.error("Failed to fetch brands:", err);
+        console.error("Lỗi load brands:", err);
       }
     };
     fetchBrands();
+  }, []);
+
+  // Load categories
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const res = await getAllCategoryApi();
+        if (res.errCode === 0) setCategories(res.data || []);
+      } catch (err) {
+        console.error("Lỗi load categories:", err);
+      }
+    };
+    fetchCategories();
   }, []);
 
   const toggleArray = (key, value) => {
@@ -45,6 +56,23 @@ function ProductFilter({ onFilterChange }) {
     });
   };
 
+  const handleCategoryChange = (e) => {
+    setFilters((prev) => ({ ...prev, category: e.target.value }));
+  };
+
+  const handleSortChange = (e) => {
+    setFilters((prev) => ({ ...prev, sort: e.target.value }));
+  };
+
+  const handlePriceChange = (e, index) => {
+    const value = Number(e.target.value);
+    setFilters((prev) => {
+      const newPrice = [...prev.price];
+      newPrice[index] = value;
+      return { ...prev, price: newPrice };
+    });
+  };
+
   const applyFilters = () => {
     onFilterChange(filters);
     setShow(false);
@@ -53,37 +81,34 @@ function ProductFilter({ onFilterChange }) {
   const resetFilters = () => {
     setFilters({
       brands: [],
-      ram: [],
-      rom: [],
-      screen: [],
-      battery: [],
-      sort: null,
+      category: "",
       price: [0, 60000000],
+      sort: "",
     });
   };
 
   return (
     <>
-      <Button className="filter-main-btn" onClick={() => setShow(true)}>
+      <Button variant="outline-primary" onClick={() => setShow(true)}>
         Bộ lọc
       </Button>
 
       <Offcanvas show={show} onHide={() => setShow(false)} placement="start">
         <Offcanvas.Header closeButton>
-          <Offcanvas.Title>Bộ lọc nâng cao</Offcanvas.Title>
+          <Offcanvas.Title>Bộ lọc sản phẩm</Offcanvas.Title>
         </Offcanvas.Header>
 
         <Offcanvas.Body>
-          {/* BRAND */}
+          {/* Brand Filter */}
           <div className="filter-section">
             <h6>Hãng</h6>
             <div className="grid brand-logos">
               {brands.map((b) => (
                 <button
                   key={b.id}
-                  className={`item ${
-                    filters.brands.includes(b.id) ? "active" : ""
-                  }`}
+                  className={
+                    filters.brands.includes(b.id) ? "item active" : "item"
+                  }
                   onClick={() => toggleArray("brands", b.id)}
                 >
                   {b.image && (
@@ -98,21 +123,63 @@ function ProductFilter({ onFilterChange }) {
                       }}
                     />
                   )}
-                  <span style={{ fontSize: 12 }}>{b.name}</span>
+                  <span>{b.name}</span>
                 </button>
               ))}
             </div>
           </div>
 
-          {/* Các filter khác giữ nguyên */}
-          {/* RAM, ROM, Screen, Battery, Sort, Price */}
+          {/* Category Filter */}
+          <div className="filter-section mt-3">
+            <h6>Danh mục</h6>
+            <Form.Select
+              value={filters.category}
+              onChange={handleCategoryChange}
+            >
+              <option value="">Tất cả</option>
+              {categories.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </Form.Select>
+          </div>
+
+          {/* Price Filter */}
+          <div className="filter-section mt-3">
+            <h6>Giá</h6>
+            <div className="d-flex gap-2 align-items-center">
+              <Form.Control
+                type="number"
+                value={filters.price[0]}
+                onChange={(e) => handlePriceChange(e, 0)}
+              />
+              <span>-</span>
+              <Form.Control
+                type="number"
+                value={filters.price[1]}
+                onChange={(e) => handlePriceChange(e, 1)}
+              />
+            </div>
+          </div>
+
+          {/* Sort Filter */}
+          <div className="filter-section mt-3">
+            <h6>Sắp xếp</h6>
+            <Form.Select value={filters.sort} onChange={handleSortChange}>
+              <option value="">Mặc định</option>
+              <option value="newest">Mới nhất</option>
+              <option value="price_asc">Giá tăng dần</option>
+              <option value="price_desc">Giá giảm dần</option>
+            </Form.Select>
+          </div>
         </Offcanvas.Body>
 
         <div className="d-flex gap-2 p-3">
-          <Button variant="secondary" className="w-50" onClick={resetFilters}>
+          <Button variant="secondary" onClick={resetFilters}>
             Xóa tất cả
           </Button>
-          <Button className="w-50 apply" onClick={applyFilters}>
+          <Button variant="primary" onClick={applyFilters}>
             Áp dụng
           </Button>
         </div>

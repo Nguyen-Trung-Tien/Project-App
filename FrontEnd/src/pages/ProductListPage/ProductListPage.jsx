@@ -1,16 +1,13 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { Container, Row, Col, Button, Spinner, Alert } from "react-bootstrap";
+import { Container, Row, Col, Button, Alert } from "react-bootstrap";
 import { useSearchParams } from "react-router-dom";
 import ProductCard from "../../components/ProductCard/ProductCard";
 import { getAllCategoryApi } from "../../api/categoryApi";
-import {
-  getAllProductApi,
-  getProductsByCategoryApi,
-} from "../../api/productApi";
+import { filterProductsApi } from "../../api/productApi";
 import ChatBot from "../../components/ChatBot/ChatBot";
 import SkeletonCard from "../../components/SkeletonCard/SkeletonCard";
-import "./ProductListPage.scss";
 import ProductFilter from "../../components/ProductFilter/ProductFilter";
+import "./ProductListPage.scss";
 
 const ProductListPage = () => {
   const [categories, setCategories] = useState([]);
@@ -20,54 +17,56 @@ const ProductListPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [error, setError] = useState("");
+  const [appliedFilters, setAppliedFilters] = useState({}); // lưu filter hiện tại
 
   const [searchParams, setSearchParams] = useSearchParams();
-  const limit = 10;
+  const limit = 12;
+  const categoryIdParam = searchParams.get("category") || "";
 
-  const categoryId = searchParams.get("category") || "";
-
+  // Load categories
   useEffect(() => {
     const fetchCategories = async () => {
       try {
         const res = await getAllCategoryApi();
-        if (res.errCode === 0) {
-          setCategories(res.data || []);
-        } else {
-          setError("Không thể tải danh mục");
-        }
+        if (res.errCode === 0) setCategories(res.data || []);
+        else setError("Không thể tải danh mục");
       } catch (err) {
-        console.error("Lỗi load danh mục:", err);
+        console.error(err);
         setError("Lỗi kết nối");
       }
     };
     fetchCategories();
   }, []);
 
+  // Fetch products (có hỗ trợ filter + pagination)
   const fetchProducts = useCallback(
-    async (page = 1, catId = "", append = false) => {
+    async (page = 1, filters = {}, append = false) => {
       try {
         append ? setLoadingMore(true) : setLoading(true);
         setError("");
 
-        let res;
-        if (catId) {
-          res = await getProductsByCategoryApi(catId, page, limit);
-        } else {
-          res = await getAllProductApi(page, limit);
-        }
+        let res = await filterProductsApi({
+          brandId: filters.brands?.length > 0 ? filters.brands.join(",") : "",
+          categoryId: filters.category || categoryIdParam || "",
+          minPrice: filters.price?.[0] ?? 0,
+          maxPrice: filters.price?.[1] ?? 60000000,
+          sort: filters.sort || "",
+          page,
+          limit,
+        });
 
-        if (res?.errCode === 0) {
-          const newProducts = res.products || [];
+        if (res.errCode === 0) {
+          const newProducts = res.products || res.data || [];
           setProducts((prev) =>
             append ? [...prev, ...newProducts] : newProducts
           );
-          setCurrentPage(res.currentPage || page);
+          setCurrentPage(res.currentPage || res.page || page);
           setTotalPages(res.totalPages || 1);
         } else {
-          throw new Error(res?.errMessage || "Lỗi tải sản phẩm");
+          throw new Error(res.errMessage || "Lỗi tải sản phẩm");
         }
       } catch (err) {
-        console.error("Lỗi fetch sản phẩm:", err);
+        console.error(err);
         setError("Không thể tải sản phẩm");
         if (!append) setProducts([]);
       } finally {
@@ -75,21 +74,32 @@ const ProductListPage = () => {
         setLoadingMore(false);
       }
     },
-    [limit]
+    [categoryIdParam]
   );
 
+  // Load products khi categoryParam thay đổi
   useEffect(() => {
-    fetchProducts(1, categoryId, false);
-  }, [categoryId, fetchProducts]);
+    const initialFilters = appliedFilters.category
+      ? { ...appliedFilters }
+      : { ...appliedFilters, category: categoryIdParam };
+    fetchProducts(1, initialFilters, false);
+  }, [categoryIdParam, appliedFilters, fetchProducts]);
 
+  // Click chọn category trên filter bar
   const handleCategoryClick = (catId) => {
     const newParams = catId ? { category: catId } : {};
     setSearchParams(newParams);
+
+    // Cập nhật filter và fetch sản phẩm
+    const newFilters = { ...appliedFilters, category: catId || "" };
+    setAppliedFilters(newFilters);
+    fetchProducts(1, newFilters, false);
   };
 
+  // Load thêm sản phẩm
   const handleLoadMore = () => {
     if (currentPage >= totalPages || loadingMore) return;
-    fetchProducts(currentPage + 1, categoryId, true);
+    fetchProducts(currentPage + 1, appliedFilters, true);
   };
 
   const renderSkeletons = (count = limit) => (
@@ -113,10 +123,12 @@ const ProductListPage = () => {
     <section className="product-list-page py-3 bg-light">
       <Container>
         <ChatBot />
+
+        {/* Product Filter */}
         <ProductFilter
           onFilterChange={(filters) => {
-            console.log("Filter áp dụng:", filters);
-            fetchProducts(filters);
+            setAppliedFilters(filters); // lưu filter
+            fetchProducts(1, filters, false);
           }}
         />
 
@@ -124,20 +136,25 @@ const ProductListPage = () => {
           Danh sách sản phẩm
         </h3>
 
+        {/* Category Filter Bar */}
         <div className="filter-bar mb-4 d-flex flex-wrap gap-2 align-items-center">
           <span className="fw-semibold text-muted">Lọc theo:</span>
           {categories.map((cat) => (
             <Button
               key={cat.id}
               size="sm"
-              variant={categoryId === cat.id ? "primary" : "outline-secondary"}
+              variant={
+                (appliedFilters.category || categoryIdParam) === cat.id
+                  ? "primary"
+                  : "outline-secondary"
+              }
               className="rounded-pill px-3"
               onClick={() => handleCategoryClick(cat.id)}
             >
               {cat.name}
             </Button>
           ))}
-          {categoryId && (
+          {(appliedFilters.category || categoryIdParam) && (
             <Button
               variant="outline-danger"
               size="sm"
@@ -149,6 +166,7 @@ const ProductListPage = () => {
           )}
         </div>
 
+        {/* Error */}
         {error && (
           <Alert variant="danger" className="text-center mb-4">
             {error}
@@ -156,21 +174,24 @@ const ProductListPage = () => {
               variant="link"
               size="sm"
               className="ms-2 p-0"
-              onClick={() => fetchProducts(1, categoryId, false)}
+              onClick={() => fetchProducts(1, appliedFilters, false)}
             >
               Thử lại
             </Button>
           </Alert>
         )}
 
+        {/* Loading Skeleton */}
         {loading && products.length === 0 && renderSkeletons()}
 
+        {/* No products */}
         {!loading && !error && products.length === 0 && (
           <Alert variant="info" className="text-center">
-            Không có sản phẩm nào trong danh mục này.
+            Không có sản phẩm nào.
           </Alert>
         )}
 
+        {/* Product List */}
         {products.length > 0 && (
           <>
             <Row className="g-3 justify-content-center">
@@ -188,6 +209,7 @@ const ProductListPage = () => {
               ))}
             </Row>
 
+            {/* Load more */}
             {loadingMore && renderSkeletons(5)}
             {currentPage < totalPages && !loadingMore && (
               <div className="text-center mt-3">
