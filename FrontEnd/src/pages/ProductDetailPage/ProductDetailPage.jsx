@@ -10,7 +10,6 @@ import {
 } from "react-bootstrap";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import {
-  ArrowLeft,
   ArrowLeftCircle,
   CartPlus,
   CreditCard,
@@ -41,6 +40,7 @@ const ProductDetailPage = () => {
   const token = user?.accessToken;
   const navigate = useNavigate();
   const dispatch = useDispatch();
+
   const [product, setProduct] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(true);
@@ -58,9 +58,11 @@ const ProductDetailPage = () => {
   const [suggestedTotalPages, setSuggestedTotalPages] = useState(1);
   const [loadingSuggested, setLoadingSuggested] = useState(false);
   const suggestedLimit = 7;
+
   const avgRating = reviews.length
     ? reviews.reduce((sum, r) => sum + (r.rating || 0), 0) / reviews.length
     : 0;
+
   const fetchSuggestedProducts = useCallback(
     async (categoryId, page = 1, append = false) => {
       if (!categoryId) return;
@@ -71,12 +73,10 @@ const ProductDetailPage = () => {
           page,
           suggestedLimit
         );
-
         if (res?.errCode === 0 && Array.isArray(res.products)) {
           const filtered = res.products.filter(
             (p) => p.id !== currentProductId.current
           );
-
           setSuggestedProducts((prev) => {
             if (append) {
               const combined = [...prev, ...filtered];
@@ -87,7 +87,6 @@ const ProductDetailPage = () => {
               return filtered;
             }
           });
-
           setSuggestedPage(page);
           setSuggestedTotalPages(res.totalPages || 1);
         }
@@ -144,6 +143,7 @@ const ProductDetailPage = () => {
       console.error("Lỗi tải đánh giá:", err);
     }
   };
+
   useEffect(() => {
     if (product?.id) {
       fetchReviews(product.id, page);
@@ -189,7 +189,6 @@ const ProductDetailPage = () => {
       );
       if (res.errCode === 0) {
         dispatch(addCartItem({ ...product, quantity }));
-
         toast.success(`Đã thêm "${product.name}" vào giỏ hàng`);
       } else {
         toast.error(res.errMessage || "Thêm vào giỏ hàng thất bại!");
@@ -253,7 +252,7 @@ const ProductDetailPage = () => {
       <div className="text-center py-5">
         <h4>Không tìm thấy sản phẩm!</h4>
         <Link to="/" className="btn btn-outline-secondary mt-3">
-          <ArrowLeft className="me-2" /> Quay lại
+          <ArrowLeftCircle className="me-2" /> Quay lại
         </Link>
       </div>
     );
@@ -273,7 +272,7 @@ const ProductDetailPage = () => {
     <div className="product-detail-page py-3 mh-90">
       <Container>
         <ChatBot />
-        <div className="text-left">
+        <div className="text-left mb-3">
           <Link
             to={"/"}
             className="btn btn-outline-primary rounded-pill px-3 py-2 fw-semibold"
@@ -302,78 +301,109 @@ const ProductDetailPage = () => {
             <div className="product-info">
               <h2 className="fw-bold mb-3">{product.name}</h2>
 
+              {/* Giá & Rating */}
               <div className="price mb-3">
                 {product.discount > 0 && (
                   <div className="text-muted text-decoration-line-through">
                     {formatVND(product.price)}
                   </div>
                 )}
-                <div>
-                  {reviews.length > 0 ? (
-                    <div className="d-flex align-items-center mb-3">
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <span key={star}>
-                          {star <= Math.floor(avgRating) ? (
-                            <StarFill color="gold" />
-                          ) : avgRating >= star - 0.5 ? (
-                            <Star color="gold" />
-                          ) : (
-                            <Star color="lightgray" />
-                          )}
-                        </span>
-                      ))}
-                      <span className="ms-2 text-muted small">
-                        {avgRating.toFixed(1)} / 5 ({reviews.length} đánh giá)
-                      </span>
-                    </div>
-                  ) : (
-                    <p className="text-muted small mb-3">Chưa có đánh giá</p>
-                  )}
-                </div>
                 <div className="fw-bold text-danger fs-5">
                   {formatVND(discountedPrice)}
                 </div>
+
+                {reviews.length > 0 ? (
+                  <div className="d-flex align-items-center mt-2 mb-3">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <span key={star}>
+                        {star <= Math.floor(avgRating) ? (
+                          <StarFill color="gold" />
+                        ) : avgRating >= star - 0.5 ? (
+                          <Star color="gold" />
+                        ) : (
+                          <Star color="lightgray" />
+                        )}
+                      </span>
+                    ))}
+                    <span className="ms-2 text-muted small">
+                      {avgRating.toFixed(1)} / 5 ({reviews.length} đánh giá)
+                    </span>
+                  </div>
+                ) : (
+                  <p className="text-muted small mb-3">Chưa có đánh giá</p>
+                )}
               </div>
-              {product.brand?.name && (
-                <p className="mb-2 text-secondary">
-                  <strong>Thương hiệu:</strong> {product.brand.name}
-                </p>
-              )}
-              <ul className="list-unstyled mb-3 small">
-                <li>
-                  <strong>Danh mục:</strong>{" "}
-                  {product.category?.name || "Chưa phân loại"}
-                </li>
-                <li>
-                  <strong>Tồn kho:</strong>{" "}
-                  {product.stock > 0 ? (
-                    <span className="text-success">{product.stock}</span>
-                  ) : (
-                    <span className="text-danger">Hết hàng</span>
-                  )}
-                </li>
-                <li>
-                  <strong>Đã bán:</strong>{" "}
-                  <span className="text-primary fw-semibold">
-                    {product.sold ?? 0}
-                  </span>
-                  {(product?.category?.slug?.includes("dien-thoai") ||
-                    product?.category?.name
-                      ?.toLowerCase()
-                      .includes("điện thoại") ||
-                    discountedPrice >= 2000000) && (
-                    <div className="text-success fw-semibold fs-6 mb-2">
-                      🚚 Miễn phí vận chuyển
+
+              {/* Thông số kỹ thuật */}
+              {(product.color ||
+                product.ram ||
+                product.rom ||
+                product.screen ||
+                product.cpu ||
+                product.battery ||
+                product.weight ||
+                product.connectivity ||
+                product.os ||
+                product.extra) && (
+                <div className="product-specs mb-3">
+                  {product.color && (
+                    <div>
+                      <strong>Màu sắc:</strong> {product.color}
                     </div>
                   )}
-                </li>
-              </ul>
+                  {product.ram && (
+                    <div>
+                      <strong>RAM:</strong> {product.ram}
+                    </div>
+                  )}
+                  {product.rom && (
+                    <div>
+                      <strong>ROM:</strong> {product.rom}
+                    </div>
+                  )}
+                  {product.screen && (
+                    <div>
+                      <strong>Màn hình:</strong> {product.screen}
+                    </div>
+                  )}
+                  {product.cpu && (
+                    <div>
+                      <strong>CPU:</strong> {product.cpu}
+                    </div>
+                  )}
+                  {product.battery && (
+                    <div>
+                      <strong>Pin:</strong> {product.battery}
+                    </div>
+                  )}
+                  {product.weight && (
+                    <div>
+                      <strong>Trọng lượng:</strong> {product.weight}
+                    </div>
+                  )}
+                  {product.connectivity && (
+                    <div>
+                      <strong>Kết nối:</strong> {product.connectivity}
+                    </div>
+                  )}
+                  {product.os && (
+                    <div>
+                      <strong>Hệ điều hành:</strong> {product.os}
+                    </div>
+                  )}
+                  {product.extra && (
+                    <div>
+                      <strong>Thông tin thêm:</strong> {product.extra}
+                    </div>
+                  )}
+                </div>
+              )}
 
+              {/* Mô tả */}
               <div className="product-description mb-4">
                 <p className="text-secondary" style={{ lineHeight: "1.6" }}>
                   {showFullDesc ? product.description : shortDescription}
                 </p>
-
                 {product.description?.length > 250 && (
                   <button
                     className="btn btn-link p-0 mt-2 fw-semibold"
@@ -384,6 +414,7 @@ const ProductDetailPage = () => {
                 )}
               </div>
 
+              {/* Số lượng */}
               <div className="d-flex align-items-center gap-3 mb-4">
                 <Form.Label className="fw-semibold mb-0">Số lượng:</Form.Label>
                 <Form.Control
@@ -406,6 +437,7 @@ const ProductDetailPage = () => {
                 />
               </div>
 
+              {/* Nút Thêm giỏ / Mua ngay */}
               <div className="d-flex flex-column flex-sm-row gap-3">
                 <Button
                   variant="danger"
@@ -443,6 +475,7 @@ const ProductDetailPage = () => {
           </Col>
         </Row>
 
+        {/* Reviews */}
         <div className="reviews-section mt-5 pt-4 border-top">
           <h4 className="fw-bold mb-3">Đánh giá sản phẩm</h4>
 
@@ -464,6 +497,7 @@ const ProductDetailPage = () => {
           />
         </div>
 
+        {/* Suggested Products */}
         {suggestedProducts.length > 0 ? (
           <div className="suggested-products mt-3 pt-3 border-top">
             <h4 className="fw-bold mb-3">Sản phẩm gợi ý</h4>

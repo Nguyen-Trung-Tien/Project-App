@@ -47,6 +47,19 @@ module.exports = {
         type: Sequelize.BLOB("long"),
         allowNull: true,
       },
+
+      // Thông số điện tử
+      color: { type: Sequelize.STRING, allowNull: true },
+      ram: { type: Sequelize.STRING, allowNull: true },
+      rom: { type: Sequelize.STRING, allowNull: true },
+      screen: { type: Sequelize.STRING, allowNull: true },
+      cpu: { type: Sequelize.STRING, allowNull: true },
+      battery: { type: Sequelize.STRING, allowNull: true },
+      weight: { type: Sequelize.STRING, allowNull: true },
+      connectivity: { type: Sequelize.STRING, allowNull: true },
+      os: { type: Sequelize.STRING, allowNull: true },
+      extra: { type: Sequelize.TEXT, allowNull: true },
+
       categoryId: {
         type: Sequelize.INTEGER,
         allowNull: true,

@@ -66,7 +66,18 @@ const ProductManage = () => {
     isActive: true,
     image: null,
     brandId: "",
+    color: "",
+    ram: "",
+    rom: "",
+    screen: "",
+    cpu: "",
+    battery: "",
+    weight: "",
+    connectivity: "",
+    os: "",
+    extra: "",
   });
+
   const [imagePreview, setImagePreview] = useState(null);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -159,6 +170,16 @@ const ProductManage = () => {
         isActive: product.isActive ?? true,
         brandId: product.brandId || "",
         image: null,
+        color: product.color || "",
+        ram: product.ram || "",
+        rom: product.rom || "",
+        screen: product.screen || "",
+        cpu: product.cpu || "",
+        battery: product.battery || "",
+        weight: product.weight || "",
+        connectivity: product.connectivity || "",
+        os: product.os || "",
+        extra: product.extra || "",
       });
       setImagePreview(getImage(product.image));
       setEditProduct(product);
@@ -174,6 +195,16 @@ const ProductManage = () => {
         brandId: "",
         isActive: true,
         image: null,
+        color: "",
+        ram: "",
+        rom: "",
+        screen: "",
+        cpu: "",
+        battery: "",
+        weight: "",
+        connectivity: "",
+        os: "",
+        extra: "",
       });
       setImagePreview(null);
       setEditProduct(null);
@@ -218,6 +249,17 @@ const ProductManage = () => {
       data.append("categoryId", formData.categoryId);
       data.append("isActive", formData.isActive ? 1 : 0);
       data.append("brandId", formData.brandId);
+      data.append("color", formData.color);
+      data.append("ram", formData.ram);
+      data.append("rom", formData.rom);
+      data.append("screen", formData.screen);
+      data.append("cpu", formData.cpu);
+      data.append("battery", formData.battery);
+      data.append("weight", formData.weight);
+      data.append("connectivity", formData.connectivity);
+      data.append("os", formData.os);
+      data.append("extra", formData.extra);
+
       if (formData.image) data.append("image", formData.image);
 
       let res;
@@ -551,6 +593,50 @@ const ProductManage = () => {
                 </Form.Group>
 
                 <Form.Group className="mb-3">
+                  <Form.Label>RAM</Form.Label>
+                  <Form.Control
+                    value={formData.ram}
+                    onChange={(e) =>
+                      setFormData({ ...formData, ram: e.target.value })
+                    }
+                    placeholder="Ví dụ: 8GB"
+                  />
+                </Form.Group>
+
+                <Form.Group className="mb-3">
+                  <Form.Label>ROM / Bộ nhớ trong</Form.Label>
+                  <Form.Control
+                    value={formData.rom}
+                    onChange={(e) =>
+                      setFormData({ ...formData, rom: e.target.value })
+                    }
+                    placeholder="Ví dụ: 128GB"
+                  />
+                </Form.Group>
+
+                <Form.Group className="mb-3">
+                  <Form.Label>Màn hình</Form.Label>
+                  <Form.Control
+                    value={formData.screen}
+                    onChange={(e) =>
+                      setFormData({ ...formData, screen: e.target.value })
+                    }
+                    placeholder="Ví dụ: 6.5 inch OLED"
+                  />
+                </Form.Group>
+
+                <Form.Group className="mb-3">
+                  <Form.Label>CPU / Chip</Form.Label>
+                  <Form.Control
+                    value={formData.cpu}
+                    onChange={(e) =>
+                      setFormData({ ...formData, cpu: e.target.value })
+                    }
+                    placeholder="Ví dụ: Snapdragon 888"
+                  />
+                </Form.Group>
+
+                <Form.Group className="mb-3">
                   <Form.Label>
                     <Tag className="me-1" /> Danh mục *
                   </Form.Label>
@@ -620,6 +706,74 @@ const ProductManage = () => {
                     }
                     required
                     min="0"
+                  />
+                </Form.Group>
+
+                <Form.Group className="mb-3">
+                  <Form.Label>Pin</Form.Label>
+                  <Form.Control
+                    value={formData.battery}
+                    onChange={(e) =>
+                      setFormData({ ...formData, battery: e.target.value })
+                    }
+                    placeholder="Ví dụ: 4500 mAh"
+                  />
+                </Form.Group>
+
+                <Form.Group className="mb-3">
+                  <Form.Label>Màu sắc</Form.Label>
+                  <Form.Control
+                    value={formData.color}
+                    onChange={(e) =>
+                      setFormData({ ...formData, color: e.target.value })
+                    }
+                    placeholder="Ví dụ: Đen, Trắng"
+                  />
+                </Form.Group>
+
+                <Form.Group className="mb-3">
+                  <Form.Label>Trọng lượng</Form.Label>
+                  <Form.Control
+                    value={formData.weight}
+                    onChange={(e) =>
+                      setFormData({ ...formData, weight: e.target.value })
+                    }
+                    placeholder="Ví dụ: 180g"
+                  />
+                </Form.Group>
+
+                <Form.Group className="mb-3">
+                  <Form.Label>Kết nối</Form.Label>
+                  <Form.Control
+                    value={formData.connectivity}
+                    onChange={(e) =>
+                      setFormData({ ...formData, connectivity: e.target.value })
+                    }
+                    placeholder="Ví dụ: 5G, WiFi 6"
+                  />
+                </Form.Group>
+
+                <Form.Group className="mb-3">
+                  <Form.Label>Hệ điều hành</Form.Label>
+                  <Form.Control
+                    value={formData.os}
+                    onChange={(e) =>
+                      setFormData({ ...formData, os: e.target.value })
+                    }
+                    placeholder="Ví dụ: Android 13"
+                  />
+                </Form.Group>
+
+                <Form.Group className="mb-3">
+                  <Form.Label>Thông tin thêm</Form.Label>
+                  <Form.Control
+                    as="textarea"
+                    rows={2}
+                    value={formData.extra}
+                    onChange={(e) =>
+                      setFormData({ ...formData, extra: e.target.value })
+                    }
+                    placeholder="Các tính năng đặc biệt, phụ kiện..."
                   />
                 </Form.Group>
 

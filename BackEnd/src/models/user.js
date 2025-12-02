@@ -19,6 +19,18 @@ module.exports = (sequelize, DataTypes) => {
         as: "reviews",
         onDelete: "CASCADE",
       });
+
+      User.hasMany(models.ReviewReply, {
+        foreignKey: "userId",
+        as: "reviewReplies",
+        onDelete: "CASCADE",
+      });
+
+      User.hasMany(models.Payment, {
+        foreignKey: "userId",
+        as: "payments",
+        onDelete: "SET NULL",
+      });
     }
   }
 

@@ -58,6 +58,19 @@ module.exports = (sequelize, DataTypes) => {
       },
       discount: { type: DataTypes.DECIMAL(5, 2), defaultValue: 0.0 },
       isActive: { type: DataTypes.BOOLEAN, defaultValue: true },
+
+      // Thông số điện tử
+      color: { type: DataTypes.STRING }, // Màu sắc
+      ram: { type: DataTypes.STRING }, // RAM, ví dụ: "8GB"
+      rom: { type: DataTypes.STRING }, // ROM / bộ nhớ trong
+      screen: { type: DataTypes.STRING }, // Kích thước / loại màn hình
+      cpu: { type: DataTypes.STRING }, // CPU / chip
+      battery: { type: DataTypes.STRING }, // Pin / dung lượng pin
+      weight: { type: DataTypes.STRING }, // Trọng lượng
+      connectivity: { type: DataTypes.STRING }, // 4G/5G, WiFi, Bluetooth, ...
+      os: { type: DataTypes.STRING }, // Hệ điều hành
+      extra: { type: DataTypes.TEXT }, // Thông tin thêm
+
       brandId: {
         type: DataTypes.INTEGER,
         allowNull: true,
