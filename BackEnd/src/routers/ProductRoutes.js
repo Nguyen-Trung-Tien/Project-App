@@ -16,7 +16,6 @@ router.post(
 );
 router.get("/get-all-product", ProductController.handleGetAllProducts);
 router.get("/get-product/:id", ProductController.handleGetProductById);
-router.get("/product-by-category", ProductController.getProductsByCategory);
 router.get("/search", ProductController.handleSearchProducts);
 
 router.put(
@@ -35,5 +34,6 @@ router.delete(
 
 router.get("/discounted", ProductController.handleGetDiscountedProducts);
 router.get("/filter", ProductController.handleFilterProducts);
+router.get("/recommend/:id", ProductController.handleRecommendProducts);
 
 module.exports = router;

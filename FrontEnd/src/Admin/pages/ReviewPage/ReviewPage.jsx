@@ -176,7 +176,7 @@ const ReviewPage = () => {
       {/* Review List */}
       {loading ? (
         <div className="text-center py-5">
-          <Spinner animation="border" />
+          <Spinner animation="border" variant="primary" />
         </div>
       ) : (
         reviews.map((review) => (

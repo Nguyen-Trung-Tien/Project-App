@@ -343,7 +343,7 @@ const UserManage = () => {
                 {loading ? (
                   <tr>
                     <td colSpan="9" className="text-center py-5">
-                      <Spinner animation="border" />
+                      <Spinner animation="border" variant="primary" />
                     </td>
                   </tr>
                 ) : users.length === 0 ? (

@@ -245,7 +245,7 @@ const OrdersReturnPage = () => {
                 {loading ? (
                   <tr>
                     <td colSpan="7" className="text-center py-5">
-                      <Spinner animation="border" variant="primary" />
+                      <Spinner animation="border" />
                     </td>
                   </tr>
                 ) : orders.length === 0 ? (

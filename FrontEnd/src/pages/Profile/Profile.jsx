@@ -263,7 +263,11 @@ const Profile = () => {
                         disabled={loading}
                       >
                         {loading ? (
-                          <Spinner animation="border" size="sm" />
+                          <Spinner
+                            animation="border"
+                            size="sm"
+                            variant="primary"
+                          />
                         ) : (
                           "💾 Lưu thay đổi"
                         )}

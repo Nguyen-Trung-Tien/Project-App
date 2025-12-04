@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Navigate, Outlet } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { jwtDecode } from "jwt-decode";
+import { Spinner } from "react-bootstrap";
 
 const PrivateRoute = ({ requiredRole }) => {
   const user = useSelector((state) => state.user.user);
@@ -44,7 +45,7 @@ const PrivateRoute = ({ requiredRole }) => {
     return (
       <div className="d-flex justify-content-center align-items-center vh-100 text-muted">
         <div className="text-center">
-          <div className="spinner-border mb-3" />
+          <Spinner animation="border" size="sm" variant="primary" />
           <p>Đang xác thực phiên đăng nhập...</p>
         </div>
       </div>

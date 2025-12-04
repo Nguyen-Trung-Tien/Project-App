@@ -396,7 +396,7 @@ const Revenue = () => {
                 </h5>
                 {chartLoading ? (
                   <div className="text-center py-5">
-                    <Spinner animation="border" />
+                    <Spinner animation="border" variant="primary" />
                   </div>
                 ) : (
                   <ResponsiveContainer width="100%" height={280}>
@@ -430,7 +430,7 @@ const Revenue = () => {
                 </h5>
                 {chartLoading ? (
                   <div className="text-center py-5">
-                    <Spinner animation="border" />
+                    <Spinner animation="border" variant="primary" />
                   </div>
                 ) : productsData.length > 0 ? (
                   <ResponsiveContainer width="100%" height={280}>
@@ -489,7 +489,7 @@ const Revenue = () => {
                     {loading ? (
                       <tr>
                         <td colSpan="6" className="text-center py-5">
-                          <Spinner animation="border" />
+                          <Spinner animation="border" variant="primary" />
                         </td>
                       </tr>
                     ) : paginatedOrders.length === 0 ? (

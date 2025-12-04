@@ -104,32 +104,6 @@ const handleDeleteProduct = async (req, res) => {
   }
 };
 
-const getProductsByCategory = async (req, res) => {
-  const query = req.query || {};
-  const categoryId = query.categoryId;
-  const page = Number(query.page) || 1;
-  const limit = Number(query.limit) || 10;
-
-  if (!categoryId) {
-    return res.status(400).json({
-      errCode: 1,
-      errMessage: "categoryId is required",
-    });
-  }
-
-  try {
-    const result = await ProductService.getProductsByCategory(
-      categoryId,
-      page,
-      limit
-    );
-    return res.json(result);
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ errCode: 1, errMessage: error.message });
-  }
-};
-
 const handleSearchProducts = async (req, res) => {
   try {
     const query = req.query.q || "";
@@ -197,14 +171,32 @@ const handleFilterProducts = async (req, res) => {
   }
 };
 
+const handleRecommendProducts = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const limit = parseInt(req.query.limit) || 6;
+    const page = parseInt(req.query.page) || 1;
+
+    const result = await ProductService.recommendProducts(id, page, limit);
+
+    return res.status(200).json(result);
+  } catch (e) {
+    console.error("Error in handleRecommendProducts:", e);
+    return res.status(500).json({
+      errCode: -1,
+      errMessage: "Internal server error",
+    });
+  }
+};
+
 module.exports = {
   handleCreateProduct,
   handleGetAllProducts,
   handleGetProductById,
   handleUpdateProduct,
   handleDeleteProduct,
-  getProductsByCategory,
   handleSearchProducts,
   handleGetDiscountedProducts,
   handleFilterProducts,
+  handleRecommendProducts,
 };

@@ -96,30 +96,6 @@ const deleteProduct = async (id) => {
   }
 };
 
-const getProductsByCategory = async (categoryId, page = 1, limit = 11) => {
-  const offset = (page - 1) * limit;
-  const whereCondition = categoryId ? { categoryId } : {};
-
-  const { count, rows } = await db.Product.findAndCountAll({
-    where: whereCondition,
-    include: [
-      { model: db.Category, as: "category" },
-      { model: db.Brand, as: "brand" },
-    ],
-    limit,
-    offset,
-    order: [["createdAt", "DESC"]],
-  });
-
-  return {
-    errCode: 0,
-    products: rows,
-    totalItems: count,
-    currentPage: page,
-    totalPages: Math.ceil(count / limit),
-  };
-};
-
 const searchProducts = async (query, page = 1, limit = 10) => {
   const offset = (page - 1) * limit;
 
@@ -239,15 +215,71 @@ const filterProducts = async ({
   }
 };
 
+const recommendProducts = async (productId, page = 1, limit = 6) => {
+  try {
+    const product = await db.Product.findByPk(productId);
+    if (!product) {
+      return { errCode: 1, errMessage: "Product not found" };
+    }
+
+    const price = Number(product.price);
+    const priceLow = price * 0.8;
+    const priceHigh = price * 1.2;
+
+    const where = {
+      id: { [Op.ne]: productId },
+      isActive: true,
+      [Op.or]: [
+        { categoryId: product.categoryId },
+        { brandId: product.brandId },
+        { price: { [Op.between]: [priceLow, priceHigh] } },
+      ],
+    };
+
+    const total = await db.Product.count({ where });
+
+    const offset = (page - 1) * limit;
+
+    const rows = await db.Product.findAll({
+      where,
+      include: [
+        { model: db.Brand, as: "brand" },
+        { model: db.Category, as: "category" },
+      ],
+      order: [
+        ["sold", "DESC"],
+        ["discount", "DESC"],
+        ["createdAt", "DESC"],
+      ],
+      offset,
+      limit,
+    });
+
+    return {
+      errCode: 0,
+      data: rows.map((p) => p.toJSON()),
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
+  } catch (e) {
+    console.error("Error recommending products:", e);
+    return { errCode: 1, errMessage: e.message };
+  }
+};
+
 module.exports = {
   createProduct,
   getAllProducts,
   getProductById,
   updateProduct,
   deleteProduct,
-  getProductsByCategory,
   searchProducts,
   updateProductSold,
   getDiscountedProducts,
   filterProducts,
+  recommendProducts,
 };

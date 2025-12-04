@@ -1,99 +1,82 @@
 .product-detail-page {
-  min-height: 90vh;
+  padding: 15px 0;
 
   .product-image-wrapper {
-    position: relative;
-
-    .discount-badge {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      background-color: #dc3545;
-      color: #fff;
-      font-weight: 600;
-      padding: 4px 8px;
-      border-radius: 6px;
-      font-size: 0.85rem;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-    }
+    padding: 12px;
+    border-radius: 12px;
+    max-width: 380px;
+    margin: 0 auto;
 
     img {
-      max-height: 400px;
+      max-height: 320px; /* Giảm kích thước */
       object-fit: contain;
-      transition: transform 0.3s ease;
     }
 
-    &:hover img {
-      transform: scale(1.05);
+    .discount-badge {
+      font-size: 0.8rem;
+      padding: 3px 6px;
     }
   }
 
   .product-info {
-    .star-rating span {
-      margin-right: 2px;
+    h2 {
+      font-size: 1.35rem;
+      margin-bottom: 10px;
     }
 
-    .price {
-      .text-decoration-line-through {
-        color: #6c757d;
-      }
-      .text-danger {
-        font-size: 1.25rem;
-      }
+    .price .fs-5 {
+      font-size: 1.15rem !important;
     }
 
     .product-specs {
-      background: #f8f9fa;
+      padding: 10px;
+      font-size: 0.85rem;
       border-radius: 10px;
-      padding: 12px 16px;
-      margin-bottom: 16px;
+      background: #f8f9fa;
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-      gap: 8px;
-      font-size: 0.9rem;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 6px;
 
-      div {
-        strong {
-          font-weight: 600;
-          margin-right: 4px;
-        }
+      div strong {
+        font-weight: 600;
       }
     }
 
     .product-description p {
-      transition: max-height 0.3s ease;
+      font-size: 0.9rem;
+      line-height: 1.5;
     }
 
-    .btn {
-      font-weight: 600;
+    /* Input số lượng nhỏ lại */
+    input[type="number"] {
+      height: 36px;
+      font-size: 0.9rem;
+    }
+
+    button.btn {
+      padding: 10px 14px;
+      font-size: 0.9rem;
     }
   }
 
   .reviews-section {
-    margin-top: 50px;
-    border-top: 1px solid #e9ecef;
-    padding-top: 24px;
+    margin-top: 30px;
+    padding-top: 15px;
 
     h4 {
-      margin-bottom: 24px;
+      font-size: 1.2rem;
     }
   }
 
-  .suggested-products {
-    margin-top: 40px;
-    border-top: 1px solid #e9ecef;
-    padding-top: 24px;
-
-    .card {
-      transition: transform 0.25s ease, box-shadow 0.25s ease;
-
-      &:hover {
-        transform: scale(1.03);
-        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
-      }
-    }
+  .suggested-products h4 {
+    font-size: 1.2rem;
   }
 
+  .suggested-products .card {
+    border-radius: 10px;
+  }
+
+  /* Mobile */
   @media (max-width: 768px) {
     .product-info {
       text-align: center;
@@ -101,29 +84,6 @@
       .product-specs {
         grid-template-columns: 1fr;
       }
-    }
-  }
-
-  /* Nút xem thêm mô tả */
-  .product-description button {
-    font-size: 0.9rem;
-    color: #007bff;
-    &:hover {
-      text-decoration: underline;
-    }
-  }
-
-  /* Free shipping */
-  .free-ship {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    color: #28a745;
-    font-weight: 600;
-    font-size: 0.95rem;
-
-    &::before {
-      content: "🚚";
     }
   }
 }

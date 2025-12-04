@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useCallback } from "react";
 import {
   Container,
   Row,
@@ -20,7 +20,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import {
   getProductByIdApi,
-  getProductsByCategoryApi,
+  getRecommendedProductsApi,
 } from "../../api/productApi";
 import { addCart, getAllCarts, createCart } from "../../api/cartApi";
 import { createReviewApi, getReviewsByProductApi } from "../../api/reviewApi";
@@ -40,7 +40,6 @@ const ProductDetailPage = () => {
   const token = user?.accessToken;
   const navigate = useNavigate();
   const dispatch = useDispatch();
-
   const [product, setProduct] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(true);
@@ -50,58 +49,19 @@ const ProductDetailPage = () => {
   const [pagination, setPagination] = useState({ totalPages: 1 });
   const [newReview, setNewReview] = useState({ rating: 5, comment: "" });
   const [showFullDesc, setShowFullDesc] = useState(false);
-
   const limit = 3;
-  const [suggestedProducts, setSuggestedProducts] = useState([]);
-  const [suggestedPage, setSuggestedPage] = useState(1);
-  const currentProductId = useRef(Number(id));
-  const [suggestedTotalPages, setSuggestedTotalPages] = useState(1);
-  const [loadingSuggested, setLoadingSuggested] = useState(false);
-  const suggestedLimit = 7;
+
+  const [recommended, setRecommended] = useState([]);
+  const [recommendedPage, setRecommendedPage] = useState(1);
+  const [recommendedTotalPages, setRecommendedTotalPages] = useState(1);
+  const [loadingRecommended, setLoadingRecommended] = useState(false);
+  const [loadingMoreRecommended, setLoadingMoreRecommended] = useState(false);
+
+  const limitRecommended = 6;
 
   const avgRating = reviews.length
     ? reviews.reduce((sum, r) => sum + (r.rating || 0), 0) / reviews.length
     : 0;
-
-  const fetchSuggestedProducts = useCallback(
-    async (categoryId, page = 1, append = false) => {
-      if (!categoryId) return;
-      setLoadingSuggested(true);
-      try {
-        const res = await getProductsByCategoryApi(
-          categoryId,
-          page,
-          suggestedLimit
-        );
-        if (res?.errCode === 0 && Array.isArray(res.products)) {
-          const filtered = res.products.filter(
-            (p) => p.id !== currentProductId.current
-          );
-          setSuggestedProducts((prev) => {
-            if (append) {
-              const combined = [...prev, ...filtered];
-              return combined.filter(
-                (p, i, arr) => arr.findIndex((x) => x.id === p.id) === i
-              );
-            } else {
-              return filtered;
-            }
-          });
-          setSuggestedPage(page);
-          setSuggestedTotalPages(res.totalPages || 1);
-        }
-      } catch (err) {
-        console.error("Lỗi lấy sản phẩm gợi ý:", err);
-      } finally {
-        setLoadingSuggested(false);
-      }
-    },
-    [suggestedLimit]
-  );
-
-  useEffect(() => {
-    currentProductId.current = Number(id);
-  }, [id]);
 
   const fetchAllData = useCallback(async () => {
     setLoading(true);
@@ -110,7 +70,8 @@ const ProductDetailPage = () => {
       if (res?.errCode === 0 && res.product) {
         const p = res.product;
         setProduct(p);
-        await fetchReviews(p.id);
+
+        await fetchReviews(p.id); // OK
       } else {
         toast.error("Không tìm thấy sản phẩm!");
       }
@@ -144,27 +105,48 @@ const ProductDetailPage = () => {
     }
   };
 
-  useEffect(() => {
-    if (product?.id) {
-      fetchReviews(product.id, page);
-    }
-  }, [page, product?.id]);
+  const fetchRecommended = async (page = 1, append = false) => {
+    if (!product || !product.id) return;
 
-  useEffect(() => {
-    if (product?.categoryId) {
-      setSuggestedProducts([]);
-      setSuggestedPage(1);
-      setSuggestedTotalPages(1);
-      setLoadingSuggested(false);
-      fetchSuggestedProducts(product.categoryId, 1, false);
-    }
-  }, [product?.id, product?.categoryId, fetchSuggestedProducts]);
+    try {
+      if (page === 1) setLoadingRecommended(true);
+      else setLoadingMoreRecommended(true);
 
-  const handleLoadMoreSuggested = () => {
-    if (suggestedPage < suggestedTotalPages) {
-      fetchSuggestedProducts(product.categoryId, suggestedPage + 1, true);
+      const res = await getRecommendedProductsApi(
+        product.id,
+        page,
+        limitRecommended
+      );
+      if (res?.errCode === 0) {
+        if (append) {
+          setRecommended((prev) => [...prev, ...res.data]);
+        } else {
+          setRecommended(res.data);
+        }
+
+        setRecommendedTotalPages(res.pagination?.totalPages || 1);
+      }
+    } finally {
+      setLoadingRecommended(false);
+      setLoadingMoreRecommended(false);
     }
   };
+
+  const handleLoadMoreRecommended = () => {
+    if (recommendedPage < recommendedTotalPages) {
+      const nextPage = recommendedPage + 1;
+      setRecommendedPage(nextPage);
+      fetchRecommended(nextPage, true);
+    }
+  };
+
+  useEffect(() => {
+    if (!product || !product.id) return;
+
+    setRecommended([]);
+    setRecommendedPage(1);
+    fetchRecommended(1, false);
+  }, [product]);
 
   const handleAddToCart = async () => {
     if (!userId) {
@@ -243,7 +225,7 @@ const ProductDetailPage = () => {
   if (loading)
     return (
       <div className="text-center py-5">
-        <Spinner animation="border" />
+        <Spinner animation="border" variant="primary" />
       </div>
     );
 
@@ -272,6 +254,8 @@ const ProductDetailPage = () => {
     <div className="product-detail-page py-3 mh-90">
       <Container>
         <ChatBot />
+
+        {/* Back */}
         <div className="text-left mb-3">
           <Link
             to={"/"}
@@ -283,6 +267,7 @@ const ProductDetailPage = () => {
         </div>
 
         <Row className="gy-4 align-items-center">
+          {/* Image */}
           <Col md={6} className="text-center">
             <div className="product-image-wrapper shadow-sm rounded bg-white p-3 position-relative">
               <Image
@@ -297,11 +282,30 @@ const ProductDetailPage = () => {
             </div>
           </Col>
 
+          {/* Info */}
           <Col md={6}>
             <div className="product-info">
-              <h2 className="fw-bold mb-3">{product.name}</h2>
+              <h2 className="fw-bold mb-2">{product.name}</h2>
 
-              {/* Giá & Rating */}
+              <div className="mb-2">
+                <span className="text-muted">Thương hiệu: </span>
+                <strong>{product.brand?.name}</strong>
+              </div>
+              <div className="mb-3">
+                <span className="text-muted">Danh mục: </span>
+                <strong>{product.category?.name}</strong>
+              </div>
+
+              <div className="mb-3">
+                <span className="text-muted">SKU: </span>
+                <strong>{product.sku}</strong> |
+                <span className="text-muted ms-2">Đã bán: </span>
+                <strong>{product.sold}</strong> |
+                <span className="text-muted ms-2">Còn hàng: </span>
+                <strong>{product.stock}</strong>
+              </div>
+
+              {/* Price */}
               <div className="price mb-3">
                 {product.discount > 0 && (
                   <div className="text-muted text-decoration-line-through">
@@ -334,7 +338,7 @@ const ProductDetailPage = () => {
                 )}
               </div>
 
-              {/* Thông số kỹ thuật */}
+              {/* Specs */}
               {(product.color ||
                 product.ram ||
                 product.rom ||
@@ -388,7 +392,7 @@ const ProductDetailPage = () => {
                   )}
                   {product.os && (
                     <div>
-                      <strong>Hệ điều hành:</strong> {product.os}
+                      <strong>OS:</strong> {product.os}
                     </div>
                   )}
                   {product.extra && (
@@ -399,7 +403,7 @@ const ProductDetailPage = () => {
                 </div>
               )}
 
-              {/* Mô tả */}
+              {/* Description */}
               <div className="product-description mb-4">
                 <p className="text-secondary" style={{ lineHeight: "1.6" }}>
                   {showFullDesc ? product.description : shortDescription}
@@ -414,7 +418,7 @@ const ProductDetailPage = () => {
                 )}
               </div>
 
-              {/* Số lượng */}
+              {/* Quantity */}
               <div className="d-flex align-items-center gap-3 mb-4">
                 <Form.Label className="fw-semibold mb-0">Số lượng:</Form.Label>
                 <Form.Control
@@ -430,14 +434,13 @@ const ProductDetailPage = () => {
                     }
                     const val = Number(input);
                     if (isNaN(val)) return;
-                    const newQty = Math.max(1, Math.min(val, product.stock));
-                    setQuantity(newQty);
+                    setQuantity(Math.max(1, Math.min(val, product.stock)));
                   }}
                   style={{ width: "90px" }}
                 />
               </div>
 
-              {/* Nút Thêm giỏ / Mua ngay */}
+              {/* Buttons */}
               <div className="d-flex flex-column flex-sm-row gap-3">
                 <Button
                   variant="danger"
@@ -450,7 +453,12 @@ const ProductDetailPage = () => {
                 >
                   {addingCart ? (
                     <>
-                      <Spinner animation="border" size="sm" className="me-2" />
+                      <Spinner
+                        animation="border"
+                        size="sm"
+                        className="me-2"
+                        variant="primary"
+                      />
                       Đang thêm...
                     </>
                   ) : (
@@ -478,13 +486,11 @@ const ProductDetailPage = () => {
         {/* Reviews */}
         <div className="reviews-section mt-5 pt-4 border-top">
           <h4 className="fw-bold mb-3">Đánh giá sản phẩm</h4>
-
           <ReviewForm
             newReview={newReview}
             setNewReview={setNewReview}
             onSubmit={handleSubmitReview}
           />
-
           <ReviewList
             reviews={reviews}
             page={page}
@@ -497,50 +503,50 @@ const ProductDetailPage = () => {
           />
         </div>
 
-        {/* Suggested Products */}
-        {suggestedProducts.length > 0 ? (
-          <div className="suggested-products mt-3 pt-3 border-top">
-            <h4 className="fw-bold mb-3">Sản phẩm gợi ý</h4>
-            <Row className="g-4">
-              {suggestedProducts.map((p) => (
-                <Col key={p.id} lg={2} md={3} sm={6} xs={12}>
-                  <ProductCard product={p} />
-                </Col>
-              ))}
-            </Row>
+        {/* Recommended */}
+        <div className="recommended-products mt-5 pt-4 border-top">
+          <h4 className="fw-bold mb-3">Sản phẩm gợi ý</h4>
 
-            <div className="text-center mt-5">
-              {suggestedPage < suggestedTotalPages ? (
-                <Button
-                  variant="outline-primary"
-                  size="ms"
-                  className="rounded-pill px-4 py-2"
-                  onClick={handleLoadMoreSuggested}
-                  disabled={loadingSuggested}
-                >
-                  {loadingSuggested ? (
-                    <>
-                      <Spinner animation="border" size="sm" className="me-2" />
-                      Đang tải...
-                    </>
-                  ) : (
-                    "Xem thêm sản phẩm"
-                  )}
-                </Button>
-              ) : (
-                <p className="text-muted fst-italic">
-                  Đã hiển thị tất cả sản phẩm gợi ý
-                </p>
-              )}
+          {loadingRecommended ? (
+            <div className="text-center py-3">
+              <Spinner animation="border" variant="primary" />
             </div>
-          </div>
-        ) : (
-          <div className="text-center mt-3 pt-3 border-top">
+          ) : recommended.length > 0 ? (
+            <>
+              <Row className="g-4">
+                {recommended.map((p) => (
+                  <Col key={p.id} lg={2} md={3} sm={6} xs={12}>
+                    <ProductCard product={p} />
+                  </Col>
+                ))}
+              </Row>
+
+              {/* Nút Load More */}
+              {loadingMoreRecommended && (
+                <div className="text-center my-3">
+                  <Spinner animation="border" variant="primary" />
+                </div>
+              )}
+
+              {recommendedPage < recommendedTotalPages &&
+                !loadingMoreRecommended && (
+                  <div className="text-center mt-3">
+                    <Button
+                      variant="outline-primary"
+                      className="rounded-pill px-3 py-2 shadow-sm"
+                      onClick={handleLoadMoreRecommended}
+                    >
+                      Xem thêm sản phẩm
+                    </Button>
+                  </div>
+                )}
+            </>
+          ) : (
             <p className="text-muted fst-italic">
               Không có sản phẩm gợi ý nào.
             </p>
-          </div>
-        )}
+          )}
+        </div>
       </Container>
     </div>
   );

@@ -343,7 +343,7 @@ const Categories = () => {
               <tbody>
                 {loading ? (
                   <tr>
-                    <td colSpan="7" className="text-center py-5">
+                    <td colSpan="7" className="text-center text-primary py-5">
                       <Spinner animation="border" variant="primary" />
                     </td>
                   </tr>
@@ -532,7 +532,8 @@ const Categories = () => {
           >
             {saving ? (
               <>
-                <Spinner animation="border" size="sm" /> Đang lưu...
+                <Spinner animation="border" size="sm" variant="primary" /> Đang
+                lưu...
               </>
             ) : (
               <>

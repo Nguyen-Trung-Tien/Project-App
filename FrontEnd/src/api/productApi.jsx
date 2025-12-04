@@ -72,22 +72,6 @@ export const deleteProductApi = async (id, token) => {
   }
 };
 
-export const getProductsByCategoryApi = async (
-  categoryId,
-  page = 1,
-  limit = 11
-) => {
-  try {
-    const res = await API.get(
-      `/product/product-by-category?categoryId=${categoryId}&page=${page}&limit=${limit}`
-    );
-    return res.data;
-  } catch (error) {
-    console.error(`Error getting products by category ${categoryId}:`, error);
-    throw error;
-  }
-};
-
 export const searchProductsApi = async (query, page = 1, limit = 10) => {
   try {
     const res = await API.get(
@@ -139,6 +123,22 @@ export const filterProductsApi = async ({
     return res.data;
   } catch (err) {
     console.error("Filter products API error:", err);
+    throw err;
+  }
+};
+
+export const getRecommendedProductsApi = async (
+  productId,
+  page = 1,
+  limit = 6
+) => {
+  try {
+    const res = await API.get(`/product/recommend/${productId}`, {
+      params: { page, limit },
+    });
+    return res.data;
+  } catch (err) {
+    console.error("Get recommended products API error:", err);
     throw err;
   }
 };

@@ -311,7 +311,7 @@ const BrandManage = () => {
                 {loadingTable ? (
                   <tr>
                     <td colSpan="6" className="py-5 text-center">
-                      <Spinner animation="border" />
+                      <Spinner animation="border" variant="primary" />
                     </td>
                   </tr>
                 ) : brands.length > 0 ? (
@@ -463,7 +463,7 @@ const BrandManage = () => {
               </Button>
               <Button variant="primary" type="submit" disabled={loadingModal}>
                 {loadingModal ? (
-                  <Spinner animation="border" size="sm" />
+                  <Spinner animation="border" size="sm" variant="primary" />
                 ) : (
                   "Lưu"
                 )}

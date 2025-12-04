@@ -182,7 +182,7 @@ const ProductCard = ({ product }) => {
             className="flex-fill btn-shopee-add btn-shopee-small d-flex align-items-center justify-content-center"
           >
             {loadingCart ? (
-              <Spinner size="sm" animation="border" />
+              <Spinner size="sm" animation="border" variant="primary" />
             ) : (
               <CartPlus className="me-1" size={22} />
             )}
@@ -195,7 +195,7 @@ const ProductCard = ({ product }) => {
             className="flex-fill btn-shopee-buy btn-shopee-small d-flex align-items-center justify-content-center"
           >
             {loadingBuy ? (
-              <Spinner size="sm" animation="border" />
+              <Spinner size="sm" animation="border" variant="primary" />
             ) : (
               <>
                 <CreditCard className="me-1" size={22} /> Mua ngay

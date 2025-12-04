@@ -134,16 +134,6 @@ const OrderPage = () => {
   return (
     <div className="order-page py-3">
       <Container>
-        {/* <div className="text-left">
-          <Link
-            to={"/"}
-            className="btn btn-outline-primary rounded-pill px-3 py-2 fw-semibold"
-          >
-            <ArrowLeftCircle size={16} className="me-1" />
-            Quay lại
-          </Link>
-        </div> */}
-
         <div className="text-center mb-3 position-relative">
           <div className="text-center mb-3">
             <div className="d-inline-flex align-items-center px-4 py-2 rounded-pill order-title">

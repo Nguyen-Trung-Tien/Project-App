@@ -754,7 +754,7 @@ const ProductManage = () => {
                 </Form.Group>
 
                 <Form.Group className="mb-3">
-                  <Form.Label>Hệ điều hành</Form.Label>
+                  <Form.Label>OS</Form.Label>
                   <Form.Control
                     value={formData.os}
                     onChange={(e) =>

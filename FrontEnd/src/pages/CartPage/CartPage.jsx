@@ -9,7 +9,12 @@ import {
   Spinner,
   Card,
 } from "react-bootstrap";
-import { Trash, ArrowLeftCircle, Cart4 } from "react-bootstrap-icons";
+import {
+  Trash,
+  ArrowLeftCircle,
+  Cart4,
+  Box2Heart,
+} from "react-bootstrap-icons";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -105,13 +110,6 @@ const CartPage = () => {
     <div className="cart-page py-3">
       <Container>
         <div className="text-left">
-          {/* <Link
-            to={"/"}
-            className="btn btn-outline-primary rounded-pill px-3 py-2 fw-semibold"
-          >
-            <ArrowLeftCircle size={16} className="me-1" />
-            Quay lại
-          </Link> */}
           <div className="text-center mb-2">
             <div className="d-inline-flex align-items-center px-4 py-2 rounded-pill cart-title">
               <Cart4 size={26} className="me-2" />
@@ -126,11 +124,24 @@ const CartPage = () => {
             <p className="text-muted mt-2">Đang tải giỏ hàng...</p>
           </div>
         ) : cartItems.length === 0 ? (
-          <div className="text-center py-3">
-            <img className="img-fluid mb-3" style={{ maxWidth: "250px" }} />
-            <p className="text-muted">Giỏ hàng trống. Hãy mua sắm ngay!</p>
-            <Link to="/" className="btn btn-primary mt-3 rounded-pill px-4">
-              <ArrowLeftCircle size={18} className="me-1" /> Tiếp tục mua sắm
+          <div className="empty-cart text-center py-5">
+            <div className="mb-3">
+              <Box2Heart
+                size={80}
+                className="text-primary mb-2"
+                style={{ opacity: 0.85 }}
+              />
+              <h5 className="fw-bold mt-2">Giỏ hàng của bạn đang trống</h5>
+              <p className="text-muted" style={{ fontSize: "0.95rem" }}>
+                Hãy khám phá sản phẩm và thêm vào giỏ ngay!
+              </p>
+            </div>
+            <Link
+              to="/"
+              className="btn btn-primary mt-3 rounded-pill px-4 py-2 fw-semibold shadow-sm"
+            >
+              <ArrowLeftCircle size={18} className="me-1" />
+              Tiếp tục mua sắm
             </Link>
           </div>
         ) : (
@@ -184,8 +195,8 @@ const CartPage = () => {
                                 alt={item.product?.name}
                                 className="img-fluid rounded-3"
                                 style={{
-                                  width: "70px",
-                                  height: "70px",
+                                  width: "80px",
+                                  height: "80px",
                                   objectFit: "cover",
                                 }}
                               />
