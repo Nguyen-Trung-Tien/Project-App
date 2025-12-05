@@ -98,11 +98,11 @@ const deleteProduct = async (id) => {
 
 const searchProducts = async (query, page = 1, limit = 10) => {
   const offset = (page - 1) * limit;
+  const { Op } = db.Sequelize;
 
-  const whereCondition = query
-    ? { name: { [db.Sequelize.Op.like]: `%${query}%` } }
-    : {};
+  const whereCondition = query ? { name: { [Op.like]: `%${query}%` } } : {};
 
+  // 1. Tìm sản phẩm phân trang (dùng cho trang kết quả tìm kiếm)
   const { count, rows } = await db.Product.findAndCountAll({
     where: whereCondition,
     include: [
@@ -114,14 +114,50 @@ const searchProducts = async (query, page = 1, limit = 10) => {
     order: [["createdAt", "DESC"]],
   });
 
+  // 2. GỢI Ý PRODUCT (lightweight → dành cho Smart Search)
+  const productSuggestions = await db.Product.findAll({
+    where: {
+      name: { [Op.like]: `%${query}%` },
+    },
+    attributes: ["id", "name", "price", "image"],
+    limit: 8,
+    order: [["sold", "DESC"]],
+  });
+
+  // 3. GỢI Ý KEYWORD (simple + hiệu quả)
+  const keywordSuggestions = [`${query}`];
+
+  // 4. GỢI Ý BRAND
+  const brandSuggestions = await db.Brand.findAll({
+    where: { name: { [Op.like]: `%${query}%` } },
+    attributes: ["id", "name"],
+    limit: 5,
+  });
+
+  // 5. GỢI Ý CATEGORY
+  const categorySuggestions = await db.Category.findAll({
+    where: { name: { [Op.like]: `%${query}%` } },
+    attributes: ["id", "name"],
+    limit: 5,
+  });
+
   return {
     errCode: 0,
     products: rows.map((p) => ({ ...p.toJSON(), image: p.image || null })),
     totalItems: count,
     currentPage: page,
     totalPages: Math.ceil(count / limit),
+
+    // 🎯 Dành cho Smart Search
+    suggestions: {
+      products: productSuggestions,
+      keywords: keywordSuggestions,
+      brands: brandSuggestions,
+      categories: categorySuggestions,
+    },
   };
 };
+
 const updateProductSold = async (productId, quantity) => {
   try {
     const product = await db.Product.findByPk(productId);

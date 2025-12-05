@@ -2,6 +2,7 @@
   background: linear-gradient(90deg, #00c6ff 0%, #0072ff 100%) !important;
   transition: all 0.3s ease;
 
+  /* Logo */
   .navbar-brand {
     font-size: 1.7rem;
     font-weight: 700;
@@ -13,46 +14,163 @@
     }
   }
 
+  /* Navigation links */
   .header__link {
     color: #fff !important;
     font-weight: 500;
     transition: color 0.2s ease;
 
     &:hover {
-      color: #00ffe0 !important; // neon xanh mint
+      color: #00ffe0 !important;
     }
   }
 
+  /* ================================
+      SEARCH BOX
+  ================================== */
   .search-wrapper {
     position: relative;
+    width: 100%;
 
     .form-control {
       border-radius: 50px;
       padding-left: 2.5rem;
+      padding-right: 2.5rem;
       border: none;
-      box-shadow: 0 0 6px rgba(0, 0, 0, 0.1);
+      height: 42px;
+      box-shadow: 0 0 6px rgba(0, 0, 0, 0.15);
       transition: all 0.2s ease;
 
       &:focus {
         outline: none;
-        box-shadow: 0 0 8px rgba(0, 198, 255, 0.6);
+        box-shadow: 0 0 8px rgba(0, 198, 255, 0.5);
       }
     }
 
     .search-icon {
+      position: absolute;
       top: 50%;
-      left: 15px;
+      left: 14px;
       transform: translateY(-50%);
-      color: #e0f7ff;
+      color: #eaffff;
+      font-size: 1.2rem;
+    }
+
+    /* Button X */
+    .btn-clear {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 26px;
+      height: 26px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+
+      background: rgba(255, 255, 255, 0.85);
+      color: #d21414;
+      transition: 0.15s ease;
+
+      &:hover {
+        background: #ffe9e9;
+        box-shadow: 0 0 6px rgba(255, 60, 60, 0.4);
+      }
+    }
+
+    /* ============================
+          SUGGEST BOX
+    ============================= */
+    .search-suggestion-box {
+      position: absolute;
+      top: 48px;
+      left: 0;
+      width: 100%;
+      background: #fff;
+      border-radius: 12px;
+      padding: 10px 0;
+      z-index: 999;
+      max-height: 380px;
+      overflow-y: auto;
+
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      animation: fadeIn 0.2s ease;
+
+      .suggest-section {
+        padding: 5px 15px 10px;
+
+        .suggest-title {
+          font-size: 14px;
+          font-weight: 600;
+          color: #0072ff;
+          margin-bottom: 6px;
+        }
+
+        .suggest-item {
+          padding: 6px 0;
+          cursor: pointer;
+          font-size: 14px;
+          border-radius: 6px;
+
+          &:hover {
+            background: #eef7ff;
+            color: #0072ff;
+          }
+        }
+
+        .suggest-product-item {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          padding: 6px 0;
+          cursor: pointer;
+          border-radius: 8px;
+
+          &:hover {
+            background: #eef7ff;
+          }
+
+          .suggest-img {
+            width: 42px;
+            height: 42px;
+            object-fit: cover;
+            border-radius: 6px;
+            border: 1px solid #e5e5e5;
+          }
+
+          span {
+            font-size: 14px;
+            color: #333;
+          }
+        }
+      }
     }
   }
 
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* ============================
+      RIGHT SIDE LINKS
+  ============================= */
   .header__actions {
     .header__icon-link {
       color: #fff !important;
       font-weight: 500;
-      transition: color 0.3s ease;
       position: relative;
+      transition: 0.2s ease;
 
       &:hover {
         color: #00ffe0 !important;

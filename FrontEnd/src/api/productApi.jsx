@@ -79,11 +79,26 @@ export const searchProductsApi = async (query, page = 1, limit = 10) => {
         query
       )}&page=${page}&limit=${limit}`
     );
-    return res.data;
+
+    return {
+      products: res.data.products || [],
+      suggestions: res.data.suggestions || {},
+      totalItems: res.data.totalItems || 0,
+      currentPage: res.data.currentPage || 1,
+      totalPages: res.data.totalPages || 1,
+      errCode: res.data.errCode,
+    };
   } catch (err) {
     console.error("Search products API error:", err);
     throw err;
   }
+};
+
+export const searchSuggestionsApi = async (query) => {
+  const res = await API.get(
+    `/product/search?q=${encodeURIComponent(query)}&limit=5`
+  );
+  return res.data;
 };
 
 export const getDiscountedProductsApi = async (page = 1, limit = 6) => {

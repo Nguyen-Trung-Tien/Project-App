@@ -37,10 +37,13 @@ const AllProducts = React.memo(() => {
           : await getAllProductApi(currentPage, limit);
 
         if (res?.errCode === 0) {
-          const newProducts = res.products || [];
+          // ⭐ lấy đúng danh sách sản phẩm từ Smart Search API
+          const newProducts = res?.products || [];
+
           setProducts((prev) =>
             append ? [...prev, ...newProducts] : newProducts
           );
+
           setTotalPages(res.totalPages || 1);
           setPage(currentPage);
         } else {

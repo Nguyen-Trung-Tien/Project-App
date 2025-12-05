@@ -21,6 +21,7 @@ const LayoutComponent = ({
     "/profile",
     "/product-detail",
     "/product-list",
+    "/products",
   ];
 
   const shouldHideFooter = hideFooterPaths.some((path) =>
