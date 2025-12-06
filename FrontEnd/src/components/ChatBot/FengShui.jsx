@@ -26,7 +26,7 @@ const FengShuiChat = ({ setBirthYear: setGlobalBirthYear }) => {
 
   const welcome = () => {
     setMessages([
-      { sender: "bot", text: "Chào bạn! 👋 Tôi là trợ lý Feng Shui." },
+      { sender: "bot", text: "Chào bạn! 👋 Tôi là trợ lý TienTe Feng Shui." },
       { sender: "bot", text: "Nhập ngày tháng năm sinh của bạn (dd/mm/yyyy):" },
     ]);
     setStep(STEP.BIRTH);
@@ -59,7 +59,7 @@ const FengShuiChat = ({ setBirthYear: setGlobalBirthYear }) => {
         setUserData((prev) => ({ ...prev, birth: text }));
         setMessages((prev) => [
           ...prev,
-          { sender: "bot", text: "✅ Ngày sinh đã nhận. Chọn giới tính:" },
+          { sender: "bot", text: "Ngày sinh đã nhận. Chọn giới tính:" },
         ]);
         setStep(STEP.GENDER);
         break;
@@ -77,7 +77,7 @@ const FengShuiChat = ({ setBirthYear: setGlobalBirthYear }) => {
           ...prev,
           {
             sender: "bot",
-            text: "✅ Giới tính đã nhận. Bạn muốn tư vấn về gì? (Màu sắc / Vật phẩm / Hướng nhà)",
+            text: "Bạn muốn tư vấn về gì? (Điện thoại / Tablet/ Laptop /Phụ Kiện/ ...)",
           },
         ]);
         setStep(STEP.GOAL);
@@ -85,7 +85,7 @@ const FengShuiChat = ({ setBirthYear: setGlobalBirthYear }) => {
 
       case STEP.GOAL:
         const birthYear = userData.birth.split("/")[2];
-        if (setGlobalBirthYear) setGlobalBirthYear(birthYear); // truyền xuống component sản phẩm
+        if (setGlobalBirthYear) setGlobalBirthYear(birthYear);
 
         const payload = { birthYear, message: text };
         setLoading(true);
@@ -105,6 +105,7 @@ const FengShuiChat = ({ setBirthYear: setGlobalBirthYear }) => {
             { sender: "bot", advice: res.advice },
           ]);
         } catch (err) {
+          console.log(err);
           setMessages((prev) => [
             ...prev,
             { sender: "bot", text: "Có lỗi xảy ra khi gọi API." },
@@ -125,7 +126,7 @@ const FengShuiChat = ({ setBirthYear: setGlobalBirthYear }) => {
     return (
       <Card style={{ marginTop: 10, background: "#f0f8ff" }}>
         <Card.Body>
-          <Card.Title>🎯 Gợi ý phong thủy</Card.Title>
+          <Card.Title>Gợi ý phong thủy</Card.Title>
           <Card.Text>
             <strong>Màu hợp:</strong> {advice.colors.join(", ")} <br />
             <strong>Vật phẩm:</strong> {advice.items.join(", ")} <br />

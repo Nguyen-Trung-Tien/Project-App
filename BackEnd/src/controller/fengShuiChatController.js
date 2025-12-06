@@ -2,52 +2,23 @@ require("dotenv").config();
 const OpenAI = require("openai");
 const { Product, Brand, Category } = require("../models");
 const { Op } = require("sequelize");
+const {
+  getElementByBirthYear,
+  getLuckyColorsByYear,
+} = require("../utils/fortuneUtils");
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-
-function getElementByYear(year) {
-  const index = (year + 6) % 10;
-  switch (index) {
-    case 0:
-    case 1:
-      return "Kim";
-    case 2:
-    case 3:
-      return "Thủy";
-    case 4:
-    case 5:
-      return "Mộc";
-    case 6:
-    case 7:
-      return "Hỏa";
-    case 8:
-    case 9:
-      return "Thổ";
-    default:
-      return "Thổ";
-  }
-}
-
-function getLuckyColorsByElement(element) {
-  const colorsMap = {
-    Kim: ["trắng", "xám", "vàng nhạt"],
-    Thủy: ["xanh dương", "đen"],
-    Mộc: ["xanh lá", "nâu nhạt"],
-    Hỏa: ["đỏ", "cam", "hồng"],
-    Thổ: ["vàng đất", "nâu", "cam nhạt"],
-  };
-  return colorsMap[element] || [];
-}
 
 const handleFengShuiChat = async (req, res) => {
   try {
     const { birthYear, message, brandId, categoryId, minPrice, maxPrice } =
       req.body;
+
     if (!birthYear || !message)
       return res.status(400).json({ error: "Thiếu năm sinh hoặc câu hỏi." });
 
-    const element = getElementByYear(Number(birthYear));
-    const luckyColors = getLuckyColorsByElement(element);
+    const element = getElementByBirthYear(Number(birthYear));
+    const luckyColors = getLuckyColorsByYear(Number(birthYear));
 
     const products = await Product.findAll({
       where: {
@@ -87,7 +58,7 @@ Dữ liệu người dùng và sản phẩm: ${dbContext}
 Trả lời bằng tiếng Việt, thân thiện, rõ ràng, gợi ý sản phẩm phù hợp.
 `;
 
-    let completion = await openai.chat.completions.create({
+    const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
         { role: "system", content: systemPrompt },
