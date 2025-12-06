@@ -4,10 +4,20 @@ import Offcanvas from "react-bootstrap/Offcanvas";
 import Form from "react-bootstrap/Form";
 import InputGroup from "react-bootstrap/InputGroup";
 import Card from "react-bootstrap/Card";
-import { FaRobot, FaPaperPlane, FaSpinner } from "react-icons/fa";
+import { FaRobot, FaPaperPlane, FaSpinner, FaRegComment } from "react-icons/fa";
 import { fengShuiChatApi } from "../../api/chatApi";
 
 const STEP = { WELCOME: 0, BIRTH: 1, GENDER: 2, GOAL: 3 };
+
+const GOAL_SUGGESTIONS = [
+  "Điện thoại",
+  "Laptop",
+  "Tablet",
+  "Phụ kiện",
+  "Máy tính bàn",
+  "Đồng hồ",
+  "Khác",
+];
 
 const FengShuiChat = ({ setBirthYear: setGlobalBirthYear }) => {
   const [show, setShow] = useState(false);
@@ -26,7 +36,7 @@ const FengShuiChat = ({ setBirthYear: setGlobalBirthYear }) => {
 
   const welcome = () => {
     setMessages([
-      { sender: "bot", text: "Chào bạn! 👋 Tôi là trợ lý TienTe Feng Shui." },
+      { sender: "bot", text: "Chào bạn! 👋 Tôi là trợ lý TienTech Feng Shui." },
       { sender: "bot", text: "Nhập ngày tháng năm sinh của bạn (dd/mm/yyyy):" },
     ]);
     setStep(STEP.BIRTH);
@@ -77,7 +87,7 @@ const FengShuiChat = ({ setBirthYear: setGlobalBirthYear }) => {
           ...prev,
           {
             sender: "bot",
-            text: "Bạn muốn tư vấn về gì? (Điện thoại / Tablet/ Laptop /Phụ Kiện/ ...)",
+            text: "Bạn muốn tư vấn về gì? Hãy chọn một mục dưới đây 👇",
           },
         ]);
         setStep(STEP.GOAL);
@@ -89,14 +99,16 @@ const FengShuiChat = ({ setBirthYear: setGlobalBirthYear }) => {
 
         const payload = { birthYear, message: text };
         setLoading(true);
+
         setMessages((prev) => [
           ...prev,
           {
             sender: "bot",
-            text: "Đang phân tích phong thủy...",
             type: "loading",
+            text: "Đang phân tích phong thủy...",
           },
         ]);
+
         try {
           const res = await fengShuiChatApi(payload);
           setMessages((prev) => [
@@ -105,12 +117,12 @@ const FengShuiChat = ({ setBirthYear: setGlobalBirthYear }) => {
             { sender: "bot", advice: res.advice },
           ]);
         } catch (err) {
-          console.log(err);
           setMessages((prev) => [
             ...prev,
             { sender: "bot", text: "Có lỗi xảy ra khi gọi API." },
           ]);
         }
+
         setLoading(false);
         setStep(STEP.WELCOME);
         break;
@@ -139,6 +151,7 @@ const FengShuiChat = ({ setBirthYear: setGlobalBirthYear }) => {
 
   return (
     <>
+      {/* Floating Button */}
       <Button
         variant="primary"
         onClick={handleShow}
@@ -150,17 +163,21 @@ const FengShuiChat = ({ setBirthYear: setGlobalBirthYear }) => {
           width: 60,
           height: 60,
           zIndex: 999,
+          background: "linear-gradient(135deg,#4facfe,#00f2fe)",
+          border: "none",
         }}
       >
-        <FaRobot size={28} />
+        <FaRegComment size={32} />
       </Button>
 
+      {/* Chat Window */}
       <Offcanvas show={show} onHide={handleClose} placement="end">
         <Offcanvas.Header closeButton>
           <Offcanvas.Title>
-            <FaRobot /> Feng Shui Chat
+            <FaRobot /> TienTech Feng Shui Chat
           </Offcanvas.Title>
         </Offcanvas.Header>
+
         <Offcanvas.Body
           style={{
             display: "flex",
@@ -169,6 +186,7 @@ const FengShuiChat = ({ setBirthYear: setGlobalBirthYear }) => {
             justifyContent: "space-between",
           }}
         >
+          {/* Message list */}
           <div style={{ overflowY: "auto", flexGrow: 1, marginBottom: 10 }}>
             {messages.map((msg, idx) => (
               <div
@@ -185,10 +203,13 @@ const FengShuiChat = ({ setBirthYear: setGlobalBirthYear }) => {
                     maxWidth: "75%",
                     padding: "10px 15px",
                     borderRadius: 20,
-                    backgroundColor:
-                      msg.sender === "bot" ? "#e0f7ff" : "#007bff",
+                    background:
+                      msg.sender === "bot"
+                        ? "#fff"
+                        : "linear-gradient(135deg,#4facfe,#00f2fe)",
                     color: msg.sender === "bot" ? "#000" : "#fff",
-                    boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
+                    boxShadow: "0 2px 10px rgba(0,0,0,0.12)",
+                    border: msg.sender === "bot" ? "1px solid #eee" : "none",
                   }}
                 >
                   {msg.type === "loading" ? (
@@ -196,6 +217,7 @@ const FengShuiChat = ({ setBirthYear: setGlobalBirthYear }) => {
                   ) : (
                     msg.text
                   )}
+
                   {msg.advice && renderAdviceCard(msg.advice)}
                 </div>
               </div>
@@ -203,28 +225,93 @@ const FengShuiChat = ({ setBirthYear: setGlobalBirthYear }) => {
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Quick replies */}
+          {/* Quick replies - Gender */}
+          {/* Quick replies - Gender */}
           {step === STEP.GENDER && (
-            <div className="d-flex gap-2 mt-2">
-              <Button onClick={() => processStep("Nam")}>Nam</Button>
-              <Button onClick={() => processStep("Nữ")}>Nữ</Button>
+            <div
+              className="d-flex gap-3 mt-3 justify-content-center"
+              style={{ animation: "fadeIn 0.3s" }}
+            >
+              <Button
+                onClick={() => processStep("Nam")}
+                style={{
+                  padding: "10px 22px",
+                  borderRadius: "25px",
+                  background: "linear-gradient(135deg,#4facfe,#00f2fe)",
+                  border: "none",
+                  marginBottom: "10px",
+                  color: "#fff",
+                  fontWeight: "600",
+                  boxShadow: "0 3px 10px rgba(0,0,0,0.15)",
+                }}
+              >
+                Nam
+              </Button>
+
+              <Button
+                onClick={() => processStep("Nữ")}
+                style={{
+                  padding: "10px 22px",
+                  borderRadius: "25px",
+                  background: "linear-gradient(135deg,#ff9a9e,#fad0c4)",
+                  border: "none",
+                  color: "#fff",
+                  fontWeight: "600",
+                  marginBottom: "10px",
+                  boxShadow: "0 3px 10px rgba(0,0,0,0.15)",
+                }}
+              >
+                Nữ
+              </Button>
             </div>
           )}
 
+          {/* Quick replies - Goal */}
+          {step === STEP.GOAL && (
+            <div
+              className="d-flex flex-wrap gap-2 mt-3 justify-content-center"
+              style={{ animation: "fadeIn 0.3s" }}
+            >
+              {GOAL_SUGGESTIONS.map((item, idx) => (
+                <Button
+                  key={idx}
+                  onClick={() => processStep(item)}
+                  style={{
+                    padding: "10px 18px",
+                    borderRadius: "22px",
+                    background: "linear-gradient(135deg,#4facfe,#00f2fe)",
+                    border: "none",
+                    color: "#fff",
+                    fontWeight: "600",
+                    boxShadow: "0 3px 8px rgba(0,0,0,0.15)",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "6px",
+                  }}
+                >
+                  {item}
+                </Button>
+              ))}
+            </div>
+          )}
+
+          {/* Input (tắt khi ở bước chọn mục đích) */}
           <InputGroup>
             <Form.Control
               placeholder="Nhập câu trả lời..."
+              disabled={step === STEP.GOAL}
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSend()}
             />
-            <Button onClick={handleSend}>
+            <Button disabled={step === STEP.GOAL} onClick={handleSend}>
               <FaPaperPlane />
             </Button>
           </InputGroup>
         </Offcanvas.Body>
       </Offcanvas>
 
+      {/* Loading spinner CSS */}
       <style>{`
         .spin { animation: spin 1s linear infinite; }
         @keyframes spin { 100% { transform: rotate(360deg); } }

@@ -6,6 +6,7 @@ import { PersistGate } from "redux-persist/integration/react";
 import { PayPalScriptProvider } from "@paypal/react-paypal-js";
 import App from "./App";
 import "bootstrap/dist/css/bootstrap.min.css";
+import "bootstrap-icons/font/bootstrap-icons.css";
 import { store, persistor } from "./redux/store";
 
 const initialOptions = {

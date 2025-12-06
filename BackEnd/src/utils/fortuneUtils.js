@@ -1,10 +1,33 @@
-// Bảng màu theo mệnh
 const colorsByElement = {
-  Kim: ["trắng", "xám", "vàng nhạt"],
-  Thủy: ["xanh dương", "đen"],
-  Mộc: ["xanh lá", "nâu nhạt"],
-  Hỏa: ["đỏ", "cam", "hồng"],
-  Thổ: ["vàng đất", "nâu", "cam nhạt"],
+  Kim: [
+    "trắng",
+    "xám",
+    "xám đen",
+    "ghi",
+    "bạc",
+    "vàng",
+    "vàng kim",
+    "vàng nhạt",
+    "be sáng",
+  ],
+  Thủy: [
+    "xanh dương",
+    "đen",
+    "xanh đen",
+    "xanh navy",
+    "xanh da trời nhạt",
+    "xanh ngọc",
+  ],
+  Mộc: [
+    "xanh lá",
+    "xanh lá đậm",
+    "xanh rêu",
+    "nâu nhạt",
+    "nâu gỗ",
+    "xanh mint",
+  ],
+  Hỏa: ["đỏ", "đỏ đô", "cam", "hồng", "hồng đậm", "tím", "tím đỏ"],
+  Thổ: ["vàng đất", "nâu", "nâu đậm", "cam nhạt", "be", "nâu sữa"],
 };
 
 // Hàm tính mệnh theo năm sinh

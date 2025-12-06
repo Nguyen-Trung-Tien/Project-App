@@ -8,6 +8,7 @@ import {
   Badge,
   Form,
 } from "react-bootstrap";
+import Select from "react-select";
 import { fetchFortuneProducts } from "../../api/productApi";
 import { getAllBrandApi } from "../../api/brandApi";
 import { getAllCategoryApi } from "../../api/categoryApi";
@@ -45,6 +46,10 @@ const FortuneProducts = () => {
     fetchCategories();
   }, []);
 
+  const yearOptions = Array.from({ length: 120 }, (_, i) => {
+    const year = new Date().getFullYear() - i;
+    return { value: year, label: year.toString() };
+  });
   // Debounced fetch products
   const fetchProducts = useCallback(async () => {
     if (!birthYear) return;
@@ -92,13 +97,22 @@ const FortuneProducts = () => {
 
       {/* Filter Form */}
       <Form className="mb-4 d-flex flex-wrap gap-2 justify-content-center">
-        <Form.Control
-          type="number"
+        <Select
+          options={yearOptions}
+          value={birthYear ? { value: birthYear, label: birthYear } : null}
+          onChange={(option) => setBirthYear(option.value)}
           placeholder="Năm sinh"
-          value={birthYear}
-          onChange={(e) => setBirthYear(e.target.value)}
-          style={{ maxWidth: "140px" }}
+          styles={{
+            control: (base) => ({
+              ...base,
+              minWidth: "140px",
+              borderRadius: "6px",
+              borderColor: "#ced4da",
+              height: "38px",
+            }),
+          }}
         />
+
         <Form.Select
           value={brandId}
           onChange={(e) => setBrandId(e.target.value)}
@@ -111,6 +125,7 @@ const FortuneProducts = () => {
             </option>
           ))}
         </Form.Select>
+
         <Form.Select
           value={categoryId}
           onChange={(e) => setCategoryId(e.target.value)}
@@ -123,6 +138,7 @@ const FortuneProducts = () => {
             </option>
           ))}
         </Form.Select>
+
         <Form.Control
           type="number"
           placeholder="Giá từ"
@@ -130,6 +146,7 @@ const FortuneProducts = () => {
           onChange={(e) => setMinPrice(e.target.value)}
           style={{ maxWidth: "100px" }}
         />
+
         <Form.Control
           type="number"
           placeholder="Đến"
@@ -137,6 +154,7 @@ const FortuneProducts = () => {
           onChange={(e) => setMaxPrice(e.target.value)}
           style={{ maxWidth: "100px" }}
         />
+
         <Form.Select
           value={sortBy}
           onChange={(e) => setSortBy(e.target.value)}
@@ -148,6 +166,7 @@ const FortuneProducts = () => {
           <option value="priceDesc">Giá cao → thấp</option>
           <option value="newest">Sản phẩm mới</option>
         </Form.Select>
+
         <Button variant="primary" onClick={handleSearch}>
           Tìm
         </Button>
