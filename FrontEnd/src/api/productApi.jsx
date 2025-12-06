@@ -157,3 +157,18 @@ export const getRecommendedProductsApi = async (
     throw err;
   }
 };
+
+export const fetchFortuneProducts = async ({
+  birthYear,
+  brandId,
+  minPrice,
+  maxPrice,
+  categoryId,
+  page,
+  limit,
+}) => {
+  const res = await API.get("/product/recommend-fortune", {
+    params: { birthYear, brandId, minPrice, maxPrice, categoryId, page, limit },
+  });
+  return res.data;
+};

@@ -119,7 +119,7 @@ const ProductCard = ({ product }) => {
         )}
       </div>
 
-      <Card.Body className="d-flex flex-column p-3">
+      <Card.Body className="d-flex flex-column p-2">
         {/* Tên sản phẩm */}
         <Card.Title
           className="mb-2 text-truncate-2-lines"

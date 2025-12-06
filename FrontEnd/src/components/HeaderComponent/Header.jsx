@@ -153,6 +153,9 @@ function Header() {
             <Nav.Link as={Link} to="/" className="header__link">
               Trang chủ
             </Nav.Link>
+            <Nav.Link as={Link} to="/fortune-products" className="header__link">
+              Phong thủy
+            </Nav.Link>
             <Nav.Link as={Link} to="/about" className="header__link">
               Giới thiệu
             </Nav.Link>

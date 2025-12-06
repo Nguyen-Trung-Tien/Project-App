@@ -189,6 +189,32 @@ const handleRecommendProducts = async (req, res) => {
   }
 };
 
+const handleRecommendFortuneProducts = async (req, res) => {
+  try {
+    const { birthYear, brandId, minPrice, maxPrice, categoryId } = req.query;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 6;
+
+    const result = await ProductService.recommendFortuneProducts({
+      birthYear,
+      brandId,
+      minPrice: minPrice ? Number(minPrice) : undefined,
+      maxPrice: maxPrice ? Number(maxPrice) : undefined,
+      categoryId,
+      page,
+      limit,
+    });
+
+    return res.status(200).json(result);
+  } catch (e) {
+    console.error("Error in handleRecommendFortuneProducts:", e);
+    return res.status(500).json({
+      errCode: -1,
+      errMessage: "Internal server error",
+    });
+  }
+};
+
 module.exports = {
   handleCreateProduct,
   handleGetAllProducts,
@@ -199,4 +225,5 @@ module.exports = {
   handleGetDiscountedProducts,
   handleFilterProducts,
   handleRecommendProducts,
+  handleRecommendFortuneProducts,
 };

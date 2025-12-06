@@ -1,6 +1,7 @@
 const db = require("../models");
 const fs = require("fs");
 const { Op } = require("sequelize");
+const { getLuckyColorsByYear } = require("../utils/fortuneUtils");
 
 const createProduct = async (data) => {
   try {
@@ -307,6 +308,66 @@ const recommendProducts = async (productId, page = 1, limit = 6) => {
   }
 };
 
+const recommendFortuneProducts = async ({
+  birthYear,
+  brandId,
+  minPrice,
+  maxPrice,
+  categoryId,
+  page = 1,
+  limit = 6,
+}) => {
+  try {
+    if (!birthYear) return { errCode: 1, errMessage: "birthYear is required" };
+
+    const luckyColors = getLuckyColorsByYear(Number(birthYear));
+
+    // Build điều kiện where
+    const where = {
+      color: { [Op.in]: luckyColors },
+      isActive: true,
+    };
+
+    if (brandId) where.brandId = brandId;
+    if (categoryId) where.categoryId = categoryId;
+    if (minPrice) where.price = { ...where.price, [Op.gte]: minPrice };
+    if (maxPrice) where.price = { ...where.price, [Op.lte]: maxPrice };
+
+    const total = await db.Product.count({ where });
+    const offset = (page - 1) * limit;
+
+    const rows = await db.Product.findAll({
+      where,
+      include: [
+        { model: db.Brand, as: "brand" },
+        { model: db.Category, as: "category" },
+      ],
+      order: [
+        ["sold", "DESC"], // ưu tiên bán chạy
+        ["discount", "DESC"], // ưu tiên giảm giá
+        ["createdAt", "DESC"], // sản phẩm mới
+      ],
+      offset,
+      limit,
+    });
+
+    return {
+      errCode: 0,
+      data: rows.map((p) => p.toJSON()),
+      luckyColors,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
+  } catch (e) {
+    console.error("Error in recommendFortuneProducts:", e);
+    return { errCode: -1, errMessage: e.message };
+  }
+};
+
 module.exports = {
   createProduct,
   getAllProducts,
@@ -318,4 +379,5 @@ module.exports = {
   getDiscountedProducts,
   filterProducts,
   recommendProducts,
+  recommendFortuneProducts,
 };

@@ -34,7 +34,7 @@ const PricePredictionModal = ({ show, onHide, result }) => {
     predicted60 = 0,
     predicted90 = 0,
     reliability = 0,
-    discount = 0, // nhận thêm từ API nếu có
+    discount = 0,
   } = result;
 
   // Helper tính % giảm từ dự đoán
@@ -73,14 +73,14 @@ const PricePredictionModal = ({ show, onHide, result }) => {
   };
 
   return (
-    <Modal show={show} onHide={onHide} centered size="lg">
+    <Modal show={show} onHide={onHide} centered size="undefined">
       <Modal.Header closeButton>
         <Modal.Title>Dự đoán giá tương lai</Modal.Title>
       </Modal.Header>
 
       <Modal.Body>
         <h5 className="fw-bold text-primary">{productName}</h5>
-        <p className="text-muted mb-3">Loại sản phẩm: {category}</p>
+        <p className="text-muted mb-2">Loại sản phẩm: {category}</p>
 
         <div className="d-flex justify-content-between mb-3 align-items-center">
           <span>Giá hiện tại:</span>
@@ -94,7 +94,7 @@ const PricePredictionModal = ({ show, onHide, result }) => {
           </span>
         </div>
 
-        <div className="prediction-box bg-light p-3 rounded mb-4">
+        <div className="prediction-box bg-light p-3 rounded mb-3">
           {predictions.map((item) => (
             <div
               key={item.label}
@@ -116,7 +116,7 @@ const PricePredictionModal = ({ show, onHide, result }) => {
           ))}
         </div>
 
-        <div className="mb-4">
+        <div className="mb-3">
           <p className="mb-1">Độ tin cậy:</p>
           <ProgressBar
             now={reliability}

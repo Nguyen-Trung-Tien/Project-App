@@ -17,6 +17,7 @@ import AboutPage from "../pages/AboutPage/AboutPage";
 import ProductListPage from "../pages/ProductListPage/ProductListPage";
 import AllProducts from "../components/AllProducts/AllProduct";
 import CheckoutFailed from "../pages/CheckoutFailed/CheckoutFailed";
+import FortuneProducts from "../components/FortuneProducts/FortuneProducts";
 
 const UserRoutes = () => {
   return (
@@ -34,6 +35,7 @@ const UserRoutes = () => {
         <Route path="orders" element={<OrderPage />} />
         <Route path="orders-detail/:id" element={<OrderDetail />} />
         <Route path="profile" element={<Profile />} />
+        <Route path="fortune-products" element={<FortuneProducts />} />
       </Route>
       <Route index element={<HomePage />} />
       <Route path="product-detail/:id" element={<ProductDetailPage />} />

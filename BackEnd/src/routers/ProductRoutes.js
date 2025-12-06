@@ -35,5 +35,9 @@ router.delete(
 router.get("/discounted", ProductController.handleGetDiscountedProducts);
 router.get("/filter", ProductController.handleFilterProducts);
 router.get("/recommend/:id", ProductController.handleRecommendProducts);
+router.get(
+  "/recommend-fortune",
+  ProductController.handleRecommendFortuneProducts
+);
 
 module.exports = router;

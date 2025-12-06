@@ -3,7 +3,6 @@ import {
   FaRobot,
   FaComments,
   FaTimes,
-  FaMicrophone,
   FaUser,
   FaExpand,
   FaCompress,
@@ -313,7 +312,7 @@ Tôi có thể giúp bạn:
               <div
                 key={q}
                 onClick={() => {
-                  setInput(q.replace(/^[^ ]+ /, "")); // bỏ emoji
+                  setInput(q.replace(/^[^ ]+ /, ""));
                   setTimeout(() => handleSend({ preventDefault() {} }), 50);
                 }}
                 style={{
@@ -402,18 +401,6 @@ Tôi có thể giúp bạn:
               }}
             >
               Gửi
-            </button>
-
-            <button
-              type="button"
-              style={{
-                background: "#eee",
-                border: "none",
-                padding: "10px",
-                borderRadius: "50%",
-              }}
-            >
-              <FaMicrophone />
             </button>
           </form>
         </div>
