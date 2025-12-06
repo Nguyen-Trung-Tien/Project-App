@@ -32,6 +32,8 @@ import ChatBot from "../../components/ChatBot/ChatBot";
 import ReviewForm from "../../components/ReviewComponent/ReviewForm";
 import ReviewList from "../../components/ReviewComponent/ReviewList";
 import { getRepliesByReviewApi } from "../../api/reviewReplyApi";
+import PricePredictionModal from "../../components/PricePredictionModal/PricePredictionModal";
+import { predictPrice } from "../../api/chatApi";
 
 const ProductDetailPage = () => {
   const user = useSelector((state) => state.user.user);
@@ -56,6 +58,9 @@ const ProductDetailPage = () => {
   const [recommendedTotalPages, setRecommendedTotalPages] = useState(1);
   const [loadingRecommended, setLoadingRecommended] = useState(false);
   const [loadingMoreRecommended, setLoadingMoreRecommended] = useState(false);
+  const [predictResult, setPredictResult] = useState(null);
+  const [showPredict, setShowPredict] = useState(false);
+  const [loadingPredict, setLoadingPredict] = useState(false);
 
   const limitRecommended = 6;
 
@@ -211,6 +216,26 @@ const ProductDetailPage = () => {
     }
   };
 
+  const handlePricePredict = async () => {
+    if (!product?.id) return;
+
+    setLoadingPredict(true);
+    try {
+      const result = await predictPrice(product.id);
+      if (result.error) {
+        toast.error(result.error);
+        return;
+      }
+      setPredictResult(result);
+      setShowPredict(true);
+    } catch (err) {
+      console.error(err);
+      toast.error("Không thể dự đoán giá!");
+    } finally {
+      setLoadingPredict(false);
+    }
+  };
+
   const formatVND = (val) => {
     if (val == null || val === "") return "0 ₫";
     const number = Number(val);
@@ -253,6 +278,11 @@ const ProductDetailPage = () => {
   return (
     <div className="product-detail-page py-3 mh-90">
       <Container>
+        <PricePredictionModal
+          show={showPredict}
+          onHide={() => setShowPredict(false)}
+          result={predictResult}
+        />
         <ChatBot />
 
         {/* Back */}
@@ -307,13 +337,25 @@ const ProductDetailPage = () => {
 
               {/* Price */}
               <div className="price mb-3">
-                {product.discount > 0 && (
-                  <div className="text-muted text-decoration-line-through">
-                    {formatVND(product.price)}
+                <div>
+                  {product.discount > 0 && (
+                    <>
+                      {/* Giá gốc gạch ngang */}
+                      <div className="text-muted text-decoration-line-through">
+                        {formatVND(product.price)}
+                      </div>
+
+                      {/* Giảm giá trực tiếp */}
+                      <div className="text-success fw-semibold">
+                        Giảm giá: {parseFloat(product.discount).toFixed(2)}%
+                      </div>
+                    </>
+                  )}
+
+                  {/* Giá sau giảm */}
+                  <div className="fw-bold text-danger fs-5">
+                    {formatVND(discountedPrice)}
                   </div>
-                )}
-                <div className="fw-bold text-danger fs-5">
-                  {formatVND(discountedPrice)}
                 </div>
 
                 {reviews.length > 0 ? (
@@ -478,6 +520,23 @@ const ProductDetailPage = () => {
                     <CreditCard className="me-2" size={22} /> Mua ngay
                   </Button>
                 )}
+
+                <Button
+                  variant="warning"
+                  size="lg"
+                  className="flex-fill d-flex align-items-center justify-content-center"
+                  onClick={handlePricePredict}
+                  disabled={loadingPredict}
+                >
+                  {loadingPredict ? (
+                    <>
+                      <Spinner animation="border" size="sm" className="me-2" />{" "}
+                      Đang dự đoán...
+                    </>
+                  ) : (
+                    <>🔮 Dự đoán giá tương lai</>
+                  )}
+                </Button>
               </div>
             </div>
           </Col>

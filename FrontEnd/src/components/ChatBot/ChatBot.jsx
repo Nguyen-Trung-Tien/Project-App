@@ -1,170 +1,200 @@
-import React, { useState, useRef, useEffect } from "react";
-import { FaRobot, FaComments, FaTimes } from "react-icons/fa";
+import React, { useState, useRef, useEffect, useCallback } from "react";
+import {
+  FaRobot,
+  FaComments,
+  FaTimes,
+  FaMicrophone,
+  FaUser,
+  FaExpand,
+  FaCompress,
+} from "react-icons/fa";
 import { useSelector } from "react-redux";
 import { sendMessage } from "../../api/chatApi";
 
 const ChatBot = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [fullMode, setFullMode] = useState(false);
+
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const [hasGreeted, setHasGreeted] = useState(false);
-  const [typingText, setTypingText] = useState("");
 
+  const [typing, setTyping] = useState("");
+  const inputRef = useRef(null);
   const messagesEndRef = useRef(null);
 
-  // Lấy user từ Redux store
   const user = useSelector((state) => state.user.user);
   const userId = user?.id || null;
 
-  const quickSuggestions = [
-    "Tìm sản phẩm",
-    "Giá giảm hôm nay",
-    "Kiểm tra đơn hàng",
-    "Chính sách đổi trả",
-    "Gợi ý theo nhu cầu",
+  /** Quick actions */
+  const quickActions = [
+    "🔍 Tìm sản phẩm theo nhu cầu",
+    "🔥 Xem sản phẩm đang giảm giá",
+    "📦 Tra cứu đơn hàng",
+    "📋 Chính sách bảo hành",
+    "💡 Gợi ý sản phẩm phù hợp",
   ];
 
+  /** Autocomplete gợi ý */
+  const autoComplete = [
+    "Kiểm tra đơn hàng của tôi",
+    "Giảm giá hôm nay có gì?",
+    "Tìm laptop văn phòng",
+    "Tư vấn PC gaming 15 triệu",
+    "Điện thoại tầm giá 7 triệu",
+  ];
+
+  /** Auto scroll */
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, typingText]);
+  }, [messages, typing]);
 
+  /** Focus input */
   useEffect(() => {
-    if (isOpen && !hasGreeted) {
-      const greetMsg = [
-        {
-          role: "assistant",
-          content: `Xin chào${
-            user ? `, ${user.username}` : "bạn"
-          }! 👋 Tôi là trợ lý TienTech.
-Tôi có thể giúp bạn với:
-• 🔍 Tìm sản phẩm
-• 💰 Xem giá, khuyến mãi
-• 📦 Kiểm tra đơn hàng
-• 📋 Chính sách đổi trả – bảo hành
-• 🚚 Vận chuyển – thanh toán
-
-Bạn muốn hỏi gì hôm nay? 😊`,
-          time: new Date(),
-        },
-      ];
-      setMessages(greetMsg);
-      setHasGreeted(true);
+    if (isOpen) {
+      setTimeout(() => inputRef.current?.focus(), 200);
     }
-  }, [isOpen, hasGreeted, user]);
+  }, [isOpen]);
 
-  const toggleChat = () => setIsOpen(!isOpen);
+  /** Format time */
+  const formatTime = (date) =>
+    `${date.getHours().toString().padStart(2, "0")}:${date
+      .getMinutes()
+      .toString()
+      .padStart(2, "0")}`;
 
-  const typeEffect = async (text) => {
-    setTypingText("");
-    for (let i = 0; i < text.length; i++) {
-      await new Promise((r) => setTimeout(r, 15));
-      setTypingText((prev) => prev + text[i]);
-    }
-    setTypingText("");
-    setMessages((prev) => [
-      ...prev,
-      { role: "assistant", content: text, time: new Date() },
-    ]);
+  /** Add message */
+  const addMessage = (role, content, type = "text") => {
+    setMessages((prev) => [...prev, { role, content, type, time: new Date() }]);
   };
 
+  /** Streaming effect (giống ChatGPT) */
+  const streamText = useCallback(async (text) => {
+    setTyping("");
+    for (let i = 0; i < text.length; i++) {
+      await new Promise((r) => setTimeout(r, 8));
+      setTyping((prev) => prev + text[i]);
+    }
+    addMessage("assistant", text);
+    setTyping("");
+  }, []);
+
+  /** Handle send */
   const handleSend = async (e) => {
     e.preventDefault();
     if (!input.trim() || loading) return;
 
-    const userMessage = {
-      role: "user",
-      content: input,
-      time: new Date(),
-    };
-
-    setMessages((prev) => [...prev, userMessage]);
+    const userText = input;
     setInput("");
+
+    addMessage("user", userText);
     setLoading(true);
 
     try {
-      const reply = await sendMessage(input, userId);
+      let reply = await sendMessage(userText, userId);
 
-      const enhancedReply =
-        reply.includes("Xin lỗi") || reply.includes("không hiểu")
-          ? `${reply}\n\nMình chưa hiểu rõ câu hỏi lắm 😅\nBạn có thể hỏi:
-• Thông tin sản phẩm
-• Tra cứu đơn hàng
-• Kiểm tra giá – giảm giá
-• Tư vấn chọn sản phẩm
-• Chính sách giao hàng / bảo hành`
-          : reply;
+      if (/không hiểu|xin lỗi/i.test(reply)) {
+        reply += `
+Tôi có thể giúp bạn:
+• Kiểm tra đơn hàng
+• Tìm sản phẩm
+• Xem giảm giá
+• Gợi ý theo nhu cầu`;
+      }
 
-      await typeEffect(enhancedReply);
-    } catch (err) {
-      console.log(err);
-      await typeEffect("Xin lỗi, tôi không thể trả lời lúc này.");
+      await streamText(reply);
+    } catch (e) {
+      console.log(e);
+      await streamText("Xin lỗi, hệ thống đang bận. Vui lòng thử lại 😥");
     }
 
     setLoading(false);
   };
 
-  const formatTime = (date) =>
-    `${date.getHours()}:${date.getMinutes().toString().padStart(2, "0")}`;
+  /** Autocomplete khi gõ */
+  const filteredAutocomplete =
+    input.length > 1
+      ? autoComplete.filter((s) =>
+          s.toLowerCase().includes(input.toLowerCase())
+        )
+      : [];
 
   return (
     <>
+      {/* Button open */}
       <div
-        onClick={toggleChat}
+        onClick={() => setIsOpen(!isOpen)}
         style={{
           position: "fixed",
-          bottom: "20px",
-          right: "18px",
+          bottom: "22px",
+          right: "20px",
           zIndex: 9999,
           cursor: "pointer",
         }}
       >
         <div
           style={{
-            background: "linear-gradient(135deg, #4facfe, #00f2fe)",
+            background: "linear-gradient(135deg,#4facfe,#00f2fe)",
             color: "#fff",
-            padding: "15px",
+            padding: "14px",
             borderRadius: "50%",
-            boxShadow: "0 4px 14px rgba(0,0,0,0.28)",
-            transition: "0.25s",
+            boxShadow: "0 4px 14px rgba(0,0,0,.28)",
+            transition: ".25s",
           }}
         >
           {isOpen ? <FaTimes size={22} /> : <FaComments size={26} />}
         </div>
       </div>
 
+      {/* CHAT WINDOW */}
       {isOpen && (
         <div
           style={{
             position: "fixed",
-            bottom: "85px",
+            bottom: "90px",
             right: "20px",
-            width: "360px",
-            height: "480px",
-            zIndex: 9998,
+            width: fullMode ? "420px" : "360px",
+            height: fullMode ? "560px" : "480px",
+            background: "#fff",
             display: "flex",
             flexDirection: "column",
-            backgroundColor: "#fff",
             borderRadius: "18px",
-            boxShadow: "0 12px 34px rgba(0,0,0,0.25)",
-            animation: "chatOpen 0.25s ease",
+            boxShadow: "0 12px 34px rgba(0,0,0,.25)",
+            animation: "chatOpen .25s ease",
             overflow: "hidden",
+            zIndex: 9998,
           }}
         >
+          {/* Header */}
           <div
             style={{
               padding: "14px 16px",
-              background: "linear-gradient(90deg, #4facfe 0%, #00f2fe 100%)",
+              background: "linear-gradient(90deg,#4facfe,#00f2fe)",
               color: "#fff",
               fontWeight: "600",
-              fontSize: "1.05rem",
               display: "flex",
               alignItems: "center",
+              justifyContent: "space-between",
             }}
           >
-            <FaRobot className="me-2" /> TienTech Trợ lý
+            <span>
+              <FaRobot className="me-2" /> TienTech AI
+            </span>
+
+            <button
+              onClick={() => setFullMode(!fullMode)}
+              style={{
+                background: "transparent",
+                border: "none",
+                color: "#fff",
+                cursor: "pointer",
+              }}
+            >
+              {fullMode ? <FaCompress /> : <FaExpand />}
+            </button>
           </div>
 
+          {/* Messages */}
           <div
             style={{
               flex: 1,
@@ -180,31 +210,49 @@ Bạn muốn hỏi gì hôm nay? 😊`,
                   display: "flex",
                   justifyContent:
                     msg.role === "user" ? "flex-end" : "flex-start",
-                  marginBottom: "8px",
+                  alignItems: "flex-end",
+                  gap: "6px",
+                  marginBottom: "10px",
                 }}
               >
+                {/* Avatar */}
+                {msg.role === "assistant" && (
+                  <div
+                    style={{
+                      background: "#fff",
+                      width: "32px",
+                      height: "32px",
+                      borderRadius: "50%",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      boxShadow: "0 2px 6px rgba(0,0,0,.15)",
+                    }}
+                  >
+                    <FaRobot color="#4facfe" />
+                  </div>
+                )}
+
                 <div
                   style={{
                     background:
                       msg.role === "user"
                         ? "linear-gradient(135deg,#4facfe,#00d0fe)"
-                        : "#e9ecef",
+                        : "#fff",
                     color: msg.role === "user" ? "#fff" : "#333",
-                    borderRadius: "16px",
                     padding: "10px 14px",
-                    maxWidth: "78%",
+                    borderRadius: "14px",
+                    maxWidth: "75%",
                     wordBreak: "break-word",
-                    boxShadow:
-                      msg.role === "user"
-                        ? "0 2px 10px rgba(0,0,0,0.2)"
-                        : "0 2px 6px rgba(0,0,0,0.1)",
+                    boxShadow: "0 2px 10px rgba(0,0,0,.14)",
+                    animation: "fadeIn .2s ease",
                   }}
                 >
                   <div
                     style={{
                       fontSize: "0.75rem",
                       marginBottom: "4px",
-                      opacity: 0.8,
+                      opacity: 0.6,
                     }}
                   >
                     {msg.role === "user" ? "Bạn" : "AI"} •{" "}
@@ -212,52 +260,69 @@ Bạn muốn hỏi gì hôm nay? 😊`,
                   </div>
                   {msg.content}
                 </div>
+
+                {msg.role === "user" && (
+                  <div
+                    style={{
+                      background: "#fff",
+                      width: "32px",
+                      height: "32px",
+                      borderRadius: "50%",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      boxShadow: "0 2px 6px rgba(0,0,0,.15)",
+                    }}
+                  >
+                    <FaUser />
+                  </div>
+                )}
               </div>
             ))}
 
-            {typingText && (
+            {/* Typing */}
+            {typing && (
               <div
                 style={{
-                  background: "#e9ecef",
+                  background: "#fff",
                   padding: "10px 14px",
-                  borderRadius: "12px",
+                  borderRadius: "14px",
                   width: "fit-content",
                   marginBottom: "10px",
-                  color: "#333",
+                  animation: "fadeIn .2s ease",
                 }}
               >
-                {typingText}
-              </div>
-            )}
-
-            {loading && !typingText && (
-              <div style={{ color: "#999", fontSize: "0.85rem" }}>
-                AI đang trả lời...
+                {typing}
               </div>
             )}
 
             <div ref={messagesEndRef} />
           </div>
 
+          {/* Quick actions */}
           <div
             style={{
-              padding: "6px 12px",
+              padding: "8px",
               display: "flex",
               gap: "8px",
-              flexWrap: "wrap",
+              overflowX: "auto",
+              background: "#fff",
             }}
           >
-            {quickSuggestions.map((q) => (
+            {quickActions.map((q) => (
               <div
                 key={q}
-                onClick={() => setInput(q)}
+                onClick={() => {
+                  setInput(q.replace(/^[^ ]+ /, "")); // bỏ emoji
+                  setTimeout(() => handleSend({ preventDefault() {} }), 50);
+                }}
                 style={{
+                  padding: "6px 10px",
                   background: "#eef3f7",
-                  padding: "6px 12px",
                   borderRadius: "14px",
-                  fontSize: "0.82rem",
+                  fontSize: ".8rem",
                   cursor: "pointer",
-                  border: "1px solid #dde3e8",
+                  whiteSpace: "nowrap",
                 }}
               >
                 {q}
@@ -265,32 +330,66 @@ Bạn muốn hỏi gì hôm nay? 😊`,
             ))}
           </div>
 
+          {/* Input box */}
           <form
             onSubmit={handleSend}
             style={{
-              padding: "12px",
+              padding: "10px",
               borderTop: "1px solid #ddd",
-              background: "#fff",
               display: "flex",
               gap: "8px",
+              background: "#fff",
             }}
           >
-            <input
-              type="text"
-              className="form-control"
-              placeholder="Nhập tin nhắn..."
-              value={input}
-              disabled={loading}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) handleSend(e);
-              }}
-              style={{
-                borderRadius: "20px",
-                padding: "10px 16px",
-                border: "1px solid #ccc",
-              }}
-            />
+            <div style={{ position: "relative", flex: 1 }}>
+              <input
+                ref={inputRef}
+                type="text"
+                placeholder="Nhập tin nhắn..."
+                className="form-control"
+                value={input}
+                disabled={loading}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e) =>
+                  e.key === "Enter" && !e.shiftKey && handleSend(e)
+                }
+                style={{
+                  borderRadius: "18px",
+                  padding: "10px 14px",
+                }}
+              />
+
+              {/* Autocomplete */}
+              {filteredAutocomplete.length > 0 && (
+                <div
+                  style={{
+                    position: "absolute",
+                    bottom: "48px",
+                    left: 0,
+                    right: 0,
+                    background: "#fff",
+                    borderRadius: "12px",
+                    boxShadow: "0 4px 12px rgba(0,0,0,.15)",
+                    zIndex: 10,
+                    padding: "6px 0",
+                  }}
+                >
+                  {filteredAutocomplete.map((s, index) => (
+                    <div
+                      key={index}
+                      onClick={() => setInput(s)}
+                      style={{
+                        padding: "8px 12px",
+                        cursor: "pointer",
+                      }}
+                    >
+                      {s}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
             <button
               type="submit"
               disabled={loading}
@@ -299,12 +398,22 @@ Bạn muốn hỏi gì hôm nay? 😊`,
                 color: "#fff",
                 border: "none",
                 padding: "10px 16px",
-                borderRadius: "20px",
-                fontWeight: "600",
-                transition: "0.2s",
+                borderRadius: "18px",
               }}
             >
               Gửi
+            </button>
+
+            <button
+              type="button"
+              style={{
+                background: "#eee",
+                border: "none",
+                padding: "10px",
+                borderRadius: "50%",
+              }}
+            >
+              <FaMicrophone />
             </button>
           </form>
         </div>
@@ -315,6 +424,10 @@ Bạn muốn hỏi gì hôm nay? 😊`,
           @keyframes chatOpen {
             from { opacity: 0; transform: scale(0.9); }
             to { opacity: 1; transform: scale(1); }
+          }
+          @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
           }
         `}
       </style>

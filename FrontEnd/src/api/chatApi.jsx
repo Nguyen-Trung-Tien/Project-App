@@ -36,3 +36,17 @@ export const sendMessage = async (message, userId = null) => {
     return "Lỗi không xác định. Vui lòng thử lại.";
   }
 };
+
+export const predictPrice = async (productId) => {
+  try {
+    if (!productId) throw new Error("Thiếu productId");
+
+    const res = await API.post("/chat/predict", { productId });
+    return res.data;
+  } catch (error) {
+    console.error("PricePredict error:", error);
+    return {
+      error: error.response?.data?.error || "Hệ thống dự đoán giá gặp sự cố.",
+    };
+  }
+};
