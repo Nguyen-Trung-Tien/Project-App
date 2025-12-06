@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Container,
   Row,
@@ -12,6 +12,7 @@ import { fetchFortuneProducts } from "../../api/productApi";
 import { getAllBrandApi } from "../../api/brandApi";
 import { getAllCategoryApi } from "../../api/categoryApi";
 import ProductCard from "../ProductCard/ProductCard";
+import FengShuiChat from "../ChatBot/FengShui";
 
 const FortuneProducts = () => {
   const [birthYear, setBirthYear] = useState("");
@@ -44,8 +45,8 @@ const FortuneProducts = () => {
     fetchCategories();
   }, []);
 
-  // Fetch products
-  const fetchProducts = async () => {
+  // Debounced fetch products
+  const fetchProducts = useCallback(async () => {
     if (!birthYear) return;
     setLoading(true);
     try {
@@ -73,17 +74,21 @@ const FortuneProducts = () => {
       setLuckyColors([]);
     }
     setLoading(false);
-  };
+  }, [birthYear, brandId, categoryId, minPrice, maxPrice, sortBy, page, limit]);
 
   useEffect(() => {
-    fetchProducts();
-  }, [page, brandId, categoryId, sortBy, birthYear, minPrice, maxPrice]);
+    const handler = setTimeout(() => fetchProducts(), 500);
+    return () => clearTimeout(handler);
+  }, [fetchProducts]);
 
   const handleSearch = () => setPage(1);
 
   return (
     <Container className="py-4">
       <h2 className="mb-4 text-center">Gợi ý sản phẩm theo phong thủy</h2>
+
+      {/* Chatbot */}
+      <FengShuiChat setBirthYear={setBirthYear} />
 
       {/* Filter Form */}
       <Form className="mb-4 d-flex flex-wrap gap-2 justify-content-center">
@@ -171,7 +176,10 @@ const FortuneProducts = () => {
         <Row className="g-1">
           {products.map((p) => (
             <Col key={p.id} xs={6} sm={4} md={2}>
-              <ProductCard product={p} />
+              <ProductCard
+                product={p}
+                highlightColor={luckyColors.includes(p.color)}
+              />
             </Col>
           ))}
         </Row>

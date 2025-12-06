@@ -316,25 +316,34 @@ const recommendFortuneProducts = async ({
   categoryId,
   page = 1,
   limit = 6,
+  sortBy,
 }) => {
   try {
     if (!birthYear) return { errCode: 1, errMessage: "birthYear is required" };
 
     const luckyColors = getLuckyColorsByYear(Number(birthYear));
 
-    // Build điều kiện where
-    const where = {
-      color: { [Op.in]: luckyColors },
-      isActive: true,
-    };
+    // Build where
+    const where = { isActive: true };
+
+    if (luckyColors.length) {
+      where.color = { [Op.in]: luckyColors };
+    }
 
     if (brandId) where.brandId = brandId;
     if (categoryId) where.categoryId = categoryId;
-    if (minPrice) where.price = { ...where.price, [Op.gte]: minPrice };
-    if (maxPrice) where.price = { ...where.price, [Op.lte]: maxPrice };
+    if (minPrice != null) where.price = { ...where.price, [Op.gte]: minPrice };
+    if (maxPrice != null) where.price = { ...where.price, [Op.lte]: maxPrice };
 
     const total = await db.Product.count({ where });
     const offset = (page - 1) * limit;
+
+    let order = [
+      ["sold", "DESC"],
+      ["createdAt", "DESC"],
+    ];
+    if (sortBy === "priceAsc") order = [["price", "ASC"]];
+    if (sortBy === "priceDesc") order = [["price", "DESC"]];
 
     const rows = await db.Product.findAll({
       where,
@@ -342,18 +351,20 @@ const recommendFortuneProducts = async ({
         { model: db.Brand, as: "brand" },
         { model: db.Category, as: "category" },
       ],
-      order: [
-        ["sold", "DESC"], // ưu tiên bán chạy
-        ["discount", "DESC"], // ưu tiên giảm giá
-        ["createdAt", "DESC"], // sản phẩm mới
-      ],
+      order,
       offset,
       limit,
     });
 
+    const data = rows.map((p) => {
+      const product = p.toJSON();
+      product.isLuckyColor = luckyColors.includes(product.color);
+      return product;
+    });
+
     return {
       errCode: 0,
-      data: rows.map((p) => p.toJSON()),
+      data,
       luckyColors,
       pagination: {
         page,

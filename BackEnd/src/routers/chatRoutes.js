@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const ChatController = require("../controller/chatController");
 const PricePredictorController = require("../controller/pricePredictorController");
-
+const FengShuiChatController = require("../controller/fengShuiChatController");
 // Validate chat message
 const validateChatRequest = (req, res, next) => {
   const { message } = req.body;
@@ -35,4 +35,9 @@ router.post(
   PricePredictorController.handlePricePredict
 );
 
+router.post(
+  "/fengshui",
+  validateChatRequest,
+  FengShuiChatController.handleFengShuiChat
+);
 module.exports = router;

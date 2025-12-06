@@ -50,3 +50,13 @@ export const predictPrice = async (productId) => {
     };
   }
 };
+
+export const fengShuiChatApi = async (data) => {
+  try {
+    const res = await API.post("chat/fengshui", data);
+    return res.data;
+  } catch (error) {
+    console.error("FengShuiChatApi error:", error);
+    return { error: error.response?.data?.error || "Hệ thống gặp sự cố." };
+  }
+};
