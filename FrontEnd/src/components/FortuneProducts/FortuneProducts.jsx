@@ -187,7 +187,7 @@ const FortuneProducts = () => {
       {/* Lucky colors */}
       {luckyColors.length > 0 && (
         <div className="mb-4 d-flex flex-wrap gap-2 justify-content-center">
-          <span>Màu phong thủy:</span>
+          <span>Màu phong thủy của bạn:</span>
           {luckyColors.map((c, idx) => (
             <Badge key={idx} bg="success" className="text-uppercase px-3 py-2">
               {c}

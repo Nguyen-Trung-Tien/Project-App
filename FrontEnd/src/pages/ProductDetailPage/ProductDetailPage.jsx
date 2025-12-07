@@ -518,7 +518,7 @@ const ProductDetailPage = () => {
                     className="flex-fill d-flex align-items-center justify-content-center"
                     onClick={handleBuyNow}
                   >
-                    <CreditCard className="me-2" size={22} /> Mua ngay
+                    <CreditCard className="me-2" size={22} /> Mua hàng ngay
                   </Button>
                 )}
 
