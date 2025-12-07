@@ -1,5 +1,5 @@
 import React from "react";
-import { Modal, Button, ProgressBar, Badge } from "react-bootstrap";
+import { Modal, Button, ProgressBar, Badge, Card } from "react-bootstrap";
 import { Line } from "react-chartjs-2";
 import { ArrowDownCircle, ArrowUpCircle } from "react-bootstrap-icons";
 import {
@@ -35,9 +35,9 @@ const PricePredictionModal = ({ show, onHide, result }) => {
     predicted90 = 0,
     reliability = 0,
     discount = 0,
+    aiAnalysis = null,
   } = result;
 
-  // Helper tính % giảm từ dự đoán
   const calcPercent = (delta) => {
     if (currentPrice === 0) return 0;
     return ((Math.abs(delta) / currentPrice) * 100).toFixed(1);
@@ -52,7 +52,7 @@ const PricePredictionModal = ({ show, onHide, result }) => {
   const progressVariant =
     reliability > 80 ? "success" : reliability > 50 ? "warning" : "danger";
 
-  // Chart dữ liệu
+  // Chart
   const chartData = {
     labels: ["Hiện tại", "30 ngày", "60 ngày", "90 ngày"],
     datasets: [
@@ -73,7 +73,7 @@ const PricePredictionModal = ({ show, onHide, result }) => {
   };
 
   return (
-    <Modal show={show} onHide={onHide} centered size="undefined">
+    <Modal show={show} onHide={onHide} centered size="lg">
       <Modal.Header closeButton>
         <Modal.Title>Dự đoán giá tương lai</Modal.Title>
       </Modal.Header>
@@ -124,6 +124,41 @@ const PricePredictionModal = ({ show, onHide, result }) => {
             variant={progressVariant}
           />
         </div>
+
+        {aiAnalysis && aiAnalysis !== "AI phân tích thất bại" && (
+          <Card className="mb-3 shadow-sm">
+            <Card.Body>
+              <h6 className="fw-bold text-primary mb-1">Phân tích AI </h6>
+
+              <p>
+                <strong>Xu hướng:</strong> {aiAnalysis.trend}
+              </p>
+              <p>
+                <strong>Rủi ro:</strong> {aiAnalysis.risk}
+              </p>
+              <p>
+                <strong>Đề xuất:</strong> {aiAnalysis.suggestion}
+              </p>
+              <p>
+                <strong>Giá hợp lý:</strong>{" "}
+                <span className="text-success fw-bold">
+                  {aiAnalysis.fairPrice?.toLocaleString()}đ
+                </span>
+              </p>
+
+              <p className="mt-2">
+                <strong>Độ tin cậy AI:</strong>{" "}
+                <Badge bg="info" pill>
+                  {aiAnalysis.reliability}%
+                </Badge>
+              </p>
+              <span className="text-muted" style={{ fontSize: "0.85rem" }}>
+                Phân tích bởi AI mang tính tham khảo; kết quả có thể không chính
+                xác và phụ thuộc biến động thị trường.
+              </span>
+            </Card.Body>
+          </Card>
+        )}
 
         <div>
           <Line data={chartData} />

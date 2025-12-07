@@ -39,14 +39,24 @@ export const sendMessage = async (message, userId = null) => {
 
 export const predictPrice = async (productId) => {
   try {
-    if (!productId) throw new Error("Thiếu productId");
+    const id = Number(productId);
+    if (!id || isNaN(id) || id <= 0) throw new Error("productId không hợp lệ");
 
-    const res = await API.post("/chat/predict", { productId });
-    return res.data;
+    const response = await API.post(
+      "/chat/predict",
+      { productId: id },
+      { timeout: 15000 }
+    );
+
+    return response.data;
   } catch (error) {
     console.error("PricePredict error:", error);
+
     return {
-      error: error.response?.data?.error || "Hệ thống dự đoán giá gặp sự cố.",
+      error:
+        error.response?.data?.error ||
+        error.message ||
+        "Hệ thống dự đoán giá gặp sự cố.",
     };
   }
 };
