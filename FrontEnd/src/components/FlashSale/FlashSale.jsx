@@ -42,7 +42,7 @@ const FlashSale = () => {
       if (append) setLoadingMore(true);
       else setLoading(true);
 
-      const res = await getDiscountedProductsApi(page, 10); // 10 sản phẩm / trang
+      const res = await getDiscountedProductsApi(page, 10);
       if (res?.errCode === 0) {
         const mapped = res.products.map((p) => ({
           ...p,
@@ -105,7 +105,7 @@ const FlashSale = () => {
     <section className="flash-sale-section py-3 bg-light">
       <Container>
         {/* Header */}
-        <div className="d-flex justify-content-between align-items-center mb-4">
+        <div className="d-flex justify-content-between align-items-center mb-2">
           <h2 className="fs-3 fw-bold">🔥 Flash Sale</h2>
           <span className="countdown fs-5">{formatTime(timeLeft)}</span>
         </div>

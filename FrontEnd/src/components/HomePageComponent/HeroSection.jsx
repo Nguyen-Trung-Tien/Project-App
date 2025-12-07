@@ -9,7 +9,7 @@ const HeroSection = () => {
   return (
     <section className="hero-section position-relative d-flex align-items-center justify-content-center text-center">
       <div className="hero-content container position-relative text-white">
-        <h1 className="hero-title fw-bold mb-3">
+        <h1 className="hero-title fw-bold mb-2">
           <span style={{ color: "#007bff" }}>T</span>ien-
           <span style={{ color: "#007bff" }}>T</span>ech
         </h1>

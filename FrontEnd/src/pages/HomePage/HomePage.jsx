@@ -40,16 +40,16 @@ const HomePage = () => {
         <ChatBot />
         <HeroSection />
 
-        <div className="my-1">
-          <SmallBanner />
-        </div>
-
         <div className="my-3">
           <CategorySection
             categories={categories}
             loading={loadingCategories}
           />
         </div>
+        {/* <div className="my-1">
+          <SmallBanner />
+        </div> */}
+
         <div className="my-3">
           <FlashSale />
         </div>
