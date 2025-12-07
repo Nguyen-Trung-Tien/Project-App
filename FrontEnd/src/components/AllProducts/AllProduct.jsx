@@ -95,8 +95,8 @@ const AllProducts = React.memo(() => {
       <Container>
         <h2 className="section-title text-center mb-3 fw-bold fs-3">
           {searchQuery
-            ? `Kết quả tìm kiếm: "${searchQuery}"`
-            : "Tất cả sản phẩm"}
+            ? `✨Kết quả tìm kiếm✨: "${searchQuery}"`
+            : "✨Tất cả sản phẩm✨"}
         </h2>
 
         {error && (

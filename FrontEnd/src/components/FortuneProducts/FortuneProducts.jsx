@@ -14,6 +14,8 @@ import { getAllBrandApi } from "../../api/brandApi";
 import { getAllCategoryApi } from "../../api/categoryApi";
 import ProductCard from "../ProductCard/ProductCard";
 import FengShuiChat from "../ChatBot/FengShui";
+import { ArrowLeftCircle } from "react-bootstrap-icons";
+import { Link } from "react-router";
 
 const FortuneProducts = () => {
   const [birthYear, setBirthYear] = useState("");
@@ -90,6 +92,16 @@ const FortuneProducts = () => {
 
   return (
     <Container className="py-4">
+      <div className="text-left">
+        <Link
+          to={"/"}
+          className="btn btn-outline-primary rounded-pill px-2 py-1 fw-semibold"
+          style={{ fontSize: "0.85rem" }}
+        >
+          <ArrowLeftCircle size={14} className="me-1" />
+          Quay lại
+        </Link>
+      </div>
       <h2 className="mb-4 text-center">Gợi ý sản phẩm theo phong thủy</h2>
 
       {/* Chatbot */}

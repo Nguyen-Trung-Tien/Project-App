@@ -45,7 +45,7 @@ export const predictPrice = async (productId) => {
     const response = await API.post(
       "/chat/predict",
       { productId: id },
-      { timeout: 15000 }
+      { timeout: 125000 }
     );
 
     return response.data;

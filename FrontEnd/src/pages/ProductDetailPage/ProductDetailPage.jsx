@@ -286,12 +286,13 @@ const ProductDetailPage = () => {
         <ChatBot />
 
         {/* Back */}
-        <div className="text-left mb-3">
+        <div className="text-left mb-2">
           <Link
             to={"/"}
-            className="btn btn-outline-primary rounded-pill px-3 py-2 fw-semibold"
+            className="btn btn-outline-primary rounded-pill px-2 py-1 fw-semibold"
+            style={{ fontSize: "0.85rem" }}
           >
-            <ArrowLeftCircle size={16} className="me-1" />
+            <ArrowLeftCircle size={14} className="me-1" />
             Quay lại
           </Link>
         </div>
