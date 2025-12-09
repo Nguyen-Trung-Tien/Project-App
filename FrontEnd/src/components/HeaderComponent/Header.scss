@@ -13,7 +13,6 @@
       text-shadow: 0 0 8px rgba(0, 198, 255, 0.8);
     }
   }
-
   /* Navigation links */
   .header__link {
     color: #fff !important;
@@ -24,10 +23,7 @@
       color: #00ffe0 !important;
     }
   }
-
-  /* ================================
-      SEARCH BOX
-  ================================== */
+  /* Search Bar */
   .search-wrapper {
     position: relative;
     width: 100%;
@@ -37,7 +33,7 @@
       padding-left: 2.5rem;
       padding-right: 2.5rem;
       border: none;
-      height: 42px;
+      height: 36px;
       box-shadow: 0 0 6px rgba(0, 0, 0, 0.15);
       transition: all 0.2s ease;
 
@@ -81,10 +77,7 @@
         box-shadow: 0 0 6px rgba(255, 60, 60, 0.4);
       }
     }
-
-    /* ============================
-          SUGGEST BOX
-    ============================= */
+    /* Suggestion Box */
     .search-suggestion-box {
       position: absolute;
       top: 48px;
@@ -162,9 +155,7 @@
     }
   }
 
-  /* ============================
-      RIGHT SIDE LINKS
-  ============================= */
+  /* Header Actions (Cart, User) */
   .header__actions {
     .header__icon-link {
       color: #fff !important;

@@ -185,7 +185,7 @@ function Header() {
                 onClick={() => {
                   setSearchInput("");
                   setShowSuggestions(false);
-                  navigate("/"); // trở về trang home
+                  navigate("/");
                 }}
               >
                 <XLg size={16} />

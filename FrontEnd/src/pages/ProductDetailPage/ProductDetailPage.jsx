@@ -276,7 +276,7 @@ const ProductDetailPage = () => {
       : product.description;
 
   return (
-    <div className="product-detail-page py-3 mh-90">
+    <div className="product-detail-page mh-100">
       <Container>
         <PricePredictionModal
           show={showPredict}
@@ -286,7 +286,7 @@ const ProductDetailPage = () => {
         <ChatBot />
 
         {/* Back */}
-        <div className="text-left mb-2">
+        <div className="text-left">
           <Link
             to={"/"}
             className="btn btn-outline-primary rounded-pill px-2 py-1 fw-semibold"
@@ -300,7 +300,7 @@ const ProductDetailPage = () => {
         <Row className="gy-4 align-items-center">
           {/* Image */}
           <Col md={6} className="text-center">
-            <div className="product-image-wrapper shadow-sm rounded bg-white p-3 position-relative">
+            <div className="product-image-wrapper shadow-lg rounded-4 bg-white p-3 position-relative">
               <Image
                 src={getImage(product.image)}
                 alt={product.name}
@@ -315,19 +315,19 @@ const ProductDetailPage = () => {
 
           {/* Info */}
           <Col md={6}>
-            <div className="product-info">
+            <div className="product-info rounded-4 shadow-sm">
               <h2 className="fw-bold mb-2">{product.name}</h2>
 
               <div className="mb-2">
                 <span className="text-muted">Thương hiệu: </span>
                 <strong>{product.brand?.name}</strong>
               </div>
-              <div className="mb-3">
+              <div className="mb-2">
                 <span className="text-muted">Danh mục: </span>
                 <strong>{product.category?.name}</strong>
               </div>
 
-              <div className="mb-3">
+              <div className="mb-2">
                 <span className="text-muted">SKU: </span>
                 <strong>{product.sku}</strong> |
                 <span className="text-muted ms-2">Đã bán: </span>
@@ -337,7 +337,7 @@ const ProductDetailPage = () => {
               </div>
 
               {/* Price */}
-              <div className="price mb-3">
+              <div className="price mb-2  bg-light rounded-4">
                 <div>
                   {product.discount > 0 && (
                     <>
@@ -360,7 +360,7 @@ const ProductDetailPage = () => {
                 </div>
 
                 {reviews.length > 0 ? (
-                  <div className="d-flex align-items-center mt-2 mb-3">
+                  <div className="d-flex align-items-center mt-2 mb-2">
                     {[1, 2, 3, 4, 5].map((star) => (
                       <span key={star}>
                         {star <= Math.floor(avgRating) ? (
@@ -377,7 +377,7 @@ const ProductDetailPage = () => {
                     </span>
                   </div>
                 ) : (
-                  <p className="text-muted small mb-3">Chưa có đánh giá</p>
+                  <p className="text-muted small mb-2">Chưa có đánh giá</p>
                 )}
               </div>
 
@@ -392,7 +392,7 @@ const ProductDetailPage = () => {
                 product.connectivity ||
                 product.os ||
                 product.extra) && (
-                <div className="product-specs mb-3">
+                <div className="product-specs mb-2">
                   {product.color && (
                     <div>
                       <strong>Màu sắc:</strong> {product.color}
@@ -447,8 +447,12 @@ const ProductDetailPage = () => {
               )}
 
               {/* Description */}
-              <div className="product-description mb-4">
-                <p className="text-secondary" style={{ lineHeight: "1.6" }}>
+              <div className="product-description mb-2">
+                <p
+                  className={`text-secondary ${
+                    !showFullDesc ? "description-collapse" : ""
+                  }`}
+                >
                   {showFullDesc ? product.description : shortDescription}
                 </p>
                 {product.description?.length > 250 && (
@@ -488,7 +492,7 @@ const ProductDetailPage = () => {
                 <Button
                   variant="danger"
                   size="lg"
-                  className="flex-fill d-flex align-items-center justify-content-center"
+                  className="rounded-pill shadow-sm flex-fill d-flex align-items-center justify-content-center"
                   onClick={handleAddToCart}
                   disabled={
                     addingCart || product.stock < 1 || !product.isActive
@@ -515,7 +519,7 @@ const ProductDetailPage = () => {
                   <Button
                     variant="success"
                     size="lg"
-                    className="flex-fill d-flex align-items-center justify-content-center"
+                    className="rounded-pill shadow-sm flex-fill d-flex align-items-center justify-content-center"
                     onClick={handleBuyNow}
                   >
                     <CreditCard className="me-2" size={22} /> Mua hàng ngay
@@ -525,17 +529,22 @@ const ProductDetailPage = () => {
                 <Button
                   variant="warning"
                   size="lg"
-                  className="flex-fill d-flex align-items-center justify-content-center"
+                  className="rounded-pill shadow-sm flex-fill d-flex align-items-center justify-content-center"
                   onClick={handlePricePredict}
                   disabled={loadingPredict}
                 >
                   {loadingPredict ? (
                     <>
-                      <Spinner animation="border" size="sm" className="me-2" />{" "}
+                      <Spinner
+                        animation="border"
+                        size="sm"
+                        variant="primary"
+                        className="me-2"
+                      />{" "}
                       Đang dự đoán...
                     </>
                   ) : (
-                    <>🔮 Dự đoán giá tương lai</>
+                    <>🔮 Đoán giá tương lai</>
                   )}
                 </Button>
               </div>
@@ -544,7 +553,7 @@ const ProductDetailPage = () => {
         </Row>
 
         {/* Reviews */}
-        <div className="reviews-section mt-5 pt-4 border-top">
+        <div className="reviews-section mt-3 pt-3 border-top">
           <h4 className="fw-bold mb-3">Đánh giá sản phẩm</h4>
           <ReviewForm
             newReview={newReview}
