@@ -190,20 +190,29 @@ const CartPage = () => {
                               />
                             </td>
                             <td style={{ width: "80px" }}>
-                              <img
-                                src={getImage(item.product?.image)}
-                                alt={item.product?.name}
-                                className="img-fluid rounded-3"
-                                style={{
-                                  width: "80px",
-                                  height: "80px",
-                                  objectFit: "cover",
-                                }}
-                              />
+                              <Link to={`/product-detail/${item.product?.id}`}>
+                                <img
+                                  src={getImage(item.product?.image)}
+                                  alt={item.product?.name}
+                                  className="img-fluid rounded-3 product-image"
+                                  style={{
+                                    width: "80px",
+                                    height: "80px",
+                                    objectFit: "cover",
+                                  }}
+                                />
+                              </Link>
                             </td>
+
                             <td className="text-start fw-semibold">
-                              {item.product?.name}
+                              <Link
+                                to={`/product-detail/${item.product?.id}`}
+                                className="product-name-link"
+                              >
+                                {item.product?.name}
+                              </Link>
                             </td>
+
                             <td className="text-end">
                               {item.product?.discount > 0 ? (
                                 <>

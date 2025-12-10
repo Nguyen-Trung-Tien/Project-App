@@ -22,6 +22,23 @@
       border: none;
     }
   }
+  .table-hover tbody tr:hover {
+    background-color: #f0f8ff !important;
+    transform: scale(1.01);
+    transition: 0.2s ease;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+  }
+  .product-name-link {
+    color: #000;
+    text-decoration: none;
+    transition: 0.2s ease;
+  }
+
+  .product-name-link:hover {
+    color: #0d6efd; /* màu xanh Bootstrap */
+    transform: scale(1.02); /* phóng nhẹ */
+  }
 
   .btn-outline-primary:hover {
     background: #007bff;
