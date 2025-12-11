@@ -1,49 +1,78 @@
-.brand-logos {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, 60px);
-  gap: 10px;
+/* --- OFFCANVAS WRAPPER --- */
+.offcanvas {
+  max-width: 330px !important;
+  border-right: 1px solid #eee;
 }
 
-.brand-logos .item {
-  border: 1px solid #ddd;
-  padding: 5px;
-  border-radius: 8px;
-  background: #fff;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.brand-logos .item.active {
-  border-color: #007bff;
-  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+.filter-section h6 {
+  font-weight: 600;
+  font-size: 0.95rem;
+  margin-bottom: 8px;
+  color: #333;
 }
 
 .brand-logos {
   display: grid;
-  grid-template-columns: repeat(auto-fill, 70px);
+  grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
   gap: 10px;
-  justify-content: start;
 }
 
 .brand-logos .item {
-  border: 1px solid #ddd;
-  padding: 5px;
-  border-radius: 8px;
-  background: #fff;
-  cursor: pointer;
+  background: #f8f9fa;
+  border: 1px solid #e6e6e6;
+  border-radius: 10px;
+  padding: 8px 4px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+
+  transition: 0.25s ease;
+  cursor: pointer;
+}
+
+.brand-logos .item:hover {
+  border-color: #0d6efd;
+  transform: translateY(-2px);
 }
 
 .brand-logos .item.active {
-  border-color: #007bff;
-  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+  background: #e7f1ff;
+  border-color: #0d6efd;
+  box-shadow: 0 0 4px rgba(13, 110, 253, 0.3);
 }
 
-.brand-logos .item img {
-  display: block;
+.category-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 8px;
+}
+
+.category-item {
+  background: #f5f5f5;
+  padding: 8px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: center;
+  border: 1px solid transparent;
+  transition: 0.2s ease;
+}
+
+.category-item:hover {
+  border-color: #0d6efd;
+  background: #e8f1ff;
+}
+
+.category-item.active {
+  background: #dce9ff;
+  border-color: #0d6efd;
+  font-weight: 600;
+}
+
+.price-input input {
+  border-radius: 8px;
+}
+
+.apply-buttons {
+  border-top: 1px solid #eee;
 }

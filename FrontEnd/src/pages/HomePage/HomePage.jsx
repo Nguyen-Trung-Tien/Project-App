@@ -15,6 +15,7 @@ import Testimonials from "../../components/Testimonials/Testimonials";
 import BrandsCarousel from "../../components/BrandsCarousel/BrandsCarousel";
 import BlogSection from "../../components/BlogSection/BlogSection";
 import Newsletter from "../../components/Newsletter/Newsletter";
+import BrandSection from "../../components/BrandSection/BrandSection";
 
 const HomePage = () => {
   const [categories, setCategories] = useState([]);
@@ -39,7 +40,9 @@ const HomePage = () => {
       <Container fluid className="homepage">
         <ChatBot />
         <HeroSection />
-
+        <div className="my-3">
+          <BrandSection />
+        </div>
         <div className="my-3">
           <CategorySection
             categories={categories}
@@ -59,6 +62,7 @@ const HomePage = () => {
         {/* <div className="my-4">
           <MidBanner />
         </div> */}
+
         <div className="my-3">
           <ProductSection
             categories={categories}

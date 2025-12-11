@@ -11,14 +11,15 @@ function ProductFilter({ onFilterChange }) {
   const [show, setShow] = useState(false);
   const [brands, setBrands] = useState([]);
   const [categories, setCategories] = useState([]);
+
+  // --- Chỉ chọn 1 brand ---
   const [filters, setFilters] = useState({
-    brands: [],
+    brand: "", // ❗ string, không phải array
     category: "",
     price: [0, 60000000],
     sort: "",
   });
 
-  // Load brands
   useEffect(() => {
     const fetchBrands = async () => {
       try {
@@ -31,7 +32,6 @@ function ProductFilter({ onFilterChange }) {
     fetchBrands();
   }, []);
 
-  // Load categories
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -44,20 +44,11 @@ function ProductFilter({ onFilterChange }) {
     fetchCategories();
   }, []);
 
-  const toggleArray = (key, value) => {
-    setFilters((prev) => {
-      const exists = prev[key].includes(value);
-      return {
-        ...prev,
-        [key]: exists
-          ? prev[key].filter((i) => i !== value)
-          : [...prev[key], value],
-      };
-    });
-  };
-
-  const handleCategoryChange = (e) => {
-    setFilters((prev) => ({ ...prev, category: e.target.value }));
+  const handleBrandClick = (id) => {
+    setFilters((prev) => ({
+      ...prev,
+      brand: prev.brand === id ? "" : id,
+    }));
   };
 
   const handleSortChange = (e) => {
@@ -74,13 +65,16 @@ function ProductFilter({ onFilterChange }) {
   };
 
   const applyFilters = () => {
-    onFilterChange(filters);
+    onFilterChange({
+      ...filters,
+      brandId: filters.brand, // ❗ Không dùng join nữa
+    });
     setShow(false);
   };
 
   const resetFilters = () => {
     setFilters({
-      brands: [],
+      brand: "",
       category: "",
       price: [0, 60000000],
       sort: "",
@@ -102,28 +96,24 @@ function ProductFilter({ onFilterChange }) {
           {/* Brand Filter */}
           <div className="filter-section">
             <h6>Hãng</h6>
-            <div className="grid brand-logos">
+
+            <div className="brand-logos">
               {brands.map((b) => (
                 <button
                   key={b.id}
-                  className={
-                    filters.brands.includes(b.id) ? "item active" : "item"
-                  }
-                  onClick={() => toggleArray("brands", b.id)}
+                  className={`item ${filters.brand === b.id ? "active" : ""}`}
+                  onClick={() => handleBrandClick(b.id)}
                 >
-                  {b.image && (
-                    <img
-                      src={getImage(b.image)}
-                      alt={b.name}
-                      style={{
-                        width: 40,
-                        height: 40,
-                        objectFit: "contain",
-                        marginBottom: 4,
-                      }}
-                    />
-                  )}
-                  <span>{b.name}</span>
+                  <img
+                    src={getImage(b.image)}
+                    alt={b.name}
+                    style={{
+                      width: 60,
+                      height: 28,
+                      objectFit: "contain",
+                      marginBottom: 4,
+                    }}
+                  />
                 </button>
               ))}
             </div>
@@ -132,23 +122,28 @@ function ProductFilter({ onFilterChange }) {
           {/* Category Filter */}
           <div className="filter-section mt-3">
             <h6>Danh mục</h6>
-            <Form.Select
-              value={filters.category}
-              onChange={handleCategoryChange}
-            >
-              <option value="">Tất cả</option>
+
+            <div className="category-grid">
               {categories.map((c) => (
-                <option key={c.id} value={c.id}>
+                <div
+                  key={c.id}
+                  className={`category-item ${
+                    filters.category === c.id ? "active" : ""
+                  }`}
+                  onClick={() =>
+                    setFilters((prev) => ({ ...prev, category: c.id }))
+                  }
+                >
                   {c.name}
-                </option>
+                </div>
               ))}
-            </Form.Select>
+            </div>
           </div>
 
           {/* Price Filter */}
           <div className="filter-section mt-3">
             <h6>Giá</h6>
-            <div className="d-flex gap-2 align-items-center">
+            <div className="d-flex gap-2 align-items-center price-input">
               <Form.Control
                 type="number"
                 value={filters.price[0]}
@@ -175,11 +170,19 @@ function ProductFilter({ onFilterChange }) {
           </div>
         </Offcanvas.Body>
 
-        <div className="d-flex gap-2 p-3">
-          <Button variant="secondary" onClick={resetFilters}>
+        <div className="d-flex gap-2 p-3 apply-buttons bg-white">
+          <Button
+            variant="secondary"
+            className="flex-grow-1"
+            onClick={resetFilters}
+          >
             Xóa tất cả
           </Button>
-          <Button variant="primary" onClick={applyFilters}>
+          <Button
+            variant="primary"
+            className="flex-grow-1"
+            onClick={applyFilters}
+          >
             Áp dụng
           </Button>
         </div>

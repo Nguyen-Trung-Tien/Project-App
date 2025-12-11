@@ -1,0 +1,32 @@
+.brand-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+  gap: 6px;
+  justify-items: center;
+}
+
+.brand-card-upgraded {
+  width: 90px;
+  height: 42px;
+  background: #fff;
+  border-radius: 10px;
+  border: 1px solid #e4e4e4;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.brand-card-upgraded:hover {
+  border-color: #0d6efd;
+  transform: translateY(-3px);
+}
+
+.brand-logo {
+  width: 79px;
+  height: 28px;
+  object-fit: contain;
+}

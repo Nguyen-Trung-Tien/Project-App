@@ -61,7 +61,6 @@ const BrandManage = () => {
 
   const tableTopRef = useRef(null);
 
-  // Fetch all brands
   const fetchBrands = async (currentPage = 1, search = "") => {
     setLoadingTable(true);
     try {
@@ -324,9 +323,12 @@ const BrandManage = () => {
                             src={getImage(b.image)}
                             rounded
                             style={{
-                              width: 60,
-                              height: 60,
-                              objectFit: "cover",
+                              width: 100,
+                              height: 28,
+                              objectFit: "contain",
+                              backgroundColor: "#f7f7f7",
+                              padding: "4px",
+                              borderRadius: "6px",
                             }}
                           />
                         )}
@@ -446,7 +448,14 @@ const BrandManage = () => {
                         : getImage(imagePreview)
                     }
                     rounded
-                    style={{ width: 100, height: 100, objectFit: "cover" }}
+                    style={{
+                      width: 100,
+                      height: 28,
+                      objectFit: "contain",
+                      backgroundColor: "#f7f7f7",
+                      padding: "4px",
+                      borderRadius: "6px",
+                    }}
                   />
                   <small className="text-muted d-block">Preview</small>
                 </div>
@@ -463,7 +472,7 @@ const BrandManage = () => {
               </Button>
               <Button variant="primary" type="submit" disabled={loadingModal}>
                 {loadingModal ? (
-                  <Spinner animation="border" size="sm" variant="primary" />
+                  <Spinner animation="border" size="sm" />
                 ) : (
                   "Lưu"
                 )}

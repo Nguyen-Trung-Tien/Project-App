@@ -17,9 +17,11 @@ const ProductListPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [error, setError] = useState("");
-  const [appliedFilters, setAppliedFilters] = useState({});
-
   const [searchParams, setSearchParams] = useSearchParams();
+
+  const [appliedFilters, setAppliedFilters] = useState({});
+  const brandIdParam = searchParams.get("brandId") || "";
+
   const limit = 12;
   const categoryIdParam = searchParams.get("category") || "";
 
@@ -44,7 +46,7 @@ const ProductListPage = () => {
         setError("");
 
         const res = await filterProductsApi({
-          brandId: filters.brands?.length > 0 ? filters.brands.join(",") : "",
+          brandId: filters.brand || brandIdParam || "",
           categoryId: filters.category || categoryIdParam || "",
           minPrice: filters.price?.[0] ?? 0,
           maxPrice: filters.price?.[1] ?? 60000000,
@@ -77,9 +79,12 @@ const ProductListPage = () => {
 
   // Load initial products
   useEffect(() => {
-    const initialFilters = appliedFilters.category
-      ? { ...appliedFilters }
-      : { ...appliedFilters, category: categoryIdParam };
+    const initialFilters = {
+      ...appliedFilters,
+      category: appliedFilters.category || categoryIdParam,
+      brand: appliedFilters.brand || brandIdParam,
+    };
+
     fetchProducts(1, initialFilters, false);
   }, [categoryIdParam, appliedFilters, fetchProducts]);
 
