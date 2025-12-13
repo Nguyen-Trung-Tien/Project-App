@@ -8,7 +8,7 @@ import { createOrder } from "../../api/orderApi";
 import { createPayment } from "../../api/paymentApi";
 import { getAllCartItems } from "../../api/cartApi";
 import { setCartItems, removeCartItem } from "../../redux/cartSlice";
-import { setSelectedIds, resetCheckout } from "../../redux/checkoutSlice";
+import { resetCheckout } from "../../redux/checkoutSlice";
 import CheckoutForm from "./CheckoutForm";
 import OrderSummary from "./OrderSummary";
 import "./CheckoutPage.scss";
@@ -39,7 +39,6 @@ const CheckoutPage = () => {
           const res = await getAllCartItems(token);
           const items = res.data || [];
           dispatch(setCartItems(items));
-          dispatch(setSelectedIds(items.map((item) => item.id)));
         } catch (err) {
           console.error("Error fetching cart:", err);
           toast.error("Không thể tải giỏ hàng. Vui lòng thử lại!");
@@ -111,6 +110,11 @@ const CheckoutPage = () => {
     }
   };
 
+  if (!isSingleProduct && checkoutState.selectedIds.length === 0) {
+    navigate("/cart");
+    return null;
+  }
+
   if (loading)
     return (
       <div className="text-center py-5">
@@ -134,15 +138,6 @@ const CheckoutPage = () => {
   return (
     <div className="checkout-page py-4 bg-light">
       <Container>
-        {/* <div className="text-left mb-3">
-          <Link
-            to={isSingleProduct ? "/" : "/cart"}
-            className="btn btn-outline-primary rounded-pill px-3 py-2 fw-semibold"
-          >
-            <ArrowLeftCircle size={16} className="me-1" /> Quay lại
-          </Link>
-        </div> */}
-
         <div className="text-center mb-4">
           <div className="d-inline-flex align-items-center px-4 py-2 rounded-pill checkout-title">
             <CreditCard size={26} className="me-2" />

@@ -33,16 +33,12 @@ const BrandSection = () => {
   if (loading)
     return (
       <div className="brand-section-loading text-center py-4">
-        <Spinner animation="border" />
+        <Spinner animation="border" variant="primary" />
       </div>
     );
 
   return (
     <div className="brand-section container my-4">
-      <h3 className="fw-bold mb-4 text-center brand-title">
-        ✨Thương hiệu nổi bật✨
-      </h3>
-
       <div className="brand-grid">
         {brands.map((brand) => (
           <div

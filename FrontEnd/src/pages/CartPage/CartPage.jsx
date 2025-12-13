@@ -47,7 +47,8 @@ const CartPage = () => {
       const res = await getAllCartItems(token);
       const items = res.data || [];
       dispatch(setCartItems(items));
-      setSelectedItems(items.map((item) => item.id));
+      dispatch(setCartItems(items));
+      setSelectedItems([]);
     } catch (err) {
       console.error("Error fetching cart:", err);
     } finally {
