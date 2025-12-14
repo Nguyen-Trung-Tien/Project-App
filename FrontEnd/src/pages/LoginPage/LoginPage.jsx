@@ -133,7 +133,7 @@ const LoginPage = () => {
                 disabled={loading}
               >
                 {loading ? (
-                  <Spinner animation="border" size="sm" variant="primary" />
+                  <Spinner animation="border" size="sm" />
                 ) : (
                   "Đăng nhập"
                 )}

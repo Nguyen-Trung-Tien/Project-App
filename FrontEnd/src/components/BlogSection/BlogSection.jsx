@@ -11,43 +11,48 @@ const BlogSection = ({ limit = 3 }) => {
         id: 1,
         title: "Cách chọn size quần áo chuẩn",
         img: "/images/blog1.jpg",
-        excerpt: "Hướng dẫn chọn size...",
+        excerpt: "Hướng dẫn chọn size quần áo phù hợp với từng dáng người.",
       },
       {
         id: 2,
         title: "Bảo quản đồ điện tử đúng cách",
         img: "/images/blog2.jpg",
-        excerpt: "Mẹo giữ pin...",
+        excerpt: "Những mẹo đơn giản giúp thiết bị luôn bền bỉ theo thời gian.",
       },
       {
         id: 3,
-        title: "Trend thời trang 2025",
+        title: "Xu hướng thời trang 2025",
         img: "/images/blog3.jpg",
-        excerpt: "Xu hướng mới...",
+        excerpt: "Khám phá các xu hướng thời trang nổi bật trong năm 2025.",
       },
     ];
     setPosts(mock.slice(0, limit));
   }, [limit]);
 
   return (
-    <Container fluid className="blog-section my-5">
-      <div className="section-head">
-        <h3>Tin tức & Mẹo</h3>
-      </div>
+    <Container fluid className="blog-section">
+      <Container>
+        <div className="section-head">
+          <h3>Tin tức & Mẹo hay</h3>
+        </div>
 
-      <Row xs={1} md={3} className="g-3">
-        {posts.map((p) => (
-          <Col key={p.id}>
-            <Card className="blog-card">
-              <Card.Img src={p.img} />
-              <Card.Body>
-                <Card.Title>{p.title}</Card.Title>
-                <Card.Text className="excerpt">{p.excerpt}</Card.Text>
-              </Card.Body>
-            </Card>
-          </Col>
-        ))}
-      </Row>
+        <Row className="g-3">
+          {posts.map((p) => (
+            <Col md={4} sm={6} xs={12} key={p.id}>
+              <Card className="blog-card">
+                <div className="image-wrap">
+                  <Card.Img src={p.img} alt={p.title} />
+                </div>
+                <Card.Body>
+                  <Card.Title>{p.title}</Card.Title>
+                  <Card.Text className="excerpt">{p.excerpt}</Card.Text>
+                  <span className="read-more">Xem chi tiết ›</span>
+                </Card.Body>
+              </Card>
+            </Col>
+          ))}
+        </Row>
+      </Container>
     </Container>
   );
 };

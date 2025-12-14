@@ -357,7 +357,7 @@ const OrderManage = () => {
                 {loading ? (
                   <tr>
                     <td colSpan="11" className="text-center py-5">
-                      <Spinner animation="border" />
+                      <Spinner animation="border" variant="primary" />
                     </td>
                   </tr>
                 ) : orders.length === 0 ? (

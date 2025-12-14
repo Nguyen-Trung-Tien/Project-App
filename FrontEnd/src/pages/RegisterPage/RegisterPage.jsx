@@ -149,7 +149,6 @@ const RegisterPage = () => {
                 )}
 
                 <Button
-                  variant="primary"
                   type="submit"
                   className="w-100 rounded-pill py-2 mt-4 fw-semibold"
                   disabled={loading}

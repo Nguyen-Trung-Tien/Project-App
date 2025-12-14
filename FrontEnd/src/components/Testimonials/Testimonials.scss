@@ -1,17 +1,69 @@
 .testimonials {
-  .test-card {
-    border-radius: 10px;
+  padding: 40px 0;
 
-    .avatar {
-      width: 56px;
-      height: 56px;
-      object-fit: cover;
+  .section-head {
+    text-align: center;
+    margin-bottom: 24px;
+
+    h3 {
+      font-size: 22px;
+      font-weight: 700;
+      color: #222;
+    }
+  }
+}
+
+.test-card {
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+  height: 100%;
+
+  .card-body {
+    padding: 20px;
+  }
+
+  .user-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    img {
+      width: 48px;
+      height: 48px;
       border-radius: 50%;
+      object-fit: cover;
+      border: 1px solid #eee;
+    }
+
+    h6 {
+      margin: 0;
+      font-size: 14px;
+      font-weight: 600;
     }
 
     .stars {
-      color: #f5a623;
-      font-size: 14px;
+      color: #f59e0b; // vàng TGDD
+      font-size: 13px;
+      line-height: 1;
     }
+  }
+
+  .content {
+    margin-top: 12px;
+    font-size: 14px;
+    color: #444;
+    line-height: 1.5;
+  }
+}
+
+/* Mobile */
+@media (max-width: 576px) {
+  .testimonials {
+    padding: 24px 0;
+  }
+
+  .test-card .content {
+    font-size: 13px;
   }
 }

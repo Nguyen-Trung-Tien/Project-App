@@ -37,7 +37,6 @@ const AllProducts = React.memo(() => {
           : await getAllProductApi(currentPage, limit);
 
         if (res?.errCode === 0) {
-          // ⭐ lấy đúng danh sách sản phẩm từ Smart Search API
           const newProducts = res?.products || [];
 
           setProducts((prev) =>

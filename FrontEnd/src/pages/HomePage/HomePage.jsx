@@ -49,9 +49,9 @@ const HomePage = () => {
             loading={loadingCategories}
           />
         </div>
-        {/* <div className="my-1">
+        <div className="my-1">
           <SmallBanner />
-        </div> */}
+        </div>
 
         <div className="my-3">
           <FlashSale />
@@ -77,20 +77,20 @@ const HomePage = () => {
           />
         </div>
 
-        {/* <div className="my-4">
+        <div className="my-4">
           <Testimonials />
-        </div> */}
+        </div>
         {/* <div className="my-3">
           <BrandsCarousel />
         </div> */}
 
-        {/* <div className="my-4">
+        <div className="my-4">
           <BlogSection />
-        </div> */}
+        </div>
 
-        {/* <div className="my-4">
+        <div className="my-4">
           <Newsletter />
-        </div> */}
+        </div>
       </Container>
     </>
   );
