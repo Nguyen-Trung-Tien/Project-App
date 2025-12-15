@@ -574,7 +574,7 @@ const ProductDetailPage = () => {
 
         {/* Recommended */}
         <div className="recommended-products mt-5 pt-4 border-top">
-          <h4 className="fw-bold mb-3">Sản phẩm gợi ý</h4>
+          <h4 className="fw-bold mb-3">Sản phẩm phù hợp với bạn</h4>
 
           {loadingRecommended ? (
             <div className="text-center py-3">

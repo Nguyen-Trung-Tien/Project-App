@@ -7,9 +7,31 @@
     color: #1d3557;
   }
 
+  .text-decoration-none {
+    color: black;
+    :hover {
+      color: #1d3557;
+      cursor: pointer;
+    }
+  }
   .table {
     border-radius: 10px;
     overflow: hidden;
+  }
+  .product-td {
+    &:hover {
+      background-color: #f1f5ff;
+    }
+
+    .product-link {
+      text-decoration: none;
+      color: #212529;
+      font-weight: 500;
+    }
+
+    &:hover .product-link {
+      color: #0a58ca;
+    }
   }
 
   .badge {

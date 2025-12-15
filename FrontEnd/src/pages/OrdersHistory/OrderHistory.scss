@@ -28,4 +28,11 @@
   th {
     vertical-align: middle;
   }
+  .text-start {
+    min-width: 150px;
+    :hover {
+      cursor: pointer;
+      color: #4facfe;
+    }
+  }
 }

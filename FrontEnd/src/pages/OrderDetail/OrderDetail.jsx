@@ -12,12 +12,11 @@ import {
   Form,
   Modal,
 } from "react-bootstrap";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, Navigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { getOrderById } from "../../api/orderApi";
 import { requestReturn } from "../../api/orderItemApi";
 import "./OrderDetail.scss";
-import { ArrowLeftCircle } from "react-bootstrap-icons";
 import { useSelector } from "react-redux";
 
 const OrderDetail = () => {
@@ -208,16 +207,6 @@ const OrderDetail = () => {
   return (
     <div className="order-detail-page py-3">
       <Container>
-        {/* <div className="text-left">
-          <Link
-            to={"/orders"}
-            className="btn btn-outline-primary rounded-pill px-3 py-2 fw-semibold"
-          >
-            <ArrowLeftCircle size={16} className="me-1" />
-            Quay lại
-          </Link>
-        </div> */}
-
         <h3 className="mb-3 text-center fw-bold text-primary">
           Chi tiết đơn hàng #DH{order.id}
         </h3>
@@ -320,7 +309,15 @@ const OrderDetail = () => {
               const subtotal = price * (item.quantity || 0);
               return (
                 <tr key={item.id} className="text-center">
-                  <td>{item.productName}</td>
+                  <td className="product-td">
+                    <Link
+                      to={`/product-detail/${item.productId}`}
+                      className="product-link"
+                    >
+                      {item.productName}
+                    </Link>
+                  </td>
+
                   <td>{item.quantity}</td>
                   <td>{price.toLocaleString()} ₫</td>
                   <td>{subtotal.toLocaleString()} ₫</td>

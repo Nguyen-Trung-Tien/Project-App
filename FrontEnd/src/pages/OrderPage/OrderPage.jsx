@@ -8,7 +8,7 @@ import {
   Badge,
   Modal,
 } from "react-bootstrap";
-import { ArrowLeftCircle, Cart4, Eye } from "react-bootstrap-icons";
+import { Cart4, Eye } from "react-bootstrap-icons";
 import { useNavigate, Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
@@ -204,7 +204,12 @@ const OrderPage = () => {
                       <td className="text-start">
                         {order.orderItems?.map((item) => (
                           <div key={item.id} className="mb-1">
-                            <div className="fw-semibold">
+                            <div
+                              className="fw-semibold"
+                              onClick={() =>
+                                navigate(`/orders-detail/${order.id}`)
+                              }
+                            >
                               {item.productName}
                             </div>
                             <div className="small text-muted">

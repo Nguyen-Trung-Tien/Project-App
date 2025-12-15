@@ -9,7 +9,7 @@ import {
   Pagination,
 } from "react-bootstrap";
 import { useNavigate, Link } from "react-router-dom";
-import { ArrowLeftCircle, Eye } from "react-bootstrap-icons";
+import { Eye } from "react-bootstrap-icons";
 import { getOrdersByUserId } from "../../api/orderApi";
 import "./OrderHistory.scss";
 import { useSelector } from "react-redux";
@@ -157,16 +157,6 @@ const OrderHistory = () => {
   return (
     <div className="order-history-page py-3">
       <Container>
-        {/* <div className="text-left mb-2">
-          <Link
-            to={"/orders"}
-            className="btn btn-outline-primary rounded-pill px-2 py-1 fw-semibold"
-            style={{ fontSize: "0.85rem" }}
-          >
-            <ArrowLeftCircle size={14} className="me-1" />
-            Quay lại
-          </Link>
-        </div> */}
         <Card className="shadow-sm border-0">
           <Card.Body>
             <h3 className="text-center fw-bold mb-2 text-primary">
@@ -190,6 +180,8 @@ const OrderHistory = () => {
                       <th>#</th>
                       <th>Mã đơn hàng</th>
                       <th>Ngày đặt</th>
+                      <th>Sản phẩm</th>
+                      <th>SL</th>
                       <th>Tổng tiền</th>
                       <th>Thanh toán</th>
                       <th>Trạng thái</th>
@@ -201,7 +193,23 @@ const OrderHistory = () => {
                       <tr key={order.id} className="text-center">
                         <td>{index + 1}</td>
                         <td className="fw-semibold text-primary">{`DH${order.id}`}</td>
+
                         <td>{formatDate(order.createdAt)}</td>
+                        <td
+                          className="text-start"
+                          onClick={() => navigate(`/orders-detail/${order.id}`)}
+                        >
+                          {order.orderItems?.map((item) => (
+                            <div key={item.id}>{item.productName}</div>
+                          ))}
+                        </td>
+
+                        <td>
+                          {order.orderItems?.reduce(
+                            (sum, item) => sum + item.quantity,
+                            0
+                          )}
+                        </td>
                         <td className="text-danger fw-semibold">
                           {formatCurrency(order.totalPrice)}
                         </td>
