@@ -9,10 +9,7 @@ import { getAllCategoryApi } from "../../api/categoryApi";
 import ChatBot from "../../components/ChatBot/ChatBot";
 import SmallBanner from "../../components/SmallBanner/SmallBanner";
 import FlashSale from "../../components/FlashSale/FlashSale";
-import FeaturedProducts from "../../components/FeaturedProducts/FeaturedProducts";
-import MidBanner from "../../components/MidBanner/MidBanner";
 import Testimonials from "../../components/Testimonials/Testimonials";
-import BrandsCarousel from "../../components/BrandsCarousel/BrandsCarousel";
 import BlogSection from "../../components/BlogSection/BlogSection";
 import Newsletter from "../../components/Newsletter/Newsletter";
 import BrandSection from "../../components/BrandSection/BrandSection";
@@ -56,12 +53,6 @@ const HomePage = () => {
         <div className="my-3">
           <FlashSale />
         </div>
-        {/* <div className="my-5">
-          <FeaturedProducts categories={categories} />
-        </div> */}
-        {/* <div className="my-4">
-          <MidBanner />
-        </div> */}
 
         <div className="my-3">
           <ProductSection
@@ -80,10 +71,6 @@ const HomePage = () => {
         <div className="my-4">
           <Testimonials />
         </div>
-        {/* <div className="my-3">
-          <BrandsCarousel />
-        </div> */}
-
         <div className="my-4">
           <BlogSection />
         </div>

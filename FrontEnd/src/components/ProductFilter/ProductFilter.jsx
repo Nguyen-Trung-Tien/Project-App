@@ -12,9 +12,8 @@ function ProductFilter({ onFilterChange }) {
   const [brands, setBrands] = useState([]);
   const [categories, setCategories] = useState([]);
 
-  // --- Chỉ chọn 1 brand ---
   const [filters, setFilters] = useState({
-    brand: "", // ❗ string, không phải array
+    brand: "",
     category: "",
     price: [0, 60000000],
     sort: "",
@@ -67,7 +66,7 @@ function ProductFilter({ onFilterChange }) {
   const applyFilters = () => {
     onFilterChange({
       ...filters,
-      brandId: filters.brand, // ❗ Không dùng join nữa
+      brandId: filters.brand,
     });
     setShow(false);
   };
