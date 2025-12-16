@@ -1,10 +1,8 @@
 import React, { useEffect, useState, useCallback } from "react";
 import {
-  Table,
   Button,
   Spinner,
   Form,
-  Pagination,
   Modal,
   InputGroup,
   Card,
@@ -28,6 +26,7 @@ import {
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import "./ReviewPage.scss";
+import AppPagination from "../../../components/Pagination/Pagination";
 
 const ReviewPage = () => {
   const [reviews, setReviews] = useState([]);
@@ -266,17 +265,17 @@ const ReviewPage = () => {
       )}
 
       {/* Pagination */}
-      <Pagination className="justify-content-center mt-4">
-        {[...Array(pagination.totalPages)].map((_, i) => (
-          <Pagination.Item
-            key={i + 1}
-            active={i + 1 === pagination.page}
-            onClick={() => setPagination((p) => ({ ...p, page: i + 1 }))}
-          >
-            {i + 1}
-          </Pagination.Item>
-        ))}
-      </Pagination>
+      <AppPagination
+        page={pagination.page}
+        totalPages={pagination.totalPages}
+        loading={loading}
+        onPageChange={(p) =>
+          setPagination((prev) => ({
+            ...prev,
+            page: p,
+          }))
+        }
+      />
 
       {/* Delete Modal */}
       <Modal show={showDeleteModal} onHide={() => setShowDeleteModal(false)}>

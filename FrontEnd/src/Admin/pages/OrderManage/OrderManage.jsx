@@ -49,6 +49,7 @@ import {
   statusMap,
 } from "../../../utils/StatusMap";
 import { StatusBadge } from "../../../utils/StatusBadge";
+import AppPagination from "../../../components/Pagination/Pagination";
 
 const OrderManage = () => {
   const user = useSelector((state) => state.user.user);
@@ -226,68 +227,6 @@ const OrderManage = () => {
     v ? Number(v).toLocaleString("vi-VN") + " ₫" : "0 ₫";
   const formatDate = (d) => (d ? new Date(d).toLocaleDateString("vi-VN") : "—");
   const paidMethods = ["momo", "paypal", "vnpay", "bank", "transfer"];
-
-  const renderPagination = () => {
-    if (totalPages <= 1) return null;
-    const items = [];
-    const pageNeighbours = 2;
-    const startPage = Math.max(1, page - pageNeighbours);
-    const endPage = Math.min(totalPages, page + pageNeighbours);
-
-    if (startPage > 1)
-      items.push(
-        <Pagination.First
-          key="first"
-          onClick={() => fetchOrders(1, searchTerm)}
-        >
-          <ChevronDoubleLeft />
-        </Pagination.First>
-      );
-    if (page > 1)
-      items.push(
-        <Pagination.Prev
-          key="prev"
-          onClick={() => fetchOrders(page - 1, searchTerm)}
-        >
-          <ChevronLeft />
-        </Pagination.Prev>
-      );
-
-    for (let i = startPage; i <= endPage; i++) {
-      items.push(
-        <Pagination.Item
-          key={i}
-          active={i === page}
-          onClick={() => fetchOrders(i, searchTerm)}
-        >
-          {i}
-        </Pagination.Item>
-      );
-    }
-
-    if (page < totalPages)
-      items.push(
-        <Pagination.Next
-          key="next"
-          onClick={() => fetchOrders(page + 1, searchTerm)}
-        >
-          <ChevronRight />
-        </Pagination.Next>
-      );
-    if (endPage < totalPages)
-      items.push(
-        <Pagination.Last
-          key="last"
-          onClick={() => fetchOrders(totalPages, searchTerm)}
-        >
-          <ChevronDoubleRight />
-        </Pagination.Last>
-      );
-
-    return (
-      <Pagination className="justify-content-center mt-4">{items}</Pagination>
-    );
-  };
 
   return (
     <div className="order-manage">
@@ -578,7 +517,12 @@ const OrderManage = () => {
             </Table>
           </div>
 
-          {renderPagination()}
+          <AppPagination
+            page={page}
+            totalPages={totalPages}
+            loading={loading}
+            onPageChange={(p) => fetchOrders(p, searchTerm)}
+          />
         </Card.Body>
       </Card>
       <Modal show={showDelete} onHide={closeDeleteModal} centered>

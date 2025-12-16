@@ -10,7 +10,6 @@ import {
   Form,
   Button,
   InputGroup,
-  Pagination,
 } from "react-bootstrap";
 import {
   BarChart,
@@ -22,10 +21,6 @@ import {
   CurrencyDollar,
   Cart,
   People,
-  ChevronLeft,
-  ChevronRight,
-  ChevronDoubleLeft,
-  ChevronDoubleRight,
 } from "react-bootstrap-icons";
 import {
   CartesianGrid,
@@ -43,6 +38,7 @@ import "./Revenue.scss";
 import { getAllOrders } from "../../../api/orderApi";
 import { getAllOrderItems } from "../../../api/orderItemApi";
 import { getDashboard } from "../../../api/adminApi";
+import AppPagination from "../../../components/Pagination/Pagination";
 
 const COLORS = ["#4361ee", "#3a0ca3", "#7209b7", "#f72585", "#ff006e"];
 const STATUS_COLORS = {
@@ -203,75 +199,11 @@ const Revenue = () => {
     }
   }, [filteredOrders, limit, page]);
 
-  const handlePageChange = (newPage) => {
-    if (newPage < 1 || newPage > totalPages || newPage === page) return;
-    setPage(newPage);
-    tableTopRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-
   const paginatedOrders = useMemo(() => {
     const start = (page - 1) * limit;
     const end = start + limit;
     return filteredOrders.slice(start, end);
   }, [filteredOrders, page, limit]);
-
-  const renderPagination = () => {
-    if (totalPages <= 1) return null;
-
-    const items = [];
-    const pageNeighbours = 1;
-    const startPage = Math.max(1, page - pageNeighbours);
-    const endPage = Math.min(totalPages, page + pageNeighbours);
-
-    if (startPage > 1) {
-      items.push(
-        <Pagination.First key="first" onClick={() => handlePageChange(1)}>
-          <ChevronDoubleLeft />
-        </Pagination.First>
-      );
-    }
-    if (page > 1) {
-      items.push(
-        <Pagination.Prev key="prev" onClick={() => handlePageChange(page - 1)}>
-          <ChevronLeft />
-        </Pagination.Prev>
-      );
-    }
-
-    for (let i = startPage; i <= endPage; i++) {
-      items.push(
-        <Pagination.Item
-          key={i}
-          active={i === page}
-          onClick={() => handlePageChange(i)}
-        >
-          {i}
-        </Pagination.Item>
-      );
-    }
-
-    if (page < totalPages) {
-      items.push(
-        <Pagination.Next key="next" onClick={() => handlePageChange(page + 1)}>
-          <ChevronRight />
-        </Pagination.Next>
-      );
-    }
-    if (endPage < totalPages) {
-      items.push(
-        <Pagination.Last
-          key="last"
-          onClick={() => handlePageChange(totalPages)}
-        >
-          <ChevronDoubleRight />
-        </Pagination.Last>
-      );
-    }
-
-    return (
-      <Pagination className="justify-content-center mt-3">{items}</Pagination>
-    );
-  };
 
   return (
     <div className="revenue-page">
@@ -532,7 +464,15 @@ const Revenue = () => {
                 </Table>
               </div>
 
-              {renderPagination()}
+              <AppPagination
+                page={page}
+                totalPages={totalPages}
+                loading={loading}
+                onPageChange={(p) => {
+                  setPage(p);
+                  tableTopRef.current?.scrollIntoView({ behavior: "smooth" });
+                }}
+              />
             </div>
           </Card.Body>
         </Card>

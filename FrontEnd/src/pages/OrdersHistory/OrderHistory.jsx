@@ -6,13 +6,13 @@ import {
   Button,
   Spinner,
   Card,
-  Pagination,
 } from "react-bootstrap";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Eye } from "react-bootstrap-icons";
 import { getOrdersByUserId } from "../../api/orderApi";
 import "./OrderHistory.scss";
 import { useSelector } from "react-redux";
+import AppPagination from "../../components/Pagination/Pagination";
 
 const OrderHistory = () => {
   const [orders, setOrders] = useState([]);
@@ -99,49 +99,6 @@ const OrderHistory = () => {
     );
   };
 
-  const renderPaginationItems = () => {
-    const items = [];
-    const delta = 2;
-
-    const left = Math.max(1, page - delta);
-    const right = Math.min(totalPages, page + delta);
-
-    if (left > 1) {
-      items.push(
-        <Pagination.Item key={1} onClick={() => handlePageChange(1)}>
-          1
-        </Pagination.Item>
-      );
-      if (left > 2) items.push(<Pagination.Ellipsis key="start-ellipsis" />);
-    }
-
-    for (let i = left; i <= right; i++) {
-      items.push(
-        <Pagination.Item
-          key={i}
-          active={i === page}
-          onClick={() => handlePageChange(i)}
-        >
-          {i}
-        </Pagination.Item>
-      );
-    }
-
-    if (right < totalPages) {
-      if (right < totalPages - 1)
-        items.push(<Pagination.Ellipsis key="end-ellipsis" />);
-      items.push(
-        <Pagination.Item
-          key={totalPages}
-          onClick={() => handlePageChange(totalPages)}
-        >
-          {totalPages}
-        </Pagination.Item>
-      );
-    }
-
-    return items;
-  };
   if (loading)
     return (
       <div className="text-center mt-5">
@@ -236,7 +193,12 @@ const OrderHistory = () => {
           </Card.Body>
         </Card>
         <div className="d-flex justify-content-center mt-3">
-          <Pagination>{renderPaginationItems()}</Pagination>
+          <AppPagination
+            page={page}
+            totalPages={totalPages}
+            loading={loading}
+            onPageChange={handlePageChange}
+          />
         </div>
       </Container>
     </div>

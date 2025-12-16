@@ -18,10 +18,6 @@ import {
   PersonFill,
   CurrencyDollar,
   InfoCircle,
-  ChevronLeft,
-  ChevronRight,
-  ChevronDoubleLeft,
-  ChevronDoubleRight,
 } from "react-bootstrap-icons";
 
 import {
@@ -34,6 +30,7 @@ import {
 import "./PaymentPage.scss";
 import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
+import AppPagination from "../../../components/Pagination/Pagination";
 
 const STATUS_LABELS = {
   pending: { text: "Chờ xử lý", class: "status-pending" },
@@ -346,41 +343,13 @@ const PaymentPage = () => {
               <div>
                 Trang {currentPage} / {totalPages} - Tổng {totalItems} giao dịch
               </div>
-              <Pagination>
-                <Pagination.First
-                  disabled={currentPage === 1}
-                  onClick={() => loadPayments(1)}
-                >
-                  <ChevronDoubleLeft />
-                </Pagination.First>
-                <Pagination.Prev
-                  disabled={currentPage === 1}
-                  onClick={() => loadPayments(currentPage - 1)}
-                >
-                  <ChevronLeft />
-                </Pagination.Prev>
-                {Array.from({ length: totalPages }, (_, i) => (
-                  <Pagination.Item
-                    key={i}
-                    active={currentPage === i + 1}
-                    onClick={() => loadPayments(i + 1)}
-                  >
-                    {i + 1}
-                  </Pagination.Item>
-                ))}
-                <Pagination.Next
-                  disabled={currentPage === totalPages}
-                  onClick={() => loadPayments(currentPage + 1)}
-                >
-                  <ChevronRight />
-                </Pagination.Next>
-                <Pagination.Last
-                  disabled={currentPage === totalPages}
-                  onClick={() => loadPayments(totalPages)}
-                >
-                  <ChevronDoubleRight />
-                </Pagination.Last>
-              </Pagination>
+
+              <AppPagination
+                page={currentPage}
+                totalPages={totalPages}
+                loading={loading}
+                onPageChange={(p) => loadPayments(p)}
+              />
             </div>
           )}
         </>

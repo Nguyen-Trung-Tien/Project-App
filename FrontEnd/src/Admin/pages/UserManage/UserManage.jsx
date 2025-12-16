@@ -9,7 +9,6 @@ import {
   Col,
   Card,
   Spinner,
-  Pagination,
 } from "react-bootstrap";
 import {
   PersonPlus,
@@ -22,10 +21,6 @@ import {
   XCircleFill,
   ShieldLockFill,
   PersonFill,
-  ChevronLeft,
-  ChevronRight,
-  ChevronDoubleLeft,
-  ChevronDoubleRight,
 } from "react-bootstrap-icons";
 import "./UserManage.scss";
 import { toast } from "react-toastify";
@@ -36,6 +31,7 @@ import {
   updateUserApi,
 } from "../../../api/userApi";
 import { useSelector } from "react-redux";
+import AppPagination from "../../../components/Pagination/Pagination";
 
 const UserManage = () => {
   const user = useSelector((state) => state.user.user);
@@ -236,62 +232,6 @@ const UserManage = () => {
     }
   };
 
-  const renderPagination = () => {
-    if (totalPages <= 1) return null;
-    const items = [];
-    const pageNeighbours = 2;
-    const startPage = Math.max(1, currentPage - pageNeighbours);
-    const endPage = Math.min(totalPages, currentPage + pageNeighbours);
-
-    if (startPage > 1)
-      items.push(
-        <Pagination.First key="first" onClick={() => fetchUsers(1, search)}>
-          <ChevronDoubleLeft />
-        </Pagination.First>
-      );
-    if (currentPage > 1)
-      items.push(
-        <Pagination.Prev
-          key="prev"
-          onClick={() => fetchUsers(currentPage - 1, search)}
-        >
-          <ChevronLeft />
-        </Pagination.Prev>
-      );
-    for (let i = startPage; i <= endPage; i++)
-      items.push(
-        <Pagination.Item
-          key={i}
-          active={i === currentPage}
-          onClick={() => fetchUsers(i, search)}
-        >
-          {i}
-        </Pagination.Item>
-      );
-    if (currentPage < totalPages)
-      items.push(
-        <Pagination.Next
-          key="next"
-          onClick={() => fetchUsers(currentPage + 1, search)}
-        >
-          <ChevronRight />
-        </Pagination.Next>
-      );
-    if (endPage < totalPages)
-      items.push(
-        <Pagination.Last
-          key="last"
-          onClick={() => fetchUsers(totalPages, search)}
-        >
-          <ChevronDoubleRight />
-        </Pagination.Last>
-      );
-
-    return (
-      <Pagination className="justify-content-center mt-3">{items}</Pagination>
-    );
-  };
-
   return (
     <>
       <div className="user-manage">
@@ -454,7 +394,12 @@ const UserManage = () => {
               </tbody>
             </Table>
 
-            {renderPagination()}
+            <AppPagination
+              page={currentPage}
+              totalPages={totalPages}
+              loading={loading}
+              onPageChange={(p) => fetchUsers(p, search)}
+            />
           </Card.Body>
         </Card>
 

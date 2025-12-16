@@ -10,8 +10,8 @@ import {
   Card,
   Image,
   Spinner,
-  Pagination,
 } from "react-bootstrap";
+
 import {
   BoxSeam,
   PlusCircle,
@@ -25,10 +25,6 @@ import {
   Box,
   ToggleOn,
   ToggleOff,
-  ChevronLeft,
-  ChevronRight,
-  ChevronDoubleLeft,
-  ChevronDoubleRight,
   CheckCircleFill,
   XCircleFill,
 } from "react-bootstrap-icons";
@@ -44,6 +40,7 @@ import { getAllCategoryApi } from "../../../api/categoryApi";
 import { getAllBrandApi } from "../../../api/brandApi";
 import { getImage } from "../../../utils/decodeImage";
 import { useSelector } from "react-redux";
+import AppPagination from "../../../components/Pagination/Pagination";
 
 const ProductManage = () => {
   const user = useSelector((state) => state.user.user);
@@ -310,72 +307,6 @@ const ProductManage = () => {
     }
   };
 
-  // Pagination
-  const renderPagination = () => {
-    if (totalPages <= 1) return null;
-
-    const items = [];
-    const pageNeighbours = 2;
-    const startPage = Math.max(1, page - pageNeighbours);
-    const endPage = Math.min(totalPages, page + pageNeighbours);
-
-    if (startPage > 1) {
-      items.push(
-        <Pagination.First
-          key="first"
-          onClick={() => fetchProducts(1, searchTerm)}
-        >
-          <ChevronDoubleLeft />
-        </Pagination.First>
-      );
-    }
-    if (page > 1) {
-      items.push(
-        <Pagination.Prev
-          key="prev"
-          onClick={() => fetchProducts(page - 1, searchTerm)}
-        >
-          <ChevronLeft />
-        </Pagination.Prev>
-      );
-    }
-    for (let i = startPage; i <= endPage; i++) {
-      items.push(
-        <Pagination.Item
-          key={i}
-          active={i === page}
-          onClick={() => fetchProducts(i, searchTerm)}
-        >
-          {i}
-        </Pagination.Item>
-      );
-    }
-    if (page < totalPages) {
-      items.push(
-        <Pagination.Next
-          key="next"
-          onClick={() => fetchProducts(page + 1, searchTerm)}
-        >
-          <ChevronRight />
-        </Pagination.Next>
-      );
-    }
-    if (endPage < totalPages) {
-      items.push(
-        <Pagination.Last
-          key="last"
-          onClick={() => fetchProducts(totalPages, searchTerm)}
-        >
-          <ChevronDoubleRight />
-        </Pagination.Last>
-      );
-    }
-
-    return (
-      <Pagination className="justify-content-center mt-4">{items}</Pagination>
-    );
-  };
-
   return (
     <div className="product-manage">
       <h3 className="mb-4">
@@ -431,7 +362,7 @@ const ProductManage = () => {
               <tbody>
                 {loadingTable ? (
                   <tr>
-                    <td colSpan="10" className="text-center py-5">
+                    <td colSpan="11" className="text-center py-5">
                       <Spinner animation="border" variant="primary" />
                     </td>
                   </tr>
@@ -503,7 +434,12 @@ const ProductManage = () => {
             </Table>
           </div>
 
-          {renderPagination()}
+          <AppPagination
+            page={page}
+            totalPages={totalPages}
+            loading={loadingTable}
+            onPageChange={(p) => fetchProducts(p, searchTerm)}
+          />
         </Card.Body>
       </Card>
 

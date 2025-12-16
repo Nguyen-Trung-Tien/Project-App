@@ -110,11 +110,6 @@ const CheckoutPage = () => {
     }
   };
 
-  if (!isSingleProduct && checkoutState.selectedIds.length === 0) {
-    navigate("/cart");
-    return null;
-  }
-
   if (loading)
     return (
       <div className="text-center py-5">

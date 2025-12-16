@@ -14,6 +14,7 @@ import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { getActiveOrdersByUser, updateOrderStatus } from "../../api/orderApi";
 import "./OrderPage.scss";
+import AppPagination from "../../components/Pagination/Pagination";
 
 const statusLabels = {
   pending: "Chờ xử lý",
@@ -65,6 +66,7 @@ const OrderPage = () => {
   const [loading, setLoading] = useState(true);
   const { user, token } = useSelector((state) => state.user);
   const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const limit = 10;
 
   const [showCancelModal, setShowCancelModal] = useState(false);
@@ -76,6 +78,7 @@ const OrderPage = () => {
       const res = await getActiveOrdersByUser(user.id, token, page, limit);
       if (res?.errCode === 0) {
         setOrders(res.data || []);
+        setTotalPages(res.pagination?.totalPages || 1);
       } else {
         toast.warning(res?.errMessage || "Không thể tải đơn hàng");
       }
@@ -196,7 +199,7 @@ const OrderPage = () => {
                 {filteredOrders.length ? (
                   filteredOrders.map((order, idx) => (
                     <tr key={order.id}>
-                      <td>{idx + 1}</td>
+                      <td>{(page - 1) * limit + idx + 1}</td>
                       <td>
                         <strong className="text-primary">{`DH${order.id}`}</strong>
                       </td>
@@ -280,19 +283,16 @@ const OrderPage = () => {
           </div>
         )}
 
-        <div className="d-flex justify-content-center mt-3">
-          <Button
-            variant="outline-primary"
-            disabled={page === 1}
-            onClick={() => setPage(page - 1)}
-            className="me-2"
-          >
-            Trang trước
-          </Button>
-          <Button variant="outline-primary" onClick={() => setPage(page + 1)}>
-            Trang sau
-          </Button>
-        </div>
+        {totalPages > 1 && (
+          <div className="d-flex justify-content-center mt-3">
+            <AppPagination
+              page={page}
+              totalPages={totalPages}
+              onPageChange={(p) => setPage(p)}
+              loading={loading}
+            />
+          </div>
+        )}
 
         <Modal
           show={showCancelModal}
