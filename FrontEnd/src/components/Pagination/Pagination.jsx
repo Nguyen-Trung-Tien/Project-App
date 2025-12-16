@@ -5,6 +5,7 @@ import {
   ChevronDoubleLeft,
   ChevronDoubleRight,
 } from "react-bootstrap-icons";
+import "./Pagination.scss";
 
 const AppPagination = ({
   page = 1,

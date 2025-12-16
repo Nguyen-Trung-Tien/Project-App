@@ -16,6 +16,7 @@ import ProductCard from "../ProductCard/ProductCard";
 import FengShuiChat from "../ChatBot/FengShui";
 import { ArrowLeftCircle } from "react-bootstrap-icons";
 import { Link } from "react-router";
+import AppPagination from "../Pagination/Pagination";
 
 const FortuneProducts = () => {
   const [birthYear, setBirthYear] = useState("");
@@ -217,35 +218,12 @@ const FortuneProducts = () => {
       )}
 
       {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="d-flex justify-content-center mt-4 gap-2 flex-wrap">
-          <Button
-            disabled={page === 1}
-            onClick={() => setPage(page - 1)}
-            variant="outline-primary"
-          >
-            Prev
-          </Button>
-          {Array.from({ length: totalPages }, (_, i) => i + 1)
-            .filter((pNum) => Math.abs(pNum - page) <= 2)
-            .map((pNum) => (
-              <Button
-                key={pNum}
-                variant={pNum === page ? "primary" : "outline-primary"}
-                onClick={() => setPage(pNum)}
-              >
-                {pNum}
-              </Button>
-            ))}
-          <Button
-            disabled={page === totalPages}
-            onClick={() => setPage(page + 1)}
-            variant="outline-primary"
-          >
-            Next
-          </Button>
-        </div>
-      )}
+      <AppPagination
+        page={page}
+        totalPages={totalPages}
+        onPageChange={(newPage) => setPage(newPage)}
+        loading={loading}
+      />
     </Container>
   );
 };

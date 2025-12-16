@@ -71,37 +71,6 @@
   .spin {
     animation: spin 1s linear infinite;
   }
-  .pagination {
-    .page-link {
-      border-radius: 6px;
-      margin: 0 2px;
-      padding: 0.5rem 0.75rem;
-      color: #495057;
-      border: 1px solid #dee2e6;
-      transition: all 0.2s;
-
-      &:hover {
-        background-color: #e9ecef;
-        border-color: #adb5bd;
-      }
-
-      &:focus {
-        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
-      }
-    }
-
-    .page-item.active .page-link {
-      background-color: #007bff;
-      border-color: #007bff;
-      color: white;
-      font-weight: 600;
-    }
-
-    .page-item.disabled .page-link {
-      color: #6c757d;
-      opacity: 0.6;
-    }
-  }
 
   @keyframes spin {
     from {
