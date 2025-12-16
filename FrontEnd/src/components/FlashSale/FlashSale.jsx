@@ -8,6 +8,7 @@ import { addCartItem } from "../../redux/cartSlice";
 import { getImage } from "../../utils/decodeImage";
 import ProductCard from "../../components/ProductCard/ProductCard";
 import SkeletonCard from "../SkeletonCard/SkeletonCard";
+import LoadMoreButton from "../LoadMoreButton/LoadMoreButton";
 
 const FlashSale = () => {
   const dispatch = useDispatch();
@@ -160,17 +161,12 @@ const FlashSale = () => {
 
             {/* Load More */}
             {currentPage < totalPages && (
-              <div className="text-center mt-4">
-                <Button
-                  variant="outline-primary"
-                  size="ms"
-                  className="rounded-pill px-3 py-2 shadow-sm"
-                  onClick={handleLoadMore}
-                  disabled={loadingMore}
-                >
-                  {loadingMore ? "Đang tải..." : "Xem thêm sản phẩm"}
-                </Button>
-              </div>
+              <LoadMoreButton
+                currentPage={currentPage}
+                totalPages={totalPages}
+                loading={loadingMore}
+                onLoadMore={handleLoadMore}
+              />
             )}
           </>
         ) : (

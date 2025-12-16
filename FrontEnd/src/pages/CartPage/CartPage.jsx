@@ -39,7 +39,6 @@ const CartPage = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const cartItems = useSelector((state) => state.cart.cartItems);
-
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [loading, setLoading] = useState(false);
@@ -226,20 +225,29 @@ const CartPage = () => {
                                 onChange={() => handleSelectItem(item.id)}
                               />
                             </td>
-                            <td style={{ width: "80px" }}>
+                            <td style={{ width: "100px" }}>
                               <Link to={`/product-detail/${item.product?.id}`}>
-                                <img
-                                  src={getImage(item.product?.image)}
-                                  alt={item.product?.name}
-                                  className="img-fluid rounded-3 product-image"
-                                  style={{
-                                    width: "80px",
-                                    height: "80px",
-                                    objectFit: "cover",
-                                  }}
-                                />
+                                <div className="position-relative">
+                                  {item.product?.discount > 0 && (
+                                    <span className="discount-badge">
+                                      -{item.product.discount}%
+                                    </span>
+                                  )}
+
+                                  <img
+                                    src={getImage(item.product?.image)}
+                                    alt={item.product?.name}
+                                    className="img-fluid rounded-3 product-image"
+                                    style={{
+                                      width: "80px",
+                                      height: "80px",
+                                      objectFit: "cover",
+                                    }}
+                                  />
+                                </div>
                               </Link>
                             </td>
+
                             <td className="text-start fw-semibold">
                               <Link
                                 to={`/product-detail/${item.product?.id}`}

@@ -26,7 +26,7 @@ const getAllCartItems = async (userId, { limit, offset }) => {
         {
           model: db.Product,
           as: "product",
-          attributes: ["id", "name", "price", "image"],
+          attributes: ["id", "name", "price", "image", "discount"],
         },
       ],
       limit,

@@ -34,6 +34,7 @@ import ReviewList from "../../components/ReviewComponent/ReviewList";
 import { getRepliesByReviewApi } from "../../api/reviewReplyApi";
 import PricePredictionModal from "../../components/PricePredictionModal/PricePredictionModal";
 import { predictPrice } from "../../api/chatApi";
+import LoadMoreButton from "../../components/LoadMoreButton/LoadMoreButton";
 
 const ProductDetailPage = () => {
   const user = useSelector((state) => state.user.user);
@@ -599,15 +600,12 @@ const ProductDetailPage = () => {
 
               {recommendedPage < recommendedTotalPages &&
                 !loadingMoreRecommended && (
-                  <div className="text-center mt-3">
-                    <Button
-                      variant="outline-primary"
-                      className="rounded-pill px-3 py-2 shadow-sm"
-                      onClick={handleLoadMoreRecommended}
-                    >
-                      Xem thêm sản phẩm
-                    </Button>
-                  </div>
+                  <LoadMoreButton
+                    page={recommendedPage}
+                    totalPages={recommendedTotalPages}
+                    loadingMore={loadingMoreRecommended}
+                    onLoadMore={handleLoadMoreRecommended}
+                  />
                 )}
             </>
           ) : (

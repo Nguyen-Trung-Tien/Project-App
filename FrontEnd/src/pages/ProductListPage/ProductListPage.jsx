@@ -8,6 +8,7 @@ import ChatBot from "../../components/ChatBot/ChatBot";
 import SkeletonCard from "../../components/SkeletonCard/SkeletonCard";
 import ProductFilter from "../../components/ProductFilter/ProductFilter";
 import "./ProductListPage.scss";
+import LoadMoreButton from "../../components/LoadMoreButton/LoadMoreButton";
 
 const ProductListPage = () => {
   const [categories, setCategories] = useState([]);
@@ -207,15 +208,12 @@ const ProductListPage = () => {
             {/* Load more */}
             {loadingMore && renderSkeletons(5)}
             {currentPage < totalPages && !loadingMore && (
-              <div className="text-center mt-3">
-                <Button
-                  variant="outline-primary"
-                  className="rounded-pill px-3 py-2 shadow-sm"
-                  onClick={handleLoadMore}
-                >
-                  Xem thêm sản phẩm
-                </Button>
-              </div>
+              <LoadMoreButton
+                page={currentPage}
+                totalPages={totalPages}
+                loadingMore={loadingMore}
+                onLoadMore={handleLoadMore}
+              />
             )}
           </>
         )}

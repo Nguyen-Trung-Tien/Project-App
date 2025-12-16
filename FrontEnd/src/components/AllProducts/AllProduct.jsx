@@ -7,6 +7,7 @@ import ProductCard from "../../components/ProductCard/ProductCard";
 import SkeletonCard from "../SkeletonCard/SkeletonCard";
 import { getAllProductApi, searchProductsApi } from "../../api/productApi";
 import "./AllProducts.scss";
+import LoadMoreButton from "../LoadMoreButton/LoadMoreButton";
 
 const AllProducts = React.memo(() => {
   const [products, setProducts] = useState([]);
@@ -139,18 +140,12 @@ const AllProducts = React.memo(() => {
 
             {loadingMore && renderSkeletons(5)}
 
-            {page < totalPages && !loadingMore && (
-              <div className="text-center mt-3">
-                <Button
-                  variant="outline-primary"
-                  size="ms"
-                  className="rounded-pill px-3 py-2 shadow-sm"
-                  onClick={handleLoadMore}
-                >
-                  Xem thêm sản phẩm
-                </Button>
-              </div>
-            )}
+            <LoadMoreButton
+              currentPage={page}
+              totalPages={totalPages}
+              loading={loadingMore}
+              onLoadMore={handleLoadMore}
+            />
           </>
         )}
       </Container>
