@@ -2,7 +2,7 @@ const CartService = require("../services/CartService");
 
 const getAllCarts = async (req, res) => {
   try {
-    const carts = await CartService.getAllCarts();
+    const carts = await CartService.getAllCarts(req.user.id);
     res.status(200).json({ errCode: 0, data: carts });
   } catch (err) {
     res.status(500).json({ errCode: 1, errMessage: err.message });
@@ -11,19 +11,16 @@ const getAllCarts = async (req, res) => {
 
 const getCartById = async (req, res) => {
   try {
-    const cart = await CartService.getCartById(req.params.id);
-    if (!cart)
-      return res.status(404).json({ errCode: 1, errMessage: "Cart not found" });
+    const cart = await CartService.getCartById(req.params.id, req.user.id);
     res.status(200).json({ errCode: 0, data: cart });
   } catch (err) {
-    res.status(500).json({ errCode: 1, errMessage: err.message });
+    res.status(404).json({ errCode: 1, errMessage: err.message });
   }
 };
 
 const createCart = async (req, res) => {
   try {
-    const { userId } = req.body;
-    const newCart = await CartService.createCart(userId);
+    const newCart = await CartService.createCart(req.user.id);
     res.status(201).json({ errCode: 0, data: newCart });
   } catch (err) {
     res.status(500).json({ errCode: 1, errMessage: err.message });
@@ -32,19 +29,23 @@ const createCart = async (req, res) => {
 
 const updateCart = async (req, res) => {
   try {
-    const updatedCart = await CartService.updateCart(req.params.id, req.body);
+    const updatedCart = await CartService.updateCart(
+      req.params.id,
+      req.body,
+      req.user.id
+    );
     res.status(200).json({ errCode: 0, data: updatedCart });
   } catch (err) {
-    res.status(500).json({ errCode: 1, errMessage: err.message });
+    res.status(404).json({ errCode: 1, errMessage: err.message });
   }
 };
 
 const deleteCart = async (req, res) => {
   try {
-    await CartService.deleteCart(req.params.id);
+    await CartService.deleteCart(req.params.id, req.user.id);
     res.status(200).json({ errCode: 0, message: "Cart deleted" });
   } catch (err) {
-    res.status(500).json({ errCode: 1, errMessage: err.message });
+    res.status(404).json({ errCode: 1, errMessage: err.message });
   }
 };
 

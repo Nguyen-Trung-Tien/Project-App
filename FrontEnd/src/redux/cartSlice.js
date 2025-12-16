@@ -11,6 +11,9 @@ const cartSlice = createSlice({
     setCartItems: (state, action) => {
       state.cartItems = action.payload;
     },
+    appendCartItems: (state, action) => {
+      state.cartItems = [...state.cartItems, ...action.payload];
+    },
     addCartItem: (state, action) => {
       const item = action.payload;
       const index = state.cartItems.findIndex((i) => i.id === item.id);
@@ -36,6 +39,7 @@ const cartSlice = createSlice({
 
 export const {
   setCartItems,
+  appendCartItems,
   addCartItem,
   updateCartItemQuantity,
   removeCartItem,

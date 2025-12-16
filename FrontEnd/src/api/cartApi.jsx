@@ -64,10 +64,11 @@ export const deleteCart = async (id, token) => {
   }
 };
 
-export const getAllCartItems = async (token) => {
+export const getAllCartItems = async (token, page = 1, limit = 10) => {
   try {
     const res = await axiosClient.get("/cartItem/get-all-cartItem", {
       headers: { Authorization: `Bearer ${token}` },
+      params: { page, limit },
     });
     return res.data;
   } catch (error) {

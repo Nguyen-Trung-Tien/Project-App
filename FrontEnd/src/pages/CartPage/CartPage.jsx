@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   Container,
   Row,
@@ -19,6 +19,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
   setCartItems,
+  appendCartItems,
   updateCartItemQuantity,
   removeCartItem,
 } from "../../redux/cartSlice";
@@ -38,17 +39,29 @@ const CartPage = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const cartItems = useSelector((state) => state.cart.cartItems);
-  const [loading, setLoading] = useState(true);
+
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [selectedItems, setSelectedItems] = useState([]);
 
-  const fetchCart = async () => {
+  const observer = useRef();
+
+  // Fetch cart items
+  const fetchCart = async (page = 1) => {
     try {
       setLoading(true);
-      const res = await getAllCartItems(token);
+      const res = await getAllCartItems(token, page, 10);
       const items = res.data || [];
-      dispatch(setCartItems(items));
-      dispatch(setCartItems(items));
-      setSelectedItems([]);
+
+      if (page === 1) {
+        dispatch(setCartItems(items));
+      } else {
+        dispatch(appendCartItems(items));
+      }
+
+      setHasMore(page < res.meta.totalPages);
+      if (page === 1) setSelectedItems([]);
     } catch (err) {
       console.error("Error fetching cart:", err);
     } finally {
@@ -56,10 +69,33 @@ const CartPage = () => {
     }
   };
 
+  // Load first page
   useEffect(() => {
-    fetchCart();
+    fetchCart(1);
   }, []);
 
+  // Infinite scroll observer
+  const lastItemRef = useCallback(
+    (node) => {
+      if (loading) return;
+      if (observer.current) observer.current.disconnect();
+      observer.current = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting && hasMore) {
+          setPage((prev) => prev + 1);
+        }
+      });
+      if (node) observer.current.observe(node);
+    },
+    [loading, hasMore]
+  );
+
+  // Fetch next page when page state changes
+  useEffect(() => {
+    if (page === 1) return;
+    fetchCart(page);
+  }, [page]);
+
+  // Remove cart item
   const handleRemove = async (id) => {
     try {
       await removeCartItemApi(id, token);
@@ -71,6 +107,7 @@ const CartPage = () => {
     }
   };
 
+  // Update quantity
   const handleQtyChange = async (id, quantity) => {
     if (quantity < 1) return;
     try {
@@ -81,12 +118,24 @@ const CartPage = () => {
     }
   };
 
+  // Select item
   const handleSelectItem = (id) => {
     setSelectedItems((prev) =>
       prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
     );
   };
 
+  // Checkout
+  const handleCheckOut = () => {
+    if (selectedItems.length === 0) {
+      toast.warning("Vui lòng chọn ít nhất 1 sản phẩm để thanh toán!");
+      return;
+    }
+    dispatch(setSelectedIds(selectedItems));
+    navigate("/checkout");
+  };
+
+  // Calculate total
   const total = cartItems
     .filter((item) => selectedItems.includes(item.id))
     .reduce((acc, item) => {
@@ -96,47 +145,32 @@ const CartPage = () => {
       return acc + price * (item.quantity || 0);
     }, 0);
 
-  const handleCheckOut = () => {
-    if (selectedItems.length === 0) {
-      toast.warning("Vui lòng chọn ít nhất 1 sản phẩm để thanh toán!");
-      return;
-    }
-
-    dispatch(setSelectedIds(selectedItems));
-
-    navigate("/checkout");
-  };
-
   return (
     <div className="cart-page py-3">
       <Container>
-        <div className="text-left">
-          <div className="text-center mb-2">
-            <div className="d-inline-flex align-items-center px-4 py-2 rounded-pill cart-title">
-              <Cart4 size={26} className="me-2" />
-              <h3 className="fw-bold mb-0">Giỏ hàng </h3>
-            </div>
+        <div className="text-center mb-2">
+          <div className="d-inline-flex align-items-center px-4 py-2 rounded-pill cart-title">
+            <Cart4 size={26} className="me-2" />
+            <h3 className="fw-bold mb-0">Giỏ hàng</h3>
           </div>
         </div>
 
-        {loading ? (
+        {loading && page === 1 ? (
           <div className="text-center py-3">
             <Spinner animation="border" variant="primary" />
             <p className="text-muted mt-2">Đang tải giỏ hàng...</p>
           </div>
         ) : cartItems.length === 0 ? (
           <div className="empty-cart text-center py-5">
-            <div className="mb-3">
-              <Box2Heart
-                size={80}
-                className="text-primary mb-2"
-                style={{ opacity: 0.85 }}
-              />
-              <h5 className="fw-bold mt-2">Giỏ hàng của bạn đang trống</h5>
-              <p className="text-muted" style={{ fontSize: "0.95rem" }}>
-                Hãy khám phá sản phẩm và thêm vào giỏ ngay!
-              </p>
-            </div>
+            <Box2Heart
+              size={80}
+              className="text-primary mb-2"
+              style={{ opacity: 0.85 }}
+            />
+            <h5 className="fw-bold mt-2">Giỏ hàng của bạn đang trống</h5>
+            <p className="text-muted" style={{ fontSize: "0.95rem" }}>
+              Hãy khám phá sản phẩm và thêm vào giỏ ngay!
+            </p>
             <Link
               to="/"
               className="btn btn-primary mt-3 rounded-pill px-4 py-2 fw-semibold shadow-sm"
@@ -175,14 +209,16 @@ const CartPage = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {cartItems.map((item) => {
+                      {cartItems.map((item, index) => {
                         const price = item.product?.discount
                           ? (item.product.price *
                               (100 - item.product.discount)) /
                             100
                           : item.product?.price || 0;
+                        const isLast = index === cartItems.length - 1;
+
                         return (
-                          <tr key={item.id}>
+                          <tr key={item.id} ref={isLast ? lastItemRef : null}>
                             <td>
                               <Form.Check
                                 type="checkbox"
@@ -204,7 +240,6 @@ const CartPage = () => {
                                 />
                               </Link>
                             </td>
-
                             <td className="text-start fw-semibold">
                               <Link
                                 to={`/product-detail/${item.product?.id}`}
@@ -213,7 +248,6 @@ const CartPage = () => {
                                 {item.product?.name}
                               </Link>
                             </td>
-
                             <td className="text-end">
                               {item.product?.discount > 0 ? (
                                 <>
@@ -237,9 +271,8 @@ const CartPage = () => {
                                 className="text-center rounded-pill border-primary"
                                 onChange={(e) => {
                                   const value = parseInt(e.target.value);
-                                  if (!isNaN(value) && value >= 1) {
+                                  if (!isNaN(value) && value >= 1)
                                     handleQtyChange(item.id, value);
-                                  }
                                 }}
                               />
                             </td>
@@ -261,6 +294,11 @@ const CartPage = () => {
                       })}
                     </tbody>
                   </Table>
+                  {loading && page > 1 && (
+                    <div className="text-center py-2">
+                      <Spinner animation="border" size="sm" variant="primary" />
+                    </div>
+                  )}
                 </Card.Body>
               </Card>
             </Col>
