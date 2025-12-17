@@ -147,9 +147,12 @@ const OrderHistory = () => {
                   </thead>
                   <tbody>
                     {orders.map((order, index) => (
-                      <tr key={order.id} className="text-center">
+                      <tr key={order.id} className="text-center cursor-pointer">
                         <td>{index + 1}</td>
-                        <td className="fw-semibold text-primary">{`DH${order.id}`}</td>
+                        <td
+                          className="fw-semibold text-primary"
+                          onClick={() => navigate(`/orders-detail/${order.id}`)}
+                        >{`DH${order.id}`}</td>
 
                         <td>{formatDate(order.createdAt)}</td>
                         <td

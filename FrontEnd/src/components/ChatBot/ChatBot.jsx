@@ -9,16 +9,16 @@ import {
 } from "react-icons/fa";
 import { useSelector } from "react-redux";
 import { sendMessage } from "../../api/chatApi";
+import "./ChatBot.scss";
 
 const ChatBot = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [fullMode, setFullMode] = useState(false);
-
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-
   const [typing, setTyping] = useState("");
+
   const inputRef = useRef(null);
   const messagesEndRef = useRef(null);
 
@@ -63,11 +63,14 @@ const ChatBot = () => {
       .padStart(2, "0")}`;
 
   /** Add message */
-  const addMessage = (role, content, type = "text") => {
-    setMessages((prev) => [...prev, { role, content, type, time: new Date() }]);
+  const addMessage = (role, content, type = "text", link = null) => {
+    setMessages((prev) => [
+      ...prev,
+      { role, content, type, link, time: new Date() },
+    ]);
   };
 
-  /** Streaming effect (giống ChatGPT) */
+  /** Streaming effect */
   const streamText = useCallback(async (text) => {
     setTyping("");
     for (let i = 0; i < text.length; i++) {
@@ -78,6 +81,31 @@ const ChatBot = () => {
     setTyping("");
   }, []);
 
+  /** Kiểm tra link theo ID sản phẩm/đơn hàng */
+  const checkForLinksById = (text) => {
+    const productMatch = text.match(/sản phẩm\s+(\d+)/i);
+    if (productMatch) {
+      const productId = productMatch[1];
+      return {
+        type: "link",
+        content: `Xem chi tiết sản phẩm #${productId}`,
+        link: `http://localhost:5173/product-detail/${productId}`,
+      };
+    }
+
+    const orderMatch = text.match(/đơn hàng\s+(\d+)/i);
+    if (orderMatch) {
+      const orderId = orderMatch[1];
+      return {
+        type: "link",
+        content: `Xem chi tiết đơn hàng #${orderId}`,
+        link: `http://localhost:5173/orders-detail/${orderId}`,
+      };
+    }
+
+    return { type: "text", content: text };
+  };
+
   /** Handle send */
   const handleSend = async (e) => {
     e.preventDefault();
@@ -85,23 +113,25 @@ const ChatBot = () => {
 
     const userText = input;
     setInput("");
-
     addMessage("user", userText);
     setLoading(true);
 
     try {
-      let reply = await sendMessage(userText, userId);
+      // Kiểm tra link dựa trên ID ngay lập tức
+      const linkResponse = checkForLinksById(userText);
 
-      if (/không hiểu|xin lỗi/i.test(reply)) {
-        reply += `
-Tôi có thể giúp bạn:
-• Kiểm tra đơn hàng
-• Tìm sản phẩm
-• Xem giảm giá
-• Gợi ý theo nhu cầu`;
+      if (linkResponse.type === "link") {
+        addMessage(
+          "assistant",
+          linkResponse.content,
+          "link",
+          linkResponse.link
+        );
+      } else {
+        // Gọi API chỉ khi không có link
+        const reply = await sendMessage(userText, userId);
+        await streamText(reply);
       }
-
-      await streamText(reply);
     } catch (e) {
       console.log(e);
       await streamText("Xin lỗi, hệ thống đang bận. Vui lòng thử lại 😥");
@@ -121,177 +151,75 @@ Tôi có thể giúp bạn:
   return (
     <>
       {/* Button open */}
-      <div
-        onClick={() => setIsOpen(!isOpen)}
-        style={{
-          position: "fixed",
-          bottom: "22px",
-          right: "20px",
-          zIndex: 9999,
-          cursor: "pointer",
-        }}
-      >
-        <div
-          style={{
-            background: "linear-gradient(135deg,#4facfe,#00f2fe)",
-            color: "#fff",
-            padding: "14px",
-            borderRadius: "50%",
-            boxShadow: "0 4px 14px rgba(0,0,0,.28)",
-            transition: ".25s",
-          }}
-        >
+      <div className="chatbot-button" onClick={() => setIsOpen(!isOpen)}>
+        <div className="button-inner">
           {isOpen ? <FaTimes size={22} /> : <FaComments size={26} />}
         </div>
       </div>
 
       {/* CHAT WINDOW */}
       {isOpen && (
-        <div
-          style={{
-            position: "fixed",
-            bottom: "90px",
-            right: "20px",
-            width: fullMode ? "420px" : "360px",
-            height: fullMode ? "560px" : "480px",
-            background: "#fff",
-            display: "flex",
-            flexDirection: "column",
-            borderRadius: "18px",
-            boxShadow: "0 12px 34px rgba(0,0,0,.25)",
-            animation: "chatOpen .25s ease",
-            overflow: "hidden",
-            zIndex: 9998,
-          }}
-        >
+        <div className={`chatbot-window ${fullMode ? "full-mode" : ""}`}>
           {/* Header */}
-          <div
-            style={{
-              padding: "14px 16px",
-              background: "linear-gradient(90deg,#4facfe,#00f2fe)",
-              color: "#fff",
-              fontWeight: "600",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-            }}
-          >
+          <div className="header">
             <span>
               <FaRobot className="me-2" /> TienTech AI
             </span>
-
-            <button
-              onClick={() => setFullMode(!fullMode)}
-              style={{
-                background: "transparent",
-                border: "none",
-                color: "#fff",
-                cursor: "pointer",
-              }}
-            >
+            <button onClick={() => setFullMode(!fullMode)}>
               {fullMode ? <FaCompress /> : <FaExpand />}
             </button>
           </div>
 
           {/* Messages */}
-          <div
-            style={{
-              flex: 1,
-              padding: "12px",
-              overflowY: "auto",
-              background: "#f6f8fa",
-            }}
-          >
+          <div className="messages">
             {messages.map((msg, i) => (
-              <div
-                key={i}
-                style={{
-                  display: "flex",
-                  justifyContent:
-                    msg.role === "user" ? "flex-end" : "flex-start",
-                  alignItems: "flex-end",
-                  gap: "6px",
-                  marginBottom: "10px",
-                }}
-              >
-                {/* Avatar */}
+              <div key={i} className={`message ${msg.role}`}>
                 {msg.role === "assistant" && (
-                  <div
-                    style={{
-                      background: "#fff",
-                      width: "32px",
-                      height: "32px",
-                      borderRadius: "50%",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      boxShadow: "0 2px 6px rgba(0,0,0,.15)",
-                    }}
-                  >
+                  <div className="avatar">
                     <FaRobot color="#4facfe" />
                   </div>
                 )}
 
-                <div
-                  style={{
-                    background:
-                      msg.role === "user"
-                        ? "linear-gradient(135deg,#4facfe,#00d0fe)"
-                        : "#fff",
-                    color: msg.role === "user" ? "#fff" : "#333",
-                    padding: "10px 14px",
-                    borderRadius: "14px",
-                    maxWidth: "75%",
-                    wordBreak: "break-word",
-                    boxShadow: "0 2px 10px rgba(0,0,0,.14)",
-                    animation: "fadeIn .2s ease",
-                  }}
-                >
-                  <div
-                    style={{
-                      fontSize: "0.75rem",
-                      marginBottom: "4px",
-                      opacity: 0.6,
-                    }}
-                  >
+                <div className="bubble">
+                  <div className="time">
                     {msg.role === "user" ? "Bạn" : "AI"} •{" "}
                     {formatTime(msg.time)}
                   </div>
-                  {msg.content}
+
+                  {msg.type === "link" ? (
+                    <a
+                      href={msg.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {msg.content}
+                    </a>
+                  ) : (
+                    msg.content
+                  )}
                 </div>
 
                 {msg.role === "user" && (
-                  <div
-                    style={{
-                      background: "#fff",
-                      width: "32px",
-                      height: "32px",
-                      borderRadius: "50%",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      boxShadow: "0 2px 6px rgba(0,0,0,.15)",
-                    }}
-                  >
+                  <div className="avatar">
                     <FaUser />
                   </div>
                 )}
               </div>
             ))}
 
-            {/* Typing */}
+            {/* Loading / Typing */}
+            {loading && !typing && (
+              <div className="message assistant">
+                <div className="bubble">
+                  <FaRobot color="#4facfe" /> AI đang phản hồi{" "}
+                  <span className="dots"></span>
+                </div>
+              </div>
+            )}
+
             {typing && (
-              <div
-                style={{
-                  background: "#fff",
-                  padding: "10px 14px",
-                  borderRadius: "14px",
-                  width: "fit-content",
-                  marginBottom: "10px",
-                  animation: "fadeIn .2s ease",
-                }}
-              >
-                {typing}
+              <div className="message assistant">
+                <div className="bubble">{typing}</div>
               </div>
             )}
 
@@ -299,29 +227,14 @@ Tôi có thể giúp bạn:
           </div>
 
           {/* Quick actions */}
-          <div
-            style={{
-              padding: "8px",
-              display: "flex",
-              gap: "8px",
-              overflowX: "auto",
-              background: "#fff",
-            }}
-          >
+          <div className="quick-actions">
             {quickActions.map((q) => (
               <div
                 key={q}
+                className="action"
                 onClick={() => {
                   setInput(q.replace(/^[^ ]+ /, ""));
                   setTimeout(() => handleSend({ preventDefault() {} }), 50);
-                }}
-                style={{
-                  padding: "6px 10px",
-                  background: "#eef3f7",
-                  borderRadius: "14px",
-                  fontSize: ".8rem",
-                  cursor: "pointer",
-                  whiteSpace: "nowrap",
                 }}
               >
                 {q}
@@ -330,16 +243,7 @@ Tôi có thể giúp bạn:
           </div>
 
           {/* Input box */}
-          <form
-            onSubmit={handleSend}
-            style={{
-              padding: "10px",
-              borderTop: "1px solid #ddd",
-              display: "flex",
-              gap: "8px",
-              background: "#fff",
-            }}
-          >
+          <form onSubmit={handleSend} className="input-box">
             <div style={{ position: "relative", flex: 1 }}>
               <input
                 ref={inputRef}
@@ -352,36 +256,13 @@ Tôi có thể giúp bạn:
                 onKeyDown={(e) =>
                   e.key === "Enter" && !e.shiftKey && handleSend(e)
                 }
-                style={{
-                  borderRadius: "18px",
-                  padding: "10px 14px",
-                }}
               />
 
               {/* Autocomplete */}
               {filteredAutocomplete.length > 0 && (
-                <div
-                  style={{
-                    position: "absolute",
-                    bottom: "48px",
-                    left: 0,
-                    right: 0,
-                    background: "#fff",
-                    borderRadius: "12px",
-                    boxShadow: "0 4px 12px rgba(0,0,0,.15)",
-                    zIndex: 10,
-                    padding: "6px 0",
-                  }}
-                >
+                <div className="autocomplete">
                   {filteredAutocomplete.map((s, index) => (
-                    <div
-                      key={index}
-                      onClick={() => setInput(s)}
-                      style={{
-                        padding: "8px 12px",
-                        cursor: "pointer",
-                      }}
-                    >
+                    <div key={index} onClick={() => setInput(s)}>
                       {s}
                     </div>
                   ))}
@@ -389,35 +270,12 @@ Tôi có thể giúp bạn:
               )}
             </div>
 
-            <button
-              type="submit"
-              disabled={loading}
-              style={{
-                background: "linear-gradient(135deg,#4facfe,#00f2fe)",
-                color: "#fff",
-                border: "none",
-                padding: "10px 16px",
-                borderRadius: "18px",
-              }}
-            >
+            <button type="submit" disabled={loading}>
               Gửi
             </button>
           </form>
         </div>
       )}
-
-      <style>
-        {`
-          @keyframes chatOpen {
-            from { opacity: 0; transform: scale(0.9); }
-            to { opacity: 1; transform: scale(1); }
-          }
-          @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(5px); }
-            to { opacity: 1; transform: translateY(0); }
-          }
-        `}
-      </style>
     </>
   );
 };

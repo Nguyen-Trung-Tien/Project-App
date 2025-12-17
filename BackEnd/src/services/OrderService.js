@@ -60,6 +60,7 @@ const getOrderById = async (id, user) => {
             "productName",
             "image",
             "returnStatus",
+            "returnReason",
           ],
           include: [
             {

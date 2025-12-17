@@ -9,7 +9,7 @@ import {
   Tabs,
   Tab,
 } from "react-bootstrap";
-import { Cart4, Eye } from "react-bootstrap-icons";
+import { Eye } from "react-bootstrap-icons";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
@@ -24,7 +24,6 @@ const STATUS_TABS = [
   { key: "processing", label: "Đang xử lý" },
   { key: "shipped", label: "Đang giao" },
   { key: "delivered", label: "Đã giao" },
-  { key: "", label: "Tất cả" },
   { key: "cancelled", label: "Đã hủy" },
 ];
 
@@ -55,6 +54,20 @@ const OrderPage = () => {
   const [statusCounts, setStatusCounts] = useState({});
   const [receivingId, setReceivingId] = useState(null);
   const [cancelling, setCancelling] = useState(false);
+  const productCounts = orders.reduce((acc, order) => {
+    if (
+      ["pending", "confirmed", "processing", "shipped"].includes(order.status)
+    ) {
+      acc[order.status] =
+        (acc[order.status] || 0) + (order.orderItems?.length || 0);
+    }
+    return acc;
+  }, {});
+
+  productCounts[""] = orders.reduce(
+    (sum, o) => sum + (o.orderItems?.length || 0),
+    0
+  );
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [orderToCancel, setOrderToCancel] = useState(null);
 
@@ -136,31 +149,34 @@ const OrderPage = () => {
     <Container className="py-3 order-page">
       {/* TABS */}
       <Tabs activeKey={activeTab} onSelect={(k) => setActiveTab(k)} justify>
-        {STATUS_TABS.map((tab) => {
-          if (!tab.key || tab.key === "cancelled")
-            return <Tab key={tab.key} eventKey={tab.key} title={tab.label} />;
-
-          return (
-            <Tab
-              key={tab.key}
-              eventKey={tab.key}
-              title={
-                <span className="position-relative">
-                  {tab.label}
-                  {!!statusCounts[tab.key] && (
+        {STATUS_TABS.map((tab) => (
+          <Tab
+            key={tab.key}
+            eventKey={tab.key}
+            title={
+              <span style={{ position: "relative", display: "inline-block" }}>
+                {tab.label}
+                {["pending", "confirmed", "processing", "shipped"].includes(
+                  tab.key
+                ) &&
+                  productCounts[tab.key] > 0 && (
                     <Badge
                       pill
                       bg="danger"
-                      className="position-absolute top-0 start-100 translate-middle"
+                      style={{
+                        position: "absolute",
+                        top: "-8px",
+                        right: "-12px",
+                        fontSize: "0.65rem",
+                      }}
                     >
-                      {statusCounts[tab.key]}
+                      {productCounts[tab.key]}
                     </Badge>
                   )}
-                </span>
-              }
-            />
-          );
-        })}
+              </span>
+            }
+          />
+        ))}
       </Tabs>
 
       {/* TABLE */}

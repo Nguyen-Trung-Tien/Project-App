@@ -1,0 +1,226 @@
+.chatbot-button {
+  position: fixed;
+  bottom: 22px;
+  right: 20px;
+  z-index: 9999;
+  cursor: pointer;
+
+  .button-inner {
+    background: linear-gradient(135deg, #4facfe, #00f2fe);
+    color: #fff;
+    padding: 14px;
+    border-radius: 50%;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.28);
+    transition: 0.25s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+.chatbot-window {
+  position: fixed;
+  bottom: 90px;
+  right: 20px;
+  width: 360px;
+  height: 480px;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  border-radius: 18px;
+  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+  z-index: 9998;
+  animation: chatOpen 0.25s ease;
+
+  &.full-mode {
+    width: 420px;
+    height: 560px;
+  }
+
+  .header {
+    padding: 14px 16px;
+    background: linear-gradient(90deg, #4facfe, #00f2fe);
+    color: #fff;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    button {
+      background: transparent;
+      border: none;
+      color: #fff;
+      cursor: pointer;
+    }
+  }
+
+  .messages {
+    flex: 1;
+    padding: 12px;
+    overflow-y: auto;
+    background: #f6f8fa;
+
+    .message {
+      display: flex;
+      align-items: flex-end;
+      gap: 6px;
+      margin-bottom: 10px;
+
+      &.user {
+        justify-content: flex-end;
+
+        .bubble {
+          background: linear-gradient(135deg, #4facfe, #00d0fe);
+          color: #fff;
+        }
+
+        .avatar {
+          background: #fff;
+          width: 32px;
+          height: 32px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+        }
+      }
+
+      &.assistant {
+        justify-content: flex-start;
+
+        .bubble {
+          background: #fff;
+          color: #333;
+        }
+
+        .avatar {
+          background: #fff;
+          width: 32px;
+          height: 32px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+        }
+      }
+
+      .bubble {
+        padding: 10px 14px;
+        border-radius: 14px;
+        max-width: 75%;
+        word-break: break-word;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.14);
+        animation: fadeIn 0.2s ease;
+
+        .time {
+          font-size: 0.75rem;
+          margin-bottom: 4px;
+          opacity: 0.6;
+        }
+      }
+    }
+  }
+
+  .quick-actions {
+    padding: 8px;
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    background: #fff;
+
+    .action {
+      padding: 6px 10px;
+      background: #eef3f7;
+      border-radius: 14px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+  }
+
+  .input-box {
+    padding: 10px;
+    border-top: 1px solid #ddd;
+    display: flex;
+    gap: 8px;
+    background: #fff;
+
+    input {
+      border-radius: 18px;
+      padding: 10px 14px;
+    }
+
+    .autocomplete {
+      position: absolute;
+      bottom: 48px;
+      left: 0;
+      right: 0;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      z-index: 10;
+      padding: 6px 0;
+
+      div {
+        padding: 8px 12px;
+        cursor: pointer;
+      }
+    }
+
+    button {
+      background: linear-gradient(135deg, #4facfe, #00f2fe);
+      color: #fff;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 18px;
+    }
+  }
+}
+
+@keyframes chatOpen {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes dots {
+  0%,
+  20% {
+    content: " ";
+  }
+  40% {
+    content: ".";
+  }
+  60% {
+    content: "..";
+  }
+  80%,
+  100% {
+    content: "...";
+  }
+}
+
+.dots::after {
+  content: "...";
+  display: inline-block;
+  animation: dots 1s infinite;
+}
