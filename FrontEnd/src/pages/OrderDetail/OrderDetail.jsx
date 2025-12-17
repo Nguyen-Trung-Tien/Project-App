@@ -18,6 +18,7 @@ import { getOrderById } from "../../api/orderApi";
 import { requestReturn } from "../../api/orderItemApi";
 import "./OrderDetail.scss";
 import { useSelector } from "react-redux";
+import { getImage } from "../../utils/decodeImage";
 
 const OrderDetail = () => {
   const user = useSelector((state) => state.user.user);
@@ -307,15 +308,38 @@ const OrderDetail = () => {
             {order.orderItems?.map((item) => {
               const price = parseFloat(item.price || 0);
               const subtotal = price * (item.quantity || 0);
+              const product = item.product || {};
+
               return (
                 <tr key={item.id} className="text-center">
-                  <td className="product-td">
-                    <Link
-                      to={`/product-detail/${item.productId}`}
-                      className="product-link"
-                    >
-                      {item.productName}
-                    </Link>
+                  <td className="product-td text-start">
+                    <div className="d-flex align-items-center gap-2">
+                      {product.image && (
+                        <img
+                          src={getImage(product.image)}
+                          alt={product.name}
+                          width={60}
+                          height={60}
+                          className="rounded"
+                        />
+                      )}
+                      <div>
+                        <Link
+                          to={`/product-detail/${product.id}`}
+                          className="product-link fw-bold"
+                        >
+                          {product.name || item.productName}
+                        </Link>
+                        <div className="text-muted small">
+                          {product.ram && <span>RAM: {product.ram} </span>}
+                          {product.rom && <span>ROM: {product.rom} </span>}
+                          {product.cpu && <span>CPU: {product.cpu} </span>}
+                          {product.screen && (
+                            <span>Màn hình: {product.screen}</span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
                   </td>
 
                   <td>{item.quantity}</td>

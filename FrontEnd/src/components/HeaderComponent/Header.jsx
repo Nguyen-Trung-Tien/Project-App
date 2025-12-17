@@ -348,10 +348,10 @@ function Header() {
                     Thông tin cá nhân
                   </NavDropdown.Item>
                   <NavDropdown.Item onClick={() => navigate("/orders")}>
-                    Đơn hàng
+                    Đơn mua
                   </NavDropdown.Item>
                   <NavDropdown.Item onClick={() => navigate("/order-history")}>
-                    Lịch sử đơn hàng
+                    Lịch sử đơn mua
                   </NavDropdown.Item>
                   <NavDropdown.Item onClick={handleLogout}>
                     Đăng xuất

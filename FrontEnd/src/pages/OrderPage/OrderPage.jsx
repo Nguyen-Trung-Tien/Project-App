@@ -16,6 +16,7 @@ import { toast } from "react-toastify";
 import { getOrdersByUserId, updateOrderStatus } from "../../api/orderApi";
 import AppPagination from "../../components/Pagination/Pagination";
 import "./OrderPage.scss";
+import { getImage } from "../../utils/decodeImage";
 
 const STATUS_TABS = [
   { key: "pending", label: "Chờ xử lý" },
@@ -51,7 +52,9 @@ const OrderPage = () => {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-
+  const [statusCounts, setStatusCounts] = useState({});
+  const [receivingId, setReceivingId] = useState(null);
+  const [cancelling, setCancelling] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [orderToCancel, setOrderToCancel] = useState(null);
 
@@ -72,6 +75,7 @@ const OrderPage = () => {
       if (res?.errCode === 0) {
         setOrders(res.data || []);
         setTotalPages(res.pagination?.totalPages || 1);
+        setStatusCounts(res.counts || {});
       } else {
         toast.warning(res?.errMessage || "Không thể tải đơn hàng");
       }
@@ -94,24 +98,34 @@ const OrderPage = () => {
   );
 
   const handleReceiveOrder = async (id) => {
+    setReceivingId(id);
     try {
       const res = await updateOrderStatus(id, "delivered");
-      if (res?.errCode === 0) toast.success("Đã nhận hàng!");
-      fetchOrders();
+      if (res?.errCode === 0) {
+        toast.success("Đã nhận hàng!");
+        setOrders((prev) => prev.filter((o) => o.id !== id));
+      }
     } catch {
       toast.error("Lỗi xác nhận nhận hàng");
+    } finally {
+      setReceivingId(null);
     }
   };
 
   const handleCancelOrder = async () => {
+    if (!orderToCancel) return;
+    setCancelling(true);
     try {
       const res = await updateOrderStatus(orderToCancel.id, "cancelled");
-      if (res?.errCode === 0) toast.success("Đã hủy đơn!");
-      fetchOrders();
+      if (res?.errCode === 0) {
+        toast.success("Đã hủy đơn!");
+        fetchOrders();
+      }
     } catch {
       toast.error("Không thể hủy đơn");
     } finally {
       setShowCancelModal(false);
+      setCancelling(false);
     }
   };
 
@@ -120,27 +134,33 @@ const OrderPage = () => {
 
   return (
     <Container className="py-3 order-page">
-      {/* TITLE */}
-      <div className="text-center mb-3">
-        <div className="d-inline-flex align-items-center px-4 py-2 rounded-pill order-title">
-          <Cart4 size={26} className="me-2" />
-          <h4 className="fw-bold mb-0">Đơn hàng của tôi</h4>
-        </div>
-      </div>
-
       {/* TABS */}
-      <Tabs
-        activeKey={activeTab}
-        onSelect={(k) => {
-          setActiveTab(k);
-          setPage(1);
-        }}
-        className="mb-3"
-        justify
-      >
-        {STATUS_TABS.map((tab) => (
-          <Tab key={tab.key} eventKey={tab.key} title={tab.label} />
-        ))}
+      <Tabs activeKey={activeTab} onSelect={(k) => setActiveTab(k)} justify>
+        {STATUS_TABS.map((tab) => {
+          if (!tab.key || tab.key === "cancelled")
+            return <Tab key={tab.key} eventKey={tab.key} title={tab.label} />;
+
+          return (
+            <Tab
+              key={tab.key}
+              eventKey={tab.key}
+              title={
+                <span className="position-relative">
+                  {tab.label}
+                  {!!statusCounts[tab.key] && (
+                    <Badge
+                      pill
+                      bg="danger"
+                      className="position-absolute top-0 start-100 translate-middle"
+                    >
+                      {statusCounts[tab.key]}
+                    </Badge>
+                  )}
+                </span>
+              }
+            />
+          );
+        })}
       </Tabs>
 
       {/* TABLE */}
@@ -168,19 +188,68 @@ const OrderPage = () => {
                 filteredOrders.map((o, idx) => (
                   <tr key={o.id}>
                     <td>{(page - 1) * limit + idx + 1}</td>
-                    <td className="fw-bold text-primary">{`DH${o.id}`}</td>
-                    <td>{new Date(o.orderDate).toLocaleDateString("vi-VN")}</td>
+                    <td
+                      className="text-start fw-bold text-primary "
+                      onClick={() => navigate(`/orders-detail/${o.id}`)}
+                    >{`DH${o.id}`}</td>
+                    <td>{new Date(o.createdAt).toLocaleDateString("vi-VN")}</td>
+
                     <td className="text-start">
-                      {o.orderItems?.map((i) => (
-                        <div key={i.id}>
-                          <div className="fw-semibold">{i.productName}</div>
-                          <small className="text-muted">
-                            {i.quantity} ×{" "}
-                            {parseFloat(i.price).toLocaleString("vi-VN")} ₫
-                          </small>
-                        </div>
-                      ))}
+                      {o.orderItems?.map((i) => {
+                        const p = i.product;
+
+                        return (
+                          <div key={i.id} className="d-flex gap-3 mb-2">
+                            {/* IMAGE */}
+                            <img
+                              src={getImage(i.product?.image)}
+                              alt={i.product?.name || i.productName}
+                              width={60}
+                              height={60}
+                            />
+
+                            {/* INFO */}
+                            <div>
+                              <div
+                                className="fw-semibold"
+                                onClick={() =>
+                                  navigate(`/orders-detail/${o.id}`)
+                                }
+                              >
+                                {p?.name || i.productName}
+                              </div>
+
+                              <div className="text-muted small">
+                                SL: {i.quantity}
+                              </div>
+
+                              {/* PRICE */}
+                              <div>
+                                {p?.discount > 0 && (
+                                  <small className="text-decoration-line-through text-muted me-2">
+                                    {parseFloat(p.price).toLocaleString(
+                                      "vi-VN"
+                                    )}{" "}
+                                    ₫
+                                  </small>
+                                )}
+                                <span className="fw-semibold text-danger">
+                                  {parseFloat(i.price).toLocaleString("vi-VN")}{" "}
+                                  ₫
+                                </span>
+
+                                {p?.discount > 0 && (
+                                  <Badge bg="danger" className="ms-2">
+                                    -{p.discount}%
+                                  </Badge>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
                     </td>
+
                     <td className="fw-semibold text-success">
                       {formatCurrency(o.totalPrice)}
                     </td>
@@ -210,7 +279,7 @@ const OrderPage = () => {
                             setShowCancelModal(true);
                           }}
                         >
-                          Hủy
+                          Hủy đơn
                         </Button>
                       )}
 
@@ -218,9 +287,18 @@ const OrderPage = () => {
                         <Button
                           size="sm"
                           variant="success"
+                          disabled={receivingId === o.id}
                           onClick={() => handleReceiveOrder(o.id)}
+                          className="d-flex align-items-center gap-1"
                         >
-                          Nhận hàng
+                          {receivingId === o.id ? (
+                            <>
+                              <Spinner animation="border" size="sm" />
+                              Đang xử lý
+                            </>
+                          ) : (
+                            "Nhận hàng"
+                          )}
                         </Button>
                       )}
                     </td>
@@ -267,8 +345,19 @@ const OrderPage = () => {
           <Button variant="secondary" onClick={() => setShowCancelModal(false)}>
             Không
           </Button>
-          <Button variant="danger" onClick={handleCancelOrder}>
-            Xác nhận hủy
+          <Button
+            variant="danger"
+            onClick={handleCancelOrder}
+            disabled={cancelling} // trạng thái khi đang hủy
+          >
+            {cancelling ? (
+              <>
+                <Spinner animation="border" size="sm" className="me-2" />
+                Đang hủy
+              </>
+            ) : (
+              "Xác nhận hủy"
+            )}
           </Button>
         </Modal.Footer>
       </Modal>

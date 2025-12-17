@@ -49,8 +49,47 @@ const getOrderById = async (id, user) => {
           as: "user",
           attributes: ["id", "username", "email", "phone"],
         },
-        { model: db.OrderItem, as: "orderItems" },
-        { model: db.Payment, as: "payment" },
+        {
+          model: db.OrderItem,
+          as: "orderItems",
+          attributes: [
+            "id",
+            "quantity",
+            "price",
+            "subtotal",
+            "productName",
+            "image",
+            "returnStatus",
+          ],
+          include: [
+            {
+              model: db.Product,
+              as: "product",
+              attributes: [
+                "id",
+                "name",
+                "image",
+                "price",
+                "discount",
+                "color",
+                "ram",
+                "rom",
+                "screen",
+                "cpu",
+                "battery",
+                "weight",
+                "connectivity",
+                "os",
+                "extra",
+              ],
+            },
+          ],
+        },
+        {
+          model: db.Payment,
+          as: "payment",
+          attributes: ["id", "orderId", "amount", "method", "status"],
+        },
       ],
     });
 
@@ -76,24 +115,61 @@ const getOrderById = async (id, user) => {
   }
 };
 
-const getOrdersByUserId = async (userId, page = 1, limit = 10) => {
+const getOrdersByUserId = async (
+  userId,
+  page = 1,
+  limit = 10,
+  status = "all"
+) => {
   try {
     const offset = (page - 1) * limit;
 
+    const where = { userId };
+    if (status !== "all") {
+      where.status = status;
+    }
+
     const { count, rows: orders } = await db.Order.findAndCountAll({
-      where: { userId },
-      include: [
-        {
-          model: db.User,
-          as: "user",
-          attributes: ["id", "username", "email", "phone"],
-        },
-        { model: db.OrderItem, as: "orderItems" },
-        { model: db.Payment, as: "payment" },
-      ],
+      where,
+      distinct: true,
       order: [["createdAt", "DESC"]],
       limit,
       offset,
+      attributes: [
+        "id",
+        "status",
+        "totalPrice",
+        "paymentMethod",
+        "paymentStatus",
+        "createdAt",
+        "deliveredAt",
+      ],
+      include: [
+        {
+          model: db.OrderItem,
+          as: "orderItems",
+          attributes: [
+            "id",
+            "quantity",
+            "price",
+            "subtotal",
+            "productName",
+            "image",
+            "returnStatus",
+          ],
+          include: [
+            {
+              model: db.Product,
+              as: "product",
+              attributes: ["id", "name", "image", "price", "discount"],
+            },
+          ],
+        },
+        {
+          model: db.Payment,
+          as: "payment",
+        },
+      ],
     });
 
     const totalPages = Math.ceil(count / limit);
@@ -136,7 +212,7 @@ const getActiveOrdersByUserId = async (userId, page = 1, limit = 10) => {
           include: [
             {
               model: db.Product,
-              as: "product",
+              as: "productInfo",
               attributes: ["id", "name", "price", "image"],
             },
           ],
