@@ -24,21 +24,25 @@ import { searchSuggestionsApi } from "../../api/productApi";
 import { getAllCarts } from "../../api/cartApi";
 import { clearCart, setCartItems } from "../../redux/cartSlice";
 import { getImage } from "../../utils/decodeImage";
+import { useCurrentUser } from "../../hooks/useUser";
 
 function Header() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [searchInput, setSearchInput] = useState("");
 
-  const user = useSelector((state) => state.user.user);
-  const token = user?.accessToken;
+  const { data: resUser } = useCurrentUser();
+  const user = resUser?.data;
+  const token = localStorage.getItem("accessToken");
 
   const cartItemCount = useSelector(
     (state) =>
       state.cart.cartItems?.reduce((sum, i) => sum + (i.quantity || 0), 0) || 0
   );
 
-  const avatarUrl = user?.avatar || "/default-avatar.png";
+  const avatarUrl = user?.avatar?.startsWith("data:image")
+    ? user.avatar
+    : "/default-avatar.png";
   const [suggestions, setSuggestions] = useState({
     products: [],
     keywords: [],
@@ -49,7 +53,7 @@ function Header() {
 
   useEffect(() => {
     const fetchCart = async () => {
-      if (!user?.id) return;
+      if (!user?.id || !token) return;
 
       try {
         const res = await getAllCarts(token);
@@ -64,7 +68,7 @@ function Header() {
     };
 
     fetchCart();
-  }, [user, dispatch]);
+  }, [user?.id, token, dispatch]);
 
   const fetchSuggestions = useCallback(
     debounce(async (query) => {
@@ -228,7 +232,7 @@ function Header() {
                         }}
                       >
                         <img
-                          src={getImage(p.image)}
+                          src={getImage(p.avatar)}
                           className="suggest-img"
                           alt=""
                         />
