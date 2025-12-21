@@ -8,23 +8,23 @@ import {
   Telephone,
   GeoAlt,
 } from "react-bootstrap-icons";
-import "./Footer.scss";
 import { Link } from "react-router-dom";
+import logoImage from "../../assets/Tien-Tech Shop.png";
+import "./Footer.scss";
 
 const Footer = () => {
   return (
     <footer className="footer mt-2 pt-2 pb-3">
       <Container>
         <Row className="gy-2">
-          {/* Cột 1 */}
-          <Col md={3} sm={6}>
-            <Navbar.Brand
-              as={Link}
-              to="/"
-              className="header__brand fw-bold fs-4"
-            >
-              <span className="brand-highlight text-primary">T</span>ien-
-              <span className="brand-highlight text-primary">T</span>ech
+          {/* Cột 1: Logo + mô tả */}
+          <Col md={3} sm={6} className="text-center text-md-start">
+            <Navbar.Brand as={Link} to="/" className="footer-logo mb-2">
+              <img
+                src={logoImage}
+                alt="Tien-Tech Logo"
+                className="footer-logo-img"
+              />
             </Navbar.Brand>
             <p className="footer__desc">
               Cửa hàng điện tử hàng đầu Việt Nam — cung cấp sản phẩm chất lượng
@@ -32,45 +32,45 @@ const Footer = () => {
             </p>
           </Col>
 
-          {/* Cột 2 */}
+          {/* Cột 2: Liên kết nhanh */}
           <Col md={3} sm={6}>
             <h6 className="footer__subtitle">Liên kết nhanh</h6>
             <ul className="footer__links">
               <li>
-                <a href="/">Trang chủ</a>
+                <Link to="/">Trang chủ</Link>
               </li>
               <li>
-                <a href="/products">Sản phẩm</a>
+                <Link to="/products">Sản phẩm</Link>
               </li>
               <li>
-                <a href="/about">Giới thiệu</a>
+                <Link to="/about">Giới thiệu</Link>
               </li>
               <li>
-                <a href="/contact">Liên hệ</a>
+                <Link to="/contact">Liên hệ</Link>
               </li>
             </ul>
           </Col>
 
-          {/* Cột 3 */}
+          {/* Cột 3: Hỗ trợ khách hàng */}
           <Col md={3} sm={6}>
             <h6 className="footer__subtitle">Hỗ trợ khách hàng</h6>
             <ul className="footer__links">
               <li>
-                <a href="/faq">Câu hỏi thường gặp</a>
+                <Link to="/faq">Câu hỏi thường gặp</Link>
               </li>
               <li>
-                <a href="/policy">Chính sách bảo hành</a>
+                <Link to="/policy">Chính sách bảo hành</Link>
               </li>
               <li>
-                <a href="/shipped">Vận chuyển & đổi trả</a>
+                <Link to="/shipped">Vận chuyển & đổi trả</Link>
               </li>
               <li>
-                <a href="/support">Trung tâm hỗ trợ</a>
+                <Link to="/support">Trung tâm hỗ trợ</Link>
               </li>
             </ul>
           </Col>
 
-          {/* Cột 4 */}
+          {/* Cột 4: Liên hệ */}
           <Col md={3} sm={6}>
             <h6 className="footer__subtitle">Liên hệ</h6>
             <ul className="footer__contact">

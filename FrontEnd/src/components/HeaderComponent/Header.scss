@@ -1,29 +1,35 @@
 .header {
-  background: linear-gradient(90deg, #00c6ff 0%, #0072ff 100%) !important;
+  background: #fff !important;
   transition: all 0.3s ease;
 
   /* Logo */
   .navbar-brand {
     font-size: 1.7rem;
     font-weight: 700;
-    color: #fff !important;
+    color: #333 !important;
 
     .brand-highlight {
-      color: #fff;
-      text-shadow: 0 0 8px rgba(0, 198, 255, 0.8);
+      color: #0072ff;
+      text-shadow: none;
+    }
+    .header-logo {
+      height: 50px;
+      object-fit: contain;
+      display: block;
     }
   }
+
   /* Navigation links */
   .header__link {
-    color: #fff !important;
+    color: #333 !important;
     font-weight: 500;
     transition: color 0.2s ease;
 
     &:hover {
-      color: #00ffe0 !important;
+      color: #0072ff !important;
     }
   }
-  /* Search Bar */
+
   .search-wrapper {
     position: relative;
     width: 100%;
@@ -32,14 +38,14 @@
       border-radius: 50px;
       padding-left: 2.5rem;
       padding-right: 2.5rem;
-      border: none;
+      border: 1px solid #ccc;
       height: 36px;
-      box-shadow: 0 0 6px rgba(0, 0, 0, 0.15);
+      box-shadow: 0 0 6px rgba(0, 0, 0, 0.05);
       transition: all 0.2s ease;
 
       &:focus {
         outline: none;
-        box-shadow: 0 0 8px rgba(0, 198, 255, 0.5);
+        box-shadow: 0 0 8px rgba(0, 198, 255, 0.25);
       }
     }
 
@@ -48,11 +54,10 @@
       top: 50%;
       left: 14px;
       transform: translateY(-50%);
-      color: #eaffff;
+      color: #999;
       font-size: 1.2rem;
     }
 
-    /* Button X */
     .btn-clear {
       position: absolute;
       right: 10px;
@@ -63,20 +68,19 @@
       display: flex;
       justify-content: center;
       align-items: center;
-
       border: none;
       border-radius: 50%;
       cursor: pointer;
-
-      background: rgba(255, 255, 255, 0.85);
+      background: rgba(0, 0, 0, 0.05);
       color: #d21414;
       transition: 0.15s ease;
 
       &:hover {
-        background: #ffe9e9;
-        box-shadow: 0 0 6px rgba(255, 60, 60, 0.4);
+        background: rgba(0, 0, 0, 0.1);
+        box-shadow: 0 0 6px rgba(0, 0, 0, 0.15);
       }
     }
+
     /* Suggestion Box */
     .search-suggestion-box {
       position: absolute;
@@ -89,8 +93,7 @@
       z-index: 999;
       max-height: 380px;
       overflow-y: auto;
-
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
       animation: fadeIn 0.2s ease;
 
       .suggest-section {
@@ -103,14 +106,14 @@
           margin-bottom: 6px;
         }
 
-        .suggest-item {
+        .suggest-item,
+        .suggest-product-item {
           padding: 6px 0;
           cursor: pointer;
-          font-size: 14px;
           border-radius: 6px;
 
           &:hover {
-            background: #eef7ff;
+            background: #f0f8ff;
             color: #0072ff;
           }
         }
@@ -119,13 +122,6 @@
           display: flex;
           align-items: center;
           gap: 10px;
-          padding: 6px 0;
-          cursor: pointer;
-          border-radius: 8px;
-
-          &:hover {
-            background: #eef7ff;
-          }
 
           .suggest-img {
             width: 42px;
@@ -155,16 +151,16 @@
     }
   }
 
-  /* Header Actions (Cart, User) */
+  /* Header Actions */
   .header__actions {
     .header__icon-link {
-      color: #fff !important;
+      color: #333 !important;
       font-weight: 500;
       position: relative;
       transition: 0.2s ease;
 
       &:hover {
-        color: #00ffe0 !important;
+        color: #0072ff !important;
       }
 
       .cart-badge {
@@ -176,11 +172,11 @@
     }
 
     .dropdown-toggle {
-      color: #fff !important;
+      color: #333 !important;
       font-weight: 500;
 
       &:hover {
-        color: #00ffe0 !important;
+        color: #0072ff !important;
       }
     }
   }

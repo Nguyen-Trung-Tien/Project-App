@@ -1,109 +1,74 @@
 .footer {
-  background: linear-gradient(90deg, #00c6ff 0%, #0072ff 100%) !important;
-  color: #fff !important;
-  font-size: 0.95rem;
+  background: #f8f9fa;
+  padding-top: 2rem;
+  padding-bottom: 1.5rem;
+  color: #495057;
+  font-size: 0.9rem;
 
-  .footer__title {
-    font-size: 1.4rem;
-    font-weight: 700;
-    color: #0d6efd;
+  .footer-logo-img {
+    max-width: 160px;
+    height: auto;
+    display: block;
     margin-bottom: 0.5rem;
   }
 
   .header__brand {
-    color: #fff !important;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    font-weight: 700;
-
-    .brand-highlight {
-      color: #fffb00;
-      font-weight: 800;
-    }
+    color: #0072ff !important;
+    text-decoration: none;
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
   }
+
   .footer__desc {
-    color: #fff !important;
-    line-height: 1.6;
+    font-size: 0.85rem;
+    margin-top: 0.5rem;
+    line-height: 1.4;
   }
 
   .footer__subtitle {
     font-weight: 600;
-    font-size: 1.1rem;
-    margin-bottom: 0.5rem;
-    color: #fff !important;
+    margin-bottom: 0.75rem;
+    color: #0072ff;
   }
 
-  .footer__links {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-
-    li {
-      margin-bottom: 0.3rem;
-
-      a {
-        color: #fff !important;
-        text-decoration: none;
-        transition: color 0.2s ease;
-
-        &:hover {
-          color: #0d6efd;
-        }
-      }
-    }
-  }
-
+  .footer__links,
   .footer__contact {
     list-style: none;
     padding: 0;
     margin: 0;
 
     li {
-      margin-bottom: 0.4rem;
-      display: flex;
-      align-items: center;
-      color: #fff !important;
+      margin-bottom: 0.5rem;
+
+      a {
+        color: #495057;
+        text-decoration: none;
+        transition: 0.2s ease;
+
+        &:hover {
+          color: #0072ff;
+          text-decoration: underline;
+        }
+      }
 
       .icon {
-        color: #fff;
         margin-right: 0.5rem;
+        color: #0072ff;
       }
     }
   }
 
   .footer__social {
     a {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 32px;
-      height: 32px;
+      display: inline-block;
       margin-right: 0.5rem;
-      color: #fff;
-      background-color: #0d6efd;
-      border-radius: 50%;
-      transition: background-color 0.2s ease;
+      font-size: 1.2rem;
+      color: #495057;
+      transition: 0.2s ease;
 
       &:hover {
-        background-color: #ff6b00;
+        color: #0072ff;
       }
-
-      svg {
-        font-size: 1rem;
-      }
-    }
-  }
-
-  // Responsive
-  @media (max-width: 768px) {
-    text-align: center;
-
-    .footer__social {
-      justify-content: center;
-    }
-
-    .footer__contact li {
-      justify-content: center;
     }
   }
 }

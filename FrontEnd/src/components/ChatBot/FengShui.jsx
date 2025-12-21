@@ -117,6 +117,7 @@ const FengShuiChat = ({ setBirthYear: setGlobalBirthYear }) => {
             { sender: "bot", advice: res.advice },
           ]);
         } catch (err) {
+          console.log(err);
           setMessages((prev) => [
             ...prev,
             { sender: "bot", text: "Có lỗi xảy ra khi gọi API." },
@@ -157,8 +158,8 @@ const FengShuiChat = ({ setBirthYear: setGlobalBirthYear }) => {
         onClick={handleShow}
         style={{
           position: "fixed",
-          bottom: 20,
-          right: 20,
+          bottom: 30,
+          left: 20,
           borderRadius: "50%",
           width: 60,
           height: 60,
@@ -171,7 +172,7 @@ const FengShuiChat = ({ setBirthYear: setGlobalBirthYear }) => {
       </Button>
 
       {/* Chat Window */}
-      <Offcanvas show={show} onHide={handleClose} placement="end">
+      <Offcanvas show={show} onHide={handleClose} placement="start">
         <Offcanvas.Header closeButton>
           <Offcanvas.Title>
             <FaRobot /> TienTech Feng Shui Chat

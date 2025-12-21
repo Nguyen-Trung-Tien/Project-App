@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Navbar,
   Nav,
@@ -8,28 +8,31 @@ import {
   Image,
 } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
-import {
-  Cart,
-  PersonCircle,
-  Search,
-  XCircleFill,
-  XLg,
-} from "react-bootstrap-icons";
+import { Cart, PersonCircle, Search, XLg } from "react-bootstrap-icons";
 import { useSelector, useDispatch } from "react-redux";
 import { removeUser } from "../../redux/userSlice";
+import { clearCart, setCartItems } from "../../redux/cartSlice";
 import { logoutUserApi } from "../../api/userApi";
-import { debounce } from "lodash";
-import "./Header.scss";
 import { searchSuggestionsApi } from "../../api/productApi";
 import { getAllCarts } from "../../api/cartApi";
-import { clearCart, setCartItems } from "../../redux/cartSlice";
 import { getImage } from "../../utils/decodeImage";
 import { useCurrentUser } from "../../hooks/useUser";
+import { debounce } from "lodash";
+import "./Header.scss";
+import logoImage from "../../assets/Tien-Tech Shop.png";
 
 function Header() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
   const [searchInput, setSearchInput] = useState("");
+  const [suggestions, setSuggestions] = useState({
+    products: [],
+    keywords: [],
+    brands: [],
+    categories: [],
+  });
+  const [showSuggestions, setShowSuggestions] = useState(false);
 
   const { data: resUser } = useCurrentUser();
   const user = resUser?.data;
@@ -43,15 +46,10 @@ function Header() {
   const avatarUrl = user?.avatar?.startsWith("data:image")
     ? user.avatar
     : "/default-avatar.png";
-  const [suggestions, setSuggestions] = useState({
-    products: [],
-    keywords: [],
-    brands: [],
-    categories: [],
-  });
-  const [showSuggestions, setShowSuggestions] = useState(false);
 
+  // Fetch Cart
   useEffect(() => {
+    let isMounted = true;
     const fetchCart = async () => {
       if (!user?.id || !token) return;
 
@@ -59,17 +57,22 @@ function Header() {
         const res = await getAllCarts(token);
         const userCart = res.data.find((c) => c.userId === user.id);
 
-        if (userCart && userCart.items) {
-          dispatch(setCartItems(userCart.items));
+        if (isMounted) {
+          if (userCart?.items) dispatch(setCartItems(userCart.items));
+          else dispatch(clearCart());
         }
-      } catch (error) {
-        console.error("Lỗi tải giỏ hàng:", error);
+      } catch (err) {
+        console.error("Fetch cart error:", err);
       }
     };
 
     fetchCart();
+    return () => {
+      isMounted = false;
+    };
   }, [user?.id, token, dispatch]);
 
+  // Search Suggestion Debounce
   const fetchSuggestions = useCallback(
     debounce(async (query) => {
       if (!query.trim()) {
@@ -82,7 +85,6 @@ function Header() {
         setShowSuggestions(false);
         return;
       }
-
       try {
         const res = await searchSuggestionsApi(query);
         setSuggestions(res?.suggestions || {});
@@ -98,7 +100,6 @@ function Header() {
     try {
       await logoutUserApi();
       localStorage.removeItem("accessToken");
-      localStorage.removeItem("user");
       dispatch(removeUser());
       dispatch(clearCart());
       navigate("/login");
@@ -106,14 +107,6 @@ function Header() {
       console.error("Logout error:", err);
     }
   };
-
-  const handleSearchDebounced = useCallback(
-    debounce((query) => {
-      if (query.trim())
-        navigate(`/products?search=${encodeURIComponent(query.trim())}`);
-    }, 300),
-    []
-  );
 
   const onSearchChange = (e) => {
     const value = e.target.value;
@@ -124,8 +117,6 @@ function Header() {
       navigate("/");
       return;
     }
-
-    handleSearchDebounced(value);
     fetchSuggestions(value);
   };
 
@@ -133,6 +124,7 @@ function Header() {
     e.preventDefault();
     if (searchInput.trim()) {
       navigate(`/products?search=${encodeURIComponent(searchInput.trim())}`);
+      setShowSuggestions(false);
     }
   };
 
@@ -145,13 +137,14 @@ function Header() {
       className="header shadow-sm py-2"
     >
       <Container>
-        <Navbar.Brand as={Link} to="/" className="navbar-brand fw-bold">
-          <span style={{ color: "#007bff" }}>T</span>ien-
-          <span style={{ color: "#007bff" }}>T</span>ech
+        <Navbar.Brand as={Link} to="/" className="navbar-brand ">
+          <img
+            className="header-logo"
+            src={logoImage}
+            alt="Tien-Tech Shop Logo"
+          />
         </Navbar.Brand>
-
         <Navbar.Toggle aria-controls="navbar-nav" />
-
         <Navbar.Collapse id="navbar-nav" className="justify-content-between">
           <Nav className="me-auto">
             <Nav.Link as={Link} to="/" className="header__link">
@@ -165,14 +158,12 @@ function Header() {
             </Nav.Link>
           </Nav>
 
+          {/* Search */}
           <form
             onSubmit={onSearchSubmit}
             className="search-wrapper position-relative d-flex align-items-center w-50"
           >
-            {/* Search Icon */}
             <Search className="search-icon" />
-
-            {/* Search Input */}
             <input
               type="text"
               placeholder="Tìm sản phẩm..."
@@ -180,8 +171,6 @@ function Header() {
               onChange={onSearchChange}
               className="form-control search-input"
             />
-
-            {/* Clear Button (X) */}
             {searchInput.length > 0 && (
               <button
                 type="button"
@@ -196,101 +185,73 @@ function Header() {
               </button>
             )}
 
-            {/* Suggestion Box */}
             {showSuggestions && (
               <div className="search-suggestion-box shadow-sm">
-                {/* Keywords */}
-                {suggestions.keywords?.length > 0 && (
-                  <div className="suggest-section">
-                    <div className="suggest-title">Gợi ý tìm kiếm</div>
-                    {suggestions.keywords.map((k, idx) => (
-                      <div
-                        key={idx}
-                        className="suggest-item"
-                        onClick={() => {
-                          navigate(`/products?search=${encodeURIComponent(k)}`);
-                          setShowSuggestions(false);
-                        }}
-                      >
-                        {k}
+                {["keywords", "products", "brands", "categories"].map(
+                  (type) =>
+                    suggestions[type]?.length > 0 && (
+                      <div key={type} className="suggest-section">
+                        <div className="suggest-title">
+                          {type === "keywords"
+                            ? "Gợi ý tìm kiếm"
+                            : type === "products"
+                            ? "Sản phẩm phù hợp"
+                            : type === "brands"
+                            ? "Thương hiệu"
+                            : "Danh mục"}
+                        </div>
+                        {suggestions[type].map((item) => {
+                          const label =
+                            type === "products" ? item.name : item.name || item;
+                          const clickHandler = () => {
+                            if (type === "products")
+                              navigate(`/product-detail/${item.id}`);
+                            else if (type === "brands")
+                              navigate(`/products?brand=${item.id}`);
+                            else if (type === "categories")
+                              navigate(`/products?category=${item.id}`);
+                            else
+                              navigate(
+                                `/products?search=${encodeURIComponent(item)}`
+                              );
+                            setShowSuggestions(false);
+                          };
+                          return (
+                            <div
+                              key={item.id || item}
+                              className={
+                                type === "products"
+                                  ? "suggest-product-item"
+                                  : "suggest-item"
+                              }
+                              onClick={clickHandler}
+                            >
+                              {type === "products" && (
+                                <img
+                                  src={getImage(item.image)}
+                                  alt=""
+                                  className="suggest-img"
+                                />
+                              )}
+                              <span>{label}</span>
+                            </div>
+                          );
+                        })}
                       </div>
-                    ))}
-                  </div>
-                )}
-
-                {/* Products */}
-                {suggestions.products?.length > 0 && (
-                  <div className="suggest-section">
-                    <div className="suggest-title">Sản phẩm phù hợp</div>
-                    {suggestions.products.map((p) => (
-                      <div
-                        key={p.id}
-                        className="suggest-product-item"
-                        onClick={() => {
-                          navigate(`/product-detail/${p.id}`);
-                          setShowSuggestions(false);
-                        }}
-                      >
-                        <img
-                          src={getImage(p.avatar)}
-                          className="suggest-img"
-                          alt=""
-                        />
-                        <span>{p.name}</span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {/* Brand */}
-                {suggestions.brands?.length > 0 && (
-                  <div className="suggest-section">
-                    <div className="suggest-title">Thương hiệu</div>
-                    {suggestions.brands.map((b) => (
-                      <div
-                        key={b.id}
-                        className="suggest-item"
-                        onClick={() => {
-                          navigate(`/products?brand=${b.id}`);
-                          setShowSuggestions(false);
-                        }}
-                      >
-                        {b.name}
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {/* Category */}
-                {suggestions.categories?.length > 0 && (
-                  <div className="suggest-section">
-                    <div className="suggest-title">Danh mục</div>
-                    {suggestions.categories.map((c) => (
-                      <div
-                        key={c.id}
-                        className="suggest-item"
-                        onClick={() => {
-                          navigate(`/products?category=${c.id}`);
-                          setShowSuggestions(false);
-                        }}
-                      >
-                        {c.name}
-                      </div>
-                    ))}
-                  </div>
+                    )
                 )}
               </div>
             )}
           </form>
 
+          {/* User & Cart */}
           <Nav className="header__actions align-items-center">
             <Nav.Link
               as={Link}
               to="/cart"
               className="header__icon-link position-relative"
             >
-              <Cart size={20} className="me-1" />
-              Giỏ hàng
+              <Cart size={20} className="me-1" /> Giỏ hàng
               {cartItemCount > 0 && (
                 <Badge bg="danger" pill className="cart-badge">
                   {cartItemCount}
@@ -306,25 +267,10 @@ function Header() {
                       Dashboard
                     </NavDropdown.Item>
                     <NavDropdown.Item as={Link} to="/admin/orders">
-                      Quản lý đơn hàng
+                      Đơn hàng
                     </NavDropdown.Item>
                     <NavDropdown.Item as={Link} to="/admin/products">
-                      Quản lý sản phẩm
-                    </NavDropdown.Item>
-                    <NavDropdown.Item as={Link} to="/admin/users">
-                      Quản lý người dùng
-                    </NavDropdown.Item>
-                    <NavDropdown.Item as={Link} to="/admin/payment">
-                      Quản lý thanh toán
-                    </NavDropdown.Item>
-                    <NavDropdown.Item as={Link} to="/admin/categories">
-                      Quản lý danh mục
-                    </NavDropdown.Item>
-                    <NavDropdown.Item as={Link} to="/admin/reviews">
-                      Quản lý phản hồi
-                    </NavDropdown.Item>
-                    <NavDropdown.Item as={Link} to="/admin/revenue">
-                      Báo cáo
+                      Sản phẩm
                     </NavDropdown.Item>
                   </NavDropdown>
                 )}
@@ -334,8 +280,6 @@ function Header() {
                     <div className="d-flex align-items-center">
                       <Image
                         src={avatarUrl}
-                        key={avatarUrl}
-                        alt="avatar"
                         roundedCircle
                         width="32"
                         height="32"
@@ -353,9 +297,6 @@ function Header() {
                   </NavDropdown.Item>
                   <NavDropdown.Item onClick={() => navigate("/orders")}>
                     Đơn mua
-                  </NavDropdown.Item>
-                  <NavDropdown.Item onClick={() => navigate("/order-history")}>
-                    Lịch sử đơn mua
                   </NavDropdown.Item>
                   <NavDropdown.Item onClick={handleLogout}>
                     Đăng xuất
