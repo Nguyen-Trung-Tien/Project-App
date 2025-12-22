@@ -147,11 +147,9 @@ const CartPage = () => {
   return (
     <div className="cart-page py-3">
       <Container>
-        <div className="text-center mb-2">
-          <div className="d-inline-flex align-items-center px-4 py-2 rounded-pill cart-title">
-            <Cart4 size={26} className="me-2" />
-            <h3 className="fw-bold mb-0">Giỏ hàng</h3>
-          </div>
+        <div className="cart-header mb-3">
+          <h4 className="fw-bold mb-1">🛒 Giỏ hàng</h4>
+          <span className="text-muted small">{cartItems.length} sản phẩm</span>
         </div>
 
         {loading && page === 1 ? (
@@ -184,7 +182,7 @@ const CartPage = () => {
               <Card className="shadow-lg border-0 rounded-4">
                 <Card.Body>
                   <Table responsive hover className="align-middle mb-0">
-                    <thead className="bg-primary text-white rounded-top">
+                    <thead className="cart-thead">
                       <tr>
                         <th style={{ width: "50px" }}>
                           <Form.Check
@@ -248,29 +246,21 @@ const CartPage = () => {
                               </Link>
                             </td>
 
-                            <td className="text-start fw-semibold">
+                            <td className="text-start">
                               <Link
                                 to={`/product-detail/${item.product?.id}`}
                                 className="product-name-link"
                               >
                                 {item.product?.name}
                               </Link>
-                            </td>
-                            <td className="text-end">
-                              {item.product?.discount > 0 ? (
-                                <>
-                                  <div className="text-muted text-decoration-line-through small">
-                                    {(item.product.price || 0).toLocaleString()}
-                                    ₫
-                                  </div>
-                                  <div className="text-danger fw-bold">
-                                    {price.toLocaleString()}₫
-                                  </div>
-                                </>
-                              ) : (
-                                <span>{price.toLocaleString()}₫</span>
+
+                              {item.product?.discount > 0 && (
+                                <div className="text-danger small">
+                                  Giảm {item.product.discount}%
+                                </div>
                               )}
                             </td>
+
                             <td style={{ width: "90px" }}>
                               <Form.Control
                                 type="number"
@@ -311,39 +301,56 @@ const CartPage = () => {
               </Card>
             </Col>
             <Col lg={4}>
-              <Card className="shadow-lg border-0 rounded-4 p-2">
+              <Card className="checkout-box shadow-sm border-0">
                 <Card.Body>
-                  <h5 className="fw-bold mb-4 text-center text-primary">
+                  {/* Title */}
+                  <h6 className="fw-bold mb-3 text-uppercase text-muted">
                     Tóm tắt đơn hàng
-                  </h5>
+                  </h6>
+
+                  {/* Subtotal */}
                   <div className="d-flex justify-content-between mb-2">
-                    <span>Tạm tính:</span>
-                    <span>{total.toLocaleString()}₫</span>
-                  </div>
-                  <div className="d-flex justify-content-between fw-semibold mb-2">
-                    <span>Phí vận chuyển:</span>
-                    <span className="text-success">Miễn phí</span>
-                  </div>
-                  <hr />
-                  <div className="d-flex justify-content-between align-items-center">
-                    <h5 className="fw-bold mb-0">Tổng cộng:</h5>
-                    <h5 className="text-primary mb-0 fw-bold">
+                    <span className="text-muted">Tạm tính</span>
+                    <span className="fw-semibold">
                       {total.toLocaleString()}₫
-                    </h5>
+                    </span>
                   </div>
+
+                  {/* Shipping */}
+                  <div className="d-flex justify-content-between mb-2">
+                    <span className="text-muted">Phí vận chuyển</span>
+                    <span className="text-success fw-semibold">Miễn phí</span>
+                  </div>
+
+                  <hr />
+
+                  {/* Total */}
+                  <div className="d-flex justify-content-between align-items-center mb-3">
+                    <span className="fw-bold fs-6">Tổng cộng</span>
+                    <span className="fw-bold fs-4" style={{ color: "#0d6efd" }}>
+                      {total.toLocaleString()}₫
+                    </span>
+                  </div>
+
+                  {/* Checkout button */}
                   <Button
-                    variant="primary"
-                    className="w-100 mt-4 rounded-pill fw-semibold shadow-sm py-2"
+                    className="w-100 py-2 fw-semibold"
+                    style={{
+                      background: "#0d6efd",
+                      border: "none",
+                    }}
                     onClick={handleCheckOut}
                   >
-                    Tiến hành thanh toán
+                    Mua hàng
                   </Button>
+
+                  {/* Continue shopping */}
                   <Link
                     to="/"
-                    className="btn btn-outline-primary w-100 mt-3 rounded-pill"
+                    className="btn btn-outline-secondary w-100 mt-2"
+                    style={{ borderRadius: 4 }}
                   >
-                    <ArrowLeftCircle size={18} className="me-1" />
-                    Tiếp tục mua sắm
+                    ← Tiếp tục mua sắm
                   </Link>
                 </Card.Body>
               </Card>

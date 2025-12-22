@@ -64,7 +64,7 @@ const RegisterPage = () => {
           <Row className="h-100 g-0">
             {/* Left Side */}
             <Col
-              lg={6}
+              lg={5}
               className="d-none d-lg-flex align-items-center justify-content-center position-relative overflow-hidden bg-gradient-left"
             >
               <div className="left-overlay"></div>
@@ -82,7 +82,7 @@ const RegisterPage = () => {
 
             {/* Right Side */}
             <Col
-              lg={6}
+              lg={7}
               className="d-flex align-items-center justify-content-center bg-light"
             >
               <Card className="register-card-modern shadow-lg border-0 p-5">

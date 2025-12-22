@@ -129,7 +129,7 @@ const CheckoutForm = ({ user, total, selectedItems, onOrderComplete }) => {
         <h4
           className="fw-bold text-white py-2 px-3 rounded-pill d-inline-block"
           style={{
-            background: "linear-gradient(90deg, #007bff 0%, #00c6ff 100%)",
+            background: "#0d6efd",
           }}
         >
           <GeoAlt className="me-2" />
@@ -266,7 +266,7 @@ const CheckoutForm = ({ user, total, selectedItems, onOrderComplete }) => {
               style={{
                 fontSize: "1rem",
                 minWidth: "220px",
-                background: "linear-gradient(90deg, #007bff 0%, #00c6ff 100%)",
+                background: "#007bff",
                 border: "none",
                 transition: "0.3s",
               }}

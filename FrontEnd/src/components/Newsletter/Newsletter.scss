@@ -39,12 +39,12 @@
     padding: 0 24px;
     border-radius: 8px;
     font-weight: 600;
-    background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
+    background: linear-gradient(135deg, #4c8dff, #1a6dff);
     border: none;
     color: #fff;
 
     &:hover {
-      background: linear-gradient(90deg, #00f2fe 100%, #4facfe 0%);
+      background: linear-gradient(135deg, #2a71eb, #4e79c2);
     }
   }
 }

@@ -7,25 +7,52 @@ const HeroSection = () => {
   const navigate = useNavigate();
 
   return (
-    <section className="hero-section position-relative d-flex align-items-center justify-content-center text-center">
-      <div className="hero-content container position-relative text-white">
-        <h1 className="hero-title fw-bold mb-2">
-          <span style={{ color: "#007bff" }}>T</span>ien-
-          <span style={{ color: "#007bff" }}>T</span>ech
-        </h1>
+    <section className="hero-ttshop">
+      <div className="container">
+        <div className="row align-items-center">
+          {/* ===== LEFT CONTENT ===== */}
+          <div className="col-lg-6 text-white text-center text-lg-start">
+            <span className="hero-badge mb-3 d-inline-block">
+              🔥 Ưu đãi công nghệ mỗi ngày
+            </span>
 
-        <p className="hero-subtitle mb-4">
-          <strong>Mua sắm công nghệ thông minh</strong> – Chất lượng vượt trội –
-          Ưu đãi ngập tràn
-        </p>
+            <h1 className="hero-title mb-4">
+              TienTech Shop <br />
+              <span>Công nghệ chính hãng</span>
+            </h1>
 
-        <Button
-          variant="light"
-          className="hero-btn fw-semibold px-4 py-2 rounded-pill shadow"
-          onClick={() => navigate("/product-list")}
-        >
-          Khám phá ngay <ArrowRight className="ms-2" size={18} />
-        </Button>
+            <p className="hero-desc mb-5">
+              Laptop – Điện thoại – PC – Phụ kiện <br />
+              Giá tốt • Bảo hành chính hãng • Giao hàng nhanh
+            </p>
+
+            <div className="d-flex gap-3 justify-content-center justify-content-lg-start">
+              <Button
+                className="hero-btn-primary px-4 py-2"
+                onClick={() => navigate("/products")}
+              >
+                Mua ngay <ArrowRight className="ms-2" />
+              </Button>
+
+              <Button
+                variant="outline-light"
+                className="px-4 py-2"
+                onClick={() => navigate("/about")}
+              >
+                Giới thiệu về TienTech
+              </Button>
+            </div>
+          </div>
+
+          {/* ===== RIGHT IMAGE ===== */}
+          <div className="col-lg-6 d-none d-lg-block text-center">
+            <img
+              src="https://images.unsplash.com/photo-1517336714731-489689fd1ca8"
+              alt="TienTech Shop"
+              className="hero-image"
+            />
+          </div>
+        </div>
       </div>
     </section>
   );

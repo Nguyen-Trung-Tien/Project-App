@@ -133,13 +133,6 @@ const CheckoutPage = () => {
   return (
     <div className="checkout-page py-4 bg-light">
       <Container>
-        <div className="text-center mb-4">
-          <div className="d-inline-flex align-items-center px-4 py-2 rounded-pill checkout-title">
-            <CreditCard size={26} className="me-2" />
-            <h3 className="fw-bold mb-0">Thanh toán</h3>
-          </div>
-        </div>
-
         <Row className="gy-4">
           <Col lg={8}>
             <Card className="border-0 rounded-4 shadow-sm">

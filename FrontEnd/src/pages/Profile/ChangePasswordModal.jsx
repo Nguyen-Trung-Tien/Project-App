@@ -60,7 +60,7 @@ const ChangePasswordModal = ({ show, onHide, userId, token }) => {
         closeButton
         className="border-0"
         style={{
-          background: "linear-gradient(90deg, #4facfe 0%, #00f2fe 100%)",
+          background: "#007bff",
           color: "white",
         }}
       >
@@ -127,7 +127,7 @@ const ChangePasswordModal = ({ show, onHide, userId, token }) => {
           disabled={loading}
           className="rounded-pill px-4 text-white border-0"
           style={{
-            background: "linear-gradient(90deg, #4facfe 0%, #00f2fe 100%)",
+            background: "#007bff",
           }}
         >
           {loading ? <Spinner animation="border" size="sm" /> : "Lưu thay đổi"}

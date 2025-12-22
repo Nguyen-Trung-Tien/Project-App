@@ -21,56 +21,60 @@ const ChatBot = () => {
 
   const inputRef = useRef(null);
   const messagesEndRef = useRef(null);
+  const [hasGreeted, setHasGreeted] = useState(false);
 
   const user = useSelector((state) => state.user.user);
   const userId = user?.id || null;
 
-  /** Quick actions */
   const quickActions = [
-    "🔍 Tìm sản phẩm theo nhu cầu",
-    "🔥 Xem sản phẩm đang giảm giá",
-    "📦 Tra cứu đơn hàng",
-    "📋 Chính sách bảo hành",
-    "💡 Gợi ý sản phẩm phù hợp",
+    "Tìm sản phẩm theo nhu cầu",
+    "Xem sản phẩm đang giảm giá",
+    "Tra cứu đơn hàng",
+    "Chính sách bảo hành",
+    "Gợi ý sản phẩm phù hợp",
   ];
 
-  /** Autocomplete gợi ý */
   const autoComplete = [
     "Kiểm tra đơn hàng của tôi",
     "Giảm giá hôm nay có gì?",
-    "Tìm laptop văn phòng",
-    "Tư vấn PC gaming 15 triệu",
+    "Laptop văn phòng",
+    "PC gaming 15 triệu",
     "Điện thoại tầm giá 7 triệu",
   ];
 
-  /** Auto scroll */
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, typing]);
 
-  /** Focus input */
   useEffect(() => {
     if (isOpen) {
       setTimeout(() => inputRef.current?.focus(), 200);
     }
   }, [isOpen]);
 
-  /** Format time */
   const formatTime = (date) =>
     `${date.getHours().toString().padStart(2, "0")}:${date
       .getMinutes()
       .toString()
       .padStart(2, "0")}`;
 
-  /** Add message */
-  const addMessage = (role, content, type = "text", link = null) => {
-    setMessages((prev) => [
-      ...prev,
-      { role, content, type, link, time: new Date() },
-    ]);
+  const addMessage = (role, content) => {
+    setMessages((prev) => [...prev, { role, content, time: new Date() }]);
   };
 
-  /** Streaming effect */
+  useEffect(() => {
+    if (isOpen && messages.length === 0 && !hasGreeted) {
+      setHasGreeted(true);
+
+      setTimeout(() => {
+        addMessage(
+          "assistant",
+          "👋 Xin chào! Tôi có thể giúp gì cho bạn hôm nay?"
+        );
+      }, 300);
+    }
+  }, [isOpen, messages.length, hasGreeted]);
+
   const streamText = useCallback(async (text) => {
     setTyping("");
     for (let i = 0; i < text.length; i++) {
@@ -81,66 +85,29 @@ const ChatBot = () => {
     setTyping("");
   }, []);
 
-  /** Kiểm tra link theo ID sản phẩm/đơn hàng */
-  const checkForLinksById = (text) => {
-    const productMatch = text.match(/sản phẩm\s+(\d+)/i);
-    if (productMatch) {
-      const productId = productMatch[1];
-      return {
-        type: "link",
-        content: `Xem chi tiết sản phẩm #${productId}`,
-        link: `http://localhost:5173/product-detail/${productId}`,
-      };
-    }
+  const sendText = async (text) => {
+    if (!text.trim() || loading) return;
 
-    const orderMatch = text.match(/đơn hàng\s+(\d+)/i);
-    if (orderMatch) {
-      const orderId = orderMatch[1];
-      return {
-        type: "link",
-        content: `Xem chi tiết đơn hàng #${orderId}`,
-        link: `http://localhost:5173/orders-detail/${orderId}`,
-      };
-    }
-
-    return { type: "text", content: text };
-  };
-
-  /** Handle send */
-  const handleSend = async (e) => {
-    e.preventDefault();
-    if (!input.trim() || loading) return;
-
-    const userText = input;
-    setInput("");
-    addMessage("user", userText);
     setLoading(true);
+    addMessage("user", text);
 
     try {
-      // Kiểm tra link dựa trên ID ngay lập tức
-      const linkResponse = checkForLinksById(userText);
-
-      if (linkResponse.type === "link") {
-        addMessage(
-          "assistant",
-          linkResponse.content,
-          "link",
-          linkResponse.link
-        );
-      } else {
-        // Gọi API chỉ khi không có link
-        const reply = await sendMessage(userText, userId);
-        await streamText(reply);
-      }
-    } catch (e) {
-      console.log(e);
-      await streamText("Xin lỗi, hệ thống đang bận. Vui lòng thử lại 😥");
+      const reply = await sendMessage(text, userId);
+      await streamText(reply);
+    } catch (err) {
+      console.error(err);
+      await streamText("Xin lỗi, hệ thống đang bận 😥");
     }
 
     setLoading(false);
   };
 
-  /** Autocomplete khi gõ */
+  const handleSend = (e) => {
+    e.preventDefault();
+    sendText(input);
+    setInput("");
+  };
+
   const filteredAutocomplete =
     input.length > 1
       ? autoComplete.filter((s) =>
@@ -150,17 +117,17 @@ const ChatBot = () => {
 
   return (
     <>
-      {/* Button open */}
+      {/* ===== BUTTON ===== */}
       <div className="chatbot-button" onClick={() => setIsOpen(!isOpen)}>
         <div className="button-inner">
           {isOpen ? <FaTimes size={22} /> : <FaComments size={26} />}
         </div>
       </div>
 
-      {/* CHAT WINDOW */}
+      {/* ===== CHAT WINDOW ===== */}
       {isOpen && (
         <div className={`chatbot-window ${fullMode ? "full-mode" : ""}`}>
-          {/* Header */}
+          {/* ===== HEADER ===== */}
           <div className="header">
             <span>
               <FaRobot className="me-2" /> TienTech AI
@@ -170,13 +137,13 @@ const ChatBot = () => {
             </button>
           </div>
 
-          {/* Messages */}
+          {/* ===== MESSAGES ===== */}
           <div className="messages">
             {messages.map((msg, i) => (
               <div key={i} className={`message ${msg.role}`}>
                 {msg.role === "assistant" && (
                   <div className="avatar">
-                    <FaRobot color="#4facfe" />
+                    <FaRobot />
                   </div>
                 )}
 
@@ -185,18 +152,7 @@ const ChatBot = () => {
                     {msg.role === "user" ? "Bạn" : "AI"} •{" "}
                     {formatTime(msg.time)}
                   </div>
-
-                  {msg.type === "link" ? (
-                    <a
-                      href={msg.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      {msg.content}
-                    </a>
-                  ) : (
-                    msg.content
-                  )}
+                  {msg.content}
                 </div>
 
                 {msg.role === "user" && (
@@ -207,12 +163,11 @@ const ChatBot = () => {
               </div>
             ))}
 
-            {/* Loading / Typing */}
+            {/* ===== LOADING ===== */}
             {loading && !typing && (
               <div className="message assistant">
                 <div className="bubble">
-                  <FaRobot color="#4facfe" /> AI đang phản hồi{" "}
-                  <span className="dots"></span>
+                  AI đang phản hồi<span className="dots"></span>
                 </div>
               </div>
             )}
@@ -226,43 +181,30 @@ const ChatBot = () => {
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Quick actions */}
+          {/* ===== QUICK ACTIONS ===== */}
           <div className="quick-actions">
             {quickActions.map((q) => (
-              <div
-                key={q}
-                className="action"
-                onClick={() => {
-                  setInput(q.replace(/^[^ ]+ /, ""));
-                  setTimeout(() => handleSend({ preventDefault() {} }), 50);
-                }}
-              >
+              <div key={q} className="action" onClick={() => sendText(q)}>
                 {q}
               </div>
             ))}
           </div>
 
-          {/* Input box */}
+          {/* ===== INPUT ===== */}
           <form onSubmit={handleSend} className="input-box">
-            <div style={{ position: "relative", flex: 1 }}>
+            <div className="input-wrapper">
               <input
                 ref={inputRef}
-                type="text"
-                placeholder="Nhập tin nhắn..."
-                className="form-control"
                 value={input}
-                disabled={loading}
                 onChange={(e) => setInput(e.target.value)}
-                onKeyDown={(e) =>
-                  e.key === "Enter" && !e.shiftKey && handleSend(e)
-                }
+                placeholder="Nhập tin nhắn..."
+                disabled={loading}
               />
 
-              {/* Autocomplete */}
               {filteredAutocomplete.length > 0 && (
                 <div className="autocomplete">
-                  {filteredAutocomplete.map((s, index) => (
-                    <div key={index} onClick={() => setInput(s)}>
+                  {filteredAutocomplete.map((s, i) => (
+                    <div key={i} onClick={() => setInput(s)}>
                       {s}
                     </div>
                   ))}
@@ -270,9 +212,7 @@ const ChatBot = () => {
               )}
             </div>
 
-            <button type="submit" disabled={loading}>
-              Gửi
-            </button>
+            <button disabled={loading || !input.trim()}>Gửi</button>
           </form>
         </div>
       )}

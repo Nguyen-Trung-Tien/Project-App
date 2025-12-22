@@ -141,7 +141,7 @@ const Profile = () => {
       <div
         className="profile-page py-3"
         style={{
-          background: "linear-gradient(120deg, #e0f7fa 0%, #f1f8ff 100%)",
+          background: "#f9fafc",
           minHeight: "90vh",
         }}
       >
@@ -155,11 +155,6 @@ const Profile = () => {
               <ArrowLeftCircle size={14} className="me-1" />
               Quay lại
             </Link>
-          </div>
-          <div className="text-center mb-4">
-            <div className="d-inline-flex align-items-center px-4 py-2 rounded-pill profile-title">
-              <h3 className="fw-bold mb-0">Hồ sơ của bạn</h3>
-            </div>
           </div>
 
           <Row className="justify-content-center g-4">
@@ -257,8 +252,7 @@ const Profile = () => {
                         variant="primary"
                         className="rounded-pill px-4 fw-semibold text-white border-0"
                         style={{
-                          background:
-                            "linear-gradient(90deg, #4facfe 0%, #00f2fe 100%)",
+                          background: "#007bff",
                         }}
                         onClick={handleSave}
                         disabled={loading}

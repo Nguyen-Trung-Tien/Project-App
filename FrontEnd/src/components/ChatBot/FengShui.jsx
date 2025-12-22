@@ -27,6 +27,7 @@ const FengShuiChat = ({ setBirthYear: setGlobalBirthYear }) => {
   const [userData, setUserData] = useState({ birth: "", gender: "", goal: "" });
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef(null);
+  const STORAGE_KEY = "fengshui_chat_history";
 
   const handleShow = () => {
     setShow(true);
@@ -43,7 +44,7 @@ const FengShuiChat = ({ setBirthYear: setGlobalBirthYear }) => {
   };
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
   }, [messages]);
 
   const handleSend = () => {
@@ -125,7 +126,7 @@ const FengShuiChat = ({ setBirthYear: setGlobalBirthYear }) => {
         }
 
         setLoading(false);
-        setStep(STEP.WELCOME);
+        setStep(STEP.GOAL);
         break;
 
       default:
@@ -134,10 +135,22 @@ const FengShuiChat = ({ setBirthYear: setGlobalBirthYear }) => {
     }
   };
 
+  useEffect(() => {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) setMessages(JSON.parse(saved));
+  }, []);
+
   const renderAdviceCard = (advice) => {
     if (!advice) return null;
     return (
-      <Card style={{ marginTop: 10, background: "#f0f8ff" }}>
+      <Card
+        style={{
+          marginTop: 10,
+          background: "#f0f8ff",
+          borderRadius: 16,
+          border: "1px solid #dbeafe",
+        }}
+      >
         <Card.Body>
           <Card.Title>Gợi ý phong thủy</Card.Title>
           <Card.Text>
@@ -164,7 +177,7 @@ const FengShuiChat = ({ setBirthYear: setGlobalBirthYear }) => {
           width: 60,
           height: 60,
           zIndex: 999,
-          background: "linear-gradient(135deg,#4facfe,#00f2fe)",
+          background: "linear-gradient(90deg, #0072ff, #6f42c1)",
           border: "none",
         }}
       >
@@ -173,7 +186,15 @@ const FengShuiChat = ({ setBirthYear: setGlobalBirthYear }) => {
 
       {/* Chat Window */}
       <Offcanvas show={show} onHide={handleClose} placement="start">
-        <Offcanvas.Header closeButton>
+        <Offcanvas.Header
+          style={{
+            background: "linear-gradient(90deg, #0072ff, #6f42c1)",
+            border: "none",
+            color: "#fff",
+            fontWeight: "600",
+          }}
+          closeButton
+        >
           <Offcanvas.Title>
             <FaRobot /> TienTech Feng Shui Chat
           </Offcanvas.Title>
@@ -206,8 +227,9 @@ const FengShuiChat = ({ setBirthYear: setGlobalBirthYear }) => {
                     borderRadius: 20,
                     background:
                       msg.sender === "bot"
-                        ? "#fff"
-                        : "linear-gradient(135deg,#4facfe,#00f2fe)",
+                        ? "#f8f9fa"
+                        : "linear-gradient(90deg, #0072ff, #6f42c1)",
+
                     color: msg.sender === "bot" ? "#000" : "#fff",
                     boxShadow: "0 2px 10px rgba(0,0,0,0.12)",
                     border: msg.sender === "bot" ? "1px solid #eee" : "none",
@@ -238,7 +260,7 @@ const FengShuiChat = ({ setBirthYear: setGlobalBirthYear }) => {
                 style={{
                   padding: "10px 22px",
                   borderRadius: "25px",
-                  background: "linear-gradient(135deg,#4facfe,#00f2fe)",
+                  background: "linear-gradient(90deg, #0072ff, #6f42c1)",
                   border: "none",
                   marginBottom: "10px",
                   color: "#fff",
@@ -280,7 +302,7 @@ const FengShuiChat = ({ setBirthYear: setGlobalBirthYear }) => {
                   style={{
                     padding: "10px 18px",
                     borderRadius: "22px",
-                    background: "linear-gradient(135deg,#4facfe,#00f2fe)",
+                    background: "linear-gradient(90deg, #0072ff, #6f42c1)",
                     border: "none",
                     color: "#fff",
                     fontWeight: "600",
@@ -300,12 +322,15 @@ const FengShuiChat = ({ setBirthYear: setGlobalBirthYear }) => {
           <InputGroup>
             <Form.Control
               placeholder="Nhập câu trả lời..."
-              disabled={step === STEP.GOAL}
+              disabled={loading || step === STEP.GOAL}
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSend()}
             />
-            <Button disabled={step === STEP.GOAL} onClick={handleSend}>
+            <Button
+              disabled={loading || step === STEP.GOAL}
+              onClick={handleSend}
+            >
               <FaPaperPlane />
             </Button>
           </InputGroup>
