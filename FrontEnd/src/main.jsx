@@ -28,20 +28,17 @@ const initialOptions = {
 };
 
 ReactDOM.createRoot(document.getElementById("root")).render(
-  <React.StrictMode>
-    <Provider store={store}>
-      <PersistGate loading={null} persistor={persistor}>
-        <QueryClientProvider client={queryClient}>
-          <BrowserRouter>
-            <PayPalScriptProvider options={initialOptions}>
-              <App />
-            </PayPalScriptProvider>
+  <Provider store={store}>
+    <PersistGate loading={null} persistor={persistor}>
+      <QueryClientProvider client={queryClient}>
+        <BrowserRouter>
+          <PayPalScriptProvider options={initialOptions}>
+            <App />
+          </PayPalScriptProvider>
 
-            {/* DEV ONLY */}
-            <ReactQueryDevtools initialIsOpen={false} />
-          </BrowserRouter>
-        </QueryClientProvider>
-      </PersistGate>
-    </Provider>
-  </React.StrictMode>
+          <ReactQueryDevtools initialIsOpen={false} />
+        </BrowserRouter>
+      </QueryClientProvider>
+    </PersistGate>
+  </Provider>
 );

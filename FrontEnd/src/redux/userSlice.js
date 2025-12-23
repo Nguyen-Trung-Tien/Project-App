@@ -45,13 +45,21 @@ const userSlice = createSlice({
   reducers: {
     setUser: (state, action) => {
       const { user, token, refreshToken } = action.payload;
-      state.user = { ...user, avatar: user.avatar || "/default-avatar.png" };
-      state.token = token;
-      state.refreshToken = refreshToken;
+
+      state.user = {
+        ...user,
+        avatar: user.avatar || "/default-avatar.png",
+      };
+      state.token = token || null;
+      state.refreshToken = refreshToken || null;
 
       saveToStorage("user", state.user);
-      localStorage.setItem("accessToken", token || null);
-      localStorage.setItem("refreshToken", refreshToken || null);
+
+      if (token) localStorage.setItem("accessToken", token);
+      else localStorage.removeItem("accessToken");
+
+      if (refreshToken) localStorage.setItem("refreshToken", refreshToken);
+      else localStorage.removeItem("refreshToken");
     },
 
     updateUser: (state, action) => {

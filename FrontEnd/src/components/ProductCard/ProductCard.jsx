@@ -73,8 +73,25 @@ const ProductCard = ({ product }) => {
         const newCartRes = await createCart(userId, token);
         cart = newCartRes.data;
       }
-      await addCart({ cartId: cart.id, productId: id, quantity: 1 }, token);
-      dispatch(addCartItem({ ...product, quantity: 1 }));
+
+      const res = await addCart(
+        { cartId: cart.id, productId: id, quantity: 1 },
+        token
+      );
+
+      dispatch(
+        addCartItem({
+          id: res.data.id,
+          product: {
+            id: res.data.product.id,
+            name: res.data.product.name,
+            price: res.data.product.price,
+            discount: res.data.product.discount || 0,
+            image: res.data.product.image || [],
+          },
+          quantity: res.data.quantity,
+        })
+      );
       toast.success(`Đã thêm "${name}" vào giỏ hàng`);
     } catch (err) {
       console.error(err);

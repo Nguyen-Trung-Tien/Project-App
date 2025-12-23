@@ -26,44 +26,43 @@ const scheduleAutoRefresh = (token) => {
     const decoded = jwtDecode(token);
     const expiresAt = decoded.exp * 1000;
     const now = Date.now();
-
     const refreshTime = expiresAt - now - 60000;
 
     if (refreshTime > 0) {
       clearTimeout(refreshTimeout);
       refreshTimeout = setTimeout(async () => {
         try {
-          const response = await axiosClient.post("/user/refresh-token");
-          const newAccessToken = response.data.data.accessToken;
+          const res = await axiosClient.post("/user/refresh-token");
+          const newToken = res.data.data.accessToken;
 
-          localStorage.setItem("accessToken", newAccessToken);
-          store.dispatch(updateToken(newAccessToken));
+          localStorage.setItem("accessToken", newToken);
+          store.dispatch(updateToken(newToken));
+          scheduleAutoRefresh(newToken);
 
-          scheduleAutoRefresh(newAccessToken);
-          console.log("Token tự động được làm mới!");
+          console.log("Token auto refreshed");
         } catch (err) {
-          console.error("Auto refresh thất bại:", err);
+          console.log(err);
           toast.warning("Vui lòng đăng nhập lại!");
-
           store.dispatch(removeUser());
         }
       }, refreshTime);
-
-      console.log(
-        `Token sẽ được làm mới tự động sau ${Math.round(
-          refreshTime / 1000
-        )} giây.`
-      );
     }
   } catch (err) {
-    console.error("Không thể decode token:", err);
+    console.error("Decode token failed", err);
   }
 };
 
 axiosClient.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("accessToken");
-    if (token) config.headers.Authorization = `Bearer ${token}`;
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+
+    config.headers["Cache-Control"] = "no-cache";
+    config.headers["Pragma"] = "no-cache";
+    config.headers["If-None-Match"] = "";
+
     return config;
   },
   (error) => Promise.reject(error)
@@ -78,28 +77,25 @@ axiosClient.interceptors.response.use(
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
-        })
-          .then((token) => {
-            originalRequest.headers["Authorization"] = `Bearer ${token}`;
-            return axiosClient(originalRequest);
-          })
-          .catch((err) => Promise.reject(err));
+        }).then((token) => {
+          originalRequest.headers.Authorization = `Bearer ${token}`;
+          return axiosClient(originalRequest);
+        });
       }
 
       originalRequest._retry = true;
       isRefreshing = true;
 
       try {
-        const response = await axiosClient.post("/user/refresh-token");
-        const newAccessToken = response.data.data.accessToken;
+        const res = await axiosClient.post("/user/refresh-token");
+        const newToken = res.data.data.accessToken;
 
-        localStorage.setItem("accessToken", newAccessToken);
-        store.dispatch(updateToken(newAccessToken));
+        localStorage.setItem("accessToken", newToken);
+        store.dispatch(updateToken(newToken));
+        scheduleAutoRefresh(newToken);
 
-        scheduleAutoRefresh(newAccessToken);
-
-        originalRequest.headers["Authorization"] = `Bearer ${newAccessToken}`;
-        processQueue(null, newAccessToken);
+        processQueue(null, newToken);
+        originalRequest.headers.Authorization = `Bearer ${newToken}`;
         return axiosClient(originalRequest);
       } catch (err) {
         processQueue(err, null);
@@ -114,6 +110,7 @@ axiosClient.interceptors.response.use(
   }
 );
 
+/* ================= INIT ================= */
 const existingToken = localStorage.getItem("accessToken");
 if (existingToken) scheduleAutoRefresh(existingToken);
 

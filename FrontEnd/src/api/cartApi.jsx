@@ -40,7 +40,7 @@ export const createCart = async (userId, token) => {
   }
 };
 
-export const updateCart = async (id, data, token) => {
+export const updateCart = async ({ id, data, token }) => {
   try {
     const res = await axiosClient.put(`/cart/update-cart/${id}`, data, {
       headers: { Authorization: `Bearer ${token}` },

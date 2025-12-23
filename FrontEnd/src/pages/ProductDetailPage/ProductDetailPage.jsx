@@ -176,7 +176,19 @@ const ProductDetailPage = () => {
         token
       );
       if (res.errCode === 0) {
-        dispatch(addCartItem({ ...product, quantity }));
+        dispatch(
+          addCartItem({
+            id: res.data.id,
+            product: {
+              id: res.data.product.id,
+              name: res.data.product.name,
+              price: res.data.product.price,
+              discount: res.data.product.discount || 0,
+              image: res.data.product.image || [],
+            },
+            quantity: res.data.quantity,
+          })
+        );
         toast.success(`Đã thêm "${product.name}" vào giỏ hàng`);
       } else {
         toast.error(res.errMessage || "Thêm vào giỏ hàng thất bại!");
