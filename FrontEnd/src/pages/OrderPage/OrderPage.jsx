@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import {
   Container,
   Table,
@@ -8,6 +8,7 @@ import {
   Modal,
   Tabs,
   Tab,
+  Card,
 } from "react-bootstrap";
 import { Eye } from "react-bootstrap-icons";
 import { useNavigate } from "react-router-dom";
@@ -36,6 +37,15 @@ const statusVariants = {
   cancelled: "danger",
 };
 
+const statusLabels = {
+  pending: "Chờ xử lý",
+  confirmed: "Đã xác nhận",
+  processing: "Đang xử lý",
+  shipped: "Đang giao",
+  delivered: "Đã giao",
+  cancelled: "Đã hủy",
+};
+
 const paymentStatus = {
   unpaid: { label: "Chưa thanh toán", variant: "secondary" },
   paid: { label: "Đã thanh toán", variant: "success" },
@@ -51,32 +61,35 @@ const OrderPage = () => {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [statusCounts, setStatusCounts] = useState({});
   const [receivingId, setReceivingId] = useState(null);
   const [cancelling, setCancelling] = useState(false);
-  const productCounts = orders.reduce((acc, order) => {
-    if (
-      ["pending", "confirmed", "processing", "shipped"].includes(order.status)
-    ) {
-      acc[order.status] =
-        (acc[order.status] || 0) + (order.orderItems?.length || 0);
-    }
-    return acc;
-  }, {});
-
-  productCounts[""] = orders.reduce(
-    (sum, o) => sum + (o.orderItems?.length || 0),
-    0
-  );
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [orderToCancel, setOrderToCancel] = useState(null);
 
   const limit = 10;
 
+  // Tính productCounts để hiển thị badge
+  const productCounts = useMemo(() => {
+    const counts = {};
+    orders.forEach((order) => {
+      if (
+        ["pending", "confirmed", "processing", "shipped"].includes(order.status)
+      ) {
+        counts[order.status] =
+          (counts[order.status] || 0) + (order.orderItems?.length || 0);
+      }
+    });
+    counts[""] = orders.reduce(
+      (sum, o) => sum + (o.orderItems?.length || 0),
+      0
+    );
+    return counts;
+  }, [orders]);
+
+  // Fetch orders
   const fetchOrders = async () => {
     try {
       setLoading(true);
-
       const res = await getOrdersByUserId(
         token,
         user.id,
@@ -84,11 +97,9 @@ const OrderPage = () => {
         limit,
         activeTab
       );
-
       if (res?.errCode === 0) {
         setOrders(res.data || []);
         setTotalPages(res.pagination?.totalPages || 1);
-        setStatusCounts(res.counts || {});
       } else {
         toast.warning(res?.errMessage || "Không thể tải đơn hàng");
       }
@@ -105,6 +116,12 @@ const OrderPage = () => {
       fetchOrders();
     }
   }, [page, activeTab, user?.id, token]);
+
+  // Reset page khi đổi tab
+  const handleTabSelect = (k) => {
+    setActiveTab(k);
+    setPage(1);
+  };
 
   const filteredOrders = orders.filter(
     (o) => !activeTab || o.status === activeTab
@@ -142,13 +159,23 @@ const OrderPage = () => {
     }
   };
 
-  const formatCurrency = (v) =>
-    parseFloat(v || 0).toLocaleString("vi-VN") + " ₫";
+  const formatCurrency = (v) => (Number(v) || 0).toLocaleString("vi-VN") + " ₫";
 
   return (
     <Container className="py-3 order-page">
+      <div className="d-flex justify-content-between align-items-center mb-3">
+        <h4>Đơn hàng của tôi</h4>
+        <Button
+          size="sm"
+          variant="secondary"
+          onClick={() => navigate("/order-history")}
+        >
+          Xem lịch sử đơn hàng
+        </Button>
+      </div>
+
       {/* TABS */}
-      <Tabs activeKey={activeTab} onSelect={(k) => setActiveTab(k)} justify>
+      <Tabs activeKey={activeTab} onSelect={handleTabSelect} justify>
         {STATUS_TABS.map((tab) => (
           <Tab
             key={tab.key}
@@ -179,156 +206,132 @@ const OrderPage = () => {
         ))}
       </Tabs>
 
-      {/* TABLE */}
+      {/* LIST ORDERS */}
       {loading ? (
         <div className="text-center py-5">
           <Spinner animation="border" variant="primary" />
         </div>
       ) : (
-        <div className="table-responsive shadow rounded">
-          <Table bordered hover className="text-center align-middle mb-0">
-            <thead className="table-primary">
-              <tr>
-                <th>#</th>
-                <th>Mã đơn</th>
-                <th>Ngày đặt</th>
-                <th>Sản phẩm</th>
-                <th>Tổng tiền</th>
-                <th>Trạng thái</th>
-                <th>Thanh toán</th>
-                <th>Hành động</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredOrders.length ? (
-                filteredOrders.map((o, idx) => (
-                  <tr key={o.id}>
-                    <td>{(page - 1) * limit + idx + 1}</td>
-                    <td
-                      className="text-start fw-bold text-primary "
-                      onClick={() => navigate(`/orders-detail/${o.id}`)}
-                    >{`DH${o.id}`}</td>
-                    <td>{new Date(o.createdAt).toLocaleDateString("vi-VN")}</td>
+        <div className="orders-list mt-3">
+          {filteredOrders.length ? (
+            filteredOrders.map((o) => (
+              <Card key={o.id} className="mb-3 shadow-sm">
+                <Card.Body>
+                  {/* HEADER */}
+                  <div className="d-flex justify-content-between align-items-center mb-2">
+                    <div className="fw-bold">{"Sản phẩm"}</div>
+                    <div className="text-muted small">
+                      {new Date(o.createdAt).toLocaleDateString("vi-VN")}
+                    </div>
+                  </div>
 
-                    <td className="text-start">
-                      {o.orderItems?.map((i) => {
-                        const p = i.product;
-
-                        return (
-                          <div key={i.id} className="d-flex gap-3 mb-2">
-                            {/* IMAGE */}
-                            <img
-                              src={getImage(i.product?.image)}
-                              alt={i.product?.name || i.productName}
-                              width={60}
-                              height={60}
-                            />
-
-                            {/* INFO */}
-                            <div>
-                              <div
-                                className="fw-semibold"
-                                onClick={() =>
-                                  navigate(`/orders-detail/${o.id}`)
-                                }
-                              >
-                                {p?.name || i.productName}
-                              </div>
-
-                              <div className="text-muted small">
-                                SL: {i.quantity}
-                              </div>
-
-                              {/* PRICE */}
-                              <div>
-                                {p?.discount > 0 && (
-                                  <small className="text-decoration-line-through text-muted me-2">
-                                    {parseFloat(p.price).toLocaleString(
-                                      "vi-VN"
-                                    )}{" "}
-                                    ₫
-                                  </small>
-                                )}
-                                <span className="fw-semibold text-danger">
-                                  {parseFloat(i.price).toLocaleString("vi-VN")}{" "}
-                                  ₫
-                                </span>
-
-                                {p?.discount > 0 && (
-                                  <Badge bg="danger" className="ms-2">
-                                    -{p.discount}%
-                                  </Badge>
-                                )}
-                              </div>
-                            </div>
+                  {/* PRODUCTS */}
+                  {o.orderItems?.map((i) => {
+                    const p = i.product;
+                    return (
+                      <div key={i.id} className="d-flex gap-3 mb-2">
+                        <img
+                          src={getImage(p?.image) || "/images/no-image.png"}
+                          alt={p?.name || i.productName}
+                          width={60}
+                          height={60}
+                          className="rounded"
+                        />
+                        <div className="flex-grow-1">
+                          <div
+                            className="fw-semibold product-name"
+                            onClick={() => navigate(`/orders-detail/${o.id}`)}
+                          >
+                            {p?.name || i.productName}
                           </div>
-                        );
-                      })}
-                    </td>
+                          <div className="text-muted small">
+                            SL: {i.quantity}
+                          </div>
+                          <div className="d-flex align-items-center gap-2">
+                            {p?.discount > 0 && (
+                              <small className="text-decoration-line-through text-muted">
+                                {formatCurrency(p.price)}
+                              </small>
+                            )}
+                            <span className="fw-semibold text-danger">
+                              {formatCurrency(i.price)}
+                            </span>
+                            {p?.discount > 0 && (
+                              <Badge bg="danger">-{p.discount}%</Badge>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
 
-                    <td className="fw-semibold text-success">
-                      {formatCurrency(o.totalPrice)}
-                    </td>
-                    <td>
-                      <Badge bg={statusVariants[o.status]}>{o.status}</Badge>
-                    </td>
-                    <td>
+                  {/* FOOTER */}
+                  <div className="d-flex justify-content-between align-items-center mt-3">
+                    <div>
+                      <Badge bg={statusVariants[o.status]} className="me-2">
+                        {statusLabels[o.status]}
+                      </Badge>
                       <Badge bg={paymentStatus[o.paymentStatus]?.variant}>
                         {paymentStatus[o.paymentStatus]?.label}
                       </Badge>
-                    </td>
-                    <td className="d-flex gap-2 justify-content-center">
+                    </div>
+                    <div className="fw-bold text-success">
+                      {formatCurrency(o.totalPrice)}
+                    </div>
+                  </div>
+
+                  {/* ACTION BUTTONS */}
+                  <div className="d-flex gap-2 mt-2 flex-wrap">
+                    <Button
+                      size="sm"
+                      variant="outline-primary"
+                      onClick={() => navigate(`/orders-detail/${o.id}`)}
+                    >
+                      <Eye /> Chi tiết
+                    </Button>
+                    {o.status === "pending" && (
                       <Button
                         size="sm"
-                        variant="outline-primary"
-                        onClick={() => navigate(`/orders-detail/${o.id}`)}
+                        variant="danger"
+                        onClick={() => {
+                          setOrderToCancel(o);
+                          setShowCancelModal(true);
+                        }}
                       >
-                        <Eye /> Xem
+                        Hủy đơn
                       </Button>
-
-                      {o.status === "pending" && (
-                        <Button
-                          size="sm"
-                          variant="danger"
-                          onClick={() => {
-                            setOrderToCancel(o);
-                            setShowCancelModal(true);
-                          }}
-                        >
-                          Hủy đơn
+                    )}
+                    {o.status === "shipped" && (
+                      <Button
+                        size="sm"
+                        variant="success"
+                        disabled={receivingId === o.id}
+                        onClick={() => handleReceiveOrder(o.id)}
+                      >
+                        {receivingId === o.id ? (
+                          <Spinner animation="border" size="sm" />
+                        ) : (
+                          "Nhận hàng"
+                        )}
+                      </Button>
+                    )}
+                    {o.status === "delivered" && (
+                      <>
+                        <Button size="sm" variant="warning">
+                          Mua lại
                         </Button>
-                      )}
-
-                      {o.status === "shipped" && (
-                        <Button
-                          size="sm"
-                          variant="success"
-                          disabled={receivingId === o.id}
-                          onClick={() => handleReceiveOrder(o.id)}
-                          className="d-flex align-items-center gap-1"
-                        >
-                          {receivingId === o.id ? (
-                            <>
-                              <Spinner animation="border" size="sm" />
-                              Đang xử lý
-                            </>
-                          ) : (
-                            "Nhận hàng"
-                          )}
+                        <Button size="sm" className="btn-orange">
+                          Đánh giá
                         </Button>
-                      )}
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={8} className="text-muted py-4">
-                    Không có đơn hàng
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </Table>
+                      </>
+                    )}
+                  </div>
+                </Card.Body>
+              </Card>
+            ))
+          ) : (
+            <div className="text-center text-muted py-5">Không có đơn hàng</div>
+          )}
         </div>
       )}
 
@@ -351,29 +354,19 @@ const OrderPage = () => {
         centered
       >
         <Modal.Header closeButton>
-          <Modal.Title>⚠️ Hủy đơn hàng</Modal.Title>
+          <Modal.Title>Xác nhận hủy đơn</Modal.Title>
         </Modal.Header>
-        <Modal.Body>
-          Bạn có chắc muốn hủy đơn{" "}
-          <strong>{orderToCancel && `DH${orderToCancel.id}`}</strong>?
-        </Modal.Body>
+        <Modal.Body>Bạn có chắc muốn hủy đơn hàng này không?</Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={() => setShowCancelModal(false)}>
-            Không
+            Đóng
           </Button>
           <Button
             variant="danger"
             onClick={handleCancelOrder}
-            disabled={cancelling} // trạng thái khi đang hủy
+            disabled={cancelling}
           >
-            {cancelling ? (
-              <>
-                <Spinner animation="border" size="sm" className="me-2" />
-                Đang hủy
-              </>
-            ) : (
-              "Xác nhận hủy"
-            )}
+            {cancelling ? <Spinner animation="border" size="sm" /> : "Hủy đơn"}
           </Button>
         </Modal.Footer>
       </Modal>

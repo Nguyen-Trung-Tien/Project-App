@@ -29,7 +29,7 @@ const HeroSection = () => {
             <div className="d-flex gap-3 justify-content-center justify-content-lg-start">
               <Button
                 className="hero-btn-primary px-4 py-2"
-                onClick={() => navigate("/products")}
+                onClick={() => navigate("/product-list  ")}
               >
                 Mua ngay <ArrowRight className="ms-2" />
               </Button>

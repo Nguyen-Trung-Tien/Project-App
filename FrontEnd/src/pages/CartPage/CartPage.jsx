@@ -40,7 +40,6 @@ const CartPage = () => {
 
   const observer = useRef();
 
-  // Fetch cart items
   const fetchCart = async (page = 1) => {
     if (!token) return;
     try {
@@ -56,7 +55,6 @@ const CartPage = () => {
       setHasMore(items.length === 10);
     } catch (err) {
       console.error(err);
-      toast.error("Lấy giỏ hàng thất bại!");
     } finally {
       setLoading(false);
     }
@@ -269,11 +267,12 @@ const CartPage = () => {
                         <div className="text-end">
                           <Button
                             variant="link"
-                            className="text-danger p-0"
+                            className="text-danger p-0 hover"
                             onClick={() => handleRemove(item.id)}
                           >
                             <Trash size={18} />
                           </Button>
+
                           <div className="fw-bold text-primary mt-4">
                             {(price * item.quantity).toLocaleString()} ₫
                           </div>

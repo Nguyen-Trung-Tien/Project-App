@@ -1,211 +1,190 @@
-import React, { useEffect, useState } from "react";
-import {
-  Container,
-  Table,
-  Badge,
-  Button,
-  Spinner,
-  Card,
-} from "react-bootstrap";
-import { useNavigate } from "react-router-dom";
+import React, { useEffect, useState, useMemo } from "react";
+import { Container, Card, Button, Badge, Spinner } from "react-bootstrap";
 import { Eye } from "react-bootstrap-icons";
-import { getOrdersByUserId } from "../../api/orderApi";
-import "./OrderHistory.scss";
+import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
+import { getOrdersByUserId } from "../../api/orderApi";
 import AppPagination from "../../components/Pagination/Pagination";
+import { getImage } from "../../utils/decodeImage";
+import "./OrderHistory.scss";
 
-const OrderHistory = () => {
+const statusVariants = {
+  pending: "warning",
+  confirmed: "info",
+  processing: "primary",
+  shipped: "primary",
+  delivered: "success",
+  cancelled: "danger",
+};
+
+const paymentStatus = {
+  unpaid: { label: "Chưa thanh toán", variant: "secondary" },
+  paid: { label: "Đã thanh toán", variant: "success" },
+  refunded: { label: "Đã hoàn tiền", variant: "info" },
+};
+
+const statusLabels = {
+  pending: "Chờ xử lý",
+  confirmed: "Đã xác nhận",
+  processing: "Đang xử lý",
+  shipped: "Đang giao",
+  delivered: "Đã giao",
+  cancelled: "Đã hủy",
+};
+
+const OrderHistoryPage = () => {
+  const navigate = useNavigate();
+  const { user, token } = useSelector((state) => state.user);
+
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
-  const user = useSelector((state) => state.user.user);
-  const token = useSelector((state) => state.user.token);
-
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const limit = 10;
 
-  useEffect(() => {
-    const fetchOrders = async () => {
-      if (!user?.id || !token) return;
-      try {
-        setLoading(true);
-        const res = await getOrdersByUserId(token, user.id, page, 8);
-        if (res?.errCode === 0) {
-          setOrders(res.data || []);
-          setTotalPages(res.pagination?.totalPages || 1);
-        } else {
-          console.error("Lỗi API:", res.errMessage);
-        }
-      } catch (err) {
-        console.error("Lỗi khi lấy đơn hàng:", err);
-      } finally {
-        setLoading(false);
+  const fetchOrders = async () => {
+    if (!user?.id || !token) return;
+    try {
+      setLoading(true);
+      const res = await getOrdersByUserId(token, user.id, page, limit);
+      if (res?.errCode === 0) {
+        setOrders(res.data || []);
+        setTotalPages(res.pagination?.totalPages || 1);
       }
-    };
-    fetchOrders();
-  }, [user, token, page]);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    setPage(1);
-  }, [user?.id]);
-  const renderStatus = (status) => {
-    switch (status) {
-      case "pending":
-        return (
-          <Badge bg="warning" text="dark">
-            Chờ xử lý
-          </Badge>
-        );
-      case "confirmed":
-        return <Badge bg="info">Đã xác nhận</Badge>;
-      case "processing":
-      case "shipped":
-        return <Badge bg="primary">Đang giao</Badge>;
-      case "delivered":
-        return <Badge bg="success">Đã giao</Badge>;
-      case "cancelled":
-        return <Badge bg="danger">Đã hủy</Badge>;
-      default:
-        return <Badge bg="secondary">Không xác định</Badge>;
-    }
-  };
-  const handlePageChange = (newPage) => {
-    if (newPage > 0 && newPage <= totalPages && newPage !== page) {
-      setPage(newPage);
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
-  };
+    fetchOrders();
+  }, [user?.id, token, page]);
 
-  const renderPaymentStatus = (status) => {
-    if (!status) return <Badge bg="secondary">Không rõ</Badge>;
-
-    const lower = status.toLowerCase();
-    if (lower === "paid")
-      return (
-        <Badge bg="success" className="px-1">
-          Đã thanh toán
-        </Badge>
-      );
-    if (lower === "unpaid")
-      return (
-        <Badge bg="danger" className="px-1">
-          Chưa thanh toán
-        </Badge>
-      );
-    return (
-      <Badge bg="warning" text="dark" className="px-1">
-        Đang xử lý
-      </Badge>
-    );
-  };
-
-  if (loading)
-    return (
-      <div className="text-center mt-5">
-        <Spinner animation="border" variant="primary" />
-      </div>
-    );
-  const formatCurrency = (value) =>
-    parseFloat(value || 0).toLocaleString("vi-VN") + " ₫";
-
+  const formatCurrency = (v) => (Number(v) || 0).toLocaleString("vi-VN") + " ₫";
   const formatDate = (dateStr) =>
     dateStr ? new Date(dateStr).toLocaleDateString("vi-VN") : "-";
 
+  const filteredOrders = useMemo(() => orders, [orders]); // có thể filter nếu muốn
+
   return (
-    <div className="order-history-page py-3">
-      <Container>
-        <Card className="shadow-sm border-0">
-          <Card.Body>
-            <h3 className="text-center fw-bold mb-2 text-primary">
-              🧾 Lịch sử đơn hàng
-            </h3>
+    <Container className="py-3 order-history-page">
+      <h3 className="text-center fw-bold mb-3 text-primary">
+        🧾 Lịch sử đơn hàng
+      </h3>
 
-            {orders.length === 0 ? (
-              <p className="text-center text-muted mt-4">
-                Bạn chưa có đơn hàng nào.
-              </p>
-            ) : (
-              <div className="table-responsive">
-                <Table
-                  bordered
-                  hover
-                  striped
-                  className="align-middle shadow-sm rounded"
-                >
-                  <thead className="table-primary text-center align-middle">
-                    <tr>
-                      <th>#</th>
-                      <th>Mã đơn hàng</th>
-                      <th>Ngày đặt</th>
-                      <th>Sản phẩm</th>
-                      <th>SL</th>
-                      <th>Tổng tiền</th>
-                      <th>Thanh toán</th>
-                      <th>Trạng thái</th>
-                      <th>Hành động</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {orders.map((order, index) => (
-                      <tr key={order.id} className="text-center cursor-pointer">
-                        <td>{index + 1}</td>
-                        <td
-                          className="fw-semibold text-primary"
-                          onClick={() => navigate(`/orders-detail/${order.id}`)}
-                        >{`DH${order.id}`}</td>
-
-                        <td>{formatDate(order.createdAt)}</td>
-                        <td
-                          className="text-start"
-                          onClick={() => navigate(`/orders-detail/${order.id}`)}
-                        >
-                          {order.orderItems?.map((item) => (
-                            <div key={item.id}>{item.productName}</div>
-                          ))}
-                        </td>
-
-                        <td>
-                          {order.orderItems?.reduce(
-                            (sum, item) => sum + item.quantity,
-                            0
-                          )}
-                        </td>
-                        <td className="text-danger fw-semibold">
-                          {formatCurrency(order.totalPrice)}
-                        </td>
-                        <td>{renderPaymentStatus(order.paymentStatus)}</td>
-                        <td>{renderStatus(order.status)}</td>
-                        <td>
-                          <Button
-                            variant="outline-primary"
-                            size="sm"
-                            className="d-flex align-items-center mx-auto"
-                            onClick={() =>
-                              navigate(`/orders-detail/${order.id}`)
-                            }
-                          >
-                            <Eye className="me-1" /> Xem
-                          </Button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </Table>
+      {loading ? (
+        <div className="text-center py-5">
+          <Spinner animation="border" variant="primary" />
+        </div>
+      ) : filteredOrders.length === 0 ? (
+        <div className="text-center text-muted py-5">
+          Bạn chưa có đơn hàng nào.
+        </div>
+      ) : (
+        filteredOrders.map((o) => (
+          <Card key={o.id} className="mb-3 shadow-sm">
+            <Card.Body>
+              {/* Header */}
+              <div className="d-flex justify-content-between align-items-center mb-2">
+                <div className="fw-bold">{"Sản phẩm"}</div>
+                <div className="text-muted small">
+                  {formatDate(o.createdAt)}
+                </div>
               </div>
-            )}
-          </Card.Body>
-        </Card>
-        <div className="d-flex justify-content-center mt-3">
+
+              {/* Products */}
+              {o.orderItems?.map((i) => {
+                const p = i.product;
+                return (
+                  <div key={i.id} className="d-flex gap-3 mb-2">
+                    <img
+                      src={getImage(p?.image) || "/images/no-image.png"}
+                      alt={p?.name || i.productName}
+                      width={60}
+                      height={60}
+                      className="rounded"
+                    />
+                    <div className="flex-grow-1">
+                      <div
+                        className="fw-semibold product-name"
+                        onClick={() => navigate(`/orders-detail/${o.id}`)}
+                      >
+                        {p?.name || i.productName}
+                      </div>
+                      <div className="text-muted small">SL: {i.quantity}</div>
+                      <div className="d-flex align-items-center gap-2">
+                        {p?.discount > 0 && (
+                          <small className="text-decoration-line-through text-muted">
+                            {formatCurrency(p.price)}
+                          </small>
+                        )}
+                        <span className="fw-semibold text-danger">
+                          {formatCurrency(i.price)}
+                        </span>
+                        {p?.discount > 0 && (
+                          <Badge bg="danger">-{p.discount}%</Badge>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+
+              {/* Footer */}
+              <div className="d-flex justify-content-between align-items-center mt-3">
+                <div>
+                  <Badge bg={statusVariants[o.status]} className="me-2">
+                    {statusLabels[o.status]}
+                  </Badge>
+                  <Badge bg={paymentStatus[o.paymentStatus]?.variant}>
+                    {paymentStatus[o.paymentStatus]?.label}
+                  </Badge>
+                </div>
+                <div className="fw-bold text-success">
+                  {formatCurrency(o.totalPrice)}
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="d-flex gap-2 mt-2 flex-wrap">
+                <Button
+                  size="sm"
+                  variant="outline-primary"
+                  onClick={() => navigate(`/orders-detail/${o.id}`)}
+                >
+                  <Eye className="me-1" /> Chi tiết
+                </Button>
+                {o.status === "delivered" && (
+                  <>
+                    <Button size="sm" variant="warning">
+                      Mua lại
+                    </Button>
+                    <Button size="sm" className="btn-orange">
+                      Đánh giá
+                    </Button>
+                  </>
+                )}
+              </div>
+            </Card.Body>
+          </Card>
+        ))
+      )}
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="mt-3 d-flex justify-content-center">
           <AppPagination
             page={page}
             totalPages={totalPages}
+            onPageChange={setPage}
             loading={loading}
-            onPageChange={handlePageChange}
           />
         </div>
-      </Container>
-    </div>
+      )}
+    </Container>
   );
 };
 
-export default OrderHistory;
+export default OrderHistoryPage;

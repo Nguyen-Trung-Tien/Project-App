@@ -40,7 +40,7 @@ const UserRoutes = () => {
       <Route index element={<HomePage />} />
       <Route path="product-detail/:id" element={<ProductDetailPage />} />
       <Route path="product-list" element={<ProductListPage />} />
-      <Route path="/products" element={<AllProducts />} />
+      <Route path="products" element={<AllProducts />} />
       <Route path="about" element={<AboutPage />} />
       <Route path="*" element={<NotFound />} />
     </Routes>

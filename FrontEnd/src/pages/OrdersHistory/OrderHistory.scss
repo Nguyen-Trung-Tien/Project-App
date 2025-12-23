@@ -1,40 +1,22 @@
 .order-history-page {
-  background: #f8f9fa;
   min-height: 90vh;
+  background: #f8f9fa;
 
-  h3 {
-    color: #1d3557;
+  .product-name:hover {
+    cursor: pointer;
+    color: #4facfe;
   }
 
-  .table {
-    border-radius: 12px;
-    overflow: hidden;
-    background: #fff;
+  .btn-orange {
+    background-color: orange;
+    color: white;
+    border: none;
   }
 
   .badge {
     font-size: 0.65rem;
   }
 
-  .btn-outline-primary {
-    &:hover {
-      background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
-      color: white;
-      border: none;
-    }
-  }
-
-  td,
-  th {
-    vertical-align: middle;
-  }
-  .text-start {
-    min-width: 150px;
-    :hover {
-      cursor: pointer;
-      color: #4facfe;
-    }
-  }
   .pagination {
     .page-link {
       border-radius: 6px;

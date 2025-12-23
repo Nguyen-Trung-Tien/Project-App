@@ -1,14 +1,17 @@
 .modern-register {
-  background: #fff !important; // nền trắng sáng
+  background: #fff !important;
   min-height: 100vh;
   display: flex;
   align-items: center;
 }
 
 .bg-gradient-left {
-  display: none; // ẩn gradient trái nếu muốn theme sáng
+  display: none;
 }
-
+.lead {
+  font-weight: 600;
+  color: #000;
+}
 .main-logo {
   max-width: 560px;
   height: auto;

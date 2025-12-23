@@ -1,14 +1,18 @@
 .modern-login {
-  background: #fff !important; // nền trắng
+  background: #fff !important;
   min-height: 100vh;
   display: flex;
   align-items: center;
 }
 
 .bg-gradient-left {
-  display: none; // ẩn phần gradient + overlay bên trái
+  display: none;
 }
 
+.lead {
+  font-weight: 600;
+  color: #000;
+}
 .main-logo {
   max-width: 360px;
   height: auto;

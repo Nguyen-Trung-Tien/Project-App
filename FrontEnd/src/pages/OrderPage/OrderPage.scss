@@ -1,35 +1,26 @@
 .order-page {
   background-color: #f8fafc;
   min-height: 90vh;
-  .order-title {
-    background: linear-gradient(90deg, #007bff 0%, #00c6ff 100%);
-    color: #fff;
-    box-shadow: 0 3px 8px rgba(0, 123, 255, 0.3);
-  }
-  .order-table {
-    th {
-      background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
-      color: #fff;
-    }
 
-    tr:hover {
-      background-color: #f1f9ff;
-    }
+  .orders-list {
+    .card {
+      cursor: pointer;
+      transition: all 0.2s ease;
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      }
 
-    td,
-    th {
-      vertical-align: middle;
+      .product-name {
+        &:hover {
+          color: #007bff;
+        }
+      }
     }
   }
-  .text-start {
-    cursor: pointer;
-    :hover {
-      color: #007bff;
-    }
-  }
+
   .btn {
     transition: all 0.2s ease-in-out;
-
     &:hover {
       transform: translateY(-2px);
     }

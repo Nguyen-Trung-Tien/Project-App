@@ -207,9 +207,9 @@ function Header() {
                             if (type === "products")
                               navigate(`/product-detail/${item.id}`);
                             else if (type === "brands")
-                              navigate(`/products?brand=${item.id}`);
+                              navigate(`/product-list?brand=${item.id}`);
                             else if (type === "categories")
-                              navigate(`/products?category=${item.id}`);
+                              navigate(`/product-list?category=${item.id}`);
                             else
                               navigate(
                                 `/products?search=${encodeURIComponent(item)}`
