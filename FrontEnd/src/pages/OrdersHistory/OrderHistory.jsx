@@ -70,7 +70,12 @@ const OrderHistoryPage = () => {
 
   return (
     <Container className="py-3 order-history-page">
-      <h3 className="text-center fw-bold mb-3">🧾 Lịch sử đơn hàng</h3>
+      <div className="order-history-header text-center mb-4 py-3 px-2 shadow-sm rounded-3 bg-white">
+        <h3 className="mb-0 fw-bold d-flex justify-content-center align-items-center gap-2">
+          <span className="header-icon">🧾</span>
+          Lịch sử đơn hàng
+        </h3>
+      </div>
 
       {loading ? (
         <div className="text-center py-5">

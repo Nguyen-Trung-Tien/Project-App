@@ -186,13 +186,15 @@ const OrderPage = () => {
 
   return (
     <Container className="py-3 order-page">
-      <div className="order-header d-flex justify-content-between align-items-center mb-4">
-        <h4 className="order-header-title fw-bold mb-3">
-          <Box className="order-header-icon" /> Đơn hàng của tôi
-        </h4>
+      <div className="order-header d-flex justify-content-between align-items-center mb-4 p-3 shadow-sm rounded-3 bg-white">
+        <div className="d-flex align-items-center">
+          <Box className="order-header-icon me-2" size={28} />
+          <h4 className="order-header-title mb-0 fw-bold">Đơn hàng của tôi</h4>
+        </div>
+
         <Button
           size="sm"
-          variant="outline-secondary"
+          variant="outline-primary"
           className="order-history-btn d-flex align-items-center"
           onClick={() => navigate("/order-history")}
         >

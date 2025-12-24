@@ -3,34 +3,34 @@
   min-height: 90vh;
 
   .order-header {
-    h4.order-header-title {
-      font-size: 1.5rem;
-      font-weight: 600;
+    background-color: #fff;
+    border-radius: 16px;
+    padding: 1rem 1.2rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 
-      .order-header-icon {
-        font-size: 1.6rem;
-        margin-right: 0.5rem;
-      }
+    .order-header-icon {
+      color: #0072ff;
+    }
+
+    .order-header-title {
+      font-size: 1.25rem;
+      color: #2563eb;
     }
 
     .order-history-btn {
-      font-size: 0.875rem;
-      font-weight: 500;
+      font-size: 0.85rem;
+      border-radius: 22px;
       padding: 0.35rem 0.75rem;
-      gap: 0.25rem;
-      transition: all 0.2s ease;
+      transition: all 0.2s;
 
       &:hover {
-        background-color: #0d6efd;
+        background: #0072ff;
         color: #fff;
-        border-color: #0d6efd;
-      }
-
-      svg {
-        font-size: 1rem;
+        border-color: #0072ff;
       }
     }
   }
+
   .orders-list {
     .card {
       cursor: pointer;

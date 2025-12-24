@@ -12,6 +12,7 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
+import "./PricePredictionModal.scss";
 
 ChartJS.register(
   CategoryScale,
@@ -64,25 +65,34 @@ const PricePredictionModal = ({ show, onHide, result }) => {
           currentPrice + predicted60,
           currentPrice + predicted90,
         ],
-        borderColor: "rgba(75,192,192,1)",
-        backgroundColor: "rgba(75,192,192,0.2)",
-        tension: 0.3,
+        borderColor: "#1890FF",
+        backgroundColor: "rgba(24,144,255,0.1)",
+        tension: 0.4,
         fill: true,
+        pointRadius: 5,
+        pointBackgroundColor: "#1890FF",
       },
     ],
   };
 
   return (
-    <Modal show={show} onHide={onHide} centered size="lg">
+    <Modal
+      show={show}
+      onHide={onHide}
+      centered
+      size="lg"
+      dialogClassName="price-prediction-modal"
+      className="fade-in-modal"
+    >
       <Modal.Header closeButton>
         <Modal.Title>Dự đoán giá tương lai</Modal.Title>
       </Modal.Header>
 
       <Modal.Body>
-        <h5 className="fw-bold text-primary">{productName}</h5>
-        <p className="text-muted mb-2">Loại sản phẩm: {category}</p>
+        <h5 className="product-title">{productName}</h5>
+        <p className="text-muted mb-3">Loại sản phẩm: {category}</p>
 
-        <div className="d-flex justify-content-between mb-3 align-items-center">
+        <div className="d-flex justify-content-between mb-3 align-items-center current-price">
           <span>Giá hiện tại:</span>
           <span className="fw-bold text-success">
             {currentPrice.toLocaleString()}đ{" "}
@@ -94,11 +104,11 @@ const PricePredictionModal = ({ show, onHide, result }) => {
           </span>
         </div>
 
-        <div className="prediction-box bg-light p-3 rounded mb-3">
+        <div className="prediction-box mb-4">
           {predictions.map((item) => (
             <div
               key={item.label}
-              className="d-flex justify-content-between align-items-center mb-2"
+              className="d-flex justify-content-between align-items-center mb-2 prediction-item"
             >
               <span>{item.label}:</span>
               <span
@@ -106,7 +116,11 @@ const PricePredictionModal = ({ show, onHide, result }) => {
                   item.delta < 0 ? "text-danger" : "text-success"
                 }`}
               >
-                {item.delta < 0 ? <ArrowDownCircle /> : <ArrowUpCircle />}{" "}
+                {item.delta < 0 ? (
+                  <ArrowDownCircle color="#FF4D4F" />
+                ) : (
+                  <ArrowUpCircle color="#52C41A" />
+                )}{" "}
                 {Math.abs(item.delta).toLocaleString()}đ{" "}
                 <Badge bg={item.delta < 0 ? "danger" : "success"} pill>
                   {calcPercent(item.delta)}%
@@ -116,7 +130,7 @@ const PricePredictionModal = ({ show, onHide, result }) => {
           ))}
         </div>
 
-        <div className="mb-3">
+        <div className="mb-4">
           <p className="mb-1">Độ tin cậy:</p>
           <ProgressBar
             now={reliability}
@@ -126,9 +140,9 @@ const PricePredictionModal = ({ show, onHide, result }) => {
         </div>
 
         {aiAnalysis && aiAnalysis !== "AI phân tích thất bại" && (
-          <Card className="mb-3 shadow-sm">
+          <Card className="mb-4 ai-analysis-card shadow-sm">
             <Card.Body>
-              <h6 className="fw-bold text-primary mb-1">Phân tích AI </h6>
+              <h6 className="fw-bold text-primary mb-2">Phân tích AI </h6>
 
               <p>
                 <strong>Xu hướng:</strong> {aiAnalysis.trend}
@@ -152,7 +166,7 @@ const PricePredictionModal = ({ show, onHide, result }) => {
                   {aiAnalysis.reliability}%
                 </Badge>
               </p>
-              <span className="text-muted" style={{ fontSize: "0.85rem" }}>
+              <span className="text-muted small">
                 Phân tích bởi AI mang tính tham khảo; kết quả có thể không chính
                 xác và phụ thuộc biến động thị trường.
               </span>
@@ -160,7 +174,7 @@ const PricePredictionModal = ({ show, onHide, result }) => {
           </Card>
         )}
 
-        <div>
+        <div className="chart-container">
           <Line data={chartData} />
         </div>
       </Modal.Body>
