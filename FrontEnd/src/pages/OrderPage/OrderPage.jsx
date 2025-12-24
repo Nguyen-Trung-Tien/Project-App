@@ -68,7 +68,6 @@ const OrderPage = () => {
 
   const limit = 10;
 
-  // Tính productCounts để hiển thị badge
   const productCounts = useMemo(() => {
     const counts = {};
     orders.forEach((order) => {
@@ -193,7 +192,7 @@ const OrderPage = () => {
                       style={{
                         position: "absolute",
                         top: "-8px",
-                        right: "-12px",
+                        right: "-20px",
                         fontSize: "0.65rem",
                       }}
                     >
@@ -317,10 +316,15 @@ const OrderPage = () => {
                     )}
                     {o.status === "delivered" && (
                       <>
-                        <Button size="sm" variant="warning">
-                          Mua lại
-                        </Button>
-                        <Button size="sm" className="btn-orange">
+                        <Button
+                          size="sm"
+                          className="btn-orange"
+                          onClick={() =>
+                            navigate(
+                              `/product-detail/${o.orderItems[0]?.product?.id}`
+                            )
+                          }
+                        >
                           Đánh giá
                         </Button>
                       </>

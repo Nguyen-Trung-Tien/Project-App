@@ -2,25 +2,6 @@
   padding: 2rem 0;
   background-color: #f9fafc;
 
-  .section-title {
-    font-weight: 700;
-    font-size: 1.6rem;
-    color: #1a1a1a;
-    text-align: center;
-    position: relative;
-    margin-bottom: 1.5rem;
-
-    &::after {
-      content: "";
-      display: block;
-      width: 60px;
-      height: 3px;
-      background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
-      margin: 0.5rem auto 0;
-      border-radius: 2px;
-    }
-  }
-
   .row {
     margin-top: 1.5rem;
   }

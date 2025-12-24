@@ -158,10 +158,15 @@ const OrderHistoryPage = () => {
                 </Button>
                 {o.status === "delivered" && (
                   <>
-                    <Button size="sm" variant="warning">
-                      Mua lại
-                    </Button>
-                    <Button size="sm" className="btn-orange">
+                    <Button
+                      size="sm"
+                      className="btn-primary"
+                      onClick={() =>
+                        navigate(
+                          `/product-detail/${o.orderItems[0]?.product?.id}`
+                        )
+                      }
+                    >
                       Đánh giá
                     </Button>
                   </>

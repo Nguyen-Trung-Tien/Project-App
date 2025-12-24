@@ -5,7 +5,7 @@ import "./AboutPage.scss";
 import imgPro1 from "../../assets/1759303601055.png";
 import imgPro2 from "../../assets/1759555834412.png";
 import imgPro3 from "../../assets/1759555519030.png";
-
+import logoImage from "../../assets/Tien-Tech Shop.png";
 const teamMembers = [
   { name: "Nguyễn Trung Tiến", role: "CEO", img: imgPro1 },
   { name: "Nguyễn Trung Tiến", role: "CTO", img: imgPro2 },
@@ -16,14 +16,16 @@ const AboutPage = () => {
   return (
     <div className="about-page">
       {/* Hero Section */}
-      <section className="hero-section text-white d-flex align-items-center">
+      <section className="hero-section d-flex align-items-center justify-content-center">
         <div className="overlay"></div>
-        <Container className="text-center position-relative z-2">
-          <h1 className="display-4 fw-bold mb-3">
-            <span style={{ color: "#007bff" }}>T</span>ien-
-            <span style={{ color: "#007bff" }}>T</span>ech
-          </h1>
-          <p className="lead mb-4">
+
+        {/* Logo nổi giữa */}
+        <div className="logo-wrapper">
+          <img src={logoImage} alt="Tien-Tech Logo" className="logo-img" />
+        </div>
+
+        <Container className="text-center position-relative z-2 hero-text">
+          <p className="lead mb-4 text-white">
             Giải pháp công nghệ thông minh – Đồng hành cùng thành công của bạn.
           </p>
           <Button
