@@ -15,15 +15,14 @@ import { useSelector, useDispatch } from "react-redux";
 import { updateUser } from "../../redux/userSlice";
 import { getUserApi, updateUserApi } from "../../api/userApi";
 import { toast } from "react-toastify";
-import Loading from "../../components/Loading/Loading";
 import ChangePasswordModal from "./ChangePasswordModal";
 import { ArrowLeftCircle } from "react-bootstrap-icons";
 import "./Profile.scss";
 
 const Profile = () => {
   const dispatch = useDispatch();
-  const { user, token } = useSelector((state) => state.user);
-
+  const user = useSelector((state) => state.user.user);
+  const token = useSelector((state) => state.user.token);
   const [formData, setFormData] = useState({
     username: "",
     email: "",
@@ -133,195 +132,166 @@ const Profile = () => {
     };
     reader.readAsDataURL(selectedFile);
   };
+  if (loading) {
+    return (
+      <div className="page-loading">
+        <Spinner animation="border" variant="primary" />
+      </div>
+    );
+  }
 
   return (
-    <>
-      {loading && <Loading />}
+    <div
+      className="profile-page py-3"
+      style={{
+        background: "#f9fafc",
+        minHeight: "90vh",
+      }}
+    >
+      <Container>
+        {/* BACK */}
+        <div className="mb-3">
+          <Link to="/" className="back-btn">
+            <ArrowLeftCircle size={16} /> Quay lại
+          </Link>
+        </div>
+        <div className="profile-header mb-4">
+          <h3 className="fw-bold text-primary mb-1">Thông tin cá nhân</h3>
+          <p className="text-muted mb-0">
+            Quản lý thông tin tài khoản và bảo mật của bạn
+          </p>
+        </div>
+        <Row className="g-4">
+          {/* LEFT – PROFILE CARD */}
+          <Col lg={4}>
+            <Card className="profile-card text-center">
+              <div
+                className="avatar-wrapper"
+                onClick={() => setShowAvatarModal(true)}
+              >
+                <Image
+                  src={formData.avatar || "/images/avatar-default.png"}
+                  roundedCircle
+                  className="avatar-img"
+                />
+                <span className="avatar-edit">Đổi ảnh</span>
+              </div>
 
-      <div
-        className="profile-page py-3"
-        style={{
-          background: "#f9fafc",
-          minHeight: "90vh",
-        }}
+              <h4 className="username">{formData.username}</h4>
+              <p className="email">{formData.email}</p>
+
+              <div className="action-buttons">
+                <Button
+                  variant={isEditing ? "outline-danger" : "outline-primary"}
+                  onClick={() => setIsEditing(!isEditing)}
+                >
+                  {isEditing ? "Hủy chỉnh sửa" : "Chỉnh sửa thông tin"}
+                </Button>
+
+                <Button
+                  variant="outline-warning"
+                  onClick={() => setShowPasswordModal(true)}
+                >
+                  Đổi mật khẩu
+                </Button>
+              </div>
+            </Card>
+          </Col>
+
+          {/* RIGHT – FORM */}
+          <Col lg={8}>
+            <Card className="profile-form-card">
+              <h5 className="form-title">Thông tin cá nhân</h5>
+
+              <Form>
+                <Row>
+                  {["username", "email", "phone", "address"].map((field, i) => (
+                    <Col md={i < 2 ? 6 : 12} key={field}>
+                      <Form.Group className="mb-3">
+                        <Form.Label>
+                          {
+                            {
+                              username: "Họ và tên",
+                              email: "Email",
+                              phone: "Số điện thoại",
+                              address: "Địa chỉ",
+                            }[field]
+                          }
+                        </Form.Label>
+
+                        <Form.Control
+                          type={field === "email" ? "email" : "text"}
+                          name={field}
+                          value={formData[field] || ""}
+                          onChange={handleChange}
+                          disabled={!isEditing}
+                          className={isEditing ? "editable" : "readonly"}
+                        />
+                      </Form.Group>
+                    </Col>
+                  ))}
+                </Row>
+
+                {isEditing && (
+                  <div className="text-end mt-4">
+                    <Button
+                      className="save-btn"
+                      onClick={handleSave}
+                      disabled={loading}
+                    >
+                      {loading ? <Spinner size="sm" /> : "Lưu thay đổi"}
+                    </Button>
+                  </div>
+                )}
+              </Form>
+            </Card>
+          </Col>
+        </Row>
+      </Container>
+      <Modal
+        show={showAvatarModal}
+        onHide={() => setShowAvatarModal(false)}
+        centered
       >
-        <Container>
-          <div className="text-left mb-2">
-            <Link
-              to={"/"}
-              className="btn btn-outline-primary rounded-pill px-2 py-1 fw-semibold"
-              style={{ fontSize: "0.85rem" }}
-            >
-              <ArrowLeftCircle size={14} className="me-1" />
-              Quay lại
-            </Link>
-          </div>
-
-          <Row className="justify-content-center g-4">
-            <Col md={4}>
-              <Card className="shadow-lg border-0 rounded-4 text-center py-4 px-3">
-                <div className="position-relative mb-3">
-                  <Image
-                    src={formData.avatar || "/images/avatar-default.png"}
-                    roundedCircle
-                    width={130}
-                    height={130}
-                    alt="Avatar"
-                    onClick={() => setShowAvatarModal(true)}
-                    style={{
-                      cursor: "pointer",
-                      border: "4px solid #4facfe",
-                      transition: "transform 0.3s ease",
-                    }}
-                    onMouseEnter={(e) =>
-                      (e.target.style.transform = "scale(1.05)")
-                    }
-                    onMouseLeave={(e) =>
-                      (e.target.style.transform = "scale(1)")
-                    }
-                  />
-                </div>
-
-                <h4 className="mt-2 mb-1 fw-bold text-dark">
-                  {formData.username}
-                </h4>
-                <p className="text-muted small mb-4">{formData.email}</p>
-
-                <div className="d-grid gap-2">
-                  <Button
-                    variant={isEditing ? "outline-danger" : "outline-primary"}
-                    className="rounded-pill fw-semibold"
-                    onClick={() => setIsEditing(!isEditing)}
-                  >
-                    {isEditing ? "❌ Hủy chỉnh sửa" : "✏️ Chỉnh sửa thông tin"}
-                  </Button>
-                  <Button
-                    variant="outline-warning"
-                    className="rounded-pill fw-semibold"
-                    onClick={() => setShowPasswordModal(true)}
-                  >
-                    🔒 Đổi mật khẩu
-                  </Button>
-                </div>
-              </Card>
-            </Col>
-
-            <Col md={7}>
-              <Card className="shadow-lg border-0 rounded-4 p-4 bg-white">
-                <h5 className="text-secondary fw-bold mb-3">
-                  Thông tin cá nhân
-                </h5>
-
-                <Form>
-                  <Row>
-                    {["username", "email", "phone", "address"].map(
-                      (field, i) => (
-                        <Col md={i < 2 ? 6 : 12} key={field}>
-                          <Form.Group className="mb-3">
-                            <Form.Label className="fw-semibold text-muted">
-                              {
-                                {
-                                  username: "Họ và tên",
-                                  email: "Email",
-                                  phone: "Số điện thoại",
-                                  address: "Địa chỉ",
-                                }[field]
-                              }
-                            </Form.Label>
-                            <Form.Control
-                              type={field === "email" ? "email" : "text"}
-                              name={field}
-                              value={formData[field] || ""}
-                              onChange={handleChange}
-                              disabled={!isEditing}
-                              className={`rounded-3 shadow-sm ${
-                                isEditing
-                                  ? "border-primary"
-                                  : "border-light bg-light"
-                              }`}
-                            />
-                          </Form.Group>
-                        </Col>
-                      )
-                    )}
-                  </Row>
-
-                  {isEditing && (
-                    <div className="text-end mt-4">
-                      <Button
-                        variant="primary"
-                        className="rounded-pill px-4 fw-semibold text-white border-0"
-                        style={{
-                          background: "#007bff",
-                        }}
-                        onClick={handleSave}
-                        disabled={loading}
-                      >
-                        {loading ? (
-                          <Spinner
-                            animation="border"
-                            size="sm"
-                            variant="primary"
-                          />
-                        ) : (
-                          "💾 Lưu thay đổi"
-                        )}
-                      </Button>
-                    </div>
-                  )}
-                </Form>
-              </Card>
-            </Col>
-          </Row>
-        </Container>
-        <Modal
-          show={showAvatarModal}
-          onHide={() => setShowAvatarModal(false)}
-          centered
-        >
-          <Modal.Body className="text-center">
-            <Image
-              src={preview || "/images/avatar-default.png"}
-              rounded
-              fluid
-              alt="Avatar Preview"
+        <Modal.Body className="text-center">
+          <Image
+            src={preview || "/images/avatar-default.png"}
+            rounded
+            fluid
+            alt="Avatar Preview"
+          />
+          <Form.Group className="mt-3">
+            <Form.Control
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
             />
-            <Form.Group className="mt-3">
-              <Form.Control
-                type="file"
-                accept="image/*"
-                onChange={handleFileChange}
-              />
-            </Form.Group>
-          </Modal.Body>
-          <Modal.Footer>
-            <Button
-              variant="secondary"
-              onClick={() => setShowAvatarModal(false)}
-            >
-              Đóng
-            </Button>
-            <Button
-              variant="primary"
-              onClick={handleAvatarUpload}
-              disabled={avatarLoading}
-            >
-              {avatarLoading ? (
-                <Spinner animation="border" size="sm" />
-              ) : (
-                "Cập nhật"
-              )}
-            </Button>
-          </Modal.Footer>
-        </Modal>
-        <ChangePasswordModal
-          show={showPasswordModal}
-          onHide={() => setShowPasswordModal(false)}
-          userId={user?.id}
-          token={token}
-        />
-      </div>
-    </>
+          </Form.Group>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowAvatarModal(false)}>
+            Đóng
+          </Button>
+          <Button
+            variant="primary"
+            onClick={handleAvatarUpload}
+            disabled={avatarLoading}
+          >
+            {avatarLoading ? (
+              <Spinner animation="border" size="sm" />
+            ) : (
+              "Cập nhật"
+            )}
+          </Button>
+        </Modal.Footer>
+      </Modal>
+      <ChangePasswordModal
+        show={showPasswordModal}
+        onHide={() => setShowPasswordModal(false)}
+        userId={user?.id}
+        token={token}
+      />
+    </div>
   );
 };
 

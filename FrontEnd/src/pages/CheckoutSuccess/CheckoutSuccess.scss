@@ -1,52 +1,82 @@
 .checkout-success-page {
-  min-height: 70vh;
+  background: linear-gradient(135deg, #f4f8ff, #ffffff);
+}
+
+.success-card {
+  background: #ffffff;
+  max-width: 520px;
+  width: 100%;
+  padding: 40px 32px;
+  border-radius: 24px;
+  text-align: center;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+}
+
+.success-icon {
+  color: #22c55e;
+  font-size: 90px;
+  margin-bottom: 16px;
+}
+
+.success-title {
+  font-weight: 700;
+  color: #1d3557;
+  margin-bottom: 12px;
+}
+
+.success-desc {
+  font-size: 0.95rem;
+  color: #6b7280;
+  line-height: 1.6;
+  margin-bottom: 24px;
+
+  .brand {
+    font-weight: 600;
+    color: #2563eb;
+  }
+}
+
+.order-box {
+  background: #f1f5ff;
+  border-radius: 14px;
+  padding: 14px;
+  margin-bottom: 28px;
+
+  span {
+    display: block;
+    font-size: 0.75rem;
+    color: #6b7280;
+  }
+
+  strong {
+    font-size: 1.1rem;
+    color: #2563eb;
+  }
+}
+
+.action-group {
   display: flex;
-  align-items: center;
   justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
 
-  .success-icon {
-    font-size: 100px;
+  button {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 20px;
+    border-radius: 12px;
+    font-weight: 500;
   }
+}
 
-  .brand-highlight {
-    font-weight: 700;
-  }
+.redirect-text {
+  font-size: 0.8rem;
+  color: #6b7280;
 
-  .order-code {
-    font-size: 1.25rem;
-    letter-spacing: 1px;
-  }
-
-  .button-group {
-    button {
-      min-width: 140px;
-      font-size: 0.9rem;
-      border-radius: 50px;
-      transition: all 0.2s ease;
-
-      &:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-      }
-    }
-  }
-
-  @media (max-width: 576px) {
-    .success-icon {
-      font-size: 70px;
-    }
-
-    .order-code {
-      font-size: 1rem;
-    }
-
-    .button-group {
-      flex-direction: column;
-      gap: 0.75rem;
-
-      button {
-        width: 100%;
-      }
-    }
+  span {
+    color: #2563eb;
+    font-weight: 600;
   }
 }

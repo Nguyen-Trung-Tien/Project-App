@@ -39,6 +39,7 @@ import { getAllOrders } from "../../../api/orderApi";
 import { getAllOrderItems } from "../../../api/orderItemApi";
 import { getDashboard } from "../../../api/adminApi";
 import AppPagination from "../../../components/Pagination/Pagination";
+import { useSelector } from "react-redux";
 
 const COLORS = ["#4361ee", "#3a0ca3", "#7209b7", "#f72585", "#ff006e"];
 const STATUS_COLORS = {
@@ -59,6 +60,7 @@ const STATUS_LABELS = {
 };
 
 const Revenue = () => {
+  const token = useSelector((state) => state.user.token);
   const [loading, setLoading] = useState(true);
   const [chartLoading, setChartLoading] = useState(false);
   const [orders, setOrders] = useState([]);
@@ -85,9 +87,9 @@ const Revenue = () => {
     setChartLoading(true);
     try {
       const [ordersRes, orderItemsRes, dashboardRes] = await Promise.all([
-        getAllOrders(1, 1000),
-        getAllOrderItems(),
-        getDashboard(),
+        getAllOrders(1, 1000, token),
+        getAllOrderItems(token),
+        getDashboard(token),
       ]);
 
       let orderList = [];

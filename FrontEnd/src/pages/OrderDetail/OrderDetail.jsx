@@ -21,8 +21,7 @@ import { useSelector } from "react-redux";
 import { getImage } from "../../utils/decodeImage";
 
 const OrderDetail = () => {
-  const user = useSelector((state) => state.user.user);
-  const token = user?.accessToken;
+  const token = useSelector((state) => state.user.token);
   const { id } = useParams();
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -67,6 +66,12 @@ const OrderDetail = () => {
         return 0;
     }
   };
+  const Info = ({ label, value }) => (
+    <div className="info-row">
+      <span>{label}</span>
+      <strong>{value || "-"}</strong>
+    </div>
+  );
 
   const getStatusBadge = (status) => {
     switch (status) {
@@ -208,156 +213,146 @@ const OrderDetail = () => {
   return (
     <div className="order-detail-page py-3">
       <Container>
-        <h3 className="mb-3 text-center fw-bold text-primary">
-          Chi tiết đơn hàng #DH{order.id}
-        </h3>
+        <div className="order-title">
+          <span className="order-title__icon">🧾</span>
+          <div>
+            <h3 className="order-title__text">
+              Chi tiết đơn hàng
+              <span className="order-title__id"> #DH{order.id}</span>
+            </h3>
+            <p className="order-title__sub">
+              Theo dõi trạng thái và thông tin đơn hàng của bạn
+            </p>
+          </div>
+        </div>
 
-        <Card className="mb-4 shadow-sm border-0">
-          <Card.Body>
-            <Row>
-              <Col md={6}>
-                <h5 className="fw-semibold mb-3 text-secondary">
-                  👤 Thông tin người nhận
-                </h5>
-                <p>
-                  <strong>Họ tên: </strong>
-                  {order.user?.username || "Khách hàng"}
-                </p>
-                <p>
-                  <strong>SĐT: </strong>
-                  {order.user?.phone}
-                </p>
-                <p>
-                  <strong>Email:</strong> {order.user?.email}
-                </p>
-                <p>
-                  <strong>Địa chỉ:</strong> {order.shippingAddress}
-                </p>
-                {order.note && (
-                  <p>
-                    <strong>Ghi chú:</strong> {order.note}
-                  </p>
-                )}
-              </Col>
+        <Card className="order-header mb-4 shadow-sm border-0">
+          <Card.Body className="d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+              <h4 className="fw-bold mb-1">
+                Đơn hàng <span className="text-primary">#DH{order.id}</span>
+              </h4>
+              <div className="d-flex align-items-center gap-2">
+                {getStatusBadge(order.status)}
+                {getPaymentBadge(order.paymentStatus)}
+              </div>
+            </div>
 
-              <Col md={6}>
-                <h5 className="fw-semibold mb-3 text-secondary">
-                  🧾 Thông tin đơn hàng
-                </h5>
-                <p>
-                  <strong>Ngày đặt:</strong>{" "}
-                  {new Date(
-                    order.orderDate || order.createdAt
-                  ).toLocaleDateString("vi-VN")}
-                </p>
-                {order.deliveredAt && (
-                  <p>
-                    <strong>Ngày giao:</strong>{" "}
-                    {new Date(order.deliveredAt).toLocaleDateString("vi-VN")}
-                  </p>
-                )}
-                <p>
-                  <strong>Trạng thái:</strong> {getStatusBadge(order.status)}
-                </p>
-                <p>
-                  <strong>Phương thức thanh toán:</strong>{" "}
-                  {order.paymentMethod?.toUpperCase()}
-                </p>
-                <div className="mt-2">
-                  <strong>Trạng thái thanh toán:</strong>{" "}
-                  {getPaymentBadge(order.paymentStatus)}
-                </div>
-                <p className="mt-3">
-                  <strong>Tổng tiền:</strong>{" "}
-                  <span className="text-danger fw-bold">
-                    {parseFloat(order.totalPrice).toLocaleString("vi-VN", {
-                      minimumFractionDigits: 0,
-                      maximumFractionDigits: 0,
-                    })}
-                    ₫
-                  </span>
-                </p>
-
-                <ProgressBar
-                  now={getProgress(order.status)}
-                  label={`${getProgress(order.status)}%`}
-                  variant={getProgressVariant(order.status)}
-                  className="mt-3"
-                  style={{ height: "12px", borderRadius: "6px" }}
-                />
-              </Col>
-            </Row>
+            <div style={{ minWidth: 220 }}>
+              <small className="text-muted">Tiến trình đơn hàng</small>
+              <ProgressBar
+                now={getProgress(order.status)}
+                variant={getProgressVariant(order.status)}
+                className="mt-1"
+                style={{ height: 10, borderRadius: 8 }}
+              />
+            </div>
           </Card.Body>
         </Card>
 
-        <h5 className="fw-semibold mb-3 text-secondary">
-          📦 Sản phẩm trong đơn hàng
-        </h5>
-        <Table responsive bordered hover className="align-middle shadow-sm">
-          <thead className="table-primary text-center">
-            <tr>
-              <th>Tên sản phẩm</th>
-              <th>Số lượng</th>
-              <th>Giá</th>
-              <th>Thành tiền</th>
-              <th>Trạng thái trả hàng</th>
-              <th>Lý do trả hàng</th>
-            </tr>
-          </thead>
-          <tbody>
-            {order.orderItems?.map((item) => {
-              const price = parseFloat(item.price || 0);
-              const subtotal = price * (item.quantity || 0);
-              const product = item.product || {};
+        {/* ===== INFO ===== */}
+        <Row className="mb-4 g-3">
+          <Col md={6}>
+            <Card className="info-card shadow-sm border-0 h-100">
+              <Card.Body>
+                <h6 className="section-title">👤 Người nhận</h6>
+                <Info label="Họ tên" value={order.user?.username || "Khách"} />
+                <Info label="SĐT" value={order.user?.phone} />
+                <Info label="Email" value={order.user?.email} />
+                <Info label="Địa chỉ" value={order.shippingAddress} />
+                {order.note && <Info label="Ghi chú" value={order.note} />}
+              </Card.Body>
+            </Card>
+          </Col>
 
-              return (
-                <tr key={item.id} className="text-center">
-                  <td className="product-td text-start">
-                    <div className="d-flex align-items-center gap-2">
-                      {product.image && (
-                        <img
-                          src={getImage(product.image)}
-                          alt={product.name}
-                          width={60}
-                          height={60}
-                          className="rounded"
-                        />
-                      )}
-                      <div>
-                        <Link
-                          to={`/product-detail/${product.id}`}
-                          className="product-link fw-bold"
-                        >
-                          {product.name || item.productName}
-                        </Link>
-                        <div className="text-muted small">
-                          {product.ram && <span>RAM: {product.ram} </span>}
-                          {product.rom && <span>ROM: {product.rom} </span>}
-                          {product.cpu && <span>CPU: {product.cpu} </span>}
-                          {product.screen && (
-                            <span>Màn hình: {product.screen}</span>
-                          )}
-                        </div>
-                      </div>
+          <Col md={6}>
+            <Card className="info-card shadow-sm border-0 h-100">
+              <Card.Body>
+                <h6 className="section-title">🧾 Thanh toán</h6>
+                <Info
+                  label="Ngày đặt"
+                  value={new Date(
+                    order.orderDate || order.createdAt
+                  ).toLocaleDateString("vi-VN")}
+                />
+                {order.deliveredAt && (
+                  <Info
+                    label="Ngày giao"
+                    value={new Date(order.deliveredAt).toLocaleDateString(
+                      "vi-VN"
+                    )}
+                  />
+                )}
+                <Info
+                  label="Phương thức"
+                  value={order.paymentMethod?.toUpperCase()}
+                />
+
+                <div className="total-box mt-3">
+                  <span>Tổng tiền</span>
+                  <strong className="text-danger">
+                    {Number(order.totalPrice).toLocaleString("vi-VN")} ₫
+                  </strong>
+                </div>
+              </Card.Body>
+            </Card>
+          </Col>
+        </Row>
+
+        {/* ===== PRODUCTS ===== */}
+        <h5 className="fw-semibold mb-3">📦 Sản phẩm</h5>
+
+        <div className="product-list">
+          {order.orderItems?.map((item) => {
+            const product = item.product || {};
+            const subtotal = item.price * item.quantity;
+
+            return (
+              <Card key={item.id} className="product-card shadow-sm border-0">
+                <Card.Body className="d-flex gap-3">
+                  <img
+                    src={getImage(product.image)}
+                    alt={product.name}
+                    className="product-img"
+                  />
+
+                  <div className="flex-grow-1">
+                    <Link
+                      to={`/product-detail/${product.id}`}
+                      className="product-name"
+                    >
+                      {product.name || item.productName}
+                    </Link>
+
+                    <div className="text-muted small mt-1">
+                      SL: {item.quantity} · Giá: {item.price.toLocaleString()} ₫
                     </div>
-                  </td>
 
-                  <td>{item.quantity}</td>
-                  <td>{price.toLocaleString()} ₫</td>
-                  <td>{subtotal.toLocaleString()} ₫</td>
-                  <td>{getReturnBadge(item.returnStatus)}</td>
-                  <td>{item.returnReason || "-"}</td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </Table>
+                    <div className="mt-2">
+                      {getReturnBadge(item.returnStatus)}
+                      {item.returnReason && (
+                        <div className="small text-muted mt-1">
+                          Lý do: {item.returnReason}
+                        </div>
+                      )}
+                    </div>
+                  </div>
 
+                  <div className="text-end fw-bold">
+                    {subtotal.toLocaleString()} ₫
+                  </div>
+                </Card.Body>
+              </Card>
+            );
+          })}
+        </div>
+
+        {/* ===== RETURN BUTTON ===== */}
         {order.status === "delivered" &&
-          order.orderItems?.some((item) => item.returnStatus === "none") && (
-            <div className="text-end mt-3">
-              <Button variant="warning" onClick={openReturnModal}>
-                Trả hàng
+          order.orderItems?.some((i) => i.returnStatus === "none") && (
+            <div className="text-end mt-4">
+              <Button variant="warning" size="lg" onClick={openReturnModal}>
+                Yêu cầu trả hàng
               </Button>
             </div>
           )}

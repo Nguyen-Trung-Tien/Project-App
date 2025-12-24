@@ -34,8 +34,7 @@ import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
 
 const OrdersReturnPage = () => {
-  const user = useSelector((state) => state.user.user);
-  const token = user?.accessToken;
+  const token = useSelector((state) => state.user.token);
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadingAction, setLoadingAction] = useState(false);

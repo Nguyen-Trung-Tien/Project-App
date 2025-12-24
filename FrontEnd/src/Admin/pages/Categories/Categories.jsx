@@ -37,8 +37,7 @@ import "./Categories.scss";
 import { useSelector } from "react-redux";
 
 const Categories = () => {
-  const user = useSelector((state) => state.user.user);
-  const token = user?.accessToken;
+  const token = useSelector((state) => state.user.token);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);

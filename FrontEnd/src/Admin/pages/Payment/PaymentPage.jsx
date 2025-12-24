@@ -47,8 +47,7 @@ const METHOD_BADGE = {
 };
 
 const PaymentPage = () => {
-  const user = useSelector((state) => state.user.user);
-  const token = user?.accessToken;
+  const token = useSelector((state) => state.user.token);
   const [payments, setPayments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filterStatus, setFilterStatus] = useState("all");

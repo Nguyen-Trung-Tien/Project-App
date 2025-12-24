@@ -34,8 +34,7 @@ import { useSelector } from "react-redux";
 import AppPagination from "../../../components/Pagination/Pagination";
 
 const UserManage = () => {
-  const user = useSelector((state) => state.user.user);
-  const token = user?.accessToken;
+  const token = useSelector((state) => state.user.token);
   const [users, setUsers] = useState([]);
   const [search, setSearch] = useState("");
 

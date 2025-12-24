@@ -38,9 +38,9 @@ import LoadMoreButton from "../../components/LoadMoreButton/LoadMoreButton";
 
 const ProductDetailPage = () => {
   const user = useSelector((state) => state.user.user);
+  const token = useSelector((state) => state.user.token);
   const userId = user?.id;
   const { id } = useParams();
-  const token = user?.accessToken;
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [product, setProduct] = useState(null);

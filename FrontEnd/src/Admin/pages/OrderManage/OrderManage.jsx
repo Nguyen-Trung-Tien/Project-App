@@ -53,7 +53,7 @@ import AppPagination from "../../../components/Pagination/Pagination";
 
 const OrderManage = () => {
   const user = useSelector((state) => state.user.user);
-  const token = user?.accessToken;
+  const token = useSelector((state) => state.user.token);
   const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
   const [showDelete, setShowDelete] = useState(false);

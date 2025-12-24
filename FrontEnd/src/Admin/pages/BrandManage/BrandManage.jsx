@@ -37,9 +37,7 @@ import { useSelector } from "react-redux";
 import { getImage } from "../../../utils/decodeImage";
 
 const BrandManage = () => {
-  const user = useSelector((state) => state.user.user);
-  const token = user?.accessToken;
-
+  const token = useSelector((state) => state.user.token);
   const [brands, setBrands] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [editBrand, setEditBrand] = useState(null);

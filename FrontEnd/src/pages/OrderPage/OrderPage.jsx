@@ -78,8 +78,8 @@ const paymentStatus = {
 
 const OrderPage = () => {
   const navigate = useNavigate();
-  const { user, token } = useSelector((state) => state.user);
-
+  const token = useSelector((state) => state.user.token);
+  const user = useSelector((state) => state.user.user);
   const [orders, setOrders] = useState([]);
   const [activeTab, setActiveTab] = useState("pending");
   const [loading, setLoading] = useState(true);
@@ -187,7 +187,7 @@ const OrderPage = () => {
   return (
     <Container className="py-3 order-page">
       <div className="order-header d-flex justify-content-between align-items-center mb-4">
-        <h4 className="order-header-title d-flex align-items-center">
+        <h4 className="order-header-title fw-bold mb-3">
           <Box className="order-header-icon" /> Đơn hàng của tôi
         </h4>
         <Button

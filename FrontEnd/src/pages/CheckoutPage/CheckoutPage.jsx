@@ -133,17 +133,23 @@ const CheckoutPage = () => {
   return (
     <div className="checkout-page py-4 bg-light">
       <Container>
-        <Row className="gy-4">
+        {
+          <div className="checkout-back mb-3">
+            <Link to="/cart" className="btn checkout-back-btn">
+              <ArrowLeftCircle size={16} />
+              <span>Quay lại giỏ hàng</span>
+            </Link>
+          </div>
+        }
+        <Row className="gy-4 align-items-start">
           <Col lg={8}>
-            <Card className="border-0 rounded-4 shadow-sm">
-              <CheckoutForm
-                user={user}
-                total={total}
-                selectedItems={selectedItems}
-                onOrderComplete={handleOrderComplete}
-                isSingleProduct={isSingleProduct}
-              />
-            </Card>
+            <CheckoutForm
+              user={user}
+              total={total}
+              selectedItems={selectedItems}
+              onOrderComplete={handleOrderComplete}
+              isSingleProduct={isSingleProduct}
+            />
           </Col>
           <Col lg={4}>
             <OrderSummary selectedItems={selectedItems} total={total} />

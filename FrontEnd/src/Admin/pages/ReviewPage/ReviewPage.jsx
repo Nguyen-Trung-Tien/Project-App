@@ -29,15 +29,13 @@ import "./ReviewPage.scss";
 import AppPagination from "../../../components/Pagination/Pagination";
 
 const ReviewPage = () => {
+  const token = useSelector((state) => state.user.token);
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedReview, setSelectedReview] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [replies, setReplies] = useState({});
   const [replyInputs, setReplyInputs] = useState({});
-
-  const user = useSelector((state) => state.user.user);
-  const token = user?.accessToken;
 
   const [filters, setFilters] = useState({ rating: "", status: "" });
   const [pagination, setPagination] = useState({

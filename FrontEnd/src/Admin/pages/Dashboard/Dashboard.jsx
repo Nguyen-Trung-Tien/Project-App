@@ -9,8 +9,7 @@ import { getDashboard } from "../../../api/adminApi";
 import { useSelector } from "react-redux";
 
 const Dashboard = () => {
-  const user = useSelector((state) => state.user.user);
-  const token = user?.accessToken;
+  const token = useSelector((state) => state.user.token);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState([]);
   const [error, setError] = useState(null);

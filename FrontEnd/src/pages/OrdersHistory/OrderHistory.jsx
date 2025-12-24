@@ -34,8 +34,8 @@ const statusLabels = {
 
 const OrderHistoryPage = () => {
   const navigate = useNavigate();
-  const { user, token } = useSelector((state) => state.user);
-
+  const token = useSelector((state) => state.user.token);
+  const user = useSelector((state) => state.user.user);
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
@@ -66,13 +66,11 @@ const OrderHistoryPage = () => {
   const formatDate = (dateStr) =>
     dateStr ? new Date(dateStr).toLocaleDateString("vi-VN") : "-";
 
-  const filteredOrders = useMemo(() => orders, [orders]); // có thể filter nếu muốn
+  const filteredOrders = useMemo(() => orders, [orders]);
 
   return (
     <Container className="py-3 order-history-page">
-      <h3 className="text-center fw-bold mb-3 text-primary">
-        🧾 Lịch sử đơn hàng
-      </h3>
+      <h3 className="text-center fw-bold mb-3">🧾 Lịch sử đơn hàng</h3>
 
       {loading ? (
         <div className="text-center py-5">
