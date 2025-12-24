@@ -6,7 +6,6 @@ import {
   FormControl,
   Button,
   Dropdown,
-  Image,
 } from "react-bootstrap";
 import {
   Search,
@@ -14,29 +13,35 @@ import {
   BoxArrowRight,
   House,
 } from "react-bootstrap-icons";
-import "./HeaderAdmin.scss";
-import { removeUser } from "../../../redux/userSlice";
-import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { logoutUserApi } from "../../../api/userApi";
+import { removeUser } from "../../../redux/userSlice";
 import { clearCart } from "../../../redux/cartSlice";
+import { useDispatch } from "react-redux";
+import { toast } from "react-toastify";
+import { useCurrentUser } from "../../../hooks/useUser";
+import logoImage from "../../../assets/Tien-Tech Shop.png";
+import "./HeaderAdmin.scss";
 
 const HeaderAdmin = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const user = useSelector((state) => state.user.user);
+  const { data: resUser } = useCurrentUser();
+  const user = resUser?.data;
 
   const [searchQuery, setSearchQuery] = useState("");
   const [showSearch, setShowSearch] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
 
-  const avatarUrl = user?.avatar ? user.avatar : "/default-avatar.png";
-  const displayName = user?.username || user?.email || "Admin";
+  const displayName =
+    user?.username?.length > 15
+      ? user.username.slice(0, 15) + "..."
+      : user?.username || user?.email || "Admin";
 
   const handleSearch = (e) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      navigate(`/admin/search?q=${encodeURIComponent(searchQuery)}`);
+      navigate(`/admin/search?q=${encodeURIComponent(searchQuery.trim())}`);
       setShowSearch(false);
     }
   };
@@ -53,6 +58,7 @@ const HeaderAdmin = () => {
       navigate("/admin/login", { replace: true });
     } catch (err) {
       console.error("Logout error:", err);
+      toast.error("Đăng xuất thất bại. Vui lòng thử lại!");
     } finally {
       setLoggingOut(false);
     }
@@ -64,41 +70,51 @@ const HeaderAdmin = () => {
         fluid
         className="d-flex justify-content-between align-items-center"
       >
-        <Navbar.Brand className="fw-bold text-primary fs-4 d-flex align-items-center gap-2">
+        <Navbar.Brand
+          className="fw-bold text-primary fs-4 d-flex align-items-center gap-2 cursor-pointer"
+          onClick={() => navigate("/admin/dashboard")}
+        >
+          <img src={logoImage} alt="Logo" className="header-logo" />
           Admin Dashboard
         </Navbar.Brand>
 
-        <div className="d-flex align-items-center gap-2">
-          <Button
-            variant="outline-secondary"
-            size="sm"
-            className="d-md-none"
-            onClick={() => setShowSearch(!showSearch)}
-          >
-            <Search size={18} />
-          </Button>
+        <Button
+          variant="outline-secondary"
+          className="d-md-none me-2"
+          onClick={() => setShowSearch(!showSearch)}
+        >
+          <Search size={18} />
+        </Button>
 
-          <Form
-            className={`d-${
-              showSearch ? "flex" : "none d-md-flex"
-            } align-items-center flex-grow-1`}
-            style={{ maxWidth: "400px" }}
-            onSubmit={handleSearch}
-          >
-            <div className="input-group">
-              <span className="input-group-text bg-light border-end-0">
-                <Search size={18} />
-              </span>
-              <FormControl
-                type="search"
-                placeholder="Tìm kiếm..."
-                className="border-start-0"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-          </Form>
-        </div>
+        <Form
+          className={`d-${
+            showSearch ? "flex" : "none d-md-flex"
+          } align-items-center flex-grow-1 mx-3`}
+          onSubmit={handleSearch}
+          style={{ maxWidth: "400px" }}
+        >
+          <div className="input-group w-100">
+            <span className="input-group-text bg-light border-end-0">
+              <Search size={18} />
+            </span>
+            <FormControl
+              type="search"
+              placeholder="Tìm kiếm..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="border-start-0"
+            />
+            {searchQuery && (
+              <Button
+                variant="light"
+                className="btn-clear"
+                onClick={() => setSearchQuery("")}
+              >
+                ×
+              </Button>
+            )}
+          </div>
+        </Form>
 
         <div className="d-flex align-items-center gap-3">
           <Button
@@ -118,14 +134,7 @@ const HeaderAdmin = () => {
               className="d-flex align-items-center gap-2"
               id="user-dropdown"
             >
-              <Image
-                src={avatarUrl}
-                alt="Avatar"
-                roundedCircle
-                width={32}
-                height={32}
-                onError={(e) => (e.target.src = "/default-avatar.png")}
-              />
+              <PersonCircle />
               <span className="fw-semibold d-none d-sm-inline">
                 {displayName}
               </span>

@@ -8,24 +8,23 @@ import {
   Card,
   Spinner,
 } from "react-bootstrap";
-import { Link, useNavigate } from "react-router-dom";
 import { Eye, EyeSlash } from "react-bootstrap-icons";
+import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
+import { loginUser } from "../../../api/userApi";
+import { setUser } from "../../../redux/userSlice";
+import logoImage from "../../../assets/Tien-Tech Shop.png";
+import ForgotPasswordModal from "../../../components/ForgotPasswordModal/ForgotPasswordModal";
+import "./AdminLogin.scss";
 
-import { loginUser } from "../../api/userApi";
-import { setUser } from "../../redux/userSlice";
-import { getAvatarBase64 } from "../../utils/decodeImage";
-import ForgotPasswordModal from "../../components/ForgotPasswordModal/ForgotPasswordModal";
-import logoImage from "../../assets/Tien-Tech Shop.png";
-import "./LoginPage.scss";
-
-const LoginPage = () => {
+const AdminLogin = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [showForgotModal, setShowForgotModal] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -33,12 +32,17 @@ const LoginPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-
     try {
       const res = await loginUser(email, password);
 
       if (res.errCode === 0 && res.data) {
-        const { user, accessToken } = res.data;
+        const { user, accessToken, refreshToken } = res.data;
+
+        if (user.role !== "admin") {
+          toast.error("Bạn không có quyền admin!");
+          return;
+        }
+
         const minimalUser = {
           id: user.id,
           email: user.email,
@@ -46,24 +50,30 @@ const LoginPage = () => {
           role: user.role,
           phone: user.phone,
           address: user.address,
-          avatar: getAvatarBase64(user.avatar),
         };
-        dispatch(setUser({ user: minimalUser, token: accessToken }));
-        toast.success(res.errMessage || "Đăng nhập thành công!");
-        navigate("/");
+
+        dispatch(
+          setUser({ user: minimalUser, token: accessToken, refreshToken })
+        );
+
+        if (accessToken) localStorage.setItem("accessToken", accessToken);
+        if (refreshToken) localStorage.setItem("refreshToken", refreshToken);
+
+        toast.success("Đăng nhập thành công!");
+        navigate("/admin/dashboard");
       } else {
         toast.error(res.errMessage || "Đăng nhập thất bại!");
       }
     } catch (err) {
       console.error("Login error:", err);
-      toast.error("Kiểm tra lại mật khẩu và tài khoản!");
+      toast.error("Có lỗi xảy ra. Vui lòng thử lại!");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="login-page modern-login vh-100 d-flex align-items-center">
+    <div className="admin-login-page modern-login vh-100 d-flex align-items-center">
       <Container fluid className="h-100 p-0">
         <Row className="h-100 g-0">
           {/* Left Side */}
@@ -73,13 +83,9 @@ const LoginPage = () => {
           >
             <div className="left-overlay"></div>
             <div className="text-center text-white z-2 position-relative px-5">
-              <img
-                src={logoImage}
-                alt="Tien-Tech Shop Logo"
-                className="main-logo mb-4"
-              />
+              <img src={logoImage} alt="Logo" className="main-logo mb-4" />
               <p className="lead mb-5 opacity-85">
-                Nơi công nghệ gặp gỡ tương lai
+                Quản lý hệ thống cửa hàng dễ dàng
               </p>
             </div>
           </Col>
@@ -92,19 +98,15 @@ const LoginPage = () => {
             <Card className="login-card-modern shadow-lg border-0 p-3">
               <Card.Body>
                 <div className="text-center">
-                  <img
-                    src={logoImage}
-                    alt="Tien-Tech Shop Logo"
-                    className="mobile-logo"
-                  />
+                  <img src={logoImage} alt="Logo" className="mobile-logo" />
                 </div>
 
                 <h4 className="text-center mb-3 fw-semibold text-dark">
-                  Chào mừng quay lại!
+                  Chào mừng Admin!
                 </h4>
 
                 <Form onSubmit={handleSubmit}>
-                  <Form.Floating className="mb-4">
+                  <Form.Floating className="mb-3">
                     <Form.Control
                       id="floatingEmail"
                       type="email"
@@ -144,6 +146,8 @@ const LoginPage = () => {
                       type="checkbox"
                       id="rememberMe"
                       label="Ghi nhớ tôi"
+                      checked={rememberMe}
+                      onChange={() => setRememberMe(!rememberMe)}
                     />
                     <button
                       type="button"
@@ -166,13 +170,6 @@ const LoginPage = () => {
                       "Đăng nhập"
                     )}
                   </Button>
-
-                  <p className="text-center mt-4 text-muted">
-                    Chưa có tài khoản?{" "}
-                    <Link to="/register" className="text-primary fw-semibold">
-                      Đăng ký ngay
-                    </Link>
-                  </p>
 
                   <div className="text-center mt-4">
                     <Button
@@ -198,4 +195,4 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage;
+export default AdminLogin;

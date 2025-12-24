@@ -1,0 +1,24 @@
+.header-logo {
+  max-height: 40px;
+  object-fit: contain;
+}
+
+.navbar .btn-clear {
+  border: none;
+  background: transparent;
+  font-size: 1.2rem;
+  line-height: 1;
+  padding: 0 0.5rem;
+}
+
+.navbar .cursor-pointer {
+  cursor: pointer;
+}
+
+.navbar .input-group .form-control {
+  border-radius: 0.25rem;
+}
+
+.navbar .dropdown-toggle::after {
+  display: none;
+}

@@ -2,7 +2,6 @@ import { Routes, Route } from "react-router-dom";
 import AdminLayout from "../Admin/AdminLayout";
 import Categories from "../Admin/pages/Categories/Categories";
 import Dashboard from "../Admin/pages/Dashboard/Dashboard";
-import AdminLogin from "../Admin/pages/LoginAdmin/Login";
 import OrderManage from "../Admin/pages/OrderManage/OrderManage";
 import ProductManage from "../Admin/pages/ProductManage/ProductManage";
 import UserManage from "../Admin/pages/UserManage/UserManage";
@@ -12,6 +11,7 @@ import PrivateRoute from "./PrivateRoute";
 import PaymentPage from "../Admin/pages/Payment/PaymentPage";
 import ReviewPage from "../Admin/pages/ReviewPage/ReviewPage";
 import BrandManage from "../Admin/pages/BrandManage/BrandManage";
+import AdminLogin from "../Admin/pages/LoginAdmin/AdminLogin";
 
 const AdminRoutes = () => {
   return (

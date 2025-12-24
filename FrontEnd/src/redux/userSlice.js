@@ -5,7 +5,7 @@ const loadFromStorage = (key) => {
     const data = localStorage.getItem(key);
     return data ? JSON.parse(data) : null;
   } catch (e) {
-    console.log(e);
+    console.error("Load từ localStorage thất bại:", e);
     localStorage.removeItem(key);
     return null;
   }
@@ -22,13 +22,12 @@ const saveToStorage = (key, value) => {
     localStorage.setItem(key, JSON.stringify(value));
   } catch (e) {
     if (e.name === "QuotaExceededError" || e.code === 22) {
-      console.warn("LocalStorage đầy — đang dọn dẹp dữ liệu cũ...");
+      console.warn("LocalStorage đầy, đang dọn dẹp...");
       try {
         const preserved = ["user", "accessToken"];
         Object.keys(localStorage).forEach((k) => {
           if (!preserved.includes(k)) localStorage.removeItem(k);
         });
-
         localStorage.setItem(key, JSON.stringify(value));
       } catch (err) {
         console.error("Không thể lưu sau khi dọn dẹp:", err);
@@ -46,33 +45,28 @@ const userSlice = createSlice({
     setUser: (state, action) => {
       const { user, token, refreshToken } = action.payload;
 
-      state.user = {
-        ...user,
-        avatar: user.avatar || "/default-avatar.png",
-      };
+      const { avatar, ...userWithoutAvatar } = user;
+
+      state.user = userWithoutAvatar;
       state.token = token || null;
       state.refreshToken = refreshToken || null;
 
       saveToStorage("user", state.user);
-
-      if (token) localStorage.setItem("accessToken", token);
-      else localStorage.removeItem("accessToken");
-
-      if (refreshToken) localStorage.setItem("refreshToken", refreshToken);
-      else localStorage.removeItem("refreshToken");
+      token
+        ? localStorage.setItem("accessToken", token)
+        : localStorage.removeItem("accessToken");
+      refreshToken
+        ? localStorage.setItem("refreshToken", refreshToken)
+        : localStorage.removeItem("refreshToken");
     },
 
     updateUser: (state, action) => {
-      const safeAvatar =
-        action.payload.avatar && typeof action.payload.avatar === "string"
-          ? action.payload.avatar
-          : state.user?.avatar || "/default-avatar.png";
-
-      state.user = { ...state.user, ...action.payload, avatar: safeAvatar };
-
+      const { avatar, ...updateWithoutAvatar } = action.payload;
+      state.user = { ...state.user, ...updateWithoutAvatar };
       saveToStorage("user", state.user);
     },
 
+    // Cập nhật token
     updateToken: (state, action) => {
       state.token = action.payload;
       localStorage.setItem("accessToken", action.payload);

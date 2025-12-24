@@ -73,7 +73,6 @@ const CartPage = () => {
     fetchCart(page);
   }, [page]);
 
-  console.log("Cart items:", cartItems);
   const lastItemRef = useCallback(
     (node) => {
       if (observer.current) observer.current.disconnect();

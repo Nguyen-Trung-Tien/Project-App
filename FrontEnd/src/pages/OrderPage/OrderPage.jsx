@@ -1,7 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import {
   Container,
-  Table,
   Button,
   Spinner,
   Badge,
@@ -10,7 +9,17 @@ import {
   Tab,
   Card,
 } from "react-bootstrap";
-import { Eye } from "react-bootstrap-icons";
+import {
+  Eye,
+  Hourglass,
+  CheckCircle,
+  Gear,
+  Truck,
+  BoxSeam,
+  XCircle,
+  Box,
+  ClockHistory,
+} from "react-bootstrap-icons";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
@@ -27,7 +36,22 @@ const STATUS_TABS = [
   { key: "delivered", label: "Đã giao" },
   { key: "cancelled", label: "Đã hủy" },
 ];
-
+const STATUS_ICONS = {
+  pending: <Hourglass size={16} />,
+  confirmed: <CheckCircle size={16} />,
+  processing: <Gear size={16} />,
+  shipped: <Truck size={16} />,
+  delivered: <BoxSeam size={16} />,
+  cancelled: <XCircle size={16} />,
+};
+const STATUS_COLORS = {
+  pending: "#f0ad4e",
+  confirmed: "#5bc0de",
+  processing: "#0275d8",
+  shipped: "#5a5a5a",
+  delivered: "#5cb85c",
+  cancelled: "#d9534f",
+};
 const statusVariants = {
   pending: "warning",
   confirmed: "info",
@@ -162,14 +186,17 @@ const OrderPage = () => {
 
   return (
     <Container className="py-3 order-page">
-      <div className="d-flex justify-content-between align-items-center mb-3">
-        <h4>Đơn hàng của tôi</h4>
+      <div className="order-header d-flex justify-content-between align-items-center mb-4">
+        <h4 className="order-header-title d-flex align-items-center">
+          <Box className="order-header-icon" /> Đơn hàng của tôi
+        </h4>
         <Button
           size="sm"
-          variant="secondary"
+          variant="outline-secondary"
+          className="order-history-btn d-flex align-items-center"
           onClick={() => navigate("/order-history")}
         >
-          Xem lịch sử đơn hàng
+          <ClockHistory className="me-1" /> Xem lịch sử
         </Button>
       </div>
 
@@ -180,7 +207,17 @@ const OrderPage = () => {
             key={tab.key}
             eventKey={tab.key}
             title={
-              <span style={{ position: "relative", display: "inline-block" }}>
+              <span
+                style={{
+                  position: "relative",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "4px",
+                  color: STATUS_COLORS[tab.key],
+                  fontWeight: activeTab === tab.key ? "600" : "400",
+                }}
+              >
+                {STATUS_ICONS[tab.key]}
                 {tab.label}
                 {["pending", "confirmed", "processing", "shipped"].includes(
                   tab.key
@@ -192,7 +229,7 @@ const OrderPage = () => {
                       style={{
                         position: "absolute",
                         top: "-8px",
-                        right: "-20px",
+                        right: "-16px",
                         fontSize: "0.65rem",
                       }}
                     >

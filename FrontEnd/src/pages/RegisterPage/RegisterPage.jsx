@@ -85,17 +85,17 @@ const RegisterPage = () => {
               lg={7}
               className="d-flex align-items-center justify-content-center bg-light"
             >
-              <Card className="register-card-modern shadow-lg border-0 p-5">
+              <Card className="register-card-modern shadow-lg border-0 p-3">
                 <Card.Body>
-                  <div className="text-center mb-4 d-lg-none">
+                  <div className="text-center ">
                     <img
                       src={logoImage}
                       alt="Tien-Tech Shop Logo"
-                      className="mobile-logo mb-3"
+                      className="mobile-logo"
                     />
                   </div>
 
-                  <h4 className="text-center mb-5 fw-semibold text-dark">
+                  <h4 className="text-center mb-3 fw-semibold text-dark">
                     Tạo tài khoản mới
                   </h4>
 
