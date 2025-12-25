@@ -1,22 +1,26 @@
 import { Routes, Route } from "react-router-dom";
+import PrivateRoute from "./PrivateRoute";
+import PublicRouteAdmin from "./PublicRouteAdmin"; // tạo riêng cho admin
 import AdminLayout from "../Admin/AdminLayout";
-import Categories from "../Admin/pages/Categories/Categories";
+
+import AdminLogin from "../Admin/pages/LoginAdmin/AdminLogin";
 import Dashboard from "../Admin/pages/Dashboard/Dashboard";
+import Categories from "../Admin/pages/Categories/Categories";
 import OrderManage from "../Admin/pages/OrderManage/OrderManage";
 import ProductManage from "../Admin/pages/ProductManage/ProductManage";
 import UserManage from "../Admin/pages/UserManage/UserManage";
 import Revenue from "../Admin/pages/Revenue/Revenue";
 import OrdersReturnPage from "../Admin/pages/OrdersReturnPage/OrdersReturnPage";
-import PrivateRoute from "./PrivateRoute";
 import PaymentPage from "../Admin/pages/Payment/PaymentPage";
 import ReviewPage from "../Admin/pages/ReviewPage/ReviewPage";
 import BrandManage from "../Admin/pages/BrandManage/BrandManage";
-import AdminLogin from "../Admin/pages/LoginAdmin/AdminLogin";
 
 const AdminRoutes = () => {
   return (
     <Routes>
-      <Route path="login" element={<AdminLogin />} />
+      <Route element={<PublicRouteAdmin />}>
+        <Route path="login" element={<AdminLogin />} />
+      </Route>
 
       <Route element={<PrivateRoute requiredRole="admin" />}>
         <Route element={<AdminLayout />}>
