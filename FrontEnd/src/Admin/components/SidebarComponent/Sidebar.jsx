@@ -21,16 +21,16 @@ import "./Sidebar.scss";
 
 const MENU_ITEMS = [
   { to: "/admin/dashboard", icon: <FiHome />, label: "Dashboard" },
-  { to: "/admin/orders", icon: <FiShoppingCart />, label: "Đơn hàng" },
-  { to: "/admin/products", icon: <FiBox />, label: "Sản phẩm" },
-  { to: "/admin/brands", icon: <FiTag />, label: "Thương hiệu" },
-  { to: "/admin/users", icon: <FiUsers />, label: "Người dùng" },
   { to: "/admin/revenue", icon: <FiBarChart />, label: "Doanh thu" },
+  { to: "/admin/orders", icon: <FiShoppingCart />, label: "Đơn hàng" },
   {
     to: "/admin/payment",
     icon: <FiDollarSign />,
     label: "Thanh toán",
   },
+  { to: "/admin/products", icon: <FiBox />, label: "Sản phẩm" },
+  { to: "/admin/users", icon: <FiUsers />, label: "Người dùng" },
+  { to: "/admin/brands", icon: <FiTag />, label: "Thương hiệu" },
   { to: "/admin/categories", icon: <FiLayers />, label: "Danh mục" },
   { to: "/admin/reviews", icon: <FiHelpCircle />, label: "Phản hồi" },
 ];

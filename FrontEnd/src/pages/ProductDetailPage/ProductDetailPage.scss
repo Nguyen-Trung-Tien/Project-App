@@ -72,15 +72,13 @@
 
   .discount-badge {
     position: absolute;
-    top: 12px;
-    left: 12px;
-    background: #ff4d4f;
+    top: 2px;
+    left: 2px;
     color: white;
-    padding: 6px 12px;
+    padding: 4px 6px;
     font-weight: bold;
     border-radius: 12px;
-    font-size: 0.9rem;
-    box-shadow: 0px 4px 12px rgba(255, 0, 0, 0.4);
+    font-size: 0.75rem;
   }
 
   .product-info {
