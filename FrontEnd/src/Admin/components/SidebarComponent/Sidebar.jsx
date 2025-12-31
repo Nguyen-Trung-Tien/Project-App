@@ -18,6 +18,7 @@ import { logoutUserApi } from "../../../api/userApi";
 import { removeUser } from "../../../redux/userSlice";
 import { clearCart } from "../../../redux/cartSlice";
 import "./Sidebar.scss";
+import { toast } from "react-toastify";
 
 const MENU_ITEMS = [
   { to: "/admin/dashboard", icon: <FiHome />, label: "Dashboard" },
@@ -53,6 +54,7 @@ const Sidebar = () => {
       dispatch(removeUser());
       dispatch(clearCart());
       navigate("/admin/login", { replace: true });
+      toast.success("Đăng xuất thành công!");
     } catch (err) {
       console.error("Logout error:", err);
     } finally {

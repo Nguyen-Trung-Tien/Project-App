@@ -56,6 +56,7 @@ const HeaderAdmin = () => {
       dispatch(removeUser());
       dispatch(clearCart());
       navigate("/admin/login", { replace: true });
+      toast.success("Đăng xuất thành công!");
     } catch (err) {
       console.error("Logout error:", err);
       toast.error("Đăng xuất thất bại. Vui lòng thử lại!");

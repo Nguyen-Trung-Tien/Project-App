@@ -20,6 +20,7 @@ import { useCurrentUser } from "../../hooks/useUser";
 import { debounce } from "lodash";
 import "./Header.scss";
 import logoImage from "../../assets/Tien-Tech Shop.png";
+import { toast } from "react-toastify";
 
 function Header() {
   const dispatch = useDispatch();
@@ -103,6 +104,7 @@ function Header() {
       dispatch(removeUser());
       dispatch(clearCart());
       navigate("/login");
+      toast.success("Đăng xuất thành công!");
     } catch (err) {
       console.error("Logout error:", err);
     }
