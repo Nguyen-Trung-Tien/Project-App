@@ -71,7 +71,7 @@ const CheckoutForm = ({ user, total, selectedItems, onOrderComplete }) => {
         orderId: `ORD${Date.now()}`,
         amount: Math.round(total),
       });
-      window.open(url, "_blank");
+      window.open(url);
       return;
     }
 

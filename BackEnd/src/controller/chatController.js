@@ -40,6 +40,7 @@ Sản phẩm:
       }
     }
 
+    // Thêm thông tin đơn hàng gần nhất
     if (userId) {
       const order = await Order.findOne({
         where: { userId },
