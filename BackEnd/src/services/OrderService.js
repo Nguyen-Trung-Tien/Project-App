@@ -297,10 +297,6 @@ const createOrder = async (data) => {
       }
     );
 
-    // ❌ KHÔNG TRỪ KHO Ở ĐÂY
-    // ❌ KHÔNG CỘNG SOLD Ở ĐÂY
-
-    // Xóa cart items (OK)
     const cartItemIds = orderItems
       .map((item) => item.cartItemId)
       .filter(Boolean);

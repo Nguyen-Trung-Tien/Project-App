@@ -94,6 +94,7 @@ const getPaymentById = async (id) => {
 };
 
 const createPayment = async (data) => {
+  const t = await db.sequelize.transaction();
   try {
     const { orderId, userId, amount, method, note } = data;
 
@@ -101,36 +102,74 @@ const createPayment = async (data) => {
       return { errCode: 2, errMessage: "Missing required fields" };
     }
 
-    const order = await db.Order.findByPk(orderId);
+    const order = await db.Order.findByPk(orderId, { transaction: t });
     if (!order) {
+      await t.rollback();
       return { errCode: 3, errMessage: "Order not found" };
     }
 
+    // Nếu Order đã thanh toán hoặc hoàn tất, không tạo payment mới
     if (order.paymentStatus === "paid" || order.status === "completed") {
+      await t.rollback();
       return {
         errCode: 4,
         errMessage: "Order has already been paid. Please create a new order.",
       };
     }
 
-    const transactionId = `DH${orderId}`;
+    // Kiểm tra Payment đã tồn tại cho order chưa
+    let payment = await db.Payment.findOne({
+      where: { orderId },
+      transaction: t,
+    });
+    if (payment) {
+      await t.rollback();
+      return {
+        errCode: 5,
+        errMessage: "Payment already exists for this order",
+        data: payment,
+      };
+    }
+
+    const transactionId = `DH${Date.now()}${orderId}`;
 
     const autoPaidMethods = ["momo", "paypal", "vnpay", "bank"];
     const isAutoPaid = autoPaidMethods.includes(method);
 
-    const payment = await db.Payment.create({
-      orderId,
-      userId: userId || order.userId,
-      amount,
-      method,
-      note,
-      transactionId,
-      status: isAutoPaid ? "completed" : "pending",
-    });
+    payment = await db.Payment.create(
+      {
+        orderId,
+        userId: userId || order.userId,
+        amount,
+        method,
+        note,
+        transactionId,
+        status: isAutoPaid ? "completed" : "pending",
+      },
+      { transaction: t }
+    );
 
     if (isAutoPaid) {
-      await order.update({ paymentStatus: "paid" });
+      // Cập nhật trạng thái Order ngay
+      order.paymentStatus = "paid";
+      if (order.status === "pending") order.status = "confirmed";
+      await order.save({ transaction: t });
+
+      // Cập nhật sold & stock sản phẩm
+      const orderItems = await db.OrderItem.findAll({
+        where: { orderId },
+        transaction: t,
+      });
+      for (const item of orderItems) {
+        await ProductService.updateProductSold(
+          item.productId,
+          item.quantity,
+          t
+        );
+      }
     }
+
+    await t.commit();
 
     return {
       errCode: 0,
@@ -138,8 +177,9 @@ const createPayment = async (data) => {
       data: payment,
     };
   } catch (e) {
+    await t.rollback();
     console.error("Error createPayment:", e);
-    return { errCode: 1, errMessage: "Internal server error" };
+    return { errCode: 1, errMessage: e.message || "Internal server error" };
   }
 };
 
