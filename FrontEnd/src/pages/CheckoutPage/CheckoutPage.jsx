@@ -7,6 +7,7 @@ import { toast } from "react-toastify";
 import { createOrder } from "../../api/orderApi";
 import { createPayment } from "../../api/paymentApi";
 import { getAllCartItems } from "../../api/cartApi";
+import { createVnpayPayment } from "../../api/paymentApi";
 import { setCartItems, removeCartItem } from "../../redux/cartSlice";
 import { resetCheckout } from "../../redux/checkoutSlice";
 import CheckoutForm from "./CheckoutForm";
@@ -70,9 +71,22 @@ const CheckoutPage = () => {
   const handleOrderComplete = async (orderData, paypalDetails = null) => {
     try {
       const orderRes = await createOrder(orderData, token);
-      if (orderRes.errCode !== 0)
-        return toast.error(orderRes.errMessage || "Lỗi khi tạo đơn hàng!");
-      const orderId = orderRes.data.id;
+      if (orderRes.errCode !== 0) {
+        toast.error(orderRes.errMessage || "Lỗi khi tạo đơn hàng!");
+        return;
+      }
+
+      const { id: orderId, orderCode } = orderRes.data;
+
+      if (orderData.paymentMethod === "vnpay") {
+        const paymentUrl = await createVnpayPayment({
+          orderCode,
+          amount: Math.round(total),
+        });
+
+        window.location.href = paymentUrl;
+        return;
+      }
 
       const paymentRes = await createPayment(
         {
@@ -80,26 +94,21 @@ const CheckoutPage = () => {
           userId: user.id,
           amount: total,
           method: orderData.paymentMethod,
-          paymentStatus: paypalDetails
-            ? "paid"
-            : orderData.paymentMethod === "cod"
-            ? "unpaid"
-            : "paid",
-          status: paypalDetails
-            ? "completed"
-            : orderData.paymentMethod === "cod"
-            ? "pending"
-            : "completed",
+          paymentStatus: paypalDetails ? "paid" : "unpaid",
+          status: paypalDetails ? "completed" : "pending",
           paypalInfo: paypalDetails,
         },
         token
       );
 
-      if (paymentRes.errCode && paymentRes.errCode !== 0)
-        return toast.error(paymentRes.errMessage || "Thanh toán thất bại!");
+      if (paymentRes.errCode !== 0) {
+        toast.error(paymentRes.errMessage || "Thanh toán thất bại!");
+        return;
+      }
 
-      if (!isSingleProduct)
+      if (!isSingleProduct) {
         selectedItems.forEach((item) => dispatch(removeCartItem(item.id)));
+      }
 
       dispatch(resetCheckout());
       toast.success("Đặt hàng thành công!");

@@ -11,7 +11,6 @@ import {
   Envelope,
 } from "react-bootstrap-icons";
 import { toast } from "react-toastify";
-import { createVnpayPayment } from "../../api/paymentApi";
 import "./CheckoutForm.scss";
 
 const CheckoutForm = ({ user, total, selectedItems, onOrderComplete }) => {
@@ -63,15 +62,9 @@ const CheckoutForm = ({ user, total, selectedItems, onOrderComplete }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.phone || !formData.address)
-      return toast.warning("Vui lòng nhập đầy đủ thông tin!");
 
-    if (formData.paymentMethod === "vnpay") {
-      const url = await createVnpayPayment({
-        orderId: `ORD${Date.now()}`,
-        amount: Math.round(total),
-      });
-      window.open(url);
+    if (!formData.phone || !formData.address) {
+      toast.warning("Vui lòng nhập đầy đủ thông tin!");
       return;
     }
 

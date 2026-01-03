@@ -21,6 +21,11 @@ module.exports = (sequelize, DataTypes) => {
 
   Order.init(
     {
+      orderCode: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: true,
+      },
       userId: {
         type: DataTypes.INTEGER,
         allowNull: false,
@@ -55,7 +60,7 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
       },
       paymentMethod: {
-        type: DataTypes.ENUM("cod", "bank", "paypal", "momo"),
+        type: DataTypes.ENUM("cod", "bank", "paypal", "momo", "vnpay"),
         defaultValue: "cod",
       },
       paymentStatus: {

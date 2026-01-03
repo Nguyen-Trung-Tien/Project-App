@@ -9,6 +9,12 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER,
       },
+      orderCode: {
+        type: Sequelize.STRING,
+        allowNull: false,
+        unique: true,
+      },
+
       userId: {
         type: Sequelize.INTEGER,
         allowNull: true,
@@ -43,7 +49,7 @@ module.exports = {
         allowNull: true,
       },
       paymentMethod: {
-        type: Sequelize.ENUM("cod", "bank", "paypal", "momo"),
+        type: Sequelize.ENUM("cod", "bank", "paypal", "momo", "vnpay"),
         defaultValue: "cod",
       },
       paymentStatus: {

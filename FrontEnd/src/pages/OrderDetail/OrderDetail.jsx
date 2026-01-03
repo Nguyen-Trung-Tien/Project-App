@@ -218,8 +218,9 @@ const OrderDetail = () => {
           <div>
             <h3 className="order-title__text">
               Chi tiết đơn hàng
-              <span className="order-title__id"> #DH{order.id}</span>
+              <span className="order-title__id">#DH{order.id}</span>
             </h3>
+
             <p className="order-title__sub">
               Theo dõi trạng thái và thông tin đơn hàng của bạn
             </p>
@@ -232,6 +233,10 @@ const OrderDetail = () => {
               <h4 className="fw-bold mb-1">
                 Đơn hàng <span className="text-primary">#DH{order.id}</span>
               </h4>
+              <h6 className="fw-bold mb-1">
+                Mã thanh toán {"  "}
+                <span className="text-primary">#DH{order.orderCode}</span>
+              </h6>
               <div className="d-flex align-items-center gap-2">
                 {getStatusBadge(order.status)}
                 {getPaymentBadge(order.paymentStatus)}
@@ -260,6 +265,7 @@ const OrderDetail = () => {
                 <Info label="SĐT" value={order.user?.phone} />
                 <Info label="Email" value={order.user?.email} />
                 <Info label="Địa chỉ" value={order.shippingAddress} />
+
                 {order.note && <Info label="Ghi chú" value={order.note} />}
               </Card.Body>
             </Card>
@@ -287,7 +293,7 @@ const OrderDetail = () => {
                   label="Phương thức"
                   value={order.paymentMethod?.toUpperCase()}
                 />
-
+                <Info label="Mã thanh toán" value={order.orderCode} />
                 <div className="total-box mt-3">
                   <span>Tổng tiền</span>
                   <strong className="text-danger">

@@ -142,6 +142,7 @@ const getOrdersByUserId = async (
         "totalPrice",
         "paymentMethod",
         "paymentStatus",
+        "orderCode",
         "createdAt",
         "deliveredAt",
       ],
@@ -247,6 +248,7 @@ const getActiveOrdersByUserId = async (userId, page = 1, limit = 10) => {
     throw e;
   }
 };
+
 const createOrder = async (data) => {
   const t = await db.sequelize.transaction();
   try {
@@ -267,6 +269,8 @@ const createOrder = async (data) => {
       };
     }
 
+    const orderCode = `ORD${Date.now()}`;
+
     const formattedItems = orderItems.map((item) => ({
       productId: item.productId,
       productName: item.productName,
@@ -277,40 +281,35 @@ const createOrder = async (data) => {
 
     const order = await db.Order.create(
       {
+        orderCode,
         userId,
         totalPrice,
         shippingAddress,
         paymentMethod,
         note: note || "",
+        paymentStatus: "unpaid",
+        status: "pending",
         orderItems: formattedItems,
       },
-      { include: [{ model: db.OrderItem, as: "orderItems" }], transaction: t }
+      {
+        include: [{ model: db.OrderItem, as: "orderItems" }],
+        transaction: t,
+      }
     );
 
-    for (const item of orderItems) {
-      const product = await db.Product.findByPk(item.productId, {
-        transaction: t,
-      });
+    // ❌ KHÔNG TRỪ KHO Ở ĐÂY
+    // ❌ KHÔNG CỘNG SOLD Ở ĐÂY
 
-      if (!product) continue;
-
-      if (product.stock < item.quantity) {
-        await t.rollback();
-        return {
-          errCode: 2,
-          errMessage: `Sản phẩm ${product.name} không đủ số lượng`,
-        };
-      }
-
-      product.stock -= item.quantity;
-      product.sold = (product.sold || 0) + item.quantity;
-      await product.save({ transaction: t });
-    }
+    // Xóa cart items (OK)
     const cartItemIds = orderItems
       .map((item) => item.cartItemId)
       .filter(Boolean);
-    if (cartItemIds.length > 0) {
-      await db.CartItem.destroy({ where: { id: cartItemIds }, transaction: t });
+
+    if (cartItemIds.length) {
+      await db.CartItem.destroy({
+        where: { id: cartItemIds },
+        transaction: t,
+      });
     }
 
     await t.commit();
@@ -318,12 +317,15 @@ const createOrder = async (data) => {
     return {
       errCode: 0,
       errMessage: "Order created successfully",
-      data: order,
+      data: {
+        id: order.id,
+        orderCode: order.orderCode,
+      },
     };
   } catch (e) {
     await t.rollback();
     console.error("Error creating order:", e);
-    return { errCode: -1, errMessage: e.message || "Error creating order" };
+    return { errCode: -1, errMessage: e.message };
   }
 };
 
@@ -434,18 +436,83 @@ const deleteOrder = async (id) => {
   }
 };
 
-const updatePaymentStatus = async (id, paymentStatus) => {
+const updatePaymentStatus = async (orderId, paymentStatus) => {
+  const t = await db.sequelize.transaction();
   try {
-    const order = await db.Order.findByPk(id);
-    if (!order) return { errCode: 1, errMessage: "Order not found" };
+    const order = await db.Order.findByPk(orderId, {
+      include: [
+        {
+          model: db.OrderItem,
+          as: "orderItems",
+        },
+      ],
+      transaction: t,
+      lock: t.LOCK.UPDATE,
+    });
+
+    if (!order) {
+      await t.rollback();
+      return { errCode: 1, errMessage: "Order not found" };
+    }
 
     const validStatuses = ["unpaid", "paid", "refunded"];
     if (!validStatuses.includes(paymentStatus)) {
+      await t.rollback();
       return { errCode: 2, errMessage: "Invalid payment status" };
     }
 
-    order.paymentStatus = paymentStatus;
-    await order.save();
+    // ĐÃ PAID → KHÔNG XỬ LÝ LẠI
+    if (order.paymentStatus === "paid") {
+      await t.commit();
+      return {
+        errCode: 0,
+        errMessage: "Order already paid",
+        data: order,
+      };
+    }
+
+    // CHỈ XỬ LÝ KHI unpaid → paid
+    if (order.paymentStatus === "unpaid" && paymentStatus === "paid") {
+      for (const item of order.orderItems) {
+        const product = await db.Product.findByPk(item.productId, {
+          transaction: t,
+          lock: t.LOCK.UPDATE,
+        });
+
+        if (!product) {
+          await t.rollback();
+          return {
+            errCode: 3,
+            errMessage: `Product ${item.productId} not found`,
+          };
+        }
+
+        if (product.stock < item.quantity) {
+          await t.rollback();
+          return {
+            errCode: 4,
+            errMessage: `Sản phẩm ${product.name} không đủ tồn kho`,
+          };
+        }
+
+        product.stock -= item.quantity;
+        product.sold = (product.sold || 0) + item.quantity;
+        await product.save({ transaction: t });
+      }
+
+      order.paymentStatus = "paid";
+      order.status = "confirmed";
+      await order.save({ transaction: t });
+    }
+
+    // refunded (để sau, không làm trong VNPay)
+    if (paymentStatus === "refunded") {
+      order.paymentStatus = "refunded";
+      order.status = "cancelled";
+      await order.save({ transaction: t });
+    }
+
+    await t.commit();
 
     return {
       errCode: 0,
@@ -453,12 +520,33 @@ const updatePaymentStatus = async (id, paymentStatus) => {
       data: order,
     };
   } catch (e) {
+    await t.rollback();
     console.error("Error updating payment status:", e);
     return {
       errCode: -1,
       errMessage: e.message || "Error updating payment status",
     };
   }
+};
+
+const getOrderByCode = async (orderCode) => {
+  const order = await db.Order.findOne({
+    where: { orderCode },
+    include: [
+      { model: db.OrderItem, as: "orderItems" },
+      { model: db.Payment, as: "payment" },
+    ],
+  });
+
+  if (!order) {
+    return { errCode: 1, errMessage: "Order not found" };
+  }
+
+  if (order.paymentStatus === "paid") {
+    return { errCode: 2, errMessage: "Order already paid", data: order };
+  }
+
+  return { errCode: 0, data: order };
 };
 
 module.exports = {
@@ -470,4 +558,5 @@ module.exports = {
   updatePaymentStatus,
   getOrdersByUserId,
   getActiveOrdersByUserId,
+  getOrderByCode,
 };

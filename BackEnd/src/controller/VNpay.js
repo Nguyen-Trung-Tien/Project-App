@@ -1,10 +1,11 @@
 const moment = require("moment");
-const qs = require("qs");
 const crypto = require("crypto");
 const OrderService = require("../services/OrderService");
 
 /**
- * Sort object by key ASC
+ * =========================
+ * SORT OBJECT BY KEY (ASC)
+ * =========================
  */
 function sortObject(obj) {
   const sorted = {};
@@ -17,10 +18,12 @@ function sortObject(obj) {
 }
 
 /**
- * Build sign data đúng chuẩn VNPAY
- * - Sort key
- * - Encode value
- * - Replace %20 -> +
+ * =========================
+ * BUILD SIGN DATA (VNPay)
+ * - sort key
+ * - encodeURIComponent
+ * - replace %20 -> +
+ * =========================
  */
 function buildSignData(params) {
   return Object.keys(params)
@@ -32,24 +35,32 @@ function buildSignData(params) {
 }
 
 /**
- * =========================
- * CREATE PAYMENT URL
- * =========================
+ * =================================================
+ * CREATE VNPAY PAYMENT URL
+ * =================================================
  */
 const handleCreateVnpayPayment = async (req, res) => {
   try {
-    const { amount, orderId } = req.body;
+    const { amount, orderCode } = req.body;
 
-    if (!amount) {
+    if (!amount || !orderCode) {
       return res.status(400).json({
         errCode: 1,
-        message: "Amount is required",
+        message: "amount & orderCode are required",
+      });
+    }
+
+    // 🔎 check order tồn tại
+    const orderResult = await OrderService.getOrderByCode(orderCode);
+    if (orderResult.errCode !== 0) {
+      return res.status(404).json({
+        errCode: 2,
+        message: "Order not found",
       });
     }
 
     let ipAddr =
       req.headers["x-forwarded-for"] || req.socket.remoteAddress || "127.0.0.1";
-
     if (ipAddr.includes(",")) ipAddr = ipAddr.split(",")[0];
     if (ipAddr === "::1") ipAddr = "127.0.0.1";
 
@@ -59,8 +70,9 @@ const handleCreateVnpayPayment = async (req, res) => {
     const returnUrl = process.env.VNP_RETURN_URL;
 
     const createDate = moment().format("YYYYMMDDHHmmss");
-    const txnRef = orderId || `ORD${Date.now()}`;
-    const vnpAmount = String(Number(amount) * 100);
+
+    // ❗ VNPay yêu cầu INTEGER
+    const vnpAmount = Math.round(Number(amount) * 100);
 
     let vnp_Params = {
       vnp_Version: "2.1.0",
@@ -68,8 +80,8 @@ const handleCreateVnpayPayment = async (req, res) => {
       vnp_TmnCode: tmnCode,
       vnp_Locale: "vn",
       vnp_CurrCode: "VND",
-      vnp_TxnRef: txnRef,
-      vnp_OrderInfo: `Thanh toan don hang ${txnRef}`,
+      vnp_TxnRef: orderCode,
+      vnp_OrderInfo: `Thanh toan don hang ${orderCode}`,
       vnp_OrderType: "billpayment",
       vnp_Amount: vnpAmount,
       vnp_ReturnUrl: returnUrl,
@@ -77,6 +89,7 @@ const handleCreateVnpayPayment = async (req, res) => {
       vnp_CreateDate: createDate,
     };
 
+    // 🔐 SIGN
     const sortedParams = sortObject(vnp_Params);
     const signData = buildSignData(sortedParams);
 
@@ -88,18 +101,15 @@ const handleCreateVnpayPayment = async (req, res) => {
     vnp_Params.vnp_SecureHashType = "SHA512";
     vnp_Params.vnp_SecureHash = secureHash;
 
-    const paymentUrl =
-      vnpUrl + "?" + qs.stringify(vnp_Params, { encode: true });
-
-    console.log("VNPay Create SignData:", signData);
-    console.log("VNPay Create Hash:", secureHash);
+    // ❗ TUYỆT ĐỐI KHÔNG dùng qs.stringify
+    const paymentUrl = `${vnpUrl}?${buildSignData(vnp_Params)}`;
 
     return res.status(200).json({
       errCode: 0,
       message: "OK",
       data: {
         paymentUrl,
-        orderId: txnRef,
+        orderCode,
       },
     });
   } catch (err) {
@@ -112,13 +122,13 @@ const handleCreateVnpayPayment = async (req, res) => {
 };
 
 /**
- * =========================
- * RETURN URL (CLIENT REDIRECT)
- * =========================
+ * =================================================
+ * VNPAY RETURN URL
+ * =================================================
  */
 const handleVnpayReturn = async (req, res) => {
   try {
-    const vnp_Params = { ...req.query };
+    let vnp_Params = { ...req.query };
     const secureHash = vnp_Params.vnp_SecureHash;
 
     if (!secureHash) {
@@ -128,9 +138,11 @@ const handleVnpayReturn = async (req, res) => {
       });
     }
 
+    // ❌ XÓA HASH TRƯỚC KHI VERIFY
     delete vnp_Params.vnp_SecureHash;
     delete vnp_Params.vnp_SecureHashType;
 
+    // ✅ SORT + BUILD SIGN DATA
     const sortedParams = sortObject(vnp_Params);
     const signData = buildSignData(sortedParams);
 
@@ -139,28 +151,47 @@ const handleVnpayReturn = async (req, res) => {
       .update(signData, "utf-8")
       .digest("hex");
 
+    // ❌ SAI CHỮ KÝ
     if (secureHash !== generatedHash) {
+      console.log("SIGN DATA:", signData);
+      console.log("HASH FROM VNPAY:", secureHash);
+      console.log("HASH GENERATED:", generatedHash);
+
       return res.status(400).json({
-        errCode: 1,
-        message: "Invalid VNPAY signature",
+        errCode: 2,
+        message: "Invalid VNPay signature",
       });
     }
 
-    const orderId = vnp_Params.vnp_TxnRef;
+    // ✅ LẤY THÔNG TIN
+    const orderCode = vnp_Params.vnp_TxnRef;
     const rspCode = vnp_Params.vnp_ResponseCode;
 
+    // 🔎 TÌM ORDER THEO orderCode
+    const orderResult = await OrderService.getOrderByCode(orderCode);
+    if (orderResult.errCode !== 0 || !orderResult.data) {
+      return res.status(404).json({
+        errCode: 3,
+        message: "Order not found",
+      });
+    }
+
+    const order = orderResult.data;
+
+    // ✅ THANH TOÁN THÀNH CÔNG
     if (rspCode === "00") {
-      await OrderService.updatePaymentStatus(orderId, "paid");
+      await OrderService.updatePaymentStatus(order.id, "paid");
 
       return res.redirect(
-        `${process.env.FRONTEND_URL}/checkout-success/${orderId}`
+        `${process.env.FRONTEND_URL}/checkout-success/${orderCode}`
       );
     }
 
-    await OrderService.updatePaymentStatus(orderId, "unpaid");
+    // ❌ THANH TOÁN THẤT BẠI
+    await OrderService.updatePaymentStatus(order.id, "unpaid");
 
     return res.redirect(
-      `${process.env.FRONTEND_URL}/checkout-failed/${orderId}`
+      `${process.env.FRONTEND_URL}/checkout-failed/${orderCode}`
     );
   } catch (err) {
     console.error("VNPay Return Error:", err);
