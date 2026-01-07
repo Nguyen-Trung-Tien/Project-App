@@ -2,11 +2,6 @@ const moment = require("moment");
 const crypto = require("crypto");
 const OrderService = require("../services/OrderService");
 
-/**
- * =========================
- * SORT OBJECT BY KEY (ASC)
- * =========================
- */
 function sortObject(obj) {
   const sorted = {};
   Object.keys(obj)
@@ -17,14 +12,6 @@ function sortObject(obj) {
   return sorted;
 }
 
-/**
- * =========================
- * BUILD SIGN DATA (VNPay)
- * - sort key
- * - encodeURIComponent
- * - replace %20 -> +
- * =========================
- */
 function buildSignData(params) {
   return Object.keys(params)
     .sort()
@@ -34,11 +21,6 @@ function buildSignData(params) {
     .join("&");
 }
 
-/**
- * =================================================
- * CREATE VNPAY PAYMENT URL
- * =================================================
- */
 const handleCreateVnpayPayment = async (req, res) => {
   try {
     const { amount, orderCode } = req.body;
@@ -50,7 +32,7 @@ const handleCreateVnpayPayment = async (req, res) => {
       });
     }
 
-    // 🔎 check order tồn tại
+    // check order tồn tại
     const orderResult = await OrderService.getOrderByCode(orderCode);
     if (orderResult.errCode !== 0) {
       return res.status(404).json({
@@ -71,7 +53,7 @@ const handleCreateVnpayPayment = async (req, res) => {
 
     const createDate = moment().format("YYYYMMDDHHmmss");
 
-    // ❗ VNPay yêu cầu INTEGER
+    // VNPay yêu cầu INTEGER
     const vnpAmount = Math.round(Number(amount) * 100);
 
     let vnp_Params = {
@@ -89,7 +71,7 @@ const handleCreateVnpayPayment = async (req, res) => {
       vnp_CreateDate: createDate,
     };
 
-    // 🔐 SIGN
+    // SIGN
     const sortedParams = sortObject(vnp_Params);
     const signData = buildSignData(sortedParams);
 
@@ -101,7 +83,7 @@ const handleCreateVnpayPayment = async (req, res) => {
     vnp_Params.vnp_SecureHashType = "SHA512";
     vnp_Params.vnp_SecureHash = secureHash;
 
-    // ❗ TUYỆT ĐỐI KHÔNG dùng qs.stringify
+    // TUYỆT ĐỐI KHÔNG dùng qs.stringify
     const paymentUrl = `${vnpUrl}?${buildSignData(vnp_Params)}`;
 
     return res.status(200).json({
@@ -121,11 +103,6 @@ const handleCreateVnpayPayment = async (req, res) => {
   }
 };
 
-/**
- * =================================================
- * VNPAY RETURN URL
- * =================================================
- */
 const handleVnpayReturn = async (req, res) => {
   try {
     let vnp_Params = { ...req.query };
@@ -138,11 +115,11 @@ const handleVnpayReturn = async (req, res) => {
       });
     }
 
-    // ❌ XÓA HASH TRƯỚC KHI VERIFY
+    // XÓA HASH TRƯỚC KHI VERIFY
     delete vnp_Params.vnp_SecureHash;
     delete vnp_Params.vnp_SecureHashType;
 
-    // ✅ SORT + BUILD SIGN DATA
+    // SORT + BUILD SIGN DATA
     const sortedParams = sortObject(vnp_Params);
     const signData = buildSignData(sortedParams);
 
@@ -151,7 +128,7 @@ const handleVnpayReturn = async (req, res) => {
       .update(signData, "utf-8")
       .digest("hex");
 
-    // ❌ SAI CHỮ KÝ
+    // SAI CHỮ KÝ
     if (secureHash !== generatedHash) {
       console.log("SIGN DATA:", signData);
       console.log("HASH FROM VNPAY:", secureHash);
@@ -163,11 +140,11 @@ const handleVnpayReturn = async (req, res) => {
       });
     }
 
-    // ✅ LẤY THÔNG TIN
+    // LẤY THÔNG TIN
     const orderCode = vnp_Params.vnp_TxnRef;
     const rspCode = vnp_Params.vnp_ResponseCode;
 
-    // 🔎 TÌM ORDER THEO orderCode
+    // TÌM ORDER THEO orderCode
     const orderResult = await OrderService.getOrderByCode(orderCode);
     if (orderResult.errCode !== 0 || !orderResult.data) {
       return res.status(404).json({
@@ -178,7 +155,7 @@ const handleVnpayReturn = async (req, res) => {
 
     const order = orderResult.data;
 
-    // ✅ THANH TOÁN THÀNH CÔNG
+    // THANH TOÁN THÀNH CÔNG
     if (rspCode === "00") {
       await OrderService.updatePaymentStatus(order.id, "paid");
 
@@ -187,7 +164,7 @@ const handleVnpayReturn = async (req, res) => {
       );
     }
 
-    // ❌ THANH TOÁN THẤT BẠI
+    // THANH TOÁN THẤT BẠI
     await OrderService.updatePaymentStatus(order.id, "unpaid");
 
     return res.redirect(
