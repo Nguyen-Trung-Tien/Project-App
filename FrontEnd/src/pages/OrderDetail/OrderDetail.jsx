@@ -108,7 +108,7 @@ const OrderDetail = () => {
     switch (status) {
       case "none":
         return <Badge bg="secondary">Không trả</Badge>;
-      case "pending":
+      case "requested":
         return <Badge bg="warning">Chờ xử lý</Badge>;
       case "approved":
         return <Badge bg="success">Được duyệt</Badge>;

@@ -3,7 +3,7 @@ import { Container, Row, Col, Card, Button } from "react-bootstrap";
 import { People, RocketTakeoff, Eye } from "react-bootstrap-icons";
 import "./AboutPage.scss";
 import imgPro1 from "../../assets/1759303601055.png";
-import imgPro2 from "../../assets/1759555834412.png";
+import imgPro2 from "../../assets/1759303601055.png";
 import imgPro3 from "../../assets/1759555519030.png";
 import logoImage from "../../assets/Tien-Tech Shop.png";
 const teamMembers = [

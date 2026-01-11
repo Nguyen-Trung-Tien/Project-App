@@ -61,7 +61,7 @@ Sản phẩm:
 
       if (order) {
         const items = order.orderItems
-          .map((i) => `${i.product.name} x${i.quantity}`) // dùng alias 'product'
+          .map((i) => `${i.product.name} x${i.quantity}`)
           .join(", ");
         dbContext += `
 Đơn hàng gần nhất:

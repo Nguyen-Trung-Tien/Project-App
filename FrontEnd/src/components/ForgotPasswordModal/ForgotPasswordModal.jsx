@@ -81,6 +81,7 @@ const ForgotPasswordModal = ({ show, onClose }) => {
       toast.warning("Vui lòng nhập đầy đủ thông tin");
       return;
     }
+
     if (newPassword !== confirmPassword) {
       toast.error("Mật khẩu xác nhận không khớp");
       return;

@@ -103,7 +103,7 @@ const searchProducts = async (query, page = 1, limit = 10) => {
 
   const whereCondition = query ? { name: { [Op.like]: `%${query}%` } } : {};
 
-  // 1. Tìm sản phẩm phân trang (dùng cho trang kết quả tìm kiếm)
+  // Tìm sản phẩm phân trang (dùng cho trang kết quả tìm kiếm)
   const { count, rows } = await db.Product.findAndCountAll({
     where: whereCondition,
     include: [
@@ -115,7 +115,7 @@ const searchProducts = async (query, page = 1, limit = 10) => {
     order: [["createdAt", "DESC"]],
   });
 
-  // 2. GỢI Ý PRODUCT (lightweight → dành cho Smart Search)
+  // GỢI Ý PRODUCT (lightweight → dành cho Smart Search)
   const productSuggestions = await db.Product.findAll({
     where: {
       name: { [Op.like]: `%${query}%` },
@@ -125,17 +125,17 @@ const searchProducts = async (query, page = 1, limit = 10) => {
     order: [["sold", "DESC"]],
   });
 
-  // 3. GỢI Ý KEYWORD (simple + hiệu quả)
+  // GỢI Ý KEYWORD (simple + hiệu quả)
   const keywordSuggestions = [`${query}`];
 
-  // 4. GỢI Ý BRAND
+  // GỢI Ý BRAND
   const brandSuggestions = await db.Brand.findAll({
     where: { name: { [Op.like]: `%${query}%` } },
     attributes: ["id", "name"],
     limit: 5,
   });
 
-  // 5. GỢI Ý CATEGORY
+  // GỢI Ý CATEGORY
   const categorySuggestions = await db.Category.findAll({
     where: { name: { [Op.like]: `%${query}%` } },
     attributes: ["id", "name"],
@@ -149,7 +149,7 @@ const searchProducts = async (query, page = 1, limit = 10) => {
     currentPage: page,
     totalPages: Math.ceil(count / limit),
 
-    // 🎯 Dành cho Smart Search
+    // Dành cho Smart Search
     suggestions: {
       products: productSuggestions,
       keywords: keywordSuggestions,

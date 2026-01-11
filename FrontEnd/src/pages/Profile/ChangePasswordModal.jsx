@@ -27,10 +27,18 @@ const ChangePasswordModal = ({ show, onHide, userId, token }) => {
 
   const handleSave = async () => {
     const { oldPassword, newPassword, confirmPassword } = passwordData;
-    if (!oldPassword || !newPassword)
+
+    if (!oldPassword || !newPassword || !confirmPassword) {
       return toast.warning("Vui lòng nhập đầy đủ thông tin");
-    if (newPassword !== confirmPassword)
+    }
+
+    if (newPassword.length < 6) {
+      return toast.warning("Mật khẩu mới phải có ít nhất 6 ký tự");
+    }
+
+    if (newPassword !== confirmPassword) {
       return toast.error("Mật khẩu xác nhận không khớp!");
+    }
 
     try {
       setLoading(true);

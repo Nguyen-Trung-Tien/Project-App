@@ -34,6 +34,12 @@ const RegisterPage = () => {
     const password = form.password.value;
     const confirmPassword = form.confirmPassword.value;
 
+    if (password.length < 6) {
+      toast.warning("Mật khẩu phải có ít nhất 6 ký tự");
+      setLoading(false);
+      return;
+    }
+
     if (password !== confirmPassword) {
       toast.error("Mật khẩu xác nhận không khớp!");
       setLoading(false);
