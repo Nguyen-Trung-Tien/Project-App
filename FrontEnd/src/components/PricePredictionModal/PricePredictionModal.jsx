@@ -45,10 +45,13 @@ const PricePredictionModal = ({ show, onHide, result }) => {
   };
 
   const predictions = [
-    { label: "30 ngày", delta: predicted30 },
-    { label: "60 ngày", delta: predicted60 },
-    { label: "90 ngày", delta: predicted90 },
-  ];
+    { label: "30 ngày", price: predicted30 },
+    { label: "60 ngày", price: predicted60 },
+    { label: "90 ngày", price: predicted90 },
+  ].map((p) => ({
+    ...p,
+    delta: p.price - currentPrice,
+  }));
 
   const progressVariant =
     reliability > 80 ? "success" : reliability > 50 ? "warning" : "danger";
@@ -59,12 +62,7 @@ const PricePredictionModal = ({ show, onHide, result }) => {
     datasets: [
       {
         label: "Giá dự đoán (VNĐ)",
-        data: [
-          currentPrice,
-          currentPrice + predicted30,
-          currentPrice + predicted60,
-          currentPrice + predicted90,
-        ],
+        data: [currentPrice, predicted30, predicted60, predicted90],
         borderColor: "#1890FF",
         backgroundColor: "rgba(24,144,255,0.1)",
         tension: 0.4,

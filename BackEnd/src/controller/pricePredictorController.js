@@ -57,7 +57,7 @@ Trả về JSON THUẦN, không markdown, không giải thích:
 }
 
 function predictPriceAdvanced(price, discount, categoryName) {
-  const current = price * (1 - discount / 100);
+  const current = Math.round(price * (1 - discount / 100));
 
   const month = new Date().getMonth() + 1;
 
@@ -65,17 +65,21 @@ function predictPriceAdvanced(price, discount, categoryName) {
   if ([11, 12].includes(month)) seasonalDrop = 0.08;
   if ([6, 7].includes(month)) seasonalDrop = 0.05;
 
-  const drop30 = Math.round(current * (-0.04 - seasonalDrop));
-  const drop60 = Math.round(current * (-0.06 - seasonalDrop / 2));
-  const drop90 = Math.round(current * (-0.09 - seasonalDrop / 3));
+  const rate30 = 0.04 + seasonalDrop;
+  const rate60 = 0.06 + seasonalDrop / 2;
+  const rate90 = 0.09 + seasonalDrop / 3;
+
+  const predicted30 = Math.round(current * (1 - rate30));
+  const predicted60 = Math.round(current * (1 - rate60));
+  const predicted90 = Math.round(current * (1 - rate90));
 
   const reliability = 70 + Math.floor(Math.random() * 20);
 
   return {
     currentPrice: current,
-    predicted30: drop30,
-    predicted60: drop60,
-    predicted90: drop90,
+    predicted30,
+    predicted60,
+    predicted90,
     reliability,
   };
 }

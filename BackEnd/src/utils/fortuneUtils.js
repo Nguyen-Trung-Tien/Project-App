@@ -33,11 +33,11 @@ const colorsByElement = {
 // Hàm tính mệnh theo năm sinh
 const getElementByBirthYear = (year) => {
   const mod = year % 10;
-  if ([0, 1].includes(mod)) return "Thổ";
-  if ([2, 3].includes(mod)) return "Mộc";
-  if ([4, 5].includes(mod)) return "Thủy";
-  if ([6, 7].includes(mod)) return "Hỏa";
-  if ([8, 9].includes(mod)) return "Kim";
+  if ([0, 1].includes(mod)) return "Kim"; // Canh, Tân
+  if ([2, 3].includes(mod)) return "Thủy"; // Nhâm, Quý
+  if ([4, 5].includes(mod)) return "Mộc"; // Giáp, Ất
+  if ([6, 7].includes(mod)) return "Hỏa"; // Bính, Đinh
+  if ([8, 9].includes(mod)) return "Thổ"; // Mậu, Kỷ
 };
 
 const getLuckyColorsByYear = (year) => {

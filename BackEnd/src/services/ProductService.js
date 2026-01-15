@@ -7,7 +7,6 @@ const createProduct = async (data) => {
   try {
     const newData = { ...data };
     if (data.image && data.image.path) {
-      const fs = require("fs");
       newData.image = fs.readFileSync(data.image.path);
     }
     const product = await db.Product.create(newData);
@@ -125,7 +124,7 @@ const searchProducts = async (query, page = 1, limit = 10) => {
     order: [["sold", "DESC"]],
   });
 
-  // GỢI Ý KEYWORD (simple + hiệu quả)
+  // GỢI Ý KEYWORD
   const keywordSuggestions = [`${query}`];
 
   // GỢI Ý BRAND
