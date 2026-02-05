@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import {
   Container,
   Button,
@@ -104,13 +104,13 @@ const OrderPage = () => {
     });
     counts[""] = orders.reduce(
       (sum, o) => sum + (o.orderItems?.length || 0),
-      0
+      0,
     );
     return counts;
   }, [orders]);
 
   // Fetch orders
-  const fetchOrders = async () => {
+  const fetchOrders = useCallback(async () => {
     try {
       setLoading(true);
       const res = await getOrdersByUserId(
@@ -118,7 +118,7 @@ const OrderPage = () => {
         user.id,
         page,
         limit,
-        activeTab
+        activeTab,
       );
       if (res?.errCode === 0) {
         setOrders(res.data || []);
@@ -132,13 +132,13 @@ const OrderPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [token, user?.id, page, activeTab]);
 
   useEffect(() => {
     if (user?.id && token) {
       fetchOrders();
     }
-  }, [page, activeTab, user?.id, token]);
+  }, [fetchOrders, user?.id, token]);
 
   // Reset page khi đổi tab
   const handleTabSelect = (k) => {
@@ -147,7 +147,7 @@ const OrderPage = () => {
   };
 
   const filteredOrders = orders.filter(
-    (o) => !activeTab || o.status === activeTab
+    (o) => !activeTab || o.status === activeTab,
   );
 
   const handleReceiveOrder = async (id) => {
@@ -222,7 +222,7 @@ const OrderPage = () => {
                 {STATUS_ICONS[tab.key]}
                 {tab.label}
                 {["pending", "confirmed", "processing", "shipped"].includes(
-                  tab.key
+                  tab.key,
                 ) &&
                   productCounts[tab.key] > 0 && (
                     <Badge
@@ -360,7 +360,7 @@ const OrderPage = () => {
                           className="btn-orange"
                           onClick={() =>
                             navigate(
-                              `/product-detail/${o.orderItems[0]?.product?.id}`
+                              `/product-detail/${o.orderItems[0]?.product?.id}`,
                             )
                           }
                         >

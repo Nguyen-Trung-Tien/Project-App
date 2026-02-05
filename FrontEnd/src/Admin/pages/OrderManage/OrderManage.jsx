@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import {
   Table,
   Button,
@@ -76,32 +76,40 @@ const OrderManage = () => {
     setSelectedOrderId(null);
     setShowDelete(false);
   };
-  const fetchOrders = async (currentPage = 1, search = "") => {
-    setLoading(true);
-    try {
-      const res = await getAllOrders(currentPage, limit, search.trim(), token);
-      if (res?.errCode === 0) {
-        setOrders(res.data || []);
-        setPage(res.pagination?.currentPage || currentPage);
-        setTotalPages(res.pagination?.totalPages || 1);
-      } else {
-        toast.error(res?.errMessage || "Lỗi tải đơn hàng");
+  const fetchOrders = useCallback(
+    async (currentPage = 1, search = "") => {
+      setLoading(true);
+      try {
+        const res = await getAllOrders(
+          currentPage,
+          limit,
+          search.trim(),
+          token,
+        );
+        if (res?.errCode === 0) {
+          setOrders(res.data || []);
+          setPage(res.pagination?.currentPage || currentPage);
+          setTotalPages(res.pagination?.totalPages || 1);
+        } else {
+          toast.error(res?.errMessage || "Lỗi tải đơn hàng");
+          setOrders([]);
+          setTotalPages(1);
+        }
+      } catch (err) {
+        console.error(err);
+        toast.error("Lỗi kết nối server");
         setOrders([]);
-        setTotalPages(1);
+      } finally {
+        setLoading(false);
+        tableTopRef.current?.scrollIntoView({ behavior: "smooth" });
       }
-    } catch (err) {
-      console.error(err);
-      toast.error("Lỗi kết nối server");
-      setOrders([]);
-    } finally {
-      setLoading(false);
-      tableTopRef.current?.scrollIntoView({ behavior: "smooth" });
-    }
-  };
+    },
+    [token, limit],
+  );
 
   useEffect(() => {
     fetchOrders(1, searchTerm);
-  }, []);
+  }, [fetchOrders, searchTerm]);
 
   useEffect(() => {
     if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
@@ -110,7 +118,7 @@ const OrderManage = () => {
       fetchOrders(1, searchTerm);
     }, 600);
     return () => clearTimeout(searchTimeoutRef.current);
-  }, [searchTerm]);
+  }, [searchTerm, fetchOrders]);
 
   const handleUpdateStatus = async (orderId, status) => {
     try {
@@ -124,7 +132,7 @@ const OrderManage = () => {
         const order = orders.find((o) => o.id === orderId);
         const method = order.paymentMethod?.toLowerCase();
         const isOnlineMethod = ["momo", "paypal", "vnpay", "bank"].includes(
-          method
+          method,
         );
 
         if (
@@ -138,7 +146,7 @@ const OrderManage = () => {
               {
                 paymentStatus: "refunded",
               },
-              token
+              token,
             );
             if (refundRes?.errCode === 0) {
               toast.success(`Đơn ${orderId} đã hoàn tiền!`);
@@ -207,7 +215,7 @@ const OrderManage = () => {
       const res = await updatePayment(
         order.id,
         { paymentStatus: status },
-        token
+        token,
       );
       if (res?.errCode === 0) {
         toast.success(`Thanh toán: ${paymentStatusMap[status]?.label}`);
@@ -353,7 +361,7 @@ const OrderManage = () => {
                         <Badge
                           bg={
                             paidMethods.includes(
-                              order.paymentMethod?.toLowerCase()
+                              order.paymentMethod?.toLowerCase(),
                             )
                               ? "success"
                               : "warning"
@@ -367,7 +375,7 @@ const OrderManage = () => {
                       </td>
                       <td>
                         {paidMethods.includes(
-                          order.paymentMethod?.toLowerCase()
+                          order.paymentMethod?.toLowerCase(),
                         ) ? (
                           <Badge bg="success">
                             <CheckCircleFill className="me-1" />
@@ -443,13 +451,13 @@ const OrderManage = () => {
                                           onClick={() =>
                                             handleUpdatePaymentStatus(
                                               order,
-                                              key
+                                              key,
                                             )
                                           }
                                         >
                                           {paymentStatusMap[key].label}
                                         </Dropdown.Item>
-                                      )
+                                      ),
                                     );
                                   }
                                   if (
@@ -496,7 +504,7 @@ const OrderManage = () => {
                             Xóa
                           </Button>
                           {order.orderItems?.some(
-                            (i) => i.returnStatus === "requested"
+                            (i) => i.returnStatus === "requested",
                           ) && (
                             <Button
                               size="sm"

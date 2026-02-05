@@ -53,11 +53,11 @@ const ReviewPage = () => {
         pagination.limit,
         filters.rating,
         filters.status,
-        token
+        token,
       );
 
       setReviews(res.data || []);
-      setPagination(res.pagination || pagination);
+      setPagination((prev) => res.pagination || prev);
 
       const newReplies = {};
       for (let r of res.data) {
@@ -71,7 +71,7 @@ const ReviewPage = () => {
     } finally {
       setLoading(false);
     }
-  }, [pagination.page, filters, token]);
+  }, [pagination.page, pagination.limit, filters, token]);
 
   useEffect(() => {
     fetchReviews();

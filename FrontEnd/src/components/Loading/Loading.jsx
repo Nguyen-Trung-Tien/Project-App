@@ -1,6 +1,6 @@
 import React from "react";
 import "./Loading.scss";
-import { motion } from "framer-motion";
+import { motion } from "framer-motion"; // eslint-disable-line no-unused-vars
 
 const Loading = ({ message = "Đang tải dữ liệu..." }) => {
   return (

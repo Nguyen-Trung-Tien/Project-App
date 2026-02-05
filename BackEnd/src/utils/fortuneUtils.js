@@ -44,4 +44,8 @@ const getLuckyColorsByYear = (year) => {
   const element = getElementByBirthYear(year);
   return colorsByElement[element] || [];
 };
-export { getElementByBirthYear, getLuckyColorsByYear, colorsByElement };
+module.exports = {
+  getElementByBirthYear,
+  getLuckyColorsByYear,
+  colorsByElement,
+};

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import {
   Container,
   Card,
@@ -77,7 +77,7 @@ const Categories = () => {
     }
     if (editingCategory) {
       const exists = categories.some(
-        (c) => c.name === formData.name && c.id !== editingCategory.id
+        (c) => c.name === formData.name && c.id !== editingCategory.id,
       );
       if (exists) {
         toast.warning("Tên danh mục đã tồn tại");
@@ -87,37 +87,40 @@ const Categories = () => {
     return true;
   };
 
-  const fetchCategories = async () => {
+  const fetchCategories = useCallback(async () => {
     setLoading(true);
     try {
       const res = await getAllCategoryApi(token);
       if (res.errCode === 0) {
         const data = res.data || [];
         setCategories(data);
-        const total = data.length;
-        const calculatedTotalPages = Math.ceil(total / limit) || 1;
-        setTotalPages(calculatedTotalPages);
-        if (page > calculatedTotalPages && calculatedTotalPages > 0) {
-          setPage(calculatedTotalPages);
-        }
       } else {
         toast.error(res.errMessage || "Lỗi tải danh mục");
         setCategories([]);
-        setTotalPages(1);
       }
     } catch (err) {
       toast.error("Không thể kết nối server");
       console.error(err);
       setCategories([]);
-      setTotalPages(1);
     } finally {
       setLoading(false);
     }
-  };
+  }, [token]);
+
+  useEffect(() => {
+    const total = categories.length;
+    const calculatedTotalPages = Math.ceil(total / limit) || 1;
+    setTotalPages(calculatedTotalPages);
+    if (page > calculatedTotalPages && calculatedTotalPages > 0) {
+      setPage(calculatedTotalPages);
+    } else if (page === 0 && calculatedTotalPages > 0) {
+      setPage(1);
+    }
+  }, [categories, limit, page]);
 
   useEffect(() => {
     fetchCategories();
-  }, []);
+  }, [fetchCategories]);
 
   const handleShowModal = (category = null) => {
     setEditingCategory(category);
@@ -128,7 +131,7 @@ const Categories = () => {
         image: category.image || "",
       });
       setPreview(
-        category.image ? `data:image/jpeg;base64,${category.image}` : null
+        category.image ? `data:image/jpeg;base64,${category.image}` : null,
       );
     } else {
       setFormData({ name: "", description: "", image: "" });
@@ -230,7 +233,7 @@ const Categories = () => {
 
   const paginatedCategories = categories.slice(
     (page - 1) * limit,
-    page * limit
+    page * limit,
   );
 
   const renderPagination = () => {
@@ -245,14 +248,14 @@ const Categories = () => {
       items.push(
         <Pagination.First key="first" onClick={() => handlePageChange(1)}>
           <ChevronDoubleLeft />
-        </Pagination.First>
+        </Pagination.First>,
       );
     }
     if (page > 1) {
       items.push(
         <Pagination.Prev key="prev" onClick={() => handlePageChange(page - 1)}>
           <ChevronLeft />
-        </Pagination.Prev>
+        </Pagination.Prev>,
       );
     }
 
@@ -264,7 +267,7 @@ const Categories = () => {
           onClick={() => handlePageChange(i)}
         >
           {i}
-        </Pagination.Item>
+        </Pagination.Item>,
       );
     }
 
@@ -272,7 +275,7 @@ const Categories = () => {
       items.push(
         <Pagination.Next key="next" onClick={() => handlePageChange(page + 1)}>
           <ChevronRight />
-        </Pagination.Next>
+        </Pagination.Next>,
       );
     }
     if (end < totalPages) {
@@ -282,7 +285,7 @@ const Categories = () => {
           onClick={() => handlePageChange(totalPages)}
         >
           <ChevronDoubleRight />
-        </Pagination.Last>
+        </Pagination.Last>,
       );
     }
 

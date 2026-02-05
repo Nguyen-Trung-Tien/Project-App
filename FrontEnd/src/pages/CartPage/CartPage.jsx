@@ -40,25 +40,28 @@ const CartPage = () => {
 
   const observer = useRef();
 
-  const fetchCart = async (page = 1) => {
-    if (!token) return;
-    try {
-      setLoading(true);
-      const res = await getAllCartItems(token, page, 10);
-      const items = Array.isArray(res?.data) ? res.data : [];
+  const fetchCart = useCallback(
+    async (page = 1) => {
+      if (!token) return;
+      try {
+        setLoading(true);
+        const res = await getAllCartItems(token, page, 10);
+        const items = Array.isArray(res?.data) ? res.data : [];
 
-      if (items.length > 0) {
-        if (page === 1) dispatch(setCartItems(items));
-        else dispatch(appendCartItems(items));
+        if (items.length > 0) {
+          if (page === 1) dispatch(setCartItems(items));
+          else dispatch(appendCartItems(items));
+        }
+
+        setHasMore(items.length === 10);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
       }
-
-      setHasMore(items.length === 10);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
+    },
+    [token, dispatch],
+  );
 
   useEffect(() => {
     if (!token) return;
@@ -66,12 +69,12 @@ const CartPage = () => {
     if (cartItems.length === 0) {
       fetchCart(1);
     }
-  }, [token, cartItems.length]);
+  }, [token, cartItems.length, fetchCart]);
 
   useEffect(() => {
     if (page === 1) return;
     fetchCart(page);
-  }, [page]);
+  }, [page, fetchCart]);
 
   const lastItemRef = useCallback(
     (node) => {
@@ -83,7 +86,7 @@ const CartPage = () => {
       });
       if (node) observer.current.observe(node);
     },
-    [hasMore, loading]
+    [hasMore, loading],
   );
 
   // Remove item
@@ -112,7 +115,7 @@ const CartPage = () => {
   // Select/unselect item
   const handleSelectItem = (id) => {
     setSelectedItems((prev) =>
-      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
+      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id],
     );
   };
 
@@ -155,7 +158,7 @@ const CartPage = () => {
               setSelectedItems(
                 selectedItems.length === cartItems.length
                   ? []
-                  : cartItems.map((item) => item.id)
+                  : cartItems.map((item) => item.id),
               )
             }
           />

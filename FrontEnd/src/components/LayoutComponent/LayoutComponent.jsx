@@ -26,13 +26,15 @@ const LayoutComponent = ({
   ];
 
   const shouldHideFooter = hideFooterPaths.some((path) =>
-    location.pathname.startsWith(path)
+    location.pathname.startsWith(path),
   );
 
   return (
     <>
       {isShowHeader && <Header />}
-      <main>{children}</main>
+      <main style={{ minHeight: "80vh", backgroundColor: "var(--bg-light)" }}>
+        {children}
+      </main>
       {isShowFooter && !shouldHideFooter && <Footer />}
     </>
   );

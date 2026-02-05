@@ -44,7 +44,7 @@ const ChangePasswordModal = ({ show, onHide, userId, token }) => {
       setLoading(true);
       const res = await updatePasswordApi(
         { userId, oldPassword, newPassword },
-        token
+        token,
       );
       if (res.errCode === 0) {
         toast.success("Đổi mật khẩu thành công!");
@@ -68,8 +68,8 @@ const ChangePasswordModal = ({ show, onHide, userId, token }) => {
         closeButton
         className="border-0"
         style={{
-          background: "#007bff",
-          color: "white",
+          background: "var(--primary-color)",
+          color: "var(--white)",
         }}
       >
         <Modal.Title className="fw-semibold d-flex align-items-center">
@@ -135,7 +135,7 @@ const ChangePasswordModal = ({ show, onHide, userId, token }) => {
           disabled={loading}
           className="rounded-pill px-4 text-white border-0"
           style={{
-            background: "#007bff",
+            background: "var(--primary-color)",
           }}
         >
           {loading ? <Spinner animation="border" size="sm" /> : "Lưu thay đổi"}

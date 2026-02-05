@@ -68,12 +68,13 @@ button {
 .admin-layout {
   min-height: 100vh;
   display: flex;
+  background-color: var(--bg-light);
 
   .sidebar {
     width: 240px;
     transition: width 0.3s ease;
-    background-color: #fff;
-    border-right: 1px solid #e5e7eb;
+    background-color: var(--white);
+    border-right: 1px solid var(--border-color);
     position: fixed;
     top: 0;
     left: 0;
@@ -90,13 +91,14 @@ button {
     transition: margin-left 0.3s ease;
     display: flex;
     flex-direction: column;
+    width: 100%;
 
     .header-admin {
       position: sticky;
       top: 0;
       z-index: 90;
-      background-color: #fff;
-      border-bottom: 1px solid #e5e7eb;
+      background-color: var(--white);
+      border-bottom: 1px solid var(--border-color);
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     }
   }
@@ -104,4 +106,27 @@ button {
   &.collapsed .admin-main {
     margin-left: 80px;
   }
+}
+
+/* Utilities */
+.table th,
+.table td {
+  vertical-align: middle;
+}
+
+.table {
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--white);
+}
+
+.card {
+  border-radius: 16px;
+  border: 1px solid var(--border-color);
+  background: var(--white);
+}
+
+.form-control:focus {
+  box-shadow: none;
+  border-color: var(--primary-color);
 }

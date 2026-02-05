@@ -141,13 +141,7 @@ const Profile = () => {
   }
 
   return (
-    <div
-      className="profile-page py-3"
-      style={{
-        background: "#f9fafc",
-        minHeight: "90vh",
-      }}
-    >
+    <div className="profile-page py-3">
       <Container>
         {/* BACK */}
         <div className="mb-3">

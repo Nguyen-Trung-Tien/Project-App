@@ -29,7 +29,7 @@ const CheckoutPage = () => {
   const isSingleProduct = !!singleProduct;
 
   const [loading, setLoading] = useState(
-    !isSingleProduct && cartItems.length === 0
+    !isSingleProduct && cartItems.length === 0,
   );
 
   useEffect(() => {
@@ -98,7 +98,7 @@ const CheckoutPage = () => {
           status: paypalDetails ? "completed" : "pending",
           paypalInfo: paypalDetails,
         },
-        token
+        token,
       );
 
       if (paymentRes.errCode !== 0) {
@@ -140,7 +140,7 @@ const CheckoutPage = () => {
     );
 
   return (
-    <div className="checkout-page py-4 bg-light">
+    <div className="checkout-page py-4">
       <Container>
         {
           <div className="checkout-back mb-3">

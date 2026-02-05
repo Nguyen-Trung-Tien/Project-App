@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import {
   Table,
   Button,
@@ -52,41 +52,71 @@ const UserManage = () => {
 
   const searchTimeoutRef = useRef(null);
 
-  const fetchUsers = async (page = 1, searchQuery = "") => {
-    setLoading(true);
-    try {
-      const res = await getAllUsersApi(token, page, limit, searchQuery.trim());
-      if (res.errCode === 0) {
-        setCurrentPage(res.pagination.currentPage);
-        setTotalPages(res.pagination.totalPages || 1);
+  const fetchUsers = useCallback(
+    async (page = 1, searchQuery = "") => {
+      setLoading(true);
+      try {
+        const res = await getAllUsersApi(
+          token,
+          page,
+          limit,
+          searchQuery.trim(),
+        );
+        if (res.errCode === 0) {
+          setCurrentPage(res.pagination.currentPage);
+          setTotalPages(res.pagination.totalPages || 1);
 
-        const mappedUsers = (res.data || []).map((u) => ({
-          id: u.id,
-          name: u.username,
-          email: u.email,
-          phone: u.phone || "",
-          address: u.address || "",
-          role: u.role,
-          status: u.isActive ? "active" : "blocked",
-          avatar: u.avatar || null,
-        }));
-        setUsers(mappedUsers);
-      } else {
-        toast.error(res.errMessage || "Lỗi khi tải người dùng");
+          const mappedUsers = (res.data || []).map((u) => ({
+            id: u.id,
+            name: u.username,
+            email: u.email,
+            phone: u.phone || "",
+            address: u.address || "",
+            role: u.role,
+            status: u.isActive ? "active" : "blocked",
+            avatar: u.avatar || null,
+          }));
+          setUsers(mappedUsers);
+        } else {
+          toast.error(res.errMessage || "Lỗi khi tải người dùng");
+        }
+      } catch (err) {
+        console.error("Fetch users error:", err);
+        toast.error("Lỗi khi kết nối API");
+      } finally {
+        setLoading(false);
       }
-    } catch (err) {
-      console.error("Fetch users error:", err);
-      toast.error("Lỗi khi kết nối API");
-    } finally {
-      setLoading(false);
-    }
-  };
+    },
+    [token, limit],
+  );
 
   useEffect(() => {
     if (token) {
       fetchUsers(1, search);
     }
-  }, [token]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token, fetchUsers]); // Removed 'search' here because logic implies fetchUsers handles it via args, but if we want auto-search on typing, it needs to be in deps OR handled by the timeout effect below. The code below handles search debounce. This effect is for initial load or token change.
+  // Actually, original code had `[token]`. `search` was used as argument.
+  // If `fetchUsers` is stable (depends on `limit`, `token`), then correct.
+  // Wait, `fetchUsers` argument `searchQuery`.
+  // Code line 87: `fetchUsers(1, search)`.
+  // If `search` changes, this effect re-runs? NO, `search` is NOT in dependency array of original code (line 89 `[token]`).
+  // But wait, React Hook warnings usually say "search is used but not in deps".
+  // Ah, line 87 uses `search`.
+  // If I add `search` to deps, it will trigger on every keystroke (no debounce).
+  // The debounced effect (lines 91-98) handles search changes.
+  // So this first effect should probably ONLY run on mount/token change.
+  // But due to closure, if I don't include `search`, `fetchUsers` might use stale `search` if called? No, it's passed as arg.
+  // `fetchUsers` function itself is stable now.
+  // Correct fix for line 89: include `fetchUsers`.
+  // Wait, if I include `search` it duplicates the debounce effect.
+  // I should probably leave `search` out if I want to avoid double fetch, but Linter will complain.
+  // Better approach: merge effects or use a ref for search if hidden?
+  // Let's look at the debounce effect:
+  // It calls `fetchUsers(1, search)` after 500ms.
+  // So the first effect is just for initial load (when `token` becomes available).
+  // If `search` is empty initially, `fetchUsers(1, "")` is fine.
+  // I will just add `fetchUsers`.
 
   useEffect(() => {
     if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
@@ -95,7 +125,7 @@ const UserManage = () => {
       fetchUsers(1, search);
     }, 500);
     return () => clearTimeout(searchTimeoutRef.current);
-  }, [search]);
+  }, [search, fetchUsers]);
 
   const handleShowModal = (user = null) => {
     setEditUser(user);
@@ -220,8 +250,10 @@ const UserManage = () => {
       if (res.errCode === 0) {
         setUsers((prev) =>
           prev.map((u) =>
-            u.id === id ? { ...u, status: !isActive ? "active" : "blocked" } : u
-          )
+            u.id === id
+              ? { ...u, status: !isActive ? "active" : "blocked" }
+              : u,
+          ),
         );
         toast.success("Cập nhật trạng thái thành công!");
       } else toast.error(res.errMessage || "Lỗi khi cập nhật trạng thái");

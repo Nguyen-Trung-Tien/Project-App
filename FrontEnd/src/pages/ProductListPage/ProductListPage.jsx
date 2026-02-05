@@ -59,7 +59,7 @@ const ProductListPage = () => {
         if (res.errCode === 0) {
           const newProducts = res.products || res.data || [];
           setProducts((prev) =>
-            append ? [...prev, ...newProducts] : newProducts
+            append ? [...prev, ...newProducts] : newProducts,
           );
           setCurrentPage(res.currentPage || page);
           setTotalPages(res.totalPages || 1);
@@ -75,7 +75,7 @@ const ProductListPage = () => {
         setLoadingMore(false);
       }
     },
-    [categoryIdParam]
+    [categoryIdParam, brandIdParam],
   );
 
   // Load initial products
@@ -87,7 +87,7 @@ const ProductListPage = () => {
     };
 
     fetchProducts(1, initialFilters, false);
-  }, [categoryIdParam, appliedFilters, fetchProducts]);
+  }, [categoryIdParam, brandIdParam, appliedFilters, fetchProducts]);
 
   const handleCategoryClick = (catId) => {
     const newParams = catId ? { category: catId } : {};
@@ -121,7 +121,7 @@ const ProductListPage = () => {
   );
 
   return (
-    <section className="product-list-page py-3 bg-light">
+    <section className="product-list-page py-3">
       <Container>
         <ChatBot />
 

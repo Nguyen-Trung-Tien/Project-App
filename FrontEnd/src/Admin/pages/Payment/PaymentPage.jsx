@@ -76,7 +76,7 @@ const PaymentPage = () => {
             limit: pageSize,
             search: searchTerm,
           },
-          token
+          token,
         );
 
         if (res.errCode === 0) {
@@ -91,7 +91,7 @@ const PaymentPage = () => {
         setLoading(false);
       }
     },
-    [filterStatus, pageSize, searchTerm]
+    [filterStatus, pageSize, searchTerm, token],
   );
 
   useEffect(() => {
@@ -114,10 +114,10 @@ const PaymentPage = () => {
       actionModal.actionFn === completePayment
         ? "Hoàn tất thanh toán"
         : actionModal.actionFn === refundPayment
-        ? "Hoàn tiền"
-        : actionModal.actionFn === deletePayment
-        ? "Xóa giao dịch"
-        : "Thao tác";
+          ? "Hoàn tiền"
+          : actionModal.actionFn === deletePayment
+            ? "Xóa giao dịch"
+            : "Thao tác";
 
     try {
       if (actionModal.actionFn === refundPayment) {
@@ -165,7 +165,7 @@ const PaymentPage = () => {
               handleActionClick(
                 completePayment,
                 payment.id,
-                "Xác nhận đã nhận thanh toán?"
+                "Xác nhận đã nhận thanh toán?",
               )
             }
           >
@@ -183,7 +183,7 @@ const PaymentPage = () => {
               handleActionClick(
                 refundPayment,
                 payment.id,
-                "Bạn có chắc muốn hoàn tiền giao dịch này?"
+                "Bạn có chắc muốn hoàn tiền giao dịch này?",
               )
             }
           >
@@ -203,7 +203,7 @@ const PaymentPage = () => {
             handleActionClick(
               deletePayment,
               payment.id,
-              "Bạn có chắc muốn xóa vĩnh viễn giao dịch này?"
+              "Bạn có chắc muốn xóa vĩnh viễn giao dịch này?",
             )
           }
         >

@@ -96,7 +96,7 @@ const FengShuiChat = ({ setBirthYear: setGlobalBirthYear }) => {
         ]);
         setStep(STEP.GOAL);
         break;
-      case STEP.GOAL:
+      case STEP.GOAL: {
         const birthYear = userData.birth.split("/")[2];
         if (setGlobalBirthYear) setGlobalBirthYear(birthYear);
         const payload = { birthYear, message: text };
@@ -126,6 +126,7 @@ const FengShuiChat = ({ setBirthYear: setGlobalBirthYear }) => {
         setLoading(false);
         setStep(STEP.GOAL);
         break;
+      }
       default:
         welcome();
         break;

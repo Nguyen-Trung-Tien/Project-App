@@ -45,7 +45,7 @@ const userSlice = createSlice({
     setUser: (state, action) => {
       const { user, token, refreshToken } = action.payload;
 
-      const { avatar, ...userWithoutAvatar } = user;
+      const { avatar: _avatar, ...userWithoutAvatar } = user;
 
       state.user = userWithoutAvatar;
       state.token = token || null;
@@ -61,7 +61,7 @@ const userSlice = createSlice({
     },
 
     updateUser: (state, action) => {
-      const { avatar, ...updateWithoutAvatar } = action.payload;
+      const { avatar: _avatar, ...updateWithoutAvatar } = action.payload;
       state.user = { ...state.user, ...updateWithoutAvatar };
       saveToStorage("user", state.user);
     },

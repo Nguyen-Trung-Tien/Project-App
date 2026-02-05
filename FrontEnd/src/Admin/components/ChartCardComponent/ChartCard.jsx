@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Card, ButtonGroup, Button, Badge } from "react-bootstrap";
 import {
   LineChart,
@@ -11,7 +11,7 @@ import {
 } from "recharts";
 import { FiRefreshCw, FiBarChart } from "react-icons/fi";
 import { toast } from "react-toastify";
-import { motion } from "motion/react";
+import { motion } from "motion/react"; // eslint-disable-line no-unused-vars
 import "./ChartCard.scss";
 import { getDashboard } from "../../../api/adminApi";
 
@@ -60,7 +60,7 @@ const ChartCard = ({ token }) => {
     revenueByYear: [],
   });
 
-  const fetchDashboard = async () => {
+  const fetchDashboard = useCallback(async () => {
     try {
       setLoading(true);
       const res = await getDashboard(token);
@@ -71,17 +71,17 @@ const ChartCard = ({ token }) => {
           revenueByWeek: convertRevenueData(
             res.data.revenueByWeek,
             "date",
-            "revenue"
+            "revenue",
           ),
           revenueByMonth: convertRevenueData(
             res.data.revenueByMonth,
             "date",
-            "revenue"
+            "revenue",
           ),
           revenueByYear: convertRevenueData(
             res.data.revenueByYear,
             "date",
-            "revenue"
+            "revenue",
           ),
         });
       } else {
@@ -93,11 +93,11 @@ const ChartCard = ({ token }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [token]);
 
   useEffect(() => {
     fetchDashboard();
-  }, []);
+  }, [fetchDashboard]);
 
   const dataMap = {
     [PERIOD.WEEK]: dashboardData.revenueByWeek,
@@ -113,8 +113,8 @@ const ChartCard = ({ token }) => {
     type === PERIOD.WEEK
       ? "Tuần này"
       : type === PERIOD.MONTH
-      ? "Tháng này"
-      : "Năm nay";
+        ? "Tháng này"
+        : "Năm nay";
 
   return (
     <motion.div
@@ -175,8 +175,8 @@ const ChartCard = ({ token }) => {
                   {period === "week"
                     ? "Tuần"
                     : period === "month"
-                    ? "Tháng"
-                    : "Năm"}
+                      ? "Tháng"
+                      : "Năm"}
                 </Button>
               ))}
             </ButtonGroup>

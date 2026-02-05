@@ -69,6 +69,24 @@ const ProductDetailPage = () => {
     ? reviews.reduce((sum, r) => sum + (r.rating || 0), 0) / reviews.length
     : 0;
 
+  const fetchReviews = useCallback(async (productId, page = 1) => {
+    try {
+      const res = await getReviewsByProductApi(productId, page, limit);
+      if (res?.errCode === 0) {
+        const reviewsWithReplies = await Promise.all(
+          res.data.map(async (r) => {
+            const replyRes = await getRepliesByReviewApi(r.id);
+            return { ...r, ReviewReplies: replyRes?.data || [] };
+          }),
+        );
+        setReviews(reviewsWithReplies);
+        setPagination(res.pagination);
+      }
+    } catch (err) {
+      console.error("Lỗi tải đánh giá:", err);
+    }
+  }, []);
+
   const fetchAllData = useCallback(async () => {
     setLoading(true);
     try {
@@ -87,56 +105,41 @@ const ProductDetailPage = () => {
     } finally {
       setLoading(false);
     }
-  }, [id]);
+  }, [id, fetchReviews]);
 
   useEffect(() => {
     fetchAllData();
   }, [fetchAllData]);
 
-  const fetchReviews = async (productId, page = 1) => {
-    try {
-      const res = await getReviewsByProductApi(productId, page, limit);
-      if (res?.errCode === 0) {
-        const reviewsWithReplies = await Promise.all(
-          res.data.map(async (r) => {
-            const replyRes = await getRepliesByReviewApi(r.id);
-            return { ...r, ReviewReplies: replyRes?.data || [] };
-          })
+  const fetchRecommended = useCallback(
+    async (page = 1, append = false) => {
+      if (!product || !product.id) return;
+
+      try {
+        if (page === 1) setLoadingRecommended(true);
+        else setLoadingMoreRecommended(true);
+
+        const res = await getRecommendedProductsApi(
+          product.id,
+          page,
+          limitRecommended,
         );
-        setReviews(reviewsWithReplies);
-        setPagination(res.pagination);
-      }
-    } catch (err) {
-      console.error("Lỗi tải đánh giá:", err);
-    }
-  };
+        if (res?.errCode === 0) {
+          if (append) {
+            setRecommended((prev) => [...prev, ...res.data]);
+          } else {
+            setRecommended(res.data);
+          }
 
-  const fetchRecommended = async (page = 1, append = false) => {
-    if (!product || !product.id) return;
-
-    try {
-      if (page === 1) setLoadingRecommended(true);
-      else setLoadingMoreRecommended(true);
-
-      const res = await getRecommendedProductsApi(
-        product.id,
-        page,
-        limitRecommended
-      );
-      if (res?.errCode === 0) {
-        if (append) {
-          setRecommended((prev) => [...prev, ...res.data]);
-        } else {
-          setRecommended(res.data);
+          setRecommendedTotalPages(res.pagination?.totalPages || 1);
         }
-
-        setRecommendedTotalPages(res.pagination?.totalPages || 1);
+      } finally {
+        setLoadingRecommended(false);
+        setLoadingMoreRecommended(false);
       }
-    } finally {
-      setLoadingRecommended(false);
-      setLoadingMoreRecommended(false);
-    }
-  };
+    },
+    [product],
+  );
 
   const handleLoadMoreRecommended = () => {
     if (recommendedPage < recommendedTotalPages) {
@@ -152,7 +155,7 @@ const ProductDetailPage = () => {
     setRecommended([]);
     setRecommendedPage(1);
     fetchRecommended(1, false);
-  }, [product]);
+  }, [product, fetchRecommended]);
 
   const handleAddToCart = async () => {
     if (!userId) {
@@ -173,7 +176,7 @@ const ProductDetailPage = () => {
           productId: product.id,
           quantity,
         },
-        token
+        token,
       );
       if (res.errCode === 0) {
         dispatch(
@@ -187,7 +190,7 @@ const ProductDetailPage = () => {
               image: res.data.product.image || [],
             },
             quantity: res.data.quantity,
-          })
+          }),
         );
         toast.success(`Đã thêm "${product.name}" vào giỏ hàng`);
       } else {
@@ -280,7 +283,7 @@ const ProductDetailPage = () => {
   const discountedPrice = Math.round(
     product.discount > 0
       ? product.price * (1 - product.discount / 100)
-      : product.price
+      : product.price,
   );
 
   const shortDescription =

@@ -14,7 +14,7 @@ app.use(
   cors({
     origin: "http://localhost:5173",
     credentials: true,
-  })
+  }),
 );
 
 // Body parser
@@ -33,6 +33,10 @@ routes(app);
 connectDB();
 
 const port = process.env.PORT || 8080;
-app.listen(port, () => {
-  console.log(`Connect server success, ${port}`);
-});
+if (require.main === module) {
+  app.listen(port, () => {
+    console.log(`Connect server success, ${port}`);
+  });
+}
+
+module.exports = app;

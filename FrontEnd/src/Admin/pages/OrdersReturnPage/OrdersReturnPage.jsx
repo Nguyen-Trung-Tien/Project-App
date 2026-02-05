@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import {
   Container,
   Table,
@@ -47,49 +47,57 @@ const OrdersReturnPage = () => {
   const navigate = useNavigate();
   const tableTopRef = useRef(null);
 
-  const fetchOrders = async (currentPage = 1) => {
-    setLoading(true);
-    try {
-      const res = await getAllOrders(currentPage, limit);
-      if (res.errCode === 0) {
-        const allOrders = res.data || [];
+  const fetchOrders = useCallback(
+    async (currentPage = 1) => {
+      setLoading(true);
+      try {
+        const res = await getAllOrders(currentPage, limit);
+        if (res.errCode === 0) {
+          const allOrders = res.data || [];
 
-        const filteredOrders = allOrders.filter((order) =>
-          order.orderItems?.some((item) => item.returnStatus === "requested")
-        );
+          const filteredOrders = allOrders.filter((order) =>
+            order.orderItems?.some((item) => item.returnStatus === "requested"),
+          );
 
-        setOrders(filteredOrders);
+          setOrders(filteredOrders);
 
-        const totalFiltered = filteredOrders.length;
-        const calculatedTotalPages = Math.ceil(totalFiltered / limit) || 1;
+          const totalFiltered = filteredOrders.length;
+          const calculatedTotalPages = Math.ceil(totalFiltered / limit) || 1;
 
-        setTotalPages(calculatedTotalPages);
+          setTotalPages(calculatedTotalPages);
 
-        if (currentPage > calculatedTotalPages && calculatedTotalPages > 0) {
-          setPage(calculatedTotalPages);
-          setTimeout(() => fetchOrders(calculatedTotalPages), 0);
+          if (currentPage > calculatedTotalPages && calculatedTotalPages > 0) {
+            setPage(calculatedTotalPages);
+            // Recursively call fetchOrders if page adjustments needed
+            // But strict mode might cause issues if not careful with recursion+effects
+            // Here we just accept logic but need to handle dependency.
+            // Since fetchOrders is now a dependency, we should avoid infinite loops.
+            // The timeout helps.
+            setTimeout(() => fetchOrders(calculatedTotalPages), 0);
+          } else {
+            setPage(currentPage);
+          }
         } else {
-          setPage(currentPage);
+          toast.error(res.errMessage || "Lỗi tải dữ liệu");
+          setOrders([]);
+          setTotalPages(1);
         }
-      } else {
-        toast.error(res.errMessage || "Lỗi tải dữ liệu");
+      } catch (err) {
+        console.error(err);
+        toast.error("Lỗi kết nối server");
         setOrders([]);
         setTotalPages(1);
+      } finally {
+        setLoading(false);
+        tableTopRef.current?.scrollIntoView({ behavior: "smooth" });
       }
-    } catch (err) {
-      console.error(err);
-      toast.error("Lỗi kết nối server");
-      setOrders([]);
-      setTotalPages(1);
-    } finally {
-      setLoading(false);
-      tableTopRef.current?.scrollIntoView({ behavior: "smooth" });
-    }
-  };
+    },
+    [limit],
+  );
 
   useEffect(() => {
     fetchOrders(1);
-  }, []);
+  }, [fetchOrders]);
 
   const handlePageChange = (newPage) => {
     if (newPage < 1 || newPage > totalPages || newPage === page) return;
@@ -102,7 +110,7 @@ const OrdersReturnPage = () => {
     setLoadingAction(true);
     try {
       const itemsToProcess = selectedOrder.orderItems.filter(
-        (i) => i.returnStatus === "requested"
+        (i) => i.returnStatus === "requested",
       );
 
       for (let item of itemsToProcess) {
@@ -112,7 +120,7 @@ const OrdersReturnPage = () => {
       toast.success(
         status === "approved"
           ? "Đã duyệt trả hàng!"
-          : "Đã từ chối yêu cầu trả hàng!"
+          : "Đã từ chối yêu cầu trả hàng!",
       );
 
       await fetchOrders(page);
@@ -140,7 +148,7 @@ const OrdersReturnPage = () => {
       items.push(
         <Pagination.First key="first" onClick={() => handlePageChange(1)}>
           <ChevronDoubleLeft />
-        </Pagination.First>
+        </Pagination.First>,
       );
     }
 
@@ -148,7 +156,7 @@ const OrdersReturnPage = () => {
       items.push(
         <Pagination.Prev key="prev" onClick={() => handlePageChange(page - 1)}>
           <ChevronLeft />
-        </Pagination.Prev>
+        </Pagination.Prev>,
       );
     }
 
@@ -160,7 +168,7 @@ const OrdersReturnPage = () => {
           onClick={() => handlePageChange(i)}
         >
           {i}
-        </Pagination.Item>
+        </Pagination.Item>,
       );
     }
 
@@ -168,7 +176,7 @@ const OrdersReturnPage = () => {
       items.push(
         <Pagination.Next key="next" onClick={() => handlePageChange(page + 1)}>
           <ChevronRight />
-        </Pagination.Next>
+        </Pagination.Next>,
       );
     }
 
@@ -179,7 +187,7 @@ const OrdersReturnPage = () => {
           onClick={() => handlePageChange(totalPages)}
         >
           <ChevronDoubleRight />
-        </Pagination.Last>
+        </Pagination.Last>,
       );
     }
 

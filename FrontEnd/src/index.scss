@@ -1,8 +1,22 @@
+:root {
+  --primary-color: #0072ff;
+  --primary-hover: #005bb5;
+  --secondary-color: #ee4d2d;
+  --text-color: #333;
+  --text-light: #999;
+  --bg-light: #f8f9fa;
+  --border-color: #e5e5e5;
+  --white: #fff;
+}
+
 html,
 body {
   margin: 0;
   padding: 0;
   min-height: 100vh;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
+    Arial, sans-serif;
 }
 
 body {

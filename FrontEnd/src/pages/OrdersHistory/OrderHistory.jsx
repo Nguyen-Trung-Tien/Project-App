@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useCallback } from "react";
 import { Container, Card, Button, Badge, Spinner } from "react-bootstrap";
 import { Eye } from "react-bootstrap-icons";
 import { useNavigate } from "react-router-dom";
@@ -42,7 +42,7 @@ const OrderHistoryPage = () => {
   const [totalPages, setTotalPages] = useState(1);
   const limit = 10;
 
-  const fetchOrders = async () => {
+  const fetchOrders = useCallback(async () => {
     if (!user?.id || !token) return;
     try {
       setLoading(true);
@@ -56,11 +56,11 @@ const OrderHistoryPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user?.id, token, page]);
 
   useEffect(() => {
     fetchOrders();
-  }, [user?.id, token, page]);
+  }, [fetchOrders]);
 
   const formatCurrency = (v) => (Number(v) || 0).toLocaleString("vi-VN") + " ₫";
   const formatDate = (dateStr) =>
@@ -166,7 +166,7 @@ const OrderHistoryPage = () => {
                       className="btn-primary"
                       onClick={() =>
                         navigate(
-                          `/product-detail/${o.orderItems[0]?.product?.id}`
+                          `/product-detail/${o.orderItems[0]?.product?.id}`,
                         )
                       }
                     >

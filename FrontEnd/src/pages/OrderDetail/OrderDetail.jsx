@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
   Container,
   Row,
@@ -121,7 +121,7 @@ const OrderDetail = () => {
     }
   };
 
-  const fetchOrderDetail = async () => {
+  const fetchOrderDetail = useCallback(async () => {
     try {
       setLoading(true);
       const res = await getOrderById(id, token);
@@ -142,11 +142,11 @@ const OrderDetail = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id, token]);
 
   useEffect(() => {
     fetchOrderDetail();
-  }, [id]);
+  }, [fetchOrderDetail]);
 
   const openReturnModal = () => {
     if (order.status !== "delivered") {
@@ -169,7 +169,7 @@ const OrderDetail = () => {
     setSelectedItems((prev) =>
       prev.includes(itemId)
         ? prev.filter((id) => id !== itemId)
-        : [...prev, itemId]
+        : [...prev, itemId],
     );
   };
 
@@ -187,8 +187,8 @@ const OrderDetail = () => {
           requestReturn(itemId, returnReason, token).catch((err) => {
             console.error(`Lỗi trả hàng ID ${itemId}:`, err);
             throw err;
-          })
-        )
+          }),
+        ),
       );
       toast.success("Gửi yêu cầu trả hàng thành công!");
       setShowReturnModal(false);
@@ -278,14 +278,14 @@ const OrderDetail = () => {
                 <Info
                   label="Ngày đặt"
                   value={new Date(
-                    order.orderDate || order.createdAt
+                    order.orderDate || order.createdAt,
                   ).toLocaleDateString("vi-VN")}
                 />
                 {order.deliveredAt && (
                   <Info
                     label="Ngày giao"
                     value={new Date(order.deliveredAt).toLocaleDateString(
-                      "vi-VN"
+                      "vi-VN",
                     )}
                   />
                 )}

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   Navbar,
   Nav,
@@ -41,7 +41,7 @@ function Header() {
 
   const cartItemCount = useSelector(
     (state) =>
-      state.cart.cartItems?.reduce((sum, i) => sum + (i.quantity || 0), 0) || 0
+      state.cart.cartItems?.reduce((sum, i) => sum + (i.quantity || 0), 0) || 0,
   );
 
   const avatarUrl = user?.avatar?.startsWith("data:image")
@@ -74,27 +74,28 @@ function Header() {
   }, [user?.id, token, dispatch]);
 
   // Search Suggestion Debounce
-  const fetchSuggestions = useCallback(
-    debounce(async (query) => {
-      if (!query.trim()) {
-        setSuggestions({
-          products: [],
-          keywords: [],
-          brands: [],
-          categories: [],
-        });
-        setShowSuggestions(false);
-        return;
-      }
-      try {
-        const res = await searchSuggestionsApi(query);
-        setSuggestions(res?.suggestions || {});
-        setShowSuggestions(true);
-      } catch (err) {
-        console.error("Search suggest error:", err);
-      }
-    }, 300),
-    []
+  const fetchSuggestions = useMemo(
+    () =>
+      debounce(async (query) => {
+        if (!query.trim()) {
+          setSuggestions({
+            products: [],
+            keywords: [],
+            brands: [],
+            categories: [],
+          });
+          setShowSuggestions(false);
+          return;
+        }
+        try {
+          const res = await searchSuggestionsApi(query);
+          setSuggestions(res?.suggestions || {});
+          setShowSuggestions(true);
+        } catch (err) {
+          console.error("Search suggest error:", err);
+        }
+      }, 300),
+    [],
   );
 
   const handleLogout = async () => {
@@ -197,10 +198,10 @@ function Header() {
                           {type === "keywords"
                             ? "Gợi ý tìm kiếm"
                             : type === "products"
-                            ? "Sản phẩm phù hợp"
-                            : type === "brands"
-                            ? "Thương hiệu"
-                            : "Danh mục"}
+                              ? "Sản phẩm phù hợp"
+                              : type === "brands"
+                                ? "Thương hiệu"
+                                : "Danh mục"}
                         </div>
                         {suggestions[type].map((item) => {
                           const label =
@@ -214,7 +215,7 @@ function Header() {
                               navigate(`/product-list?category=${item.id}`);
                             else
                               navigate(
-                                `/products?search=${encodeURIComponent(item)}`
+                                `/products?search=${encodeURIComponent(item)}`,
                               );
                             setShowSuggestions(false);
                           };
@@ -240,7 +241,7 @@ function Header() {
                           );
                         })}
                       </div>
-                    )
+                    ),
                 )}
               </div>
             )}

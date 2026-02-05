@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useMemo, useRef } from "react";
+import React, {
+  useState,
+  useEffect,
+  useMemo,
+  useRef,
+  useCallback,
+} from "react";
 import {
   Container,
   Row,
@@ -66,7 +72,7 @@ const Revenue = () => {
   const [orders, setOrders] = useState([]);
   const [revenueData, setRevenueData] = useState([]);
   const [productsData, setProductsData] = useState([]);
-  const [ordersByStatus, setOrdersByStatus] = useState([]);
+
   const [dateFilter, setDateFilter] = useState("7days");
   const [searchTerm, setSearchTerm] = useState("");
   const [page, setPage] = useState(1);
@@ -82,7 +88,7 @@ const Revenue = () => {
       maximumFractionDigits: 0,
     }).format(value);
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true);
     setChartLoading(true);
     try {
@@ -104,7 +110,7 @@ const Revenue = () => {
           value: parseFloat(item.revenue || 0),
         }));
         setRevenueData(
-          backendData.sort((a, b) => new Date(a.name) - new Date(b.name))
+          backendData.sort((a, b) => new Date(a.name) - new Date(b.name)),
         );
       } else {
         const revenueMap = {};
@@ -138,22 +144,19 @@ const Revenue = () => {
         const status = order.status || "unknown";
         statusMap[status] = (statusMap[status] || 0) + 1;
       });
-      const statusArray = Object.entries(statusMap).map(([status, amount]) => ({
-        status: STATUS_LABELS[status] || status,
-        amount,
-      }));
-      setOrdersByStatus(statusArray);
+      // ordersByStatus logic removed in previous step, ensuring this block is clean or consistent
+      // Note: Previous edit removed setOrdersByStatus logic. Ensuring valid structure here.
     } catch (error) {
       console.error("Error:", error);
     } finally {
       setLoading(false);
       setChartLoading(false);
     }
-  };
+  }, [token]);
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [fetchData]);
 
   const filteredOrders = useMemo(() => {
     let filtered = [...orders];
@@ -170,7 +173,7 @@ const Revenue = () => {
       filtered = filtered.filter(
         (o) =>
           o.id.toString().includes(term) ||
-          o.user?.username?.toLowerCase().includes(term)
+          o.user?.username?.toLowerCase().includes(term),
       );
     }
 
@@ -180,12 +183,12 @@ const Revenue = () => {
   const stats = useMemo(() => {
     const totalRevenue = filteredOrders.reduce(
       (sum, o) => sum + parseFloat(o.totalPrice || 0),
-      0
+      0,
     );
     const totalOrders = filteredOrders.length;
     const avgOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
     const deliveredCount = filteredOrders.filter(
-      (o) => o.status === "delivered"
+      (o) => o.status === "delivered",
     ).length;
 
     return { totalRevenue, totalOrders, avgOrderValue, deliveredCount };
@@ -444,7 +447,7 @@ const Revenue = () => {
                             <td>{order.user?.username || "Ẩn danh"}</td>
                             <td>
                               {new Date(order.createdAt).toLocaleDateString(
-                                "vi-VN"
+                                "vi-VN",
                               )}
                             </td>
                             <td className="fw-bold text-danger">

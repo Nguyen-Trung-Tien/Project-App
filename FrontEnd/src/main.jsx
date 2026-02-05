@@ -10,6 +10,7 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import App from "./App";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
+import "./index.scss";
 import { store, persistor } from "./redux/store";
 
 const queryClient = new QueryClient({
@@ -40,5 +41,5 @@ ReactDOM.createRoot(document.getElementById("root")).render(
         </BrowserRouter>
       </QueryClientProvider>
     </PersistGate>
-  </Provider>
+  </Provider>,
 );

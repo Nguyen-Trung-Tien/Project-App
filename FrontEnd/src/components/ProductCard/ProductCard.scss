@@ -6,7 +6,7 @@
   border: none;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   transition: all 0.2s ease;
-  background: #fff;
+  background: var(--white);
 
   &:hover {
     transform: translateY(-3px);
@@ -26,7 +26,7 @@
 /* IMAGE */
 .image-box {
   height: 150px;
-  background: #fff;
+  background: var(--white);
   position: relative;
   display: flex;
   align-items: center;
@@ -44,7 +44,7 @@
     position: absolute;
     top: 6px;
     left: 6px;
-    background: #ee4d2d;
+    background: var(--secondary-color);
     font-size: 10px;
     border-radius: 6px;
   }
@@ -72,14 +72,14 @@
 .price {
   .old-price {
     font-size: 12px;
-    color: #999;
+    color: var(--text-light);
     text-decoration: line-through;
   }
 
   .final-price {
     font-size: 16px;
     font-weight: 700;
-    color: #ee4d2d;
+    color: var(--secondary-color);
   }
 }
 
@@ -98,7 +98,7 @@
   font-size: 12px;
 
   span {
-    color: #999;
+    color: var(--text-light);
     margin-left: 4px;
   }
 }

@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { Container, Button } from "react-bootstrap";
 import { CheckCircleFill, HouseDoor, Receipt } from "react-bootstrap-icons";
 import { useNavigate, useParams } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion } from "framer-motion"; // eslint-disable-line no-unused-vars
 import "./CheckoutSuccess.scss";
 
 const CheckoutSuccess = () => {
