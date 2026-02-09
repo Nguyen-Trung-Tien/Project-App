@@ -128,8 +128,7 @@ Project-App/
 ---
 
 ## 🗄 Cơ sở dữ liệu (ERD)
-
-Đang cập nhật.
+<img width="3494" height="4270" alt="Untitled diagram-2026-02-09-070005" src="https://github.com/user-attachments/assets/458ef7a0-d078-48a6-9ec2-8b9b6de5abda" />
 
 ---
 
