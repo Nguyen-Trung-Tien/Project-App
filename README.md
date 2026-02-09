@@ -1,24 +1,24 @@
-<div align="center">
+﻿<div align="center">
   <a href="https://github.com/Nguyen-Trung-Tien/Project-App">
     <img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExdnZnbjh5Y3I4Y2x5Y3I4Y2x5Y3I4Y2x5Y3I4Y2x5Y3I4Y2x5Y3I4Y2x5L2Vjb21tZXJjZS9naXBoeS5naWY/giphy.gif" alt="Logo" width="120" height="120">
   </a>
 
-  <h1 align="center">?? TIEN_TECH Shop</h1>
+  <h1 align="center">🛒 TIEN_TECH Shop</h1>
 
   <p align="center">
-    <strong>N?n t?ng Thuong m?i di?n t? Full-stack</strong>
+    <strong>Nền tảng Thương mại điện tử Full-stack</strong>
     <br />
-    Gi?i ph�p mua s?m tr?c tuy?n hi?n d?i, b?o m?t v� t?i uu tr?i nghi?m ngu?i d�ng.
+    Giải pháp mua sắm trực tuyến hiện đại, bảo mật và tối ưu trải nghiệm người dùng.
     <br />
     <br />
-    <a href="https://github.com/Nguyen-Trung-Tien/Project-App"><strong>Explore the docs �</strong></a>
+    <a href="https://github.com/Nguyen-Trung-Tien/Project-App"><strong>Explore the docs »</strong></a>
     <br />
     <br />
     <a href="#">Xem Demo</a>
-    �
-    <a href="https://github.com/Nguyen-Trung-Tien/Project-App/issues">B�o l?i</a>
-    �
-    <a href="https://github.com/Nguyen-Trung-Tien/Project-App/issues">Y�u c?u t�nh nang</a>
+    ·
+    <a href="https://github.com/Nguyen-Trung-Tien/Project-App/issues">Báo lỗi</a>
+    ·
+    <a href="https://github.com/Nguyen-Trung-Tien/Project-App/issues">Yêu cầu tính năng</a>
   </p>
 
   <p>
@@ -31,33 +31,33 @@
 
 ---
 
-## ?? M?c l?c
+## 📋 Mục lục
 
-1. [Gi?i thi?u](#-gi?i-thi?u)
-2. [C�ng ngh? s? d?ng](#-c�ng-ngh?-s?-d?ng)
-3. [T�nh nang ch�nh](#-t�nh-nang-ch�nh)
-4. [C?u tr�c d? �n](#-c?u-tr�c-d?-�n)
-5. [Co s? d? li?u (ERD)](#-co-s?-d?-li?u-erd)
-6. [C�i d?t & Tri?n khai](#-c�i-d?t--tri?n-khai)
+1. [Giới thiệu](#-giới-thiệu)
+2. [Công nghệ sử dụng](#-công-nghệ-sử-dụng)
+3. [Tính năng chính](#-tính-năng-chính)
+4. [Cấu trúc dự án](#-cấu-trúc-dự-án)
+5. [Cơ sở dữ liệu (ERD)](#-cơ-sở-dữ-liệu-erd)
+6. [Cài đặt & Triển khai](#-cài-đặt--triển-khai)
 7. [API Reference](#-api-reference)
-8. [Li�n h?](#-li�n-h?)
+8. [Liên hệ](#-liên-hệ)
 
 ---
 
-## ?? Gi?i thi?u
+## 🚀 Giới thiệu
 
-**TIEN_TECH Shop** l� h? th?ng thuong m?i di?n t? ho�n ch?nh, m� ph?ng quy tr�nh mua s?m t? ph�a kh�ch h�ng (Storefront) d?n qu?n tr? vi�n (Admin Dashboard).
+**TIEN_TECH Shop** là hệ thống thương mại điện tử hoàn chỉnh, mô phỏng quy trình mua sắm từ phía khách hàng (Storefront) đến quản trị viên (Admin Dashboard).
 
-D? �n t?p trung v�o:
+Dự án tập trung vào:
 
-- X�y d?ng **RESTful API** chu?n v?i Node.js/Express.
-- Thi?t k? giao di?n **SPA** tuong t�c cao b?ng ReactJS.
-- Qu?n l� d? li?u quan h? v?i **MySQL & Sequelize**.
-- Tri?n khai **Authentication & Authorization** an to�n.
+- Xây dựng **RESTful API** chuẩn với Node.js/Express.
+- Thiết kế giao diện **SPA** tương tác cao bằng ReactJS.
+- Quản lý dữ liệu quan hệ với **MySQL & Sequelize**.
+- Triển khai **Authentication & Authorization** an toàn.
 
 ---
 
-## ?? C�ng ngh? s? d?ng
+## 🛠 Công nghệ sử dụng
 
 ### Frontend (Client)
 
@@ -81,78 +81,78 @@ D? �n t?p trung v�o:
 
 ---
 
-## ? T�nh nang ch�nh
+## ✨ Tính năng chính
 
-Ph�n h? Kh�ch h�ng (Client)
-- Authentication: dang k�, dang nh?p, logout, luu token.
-- Smart Search: t�m ki?m s?n ph?m, g?i � theo t? kh�a.
-- Shopping Cart: th�m, c?p nh?t s? lu?ng, x�a s?n ph?m.
-- Checkout: d?t h�ng, thanh to�n COD.
-- User Dashboard: xem l?ch s? don h�ng, theo d�i tr?ng th�i.
+Phân hệ Khách hàng (Client)
+- Authentication: đăng ký, đăng nhập, logout, lưu token.
+- Smart Search: tìm kiếm sản phẩm, gợi ý theo từ khóa.
+- Shopping Cart: thêm, cập nhật số lượng, xóa sản phẩm.
+- Checkout: đặt hàng, thanh toán COD.
+- User Dashboard: xem lịch sử đơn hàng, theo dõi trạng thái.
 
-Ph�n h? Qu?n tr? (Admin)
-- Secure Access: ch? admin truy c?p dashboard.
-- Dashboard: th?ng k� doanh thu, don h�ng m?i.
-- Product Management: th�m, s?a, x�a s?n ph?m, upload ?nh.
-- Category Management: qu?n l� danh m?c.
-- Order Processing: duy?t v� c?p nh?t tr?ng th�i giao v?n.
+Phân hệ Quản trị (Admin)
+- Secure Access: chỉ admin truy cập dashboard.
+- Dashboard: thống kê doanh thu, đơn hàng mới.
+- Product Management: thêm, sửa, xóa sản phẩm, upload ảnh.
+- Category Management: quản lý danh mục.
+- Order Processing: duyệt và cập nhật trạng thái giao vận.
 
 ---
 
-## ?? C?u tr�c d? �n
+## 📂 Cấu trúc dự án
 
 ```text
 Project-App/
-+-- BackEnd/
-�   +-- src/
-�       +-- config/         # DB, Env
-�       +-- controller/     # API handlers
-�       +-- middleware/     # Auth, Upload
-�       +-- migrations/     # Sequelize migrations
-�       +-- models/         # DB models
-�       +-- routers/        # API routes
-�       +-- services/       # Business logic
-�       +-- service.js      # Entry
-+-- FrontEnd/
-�   +-- src/
-�       +-- api/            # API clients
-�       +-- assets/         # Images, SCSS
-�       +-- components/     # Reusable components
-�       +-- pages/          # Pages
-�       +-- redux/          # Slices & Store
-�       +-- styles/         # Global styles
-�       +-- main.jsx
-+-- README.md
+├── BackEnd/
+│   └── src/
+│       ├── config/         # DB, Env
+│       ├── controller/     # API handlers
+│       ├── middleware/     # Auth, Upload
+│       ├── migrations/     # Sequelize migrations
+│       ├── models/         # DB models
+│       ├── routers/        # API routes
+│       ├── services/       # Business logic
+│       └── service.js      # Entry
+├── FrontEnd/
+│   └── src/
+│       ├── api/            # API clients
+│       ├── assets/         # Images, SCSS
+│       ├── components/     # Reusable components
+│       ├── pages/          # Pages
+│       ├── redux/          # Slices & Store
+│       ├── styles/         # Global styles
+│       └── main.jsx
+└── README.md
 ```
 
 ---
 
-## ?? Co s? d? li?u (ERD)
+## 🗄 Cơ sở dữ liệu (ERD)
 
-�ang c?p nh?t.
+Đang cập nhật.
 
 ---
 
-## ? C�i d?t & Tri?n khai
+## ⚡ Cài đặt & Triển khai
 
-Y�u c?u
+Yêu cầu
 - Node.js >= 22
 - MySQL Server
 
-1. Clone d? �n
+1. Clone dự án
 
 ```bash
 git clone https://github.com/Nguyen-Trung-Tien/Project-App.git
 cd Project-App
 ```
 
-2. C�i d?t Backend
+2. Cài đặt Backend
 
 ```bash
 cd BackEnd
 npm install
 
-# T?o file .env v� c?u h�nh:
+# Tạo file .env và cấu hình:
 # PORT=8080
 # DB_HOST=localhost
 # DB_USER=root
@@ -162,9 +162,9 @@ npm install
 npm start
 ```
 
-Backend ch?y t?i `http://localhost:8080`
+Backend chạy tại `http://localhost:8080`
 
-3. C�i d?t Frontend
+3. Cài đặt Frontend
 
 ```bash
 cd FrontEnd
@@ -172,27 +172,27 @@ npm install
 npm run dev
 ```
 
-Frontend ch?y t?i `http://localhost:5173`
+Frontend chạy tại `http://localhost:5173`
 
 ---
 
-## ?? API Reference
+## 🔌 API Reference
 
 ```text
-Method  Endpoint                      M� t?
-POST    /user/login                   �ang nh?p ngu?i d�ng
-GET     /product/get-all-product      Danh s�ch s?n ph?m
-GET     /product/get-product/:id      Chi ti?t s?n ph?m
-GET     /product/search               T�m ki?m s?n ph?m
-GET     /product/discounted           S?n ph?m gi?m gi�
-POST    /order/create                 T?o don h�ng
-GET     /order/get-all-order          Danh s�ch don h�ng
+Method  Endpoint                      Mô tả
+POST    /user/login                   Đăng nhập người dùng
+GET     /product/get-all-product      Danh sách sản phẩm
+GET     /product/get-product/:id      Chi tiết sản phẩm
+GET     /product/search               Tìm kiếm sản phẩm
+GET     /product/discounted           Sản phẩm giảm giá
+POST    /order/create                 Tạo đơn hàng
+GET     /order/get-all-order          Danh sách đơn hàng
 ```
 
 ---
 
-## ?? Li�n h?
+## 📞 Liên hệ
 
-T�c gi?: Nguy?n Trung Ti?n
+Tác giả: Nguyễn Trung Tiến
 GitHub: @Nguyen-Trung-Tien
 Email: trungtiennguyen910@gmail.com
