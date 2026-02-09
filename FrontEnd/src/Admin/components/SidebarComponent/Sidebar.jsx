@@ -65,7 +65,7 @@ const Sidebar = () => {
   if (!user) return null;
 
   return (
-    <div className="sidebar d-flex flex-column justify-content-between p-3 shadow-sm bg-white">
+    <div className="sidebar d-flex flex-column justify-content-between">
       <div>
         <div className="sidebar-header mb-4 text-center">
           <h5 className="fw-bold text-primary mb-1">Admin Panel</h5>
@@ -80,9 +80,7 @@ const Sidebar = () => {
                 as={Link}
                 key={item.to}
                 to={item.to}
-                className={`sidebar-link d-flex align-items-center gap-2 px-3 py-2 mb-2 rounded-3 transition-all ${
-                  isActive ? "active bg-primary text-white" : "text-secondary"
-                }`}
+                className={`sidebar-link ${isActive ? "active" : ""}`}
                 title={item.label}
                 aria-current={isActive ? "page" : undefined}
               >

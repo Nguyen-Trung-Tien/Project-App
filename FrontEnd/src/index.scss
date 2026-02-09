@@ -1,12 +1,22 @@
+@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=Sora:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap");
+
 :root {
   --primary-color: #0072ff;
   --primary-hover: #005bb5;
   --secondary-color: #ee4d2d;
-  --text-color: #333;
-  --text-light: #999;
-  --bg-light: #f8f9fa;
-  --border-color: #e5e5e5;
+  --text-color: #101624;
+  --text-muted: #5e6a7e;
+  --bg-light: #f2f5fb;
+  --bg-deep: #e7edf7;
+  --surface: #ffffff;
+  --surface-elevated: #f9fbff;
+  --border-color: #d7e0ee;
   --white: #fff;
+  --shadow-sm: 0 8px 20px rgba(12, 32, 66, 0.08);
+  --shadow-md: 0 14px 40px rgba(12, 32, 66, 0.12);
+  --radius-lg: 20px;
+  --radius-md: 14px;
+  --radius-sm: 10px;
 }
 
 html,
@@ -14,14 +24,18 @@ body {
   margin: 0;
   padding: 0;
   min-height: 100vh;
-  font-family:
-    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
-    Arial, sans-serif;
+  font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
+  color: var(--text-color);
+  background: var(--bg-light);
 }
 
 body {
   display: flex;
   flex-direction: column;
+  background-image:
+    radial-gradient(900px 320px at 10% -10%, rgba(0, 114, 255, 0.08), transparent 70%),
+    radial-gradient(700px 260px at 95% 0%, rgba(238, 77, 45, 0.06), transparent 75%),
+    linear-gradient(180deg, #f6f8fd 0%, #eef3fb 45%, #f8f9fc 100%);
 }
 
 #root {
@@ -30,6 +44,111 @@ body {
   flex-direction: column;
 }
 
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: "Sora", "IBM Plex Sans", sans-serif;
+  letter-spacing: -0.02em;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.app-shell {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.app-main {
+  position: relative;
+  flex: 1;
+  padding: 1.5rem 0 3rem;
+  background: transparent;
+  overflow: hidden;
+}
+
+.app-main::before,
+.app-main::after {
+  content: "";
+  position: absolute;
+  width: 420px;
+  height: 420px;
+  border-radius: 50%;
+  z-index: 0;
+  filter: blur(10px);
+  opacity: 0.35;
+}
+
+.app-main::before {
+  top: -120px;
+  right: -120px;
+  background: radial-gradient(circle, rgba(0, 114, 255, 0.35), transparent 70%);
+}
+
+.app-main::after {
+  bottom: -160px;
+  left: -140px;
+  background: radial-gradient(circle, rgba(238, 77, 45, 0.25), transparent 70%);
+}
+
+.app-main > * {
+  position: relative;
+  z-index: 1;
+}
+
 .main-content {
   flex: 1;
+}
+
+.card {
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.btn {
+  border-radius: 999px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.btn-primary {
+  background: var(--primary-color);
+  border-color: var(--primary-color);
+  box-shadow: 0 10px 20px rgba(0, 114, 255, 0.2);
+}
+
+.btn-primary:hover {
+  background: var(--primary-hover);
+  border-color: var(--primary-hover);
+}
+
+.btn-outline-primary {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+}
+
+.form-control,
+.form-select {
+  border-radius: var(--radius-md);
+  border-color: var(--border-color);
+  background: var(--surface);
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 0.2rem rgba(0, 114, 255, 0.15);
+}
+
+.badge {
+  font-weight: 600;
 }

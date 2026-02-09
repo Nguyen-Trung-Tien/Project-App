@@ -32,7 +32,19 @@ module.exports = {
       },
       resetToken: {
         type: Sequelize.STRING,
-        allowNull: false,
+        allowNull: true,
+      },
+      resetTokenExpiresAt: {
+        type: Sequelize.DATE,
+        allowNull: true,
+      },
+      refreshTokenHash: {
+        type: Sequelize.STRING,
+        allowNull: true,
+      },
+      refreshTokenExpiresAt: {
+        type: Sequelize.DATE,
+        allowNull: true,
       },
       role: {
         type: Sequelize.ENUM("customer", "admin"),

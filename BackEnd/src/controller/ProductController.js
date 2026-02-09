@@ -121,6 +121,22 @@ const handleSearchProducts = async (req, res) => {
   }
 };
 
+const handleSearchSuggestions = async (req, res) => {
+  try {
+    const query = req.query.q || "";
+    const limit = parseInt(req.query.limit) || 8;
+
+    const result = await ProductService.searchSuggestions(query, limit);
+    return res.status(200).json(result);
+  } catch (e) {
+    console.error("Error in handleSearchSuggestions:", e);
+    return res.status(500).json({
+      errCode: -1,
+      errMessage: "Internal server error",
+    });
+  }
+};
+
 const handleGetDiscountedProducts = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
@@ -222,6 +238,7 @@ module.exports = {
   handleUpdateProduct,
   handleDeleteProduct,
   handleSearchProducts,
+  handleSearchSuggestions,
   handleGetDiscountedProducts,
   handleFilterProducts,
   handleRecommendProducts,

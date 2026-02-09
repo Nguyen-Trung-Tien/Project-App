@@ -9,11 +9,11 @@ const AdminLayout = () => {
   const toggleSidebar = () => setCollapsed(!collapsed);
 
   return (
-    <div className={`admin-layout d-flex ${collapsed ? "collapsed" : ""}`}>
+    <div className={`admin-shell ${collapsed ? "is-collapsed" : ""}`}>
       <Sidebar collapsed={collapsed} />
-      <div className="admin-main flex-grow-1 d-flex flex-column">
+      <div className="admin-main">
         <HeaderAdmin toggleSidebar={toggleSidebar} />
-        <div className="p-4 flex-grow-1">
+        <div className="admin-content">
           <Outlet />
         </div>
       </div>

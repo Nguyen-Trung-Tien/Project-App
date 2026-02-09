@@ -30,13 +30,13 @@ const LayoutComponent = ({
   );
 
   return (
-    <>
+    <div className="app-shell">
       {isShowHeader && <Header />}
-      <main style={{ minHeight: "80vh", backgroundColor: "var(--bg-light)" }}>
+      <main className="app-main" style={{ minHeight: "80vh" }}>
         {children}
       </main>
       {isShowFooter && !shouldHideFooter && <Footer />}
-    </>
+    </div>
   );
 };
 

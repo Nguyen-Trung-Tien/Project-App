@@ -1,12 +1,23 @@
 const db = require("../models");
 const bcrypt = require("bcryptjs");
 const { v4: uuidv4 } = require("uuid");
+const crypto = require("crypto");
+const jwt = require("jsonwebtoken");
 const {
   generateAccessToken,
   generateRefreshToken,
   verifyRefreshToken,
 } = require("../services/jwtService");
 const { sendForgotPasswordEmail } = require("./sendEmail");
+
+const hashToken = (token) =>
+  crypto.createHash("sha256").update(token).digest("hex");
+
+const getTokenExpiryDate = (token) => {
+  const decoded = jwt.decode(token);
+  if (!decoded?.exp) return null;
+  return new Date(decoded.exp * 1000);
+};
 
 const hashUserPassword = async (password) => {
   const salt = await bcrypt.genSalt(10);
@@ -65,6 +76,12 @@ const handleUserLogin = async (email, password) => {
     const payload = { id: user.id, email: user.email, role: user.role };
     const accessToken = generateAccessToken(payload);
     const refreshToken = generateRefreshToken(payload);
+    const refreshTokenExpiresAt = getTokenExpiryDate(refreshToken);
+
+    await user.update({
+      refreshTokenHash: hashToken(refreshToken),
+      refreshTokenExpiresAt,
+    });
 
     const { password: _, ...userData } = user.toJSON();
     return {
@@ -206,7 +223,9 @@ const forgotPassword = async (email) => {
   if (!user) return { errCode: 1, errMessage: "Email không tồn tại" };
 
   const resetToken = uuidv4();
+  const resetTokenExpiresAt = new Date(Date.now() + 15 * 60 * 1000);
   user.resetToken = resetToken;
+  user.resetTokenExpiresAt = resetTokenExpiresAt;
   await user.save();
 
   await sendForgotPasswordEmail(user, resetToken);
@@ -224,6 +243,10 @@ const verifyResetToken = async (email, token) => {
 
     if (user.resetToken !== token) {
       return { errCode: 3, errMessage: "Invalid verification code!" };
+    }
+
+    if (user.resetTokenExpiresAt && user.resetTokenExpiresAt < new Date()) {
+      return { errCode: 4, errMessage: "Verification code expired!" };
     }
 
     return { errCode: 0, errMessage: "Valid verification code! " };
@@ -245,9 +268,14 @@ const resetPassword = async (email, token, newPassword) => {
       };
     }
 
+    if (user.resetTokenExpiresAt && user.resetTokenExpiresAt < new Date()) {
+      return { errCode: 3, errMessage: "Token expired!" };
+    }
+
     const hashedPassword = await hashUserPassword(newPassword);
     user.password = hashedPassword;
     user.resetToken = null;
+    user.resetTokenExpiresAt = null;
     await user.save();
 
     return { errCode: 0, errMessage: "Change password success!" };
@@ -256,6 +284,51 @@ const resetPassword = async (email, token, newPassword) => {
     return { errCode: 2, errMessage: "Error from server!" };
   }
 };
+const rotateRefreshToken = async (refreshToken) => {
+  const decoded = verifyRefreshToken(refreshToken);
+  if (!decoded) return { errCode: 1, errMessage: "Invalid refresh token" };
+
+  const user = await db.User.findByPk(decoded.id);
+  if (!user || !user.refreshTokenHash) {
+    return { errCode: 2, errMessage: "Refresh token revoked" };
+  }
+
+  const tokenHash = hashToken(refreshToken);
+  if (user.refreshTokenHash !== tokenHash) {
+    return { errCode: 3, errMessage: "Refresh token mismatch" };
+  }
+
+  if (user.refreshTokenExpiresAt && user.refreshTokenExpiresAt < new Date()) {
+    return { errCode: 4, errMessage: "Refresh token expired" };
+  }
+
+  const payload = { id: user.id, email: user.email, role: user.role };
+  const newAccessToken = generateAccessToken(payload);
+  const newRefreshToken = generateRefreshToken(payload);
+  const newRefreshTokenExpiresAt = getTokenExpiryDate(newRefreshToken);
+
+  await user.update({
+    refreshTokenHash: hashToken(newRefreshToken),
+    refreshTokenExpiresAt: newRefreshTokenExpiresAt,
+  });
+
+  return {
+    errCode: 0,
+    data: {
+      accessToken: newAccessToken,
+      refreshToken: newRefreshToken,
+    },
+  };
+};
+
+const revokeRefreshToken = async (userId) => {
+  const user = await db.User.findByPk(userId);
+  if (!user) return { errCode: 1, errMessage: "User not found" };
+
+  await user.update({ refreshTokenHash: null, refreshTokenExpiresAt: null });
+  return { errCode: 0, errMessage: "Refresh token revoked" };
+};
+
 module.exports = {
   createNewUser,
   handleUserLogin,
@@ -269,4 +342,6 @@ module.exports = {
   verifyResetToken,
   resetPassword,
   forgotPassword,
+  rotateRefreshToken,
+  revokeRefreshToken,
 };

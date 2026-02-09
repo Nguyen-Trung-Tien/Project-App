@@ -18,9 +18,35 @@ const getReviewsByProduct = async (productId, page = 1, limit = 10) => {
       offset: offset,
     });
 
+    const reviewIds = rows.map((r) => r.id);
+    let repliesByReviewId = {};
+    if (reviewIds.length > 0) {
+      const replies = await db.ReviewReply.findAll({
+        where: { reviewId: reviewIds },
+        include: [
+          {
+            model: db.User,
+            as: "user",
+            attributes: ["id", "username", "avatar"],
+          },
+        ],
+        order: [["createdAt", "ASC"]],
+      });
+
+      repliesByReviewId = replies.reduce((acc, rep) => {
+        const key = rep.reviewId;
+        if (!acc[key]) acc[key] = [];
+        acc[key].push(rep);
+        return acc;
+      }, {});
+    }
+
     return {
       errCode: 0,
-      data: rows,
+      data: rows.map((r) => ({
+        ...r.toJSON(),
+        replies: repliesByReviewId[r.id] || [],
+      })),
       pagination: {
         total: count,
         page: page,

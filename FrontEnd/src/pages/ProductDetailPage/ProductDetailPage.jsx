@@ -31,7 +31,6 @@ import { addCartItem } from "../../redux/cartSlice";
 import ChatBot from "../../components/ChatBot/ChatBot";
 import ReviewForm from "../../components/ReviewComponent/ReviewForm";
 import ReviewList from "../../components/ReviewComponent/ReviewList";
-import { getRepliesByReviewApi } from "../../api/reviewReplyApi";
 import PricePredictionModal from "../../components/PricePredictionModal/PricePredictionModal";
 import { predictPrice } from "../../api/chatApi";
 import LoadMoreButton from "../../components/LoadMoreButton/LoadMoreButton";
@@ -73,13 +72,7 @@ const ProductDetailPage = () => {
     try {
       const res = await getReviewsByProductApi(productId, page, limit);
       if (res?.errCode === 0) {
-        const reviewsWithReplies = await Promise.all(
-          res.data.map(async (r) => {
-            const replyRes = await getRepliesByReviewApi(r.id);
-            return { ...r, ReviewReplies: replyRes?.data || [] };
-          }),
-        );
-        setReviews(reviewsWithReplies);
+        setReviews(res.data || []);
         setPagination(res.pagination);
       }
     } catch (err) {

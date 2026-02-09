@@ -98,6 +98,12 @@ function Header() {
     [],
   );
 
+  useEffect(() => {
+    return () => {
+      fetchSuggestions.cancel();
+    };
+  }, [fetchSuggestions]);
+
   const handleLogout = async () => {
     try {
       await logoutUserApi();
@@ -116,6 +122,7 @@ function Header() {
     setSearchInput(value);
 
     if (value.trim() === "") {
+      fetchSuggestions.cancel();
       setShowSuggestions(false);
       navigate("/");
       return;

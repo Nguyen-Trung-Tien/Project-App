@@ -1,6 +1,15 @@
 const db = require("../models");
 const ProductService = require("./ProductService");
 
+// Temporary refund simulator for online methods to avoid runtime crash.
+// Replace with real provider integration.
+const simulateRefund = async (order, method) => {
+  if (!order || !method) {
+    return { success: false, message: "Missing order or method" };
+  }
+  return { success: true, message: "Refund simulated" };
+};
+
 const getAllPayments = async ({
   page = 1,
   limit = 10,
@@ -19,7 +28,7 @@ const getAllPayments = async ({
       where[db.Sequelize.Op.or] = [
         { id: { [db.Sequelize.Op.like]: `%${search}%` } },
         { orderId: { [db.Sequelize.Op.like]: `%${search}%` } },
-        { "$user.name$": { [db.Sequelize.Op.like]: `%${search}%` } },
+        { "$user.username$": { [db.Sequelize.Op.like]: `%${search}%` } },
         { "$user.email$": { [db.Sequelize.Op.like]: `%${search}%` } },
       ];
     }

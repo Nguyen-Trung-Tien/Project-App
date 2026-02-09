@@ -8,6 +8,10 @@ const API = axios.create({
   },
 });
 
+const SUGGEST_TTL_MS = 10000;
+const suggestCache = new Map();
+const suggestInflight = new Map();
+
 export const getAllProductApi = async (page = 1, limit = 10, search = "") => {
   try {
     const res = await API.get(`/product/get-all-product`, {
@@ -95,10 +99,33 @@ export const searchProductsApi = async (query, page = 1, limit = 10) => {
 };
 
 export const searchSuggestionsApi = async (query) => {
-  const res = await API.get(
-    `/product/search?q=${encodeURIComponent(query)}&limit=5`
-  );
-  return res.data;
+  const q = (query || "").trim().toLowerCase();
+  if (!q) {
+    return { suggestions: { products: [], keywords: [], brands: [], categories: [] } };
+  }
+
+  const cached = suggestCache.get(q);
+  if (cached && Date.now() - cached.ts < SUGGEST_TTL_MS) {
+    return cached.data;
+  }
+
+  const inflight = suggestInflight.get(q);
+  if (inflight) return inflight;
+
+  const req = API.get(`/product/search-suggest`, { params: { q, limit: 5 } })
+    .then((res) => {
+      const data = res.data;
+      suggestCache.set(q, { ts: Date.now(), data });
+      suggestInflight.delete(q);
+      return data;
+    })
+    .catch((err) => {
+      suggestInflight.delete(q);
+      throw err;
+    });
+
+  suggestInflight.set(q, req);
+  return req;
 };
 
 export const getDiscountedProductsApi = async (page = 1, limit = 6) => {

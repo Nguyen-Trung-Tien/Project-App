@@ -30,7 +30,7 @@ const ReviewItem = ({ review, user }) => {
 
       {/* Reply list */}
       <div className="mt-3 ps-3 border-start">
-        {review.ReviewReplies?.map((rep) => (
+        {review.replies?.map((rep) => (
           <ReplyItem key={rep.id} reply={rep} user={user} />
         ))}
       </div>

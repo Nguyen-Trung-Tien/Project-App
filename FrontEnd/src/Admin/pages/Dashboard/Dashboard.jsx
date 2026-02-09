@@ -98,9 +98,8 @@ const Dashboard = () => {
   }, []);
 
   return (
-    <div className="admin-layout d-flex">
-      <div className="main-content flex-grow-1">
-        <Container fluid className="p-4">
+    <div className="dashboard-page">
+      <Container fluid>
           <h3 className="mb-4 fw-bold d-flex align-items-center gap-2">
             Thống kê tổng quan
           </h3>
@@ -137,8 +136,7 @@ const Dashboard = () => {
               Không có dữ liệu thống kê.
             </Alert>
           )}
-        </Container>
-      </div>
+      </Container>
     </div>
   );
 };

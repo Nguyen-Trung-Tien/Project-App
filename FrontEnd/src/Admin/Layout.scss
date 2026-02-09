@@ -4,8 +4,9 @@
 }
 
 .table {
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   overflow: hidden;
+  background: var(--surface);
 }
 
 .btn-outline-warning,
@@ -14,20 +15,29 @@
 }
 
 .card {
-  border-radius: 16px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
 }
 
 .login-page {
-  background: linear-gradient(135deg, #0d6efd15, #0dcaf015);
-}
-
-.card {
-  border-radius: 20px;
+  background: radial-gradient(
+      circle at top left,
+      rgba(0, 114, 255, 0.12),
+      transparent 45%
+    ),
+    radial-gradient(
+      circle at bottom right,
+      rgba(238, 77, 45, 0.12),
+      transparent 45%
+    );
 }
 
 .input-group-text {
   border-right: none;
-  color: #0d6efd;
+  color: var(--primary-color);
+  background: transparent;
 }
 
 .form-control {
@@ -35,12 +45,12 @@
 
   &:focus {
     box-shadow: none;
-    border-color: #0d6efd;
+    border-color: var(--primary-color);
   }
 }
 
 button {
-  border-radius: 12px;
+  border-radius: 999px;
 }
 
 .recharts-wrapper *:focus {
@@ -48,8 +58,10 @@ button {
 }
 
 .navbar {
-  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(12px);
   transition: all 0.3s ease;
+  border-bottom: 1px solid rgba(215, 224, 238, 0.7);
 
   .btn-outline-primary,
   .btn-outline-secondary {
@@ -65,68 +77,66 @@ button {
   }
 }
 
-.admin-layout {
+.admin-shell {
   min-height: 100vh;
   display: flex;
-  background-color: var(--bg-light);
-
-  .sidebar {
-    width: 240px;
-    transition: width 0.3s ease;
-    background-color: var(--white);
-    border-right: 1px solid var(--border-color);
-    position: fixed;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    z-index: 100;
-  }
-
-  &.collapsed .sidebar {
-    width: 80px;
-  }
-
-  .admin-main {
-    margin-left: 240px;
-    transition: margin-left 0.3s ease;
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-
-    .header-admin {
-      position: sticky;
-      top: 0;
-      z-index: 90;
-      background-color: var(--white);
-      border-bottom: 1px solid var(--border-color);
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-    }
-  }
-
-  &.collapsed .admin-main {
-    margin-left: 80px;
-  }
+  background: linear-gradient(180deg, #f7f9fe 0%, #eef3fb 100%);
 }
 
-/* Utilities */
-.table th,
-.table td {
-  vertical-align: middle;
+.admin-shell .sidebar {
+  width: 250px;
+  transition: width 0.3s ease;
+  background: var(--surface);
+  border-right: 1px solid var(--border-color);
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  z-index: 100;
 }
 
-.table {
-  border-radius: 12px;
-  overflow: hidden;
-  background: var(--white);
+.admin-shell.is-collapsed .sidebar {
+  width: 86px;
 }
 
-.card {
-  border-radius: 16px;
-  border: 1px solid var(--border-color);
-  background: var(--white);
+.admin-main {
+  margin-left: 250px;
+  transition: margin-left 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 100vh;
 }
 
-.form-control:focus {
-  box-shadow: none;
-  border-color: var(--primary-color);
+.admin-shell.is-collapsed .admin-main {
+  margin-left: 86px;
+}
+
+.admin-main .header-admin {
+  position: sticky;
+  top: 0;
+  z-index: 90;
+  background: rgba(255, 255, 255, 0.96);
+  border-bottom: 1px solid var(--border-color);
+  box-shadow: 0 1px 10px rgba(12, 32, 66, 0.08);
+}
+
+.admin-content {
+  padding: 2rem 2.2rem 2.6rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  animation: adminFade 0.4s ease;
+}
+
+@keyframes adminFade {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

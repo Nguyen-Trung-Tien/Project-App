@@ -28,7 +28,7 @@ const PrivateRoute = ({ requiredRole }) => {
         } else if (!isExpired) {
           setValid(true);
         } else {
-          setValid(true);
+          setValid(false);
         }
       } catch (err) {
         console.error("Token decode error:", err);

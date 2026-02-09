@@ -158,6 +158,47 @@ const searchProducts = async (query, page = 1, limit = 10) => {
   };
 };
 
+const searchSuggestions = async (query, limit = 8) => {
+  const { Op } = db.Sequelize;
+  const q = (query || "").trim();
+
+  if (!q) {
+    return {
+      errCode: 0,
+      suggestions: { products: [], keywords: [], brands: [], categories: [] },
+    };
+  }
+
+  const productSuggestions = await db.Product.findAll({
+    where: { name: { [Op.like]: `%${q}%` } },
+    attributes: ["id", "name", "price", "image"],
+    limit,
+    order: [["sold", "DESC"]],
+  });
+
+  const brandSuggestions = await db.Brand.findAll({
+    where: { name: { [Op.like]: `%${q}%` } },
+    attributes: ["id", "name"],
+    limit: 5,
+  });
+
+  const categorySuggestions = await db.Category.findAll({
+    where: { name: { [Op.like]: `%${q}%` } },
+    attributes: ["id", "name"],
+    limit: 5,
+  });
+
+  return {
+    errCode: 0,
+    suggestions: {
+      products: productSuggestions,
+      keywords: [q],
+      brands: brandSuggestions,
+      categories: categorySuggestions,
+    },
+  };
+};
+
 const updateProductSold = async (productId, quantity) => {
   try {
     const product = await db.Product.findByPk(productId);
@@ -217,7 +258,7 @@ const filterProducts = async ({
 
     if (brandId) conditions.brandId = brandId;
     if (categoryId) conditions.categoryId = categoryId;
-    if (search) conditions.name = { [Op.iLike]: `%${search}%` };
+    if (search) conditions.name = { [Op.like]: `%${search}%` };
 
     // SORT
     let order = [];
@@ -385,6 +426,7 @@ module.exports = {
   updateProduct,
   deleteProduct,
   searchProducts,
+  searchSuggestions,
   updateProductSold,
   getDiscountedProducts,
   filterProducts,

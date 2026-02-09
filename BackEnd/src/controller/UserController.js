@@ -57,7 +57,7 @@ const handleLogin = async (req, res) => {
   }
 };
 
-const handleRefreshToken = (req, res) => {
+const handleRefreshToken = async (req, res) => {
   try {
     const refreshToken = req.cookies?.refreshToken;
     if (!refreshToken) {
@@ -67,24 +67,22 @@ const handleRefreshToken = (req, res) => {
       });
     }
 
-    const decoded = UserService.verifyRefreshToken(refreshToken);
-    if (!decoded) {
-      return res.status(403).json({
-        errCode: 2,
-        errMessage: "Invalid or expired refresh token",
-      });
+    const result = await UserService.rotateRefreshToken(refreshToken);
+    if (result.errCode !== 0) {
+      return res.status(403).json(result);
     }
 
-    const accessToken = UserService.generateAccessToken({
-      id: decoded.id,
-      email: decoded.email,
-      role: decoded.role,
+    res.cookie("refreshToken", result.data.refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
     return res.status(200).json({
       errCode: 0,
       errMessage: "Access token refreshed successfully",
-      data: { accessToken },
+      data: { accessToken: result.data.accessToken },
     });
   } catch (e) {
     console.error(e);
@@ -173,10 +171,10 @@ const handleGetUserById = async (req, res) => {
 const handleDeleteUser = async (req, res) => {
   try {
     const { id } = req.params;
-    const result = await UserService.deleteUser(id);
     if (req.user.role !== "admin" && req.user.id !== id) {
       return res.status(403).json({ errCode: 403, errMessage: "Forbidden" });
     }
+    const result = await UserService.deleteUser(id);
     return res.status(200).json(result);
   } catch (e) {
     console.error("Error in handleDeleteUser:", e);
@@ -189,6 +187,14 @@ const handleDeleteUser = async (req, res) => {
 
 const handleLogout = async (req, res) => {
   try {
+    const refreshToken = req.cookies?.refreshToken;
+    if (refreshToken) {
+      const decoded = UserService.verifyRefreshToken(refreshToken);
+      if (decoded?.id) {
+        await UserService.revokeRefreshToken(decoded.id);
+      }
+    }
+
     res.clearCookie("refreshToken", {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
@@ -197,7 +203,7 @@ const handleLogout = async (req, res) => {
 
     return res.status(200).json({
       errCode: 0,
-      errMessage: "Logout thành công",
+      errMessage: "Logout thanh cong",
     });
   } catch (err) {
     console.error(err);

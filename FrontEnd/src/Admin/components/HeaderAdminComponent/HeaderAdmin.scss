@@ -1,6 +1,7 @@
 .header-logo {
   max-height: 40px;
   object-fit: contain;
+  filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.1));
 }
 
 .navbar .btn-clear {
@@ -16,7 +17,9 @@
 }
 
 .navbar .input-group .form-control {
-  border-radius: 0.25rem;
+  border-radius: 999px;
+  padding-left: 1rem;
+  background: rgba(255, 255, 255, 0.85);
 }
 
 .navbar .dropdown-toggle::after {
