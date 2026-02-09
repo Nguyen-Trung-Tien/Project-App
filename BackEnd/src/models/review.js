@@ -29,14 +29,14 @@ module.exports = (sequelize, DataTypes) => {
       userId: {
         type: DataTypes.INTEGER,
         allowNull: false,
-        references: { model: "Users", key: "id" },
+        // references: { model: "Users", key: "id" },
         onDelete: "CASCADE",
         onUpdate: "CASCADE",
       },
       productId: {
         type: DataTypes.INTEGER,
         allowNull: false,
-        references: { model: "Products", key: "id" },
+        // references: { model: "Products", key: "id" },
         onDelete: "CASCADE",
         onUpdate: "CASCADE",
       },
@@ -61,7 +61,7 @@ module.exports = (sequelize, DataTypes) => {
       modelName: "Review",
       tableName: "Reviews",
       timestamps: true,
-    }
+    },
   );
 
   return Review;

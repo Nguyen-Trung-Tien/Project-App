@@ -18,8 +18,8 @@ module.exports = {
       },
       productId: {
         type: Sequelize.INTEGER,
-        allowNull: false,
-        references: { model: "Products", key: "id" },
+        allowNull: true,
+        // references: { model: "Products", key: "id" },
         onUpdate: "CASCADE",
         onDelete: "SET NULL",
       },
@@ -35,7 +35,7 @@ module.exports = {
           "requested", // khách yêu cầu trả
           "approved", // admin chấp nhận
           "rejected", // admin từ chối
-          "completed" // hoàn tất trả hàng
+          "completed", // hoàn tất trả hàng
         ),
         defaultValue: "none",
       },
@@ -52,7 +52,7 @@ module.exports = {
         allowNull: false,
         type: Sequelize.DATE,
         defaultValue: Sequelize.literal(
-          "CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"
+          "CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP",
         ),
       },
     });

@@ -13,20 +13,20 @@ module.exports = {
       reviewId: {
         type: Sequelize.INTEGER,
         allowNull: false,
-        references: {
-          model: "Reviews",
-          key: "id",
-        },
+        // references: {
+        //   model: "Reviews",
+        //   key: "id",
+        // },
         onDelete: "CASCADE",
         onUpdate: "CASCADE",
       },
       userId: {
         type: Sequelize.INTEGER,
         allowNull: false,
-        references: {
-          model: "Users",
-          key: "id",
-        },
+        // references: {
+        //   model: "Users",
+        //   key: "id",
+        // },
         onDelete: "CASCADE",
         onUpdate: "CASCADE",
       },
@@ -44,7 +44,7 @@ module.exports = {
         allowNull: false,
         type: Sequelize.DATE,
         defaultValue: Sequelize.literal(
-          "CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"
+          "CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP",
         ),
       },
     });

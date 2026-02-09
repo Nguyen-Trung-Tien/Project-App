@@ -61,6 +61,9 @@ const ProductDetailPage = () => {
   const [predictResult, setPredictResult] = useState(null);
   const [showPredict, setShowPredict] = useState(false);
   const [loadingPredict, setLoadingPredict] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [selectedVariantId, setSelectedVariantId] = useState(null);
 
   const limitRecommended = 6;
 
@@ -87,6 +90,23 @@ const ProductDetailPage = () => {
       if (res?.errCode === 0 && res.product) {
         const p = res.product;
         setProduct(p);
+        const primary =
+          p.images?.find((i) => i.isPrimary)?.imageUrl ||
+          p.image ||
+          (p.images?.[0]?.imageUrl || null);
+        setSelectedImage(primary);
+        const initialIndex =
+          primary && p.images?.length
+            ? p.images.findIndex((i) => i.imageUrl === primary)
+            : 0;
+        setSelectedIndex(initialIndex >= 0 ? initialIndex : 0);
+        if (p.variants && p.variants.length > 0) {
+          const firstActive = p.variants.find((v) => v.isActive) || p.variants[0];
+          setSelectedVariantId(firstActive?.id || null);
+          if (firstActive?.imageUrl) setSelectedImage(firstActive.imageUrl);
+        } else {
+          setSelectedVariantId(null);
+        }
 
         await fetchReviews(p.id); // OK
       } else {
@@ -273,11 +293,84 @@ const ProductDetailPage = () => {
       </div>
     );
 
+  const gallery = (() => {
+    const urls = [];
+    if (product.images && product.images.length > 0) {
+      product.images.forEach((i) => {
+        if (i?.imageUrl) urls.push(i.imageUrl);
+      });
+    }
+    if (product.image) urls.push(product.image);
+    return Array.from(new Set(urls));
+  })();
+
+  const variants = Array.isArray(product.variants) ? product.variants : [];
+  const selectedVariant =
+    variants.find((v) => v.id === selectedVariantId) || null;
+
+  const variantAttributes = (() => {
+    const map = {};
+    variants.forEach((v) => {
+      const attrs = v.attributes || {};
+      Object.keys(attrs).forEach((key) => {
+        if (!map[key]) map[key] = new Set();
+        map[key].add(attrs[key]);
+      });
+    });
+    const result = {};
+    Object.keys(map).forEach((k) => {
+      result[k] = Array.from(map[k]);
+    });
+    return result;
+  })();
+
+  const selectedAttributes = selectedVariant?.attributes || {};
+
+  const applyAttribute = (key, value) => {
+    const next = { ...selectedAttributes, [key]: value };
+    const found = variants.find((v) => {
+      const attrs = v.attributes || {};
+      return Object.keys(next).every((k) => attrs[k] === next[k]);
+    });
+    if (found) {
+      setSelectedVariantId(found.id);
+      if (found.imageUrl) setSelectedImage(found.imageUrl);
+      setQuantity(1);
+    } else {
+      setSelectedVariantId(null);
+    }
+  };
+
+  const activePrice =
+    selectedVariant?.price != null ? Number(selectedVariant.price) : product.price;
+  const activeStock =
+    selectedVariant?.stock != null ? Number(selectedVariant.stock) : product.stock;
+
   const discountedPrice = Math.round(
     product.discount > 0
-      ? product.price * (1 - product.discount / 100)
-      : product.price,
+      ? activePrice * (1 - product.discount / 100)
+      : activePrice,
   );
+
+  const currentIndex = (() => {
+    if (!selectedImage) return 0;
+    const idx = gallery.findIndex((u) => u === selectedImage);
+    return idx >= 0 ? idx : 0;
+  })();
+
+  const goPrev = () => {
+    if (gallery.length === 0) return;
+    const next = (currentIndex - 1 + gallery.length) % gallery.length;
+    setSelectedIndex(next);
+    setSelectedImage(gallery[next]);
+  };
+
+  const goNext = () => {
+    if (gallery.length === 0) return;
+    const next = (currentIndex + 1) % gallery.length;
+    setSelectedIndex(next);
+    setSelectedImage(gallery[next]);
+  };
 
   const shortDescription =
     product.description && product.description.length > 250
@@ -310,16 +403,56 @@ const ProductDetailPage = () => {
           {/* Image */}
           <Col md={6} className="text-center">
             <div className="product-image-wrapper shadow-lg rounded-4 bg-white p-3 position-relative">
+              {gallery.length > 1 && (
+                <button
+                  type="button"
+                  className="img-nav prev"
+                  onClick={goPrev}
+                  aria-label="Previous image"
+                >
+                  ‹
+                </button>
+              )}
               <Image
-                src={getImage(product.image)}
+                src={getImage(selectedImage || product.image)}
                 alt={product.name}
                 fluid
                 className="product-image"
               />
+              {gallery.length > 1 && (
+                <button
+                  type="button"
+                  className="img-nav next"
+                  onClick={goNext}
+                  aria-label="Next image"
+                >
+                  ›
+                </button>
+              )}
               {product.discount > 0 && (
                 <span className="discount-badge">-{product.discount}%</span>
               )}
             </div>
+
+            {gallery.length > 1 && (
+              <div className="product-thumbs mt-3 d-flex flex-wrap gap-2 justify-content-center">
+                {gallery.map((url, idx) => (
+                  <button
+                    key={`${url}-${idx}`}
+                    type="button"
+                    className={`thumb-btn ${
+                      (selectedImage || product.image) === url ? "active" : ""
+                    }`}
+                    onClick={() => {
+                      setSelectedIndex(idx);
+                      setSelectedImage(url);
+                    }}
+                  >
+                    <Image src={getImage(url)} alt="" className="thumb-img" />
+                  </button>
+                ))}
+              </div>
+            )}
           </Col>
 
           {/* Info */}
@@ -338,11 +471,11 @@ const ProductDetailPage = () => {
 
               <div className="mb-2">
                 <span className="text-muted">SKU: </span>
-                <strong>{product.sku}</strong> |
+                <strong>{selectedVariant?.sku || product.sku}</strong> |
                 <span className="text-muted ms-2">Đã bán: </span>
                 <strong>{product.sold}</strong> |
                 <span className="text-muted ms-2">Còn hàng: </span>
-                <strong>{product.stock}</strong>
+                <strong>{activeStock}</strong>
               </div>
 
               {/* Price */}
@@ -352,7 +485,7 @@ const ProductDetailPage = () => {
                     <>
                       {/* Giá gốc gạch ngang */}
                       <div className="text-muted text-decoration-line-through">
-                        {formatVND(product.price)}
+                        {formatVND(activePrice)}
                       </div>
 
                       {/* Giảm giá trực tiếp */}
@@ -455,6 +588,31 @@ const ProductDetailPage = () => {
                 </div>
               )}
 
+              {Object.keys(variantAttributes).length > 0 && (
+                <div className="variant-select mb-3">
+                  {Object.entries(variantAttributes).map(([key, values]) => (
+                    <div key={key} className="variant-group">
+                      <div className="variant-label">{key}</div>
+                      <div className="variant-options">
+                        {values.map((val) => {
+                          const active = selectedAttributes?.[key] === val;
+                          return (
+                            <button
+                              key={`${key}-${val}`}
+                              type="button"
+                              className={`variant-btn ${active ? "active" : ""}`}
+                              onClick={() => applyAttribute(key, val)}
+                            >
+                              {val}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
               {/* Description */}
               <div className="product-description mb-2">
                 <p
@@ -480,7 +638,7 @@ const ProductDetailPage = () => {
                 <Form.Control
                   type="number"
                   min={1}
-                  max={product.stock}
+                  max={activeStock}
                   value={quantity}
                   onChange={(e) => {
                     const input = e.target.value;
@@ -490,7 +648,7 @@ const ProductDetailPage = () => {
                     }
                     const val = Number(input);
                     if (isNaN(val)) return;
-                    setQuantity(Math.max(1, Math.min(val, product.stock)));
+                    setQuantity(Math.max(1, Math.min(val, activeStock)));
                   }}
                   style={{ width: "90px" }}
                 />
@@ -504,7 +662,7 @@ const ProductDetailPage = () => {
                   className="rounded-pill shadow-sm flex-fill d-flex align-items-center justify-content-center"
                   onClick={handleAddToCart}
                   disabled={
-                    addingCart || product.stock < 1 || !product.isActive
+                    addingCart || activeStock < 1 || !product.isActive
                   }
                 >
                   {addingCart ? (
@@ -524,7 +682,7 @@ const ProductDetailPage = () => {
                   )}
                 </Button>
 
-                {product.stock > 0 && (
+                {activeStock > 0 && (
                   <Button
                     variant="success"
                     size="lg"

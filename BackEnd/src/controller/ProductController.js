@@ -18,15 +18,66 @@ const uploadToCloudinary = (buffer) => {
     stream.end(buffer);
   });
 };
+
+const parseBoolean = (value) => {
+  if (value === true || value === false) return value;
+  if (value === "1" || value === "true") return true;
+  if (value === "0" || value === "false") return false;
+  return value;
+};
+
+const uploadFilesToCloudinary = async (files = []) => {
+  const results = [];
+  for (const file of files) {
+    const res = await uploadToCloudinary(file.buffer);
+    results.push({
+      imageUrl: res.secure_url,
+      publicId: res.public_id,
+    });
+  }
+  return results;
+};
+
 const handleCreateProduct = async (req, res) => {
   try {
     const data = { ...req.body };
     if (data.brandId) data.brandId = parseInt(data.brandId);
-    if (req.file) {
-      const result = await uploadToCloudinary(req.file.buffer);
-      data.image = result.secure_url;
+    if (data.categoryId) data.categoryId = parseInt(data.categoryId);
+    if (data.isActive !== undefined) data.isActive = parseBoolean(data.isActive);
+
+    const files = req.files || {};
+    const primaryFile = files.image?.[0] || files.images?.[0] || null;
+    const galleryFiles = files.images || [];
+
+    const imageRecords = [];
+
+    if (primaryFile) {
+      const uploaded = await uploadToCloudinary(primaryFile.buffer);
+      data.image = uploaded.secure_url;
+      imageRecords.push({
+        imageUrl: uploaded.secure_url,
+        publicId: uploaded.public_id,
+        isPrimary: true,
+      });
     }
-    const product = await ProductService.createProduct(data);
+
+    const extraFiles =
+      primaryFile && galleryFiles.length > 0
+        ? galleryFiles.slice(primaryFile === galleryFiles[0] ? 1 : 0)
+        : galleryFiles;
+
+    if (extraFiles.length > 0) {
+      const uploads = await uploadFilesToCloudinary(extraFiles);
+      uploads.forEach((u) =>
+        imageRecords.push({
+          imageUrl: u.imageUrl,
+          publicId: u.publicId,
+          isPrimary: false,
+        })
+      );
+    }
+
+    const product = await ProductService.createProduct(data, imageRecords);
     return res.status(201).json(product);
   } catch (e) {
     console.error(e);
@@ -74,11 +125,38 @@ const handleUpdateProduct = async (req, res) => {
     const { id } = req.params;
     const data = { ...req.body };
 
-    if (req.file) {
-      const result = await uploadToCloudinary(req.file.buffer);
-      data.image = result.secure_url;
+    if (data.brandId) data.brandId = parseInt(data.brandId);
+    if (data.categoryId) data.categoryId = parseInt(data.categoryId);
+    if (data.isActive !== undefined) data.isActive = parseBoolean(data.isActive);
+
+    const files = req.files || {};
+    const primaryFile = files.image?.[0] || null;
+    const galleryFiles = files.images || [];
+
+    const imageRecords = [];
+
+    if (primaryFile) {
+      const uploaded = await uploadToCloudinary(primaryFile.buffer);
+      data.image = uploaded.secure_url;
+      imageRecords.push({
+        imageUrl: uploaded.secure_url,
+        publicId: uploaded.public_id,
+        isPrimary: true,
+      });
     }
-    const product = await ProductService.updateProduct(id, data);
+
+    if (galleryFiles.length > 0) {
+      const uploads = await uploadFilesToCloudinary(galleryFiles);
+      uploads.forEach((u) =>
+        imageRecords.push({
+          imageUrl: u.imageUrl,
+          publicId: u.publicId,
+          isPrimary: false,
+        })
+      );
+    }
+
+    const product = await ProductService.updateProduct(id, data, imageRecords);
     return res.status(200).json(product);
   } catch (e) {
     console.error(e);

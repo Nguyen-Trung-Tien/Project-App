@@ -27,14 +27,14 @@ module.exports = (sequelize, DataTypes) => {
       reviewId: {
         type: DataTypes.INTEGER,
         allowNull: false,
-        references: { model: "Reviews", key: "id" },
+        // references: { model: "Reviews", key: "id" },
         onDelete: "CASCADE",
         onUpdate: "CASCADE",
       },
       userId: {
         type: DataTypes.INTEGER,
         allowNull: false,
-        references: { model: "Users", key: "id" },
+        // references: { model: "Users", key: "id" },
         onDelete: "CASCADE",
         onUpdate: "CASCADE",
       },
@@ -49,7 +49,7 @@ module.exports = (sequelize, DataTypes) => {
       modelName: "ReviewReply",
       tableName: "ReviewReplies",
       timestamps: true,
-    }
+    },
   );
 
   return ReviewReply;

@@ -25,10 +25,10 @@ module.exports = (sequelize, DataTypes) => {
       cartId: {
         type: DataTypes.INTEGER,
         allowNull: false,
-        references: {
-          model: "Carts",
-          key: "id",
-        },
+        // references: {
+        //   model: "Carts",
+        //   key: "id",
+        // },
         onUpdate: "CASCADE",
         onDelete: "CASCADE",
       },
@@ -53,7 +53,7 @@ module.exports = (sequelize, DataTypes) => {
       modelName: "CartItem",
       tableName: "CartItems",
       timestamps: true,
-    }
+    },
   );
 
   return CartItem;

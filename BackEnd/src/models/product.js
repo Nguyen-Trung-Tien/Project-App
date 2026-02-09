@@ -29,6 +29,18 @@ module.exports = (sequelize, DataTypes) => {
         onDelete: "CASCADE",
       });
 
+      Product.hasMany(models.ProductImage, {
+        foreignKey: "productId",
+        as: "images",
+        onDelete: "CASCADE",
+      });
+
+      Product.hasMany(models.ProductVariant, {
+        foreignKey: "productId",
+        as: "variants",
+        onDelete: "CASCADE",
+      });
+
       Product.belongsTo(models.Brand, {
         foreignKey: "brandId",
         as: "brand",
@@ -52,7 +64,7 @@ module.exports = (sequelize, DataTypes) => {
         validate: { min: 0 },
       },
       stock: { type: DataTypes.INTEGER, defaultValue: 0, validate: { min: 0 } },
-      image: { type: DataTypes.BLOB("long") },
+      image: { type: DataTypes.STRING },
       sku: { type: DataTypes.STRING, unique: true, allowNull: true },
       sold: {
         type: DataTypes.INTEGER,
@@ -78,14 +90,14 @@ module.exports = (sequelize, DataTypes) => {
       brandId: {
         type: DataTypes.INTEGER,
         allowNull: true,
-        references: { model: "Brands", key: "id" },
+        // references: { model: "Brands", key: "id" },
         onDelete: "SET NULL",
         onUpdate: "CASCADE",
       },
       categoryId: {
         type: DataTypes.INTEGER,
         allowNull: true,
-        references: { model: "Categories", key: "id" },
+        // references: { model: "Categories", key: "id" },
         onDelete: "SET NULL",
         onUpdate: "CASCADE",
       },
@@ -95,7 +107,7 @@ module.exports = (sequelize, DataTypes) => {
       modelName: "Product",
       tableName: "Products",
       timestamps: true,
-    }
+    },
   );
 
   return Product;

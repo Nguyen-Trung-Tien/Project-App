@@ -12,14 +12,14 @@ module.exports = {
       orderId: {
         type: Sequelize.INTEGER,
         allowNull: false,
-        references: { model: "Orders", key: "id" },
+        // references: { model: "Orders", key: "id" },
         onUpdate: "CASCADE",
         onDelete: "CASCADE",
       },
       userId: {
         type: Sequelize.INTEGER,
         allowNull: true,
-        references: { model: "Users", key: "id" },
+        // references: { model: "Users", key: "id" },
         onUpdate: "CASCADE",
         onDelete: "SET NULL",
       },
@@ -58,7 +58,7 @@ module.exports = {
         allowNull: false,
         type: Sequelize.DATE,
         defaultValue: Sequelize.literal(
-          "CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"
+          "CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP",
         ),
       },
     });

@@ -44,7 +44,7 @@ module.exports = {
         defaultValue: true,
       },
       image: {
-        type: Sequelize.BLOB("long"),
+        type: Sequelize.STRING,
         allowNull: true,
       },
 
@@ -63,14 +63,14 @@ module.exports = {
       categoryId: {
         type: Sequelize.INTEGER,
         allowNull: true,
-        references: { model: "Categories", key: "id" },
+        // references: { model: "Categories", key: "id" },
         onUpdate: "CASCADE",
         onDelete: "SET NULL",
       },
       brandId: {
         type: Sequelize.INTEGER,
         allowNull: true,
-        references: { model: "Brands", key: "id" },
+        // references: { model: "Brands", key: "id" },
         onUpdate: "CASCADE",
         onDelete: "SET NULL",
       },
@@ -83,7 +83,7 @@ module.exports = {
         allowNull: false,
         type: Sequelize.DATE,
         defaultValue: Sequelize.literal(
-          "CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"
+          "CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP",
         ),
       },
     });

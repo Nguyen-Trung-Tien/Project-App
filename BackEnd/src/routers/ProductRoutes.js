@@ -9,7 +9,10 @@ const {
 
 router.post(
   "/create-new-product",
-  upload.single("image"),
+  upload.fields([
+    { name: "image", maxCount: 1 },
+    { name: "images", maxCount: 20 },
+  ]),
   authenticateToken,
   authorizeRole(["admin"]),
   ProductController.handleCreateProduct
@@ -21,7 +24,10 @@ router.get("/search-suggest", ProductController.handleSearchSuggestions);
 
 router.put(
   "/update-product/:id",
-  upload.single("image"),
+  upload.fields([
+    { name: "image", maxCount: 1 },
+    { name: "images", maxCount: 20 },
+  ]),
   authenticateToken,
   authorizeRole(["admin"]),
   ProductController.handleUpdateProduct

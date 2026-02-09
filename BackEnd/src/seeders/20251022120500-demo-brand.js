@@ -56,7 +56,7 @@ const parseCsv = (content) => {
   return rows;
 };
 
-const loadCsvCategoryIds = () => {
+const loadCsvBrandIds = () => {
   if (!fs.existsSync(CSV_PATH)) {
     throw new Error(`CSV not found: ${CSV_PATH}`);
   }
@@ -65,11 +65,11 @@ const loadCsvCategoryIds = () => {
   const rows = parseCsv(text);
   if (rows.length < 2) return [];
   const headers = rows[0].map((h) => h.trim());
-  const categoryIdx = headers.indexOf("categoryId");
-  if (categoryIdx === -1) return [];
+  const brandIdx = headers.indexOf("brandId");
+  if (brandIdx === -1) return [];
   const ids = new Set();
   for (let i = 1; i < rows.length; i++) {
-    const val = rows[i][categoryIdx];
+    const val = rows[i][brandIdx];
     const id = parseInt(val, 10);
     if (Number.isFinite(id)) ids.add(id);
   }
@@ -86,31 +86,30 @@ const countRows = async (queryInterface, Sequelize, table) => {
 
 module.exports = {
   async up(queryInterface, Sequelize) {
-    const existing = await countRows(queryInterface, Sequelize, "Categories");
+    const existing = await countRows(queryInterface, Sequelize, "Brands");
     if (existing > 0) return;
 
     const now = new Date();
-    const ids = loadCsvCategoryIds();
+    const ids = loadCsvBrandIds();
     if (!ids.length) return;
 
-    const categories = ids.map((id) => ({
+    const brands = ids.map((id) => ({
       id,
-      name: `Category ${id}`,
-      slug: `category-${id}`,
-      description: `Auto seeded from CSV (categoryId=${id}).`,
+      name: `Brand ${id}`,
+      slug: `brand-${id}`,
+      description: `Auto seeded from CSV (brandId=${id}).`,
       image: null,
-      parentId: null,
       createdAt: now,
       updatedAt: now,
     }));
 
-    await queryInterface.bulkInsert("Categories", categories);
+    await queryInterface.bulkInsert("Brands", brands);
   },
 
   async down(queryInterface, Sequelize) {
-    const ids = loadCsvCategoryIds();
+    const ids = loadCsvBrandIds();
     if (ids.length) {
-      await queryInterface.bulkDelete("Categories", { id: ids }, {});
+      await queryInterface.bulkDelete("Brands", { id: ids }, {});
     }
   },
 };

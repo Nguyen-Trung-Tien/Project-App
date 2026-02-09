@@ -29,7 +29,7 @@ module.exports = (sequelize, DataTypes) => {
       userId: {
         type: DataTypes.INTEGER,
         allowNull: false,
-        references: { model: "Users", key: "id" },
+        // references: { model: "Users", key: "id" },
         onUpdate: "CASCADE",
         onDelete: "SET NULL",
       },
@@ -45,7 +45,7 @@ module.exports = (sequelize, DataTypes) => {
           "processing",
           "shipped",
           "delivered",
-          "cancelled" // khách hủy
+          "cancelled", // khách hủy
         ),
         defaultValue: "pending",
       },
@@ -85,7 +85,7 @@ module.exports = (sequelize, DataTypes) => {
       modelName: "Order",
       tableName: "Orders",
       timestamps: true,
-    }
+    },
   );
 
   return Order;

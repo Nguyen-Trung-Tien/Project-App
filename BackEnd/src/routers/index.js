@@ -12,6 +12,7 @@ const ChatRoutes = require("./chatRoutes");
 const VNpayRoutes = require("./VNpayRouter");
 const ReviewReply = require("./ReviewReply");
 const BrandRouter = require("./BrandRouter");
+const ProductVariantRouter = require("./ProductVariantRouter");
 
 const routes = (app) => {
   app.use("/api/v1/user", UserRouter);
@@ -28,5 +29,6 @@ const routes = (app) => {
   app.use("/api/v1/admin", AdminRouter);
   app.use("/api/v1/chat", ChatRoutes);
   app.use("/api/v1/vnpay", VNpayRoutes);
+  app.use("/api/v1/variant", ProductVariantRouter);
 };
 module.exports = routes;

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+﻿import { useState, useEffect, useRef } from "react";
 import {
   Table,
   Button,
@@ -36,6 +36,11 @@ import {
   getAllProductApi,
   updateProductApi,
 } from "../../../api/productApi";
+import {
+  getVariantsByProduct,
+  createVariant,
+  deleteVariant,
+} from "../../../api/variantApi";
 import { getAllCategoryApi } from "../../../api/categoryApi";
 import { getAllBrandApi } from "../../../api/brandApi";
 import { getImage } from "../../../utils/decodeImage";
@@ -75,6 +80,16 @@ const ProductManage = () => {
   });
 
   const [imagePreview, setImagePreview] = useState(null);
+  const [images, setImages] = useState([]);
+  const [imagePreviews, setImagePreviews] = useState([]);
+  const [variants, setVariants] = useState([]);
+  const [variantForm, setVariantForm] = useState({
+    sku: "",
+    price: "",
+    stock: "",
+    ram: "",
+    rom: "",
+  });
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const limit = 10;
@@ -179,6 +194,9 @@ const ProductManage = () => {
       });
       setImagePreview(getImage(product.image));
       setEditProduct(product);
+      setImages([]);
+      setImagePreviews([]);
+      fetchVariants(product.id);
     } else {
       setFormData({
         name: "",
@@ -204,6 +222,10 @@ const ProductManage = () => {
       });
       setImagePreview(null);
       setEditProduct(null);
+      setImages([]);
+      setImagePreviews([]);
+      setVariants([]);
+      setVariantForm({ sku: "", price: "", stock: "", ram: "", rom: "" });
     }
     setShowModal(true);
   };
@@ -211,6 +233,10 @@ const ProductManage = () => {
     setShowModal(false);
     setEditProduct(null);
     setImagePreview(null);
+    setImages([]);
+    setImagePreviews([]);
+    setVariants([]);
+    setVariantForm({ sku: "", price: "", stock: "", ram: "", rom: "" });
   };
 
   const handleImageChange = (e) => {
@@ -222,6 +248,85 @@ const ProductManage = () => {
       }
       setFormData({ ...formData, image: file });
       setImagePreview(URL.createObjectURL(file));
+    }
+  };
+
+  const handleImagesChange = (e) => {
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+    const limited = files.slice(0, 10);
+    const tooBig = limited.find((f) => f.size > 2 * 1024 * 1024);
+    if (tooBig) {
+      toast.warn("Ảnh không được quá 2MB");
+      return;
+    }
+    setImages(limited);
+    setImagePreviews(limited.map((f) => URL.createObjectURL(f)));
+  };
+
+  const fetchVariants = async (productId) => {
+    if (!productId) return;
+    try {
+      const res = await getVariantsByProduct(productId, token);
+      if (res?.errCode === 0 && Array.isArray(res.data)) {
+        setVariants(res.data);
+      } else {
+        setVariants([]);
+      }
+    } catch (err) {
+      console.error("Fetch variants error:", err);
+      setVariants([]);
+    }
+  };
+
+  const handleCreateVariant = async () => {
+    if (!editProduct?.id) {
+      toast.warn("Vui lòng lưu sản phẩm trước khi thêm biến thể!");
+      return;
+    }
+    if (variantForm.price === "" || variantForm.stock === "") {
+      toast.error("Vui lòng nhập giá và tồn!");
+      return;
+    }
+    try {
+      const payload = {
+        productId: editProduct.id,
+        sku: variantForm.sku || null,
+        price: Number(variantForm.price),
+        stock: Number(variantForm.stock),
+        isActive: true,
+        attributes: {
+          ram: variantForm.ram || null,
+          rom: variantForm.rom || null,
+        },
+      };
+      const res = await createVariant(payload, token);
+      if (res?.errCode === 0) {
+        toast.success("Tạo biến thể thành công!");
+        setVariantForm({ sku: "", price: "", stock: "", ram: "", rom: "" });
+        fetchVariants(editProduct.id);
+      } else {
+        toast.error(res?.errMessage || "Không thể thêm biến thể");
+      }
+    } catch (err) {
+      console.error("Create variant error:", err);
+      toast.error("Không thể thêm biến thể");
+    }
+  };
+
+  const handleDeleteVariant = async (variantId) => {
+    if (!variantId) return;
+    try {
+      const res = await deleteVariant(variantId, token);
+      if (res?.errCode === 0) {
+        toast.success("Đã xóa biến thể");
+        if (editProduct?.id) fetchVariants(editProduct.id);
+      } else {
+        toast.error(res?.errMessage || "Không thể xóa biến thể");
+      }
+    } catch (err) {
+      console.error("Delete variant error:", err);
+      toast.error("Không thể xóa biến thể");
     }
   };
 
@@ -257,6 +362,9 @@ const ProductManage = () => {
       data.append("extra", formData.extra);
 
       if (formData.image) data.append("image", formData.image);
+      if (images.length) {
+        images.forEach((file) => data.append("images", file));
+      }
 
       let res;
       if (editProduct) {
@@ -382,7 +490,7 @@ const ProductManage = () => {
                       <td>{p.sku || "—"}</td>
                       <td>{p.brand?.name || "—"}</td>
                       <td>{p.category?.name || "—"}</td>
-                      <td>{Number(p.price).toLocaleString()}₫</td>
+                      <td>{Number(p.price).toLocaleString()} VND</td>
                       <td>{p.discount}%</td>
                       <td>{p.stock}</td>
                       <td>
@@ -499,7 +607,7 @@ const ProductManage = () => {
 
                 <Form.Group className="mb-3">
                   <Form.Label>
-                    <CurrencyDollar className="me-1" /> Giá (₫) *
+                    <CurrencyDollar className="me-1" /> Giá (VND) *
                   </Form.Label>
                   <Form.Control
                     type="number"
@@ -662,12 +770,12 @@ const ProductManage = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, color: e.target.value })
                     }
-                    placeholder="Ví dụ: Đen, Trắng"
+                    placeholder="Ví dụ: Đen, TrẨng"
                   />
                 </Form.Group>
 
                 <Form.Group className="mb-3">
-                  <Form.Label>Trọng lượng</Form.Label>
+                  <Form.Label>TrẨng luẨng</Form.Label>
                   <Form.Control
                     value={formData.weight}
                     onChange={(e) =>
@@ -735,6 +843,154 @@ const ProductManage = () => {
                 </Form.Group>
 
                 <Form.Group className="mb-3">
+                  <Form.Label>
+                    <ImageIcon className="me-1" /> Thêm nhiều ảnh (gallery)
+                  </Form.Label>
+                  <Form.Control
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={handleImagesChange}
+                  />
+                  {imagePreviews.length > 0 && (
+                    <div className="mt-2 d-flex flex-wrap gap-2">
+                      {imagePreviews.map((src, idx) => (
+                        <Image
+                          key={`${src}-${idx}`}
+                          src={src}
+                          rounded
+                          style={{ width: 64, height: 64, objectFit: "cover" }}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </Form.Group>
+
+                {editProduct && (
+                  <Form.Group className="mb-3">
+                    <Form.Label>Biến thể sản phẩm</Form.Label>
+
+                    <div className="mb-2">
+                      {variants.length > 0 ? (
+                        variants.map((v) => (
+                          <div
+                            key={v.id}
+                            className="d-flex align-items-center justify-content-between border rounded-3 px-2 py-2 mb-2"
+                          >
+                            <div className="small">
+                              <div>
+                                SKU: <strong>{v.sku || "-"}</strong>
+                              </div>
+                              <div>
+                                Giá:{" "}
+                                <strong>
+                                  {Number(v.price || 0).toLocaleString()} VND
+                                </strong>
+                              </div>
+                              <div>
+                                Tồn: <strong>{v.stock}</strong>
+                              </div>
+                              <div className="text-muted">
+                                {v.attributes?.ram && (
+                                  <span>RAM: {v.attributes.ram} </span>
+                                )}
+                                {v.attributes?.rom && (
+                                  <span>ROM: {v.attributes.rom}</span>
+                                )}
+                              </div>
+                            </div>
+                            <Button
+                              size="sm"
+                              variant="outline-danger"
+                              onClick={() => handleDeleteVariant(v.id)}
+                            >
+                              Xóa
+                            </Button>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="text-muted small">Chưa có biến thể</div>
+                      )}
+                    </div>
+
+                    <Row className="g-2">
+                      <Col md={6}>
+                        <Form.Control
+                          placeholder="SKU (tùy chọn)"
+                          value={variantForm.sku}
+                          onChange={(e) =>
+                            setVariantForm({
+                              ...variantForm,
+                              sku: e.target.value,
+                            })
+                          }
+                        />
+                      </Col>
+                      <Col md={3}>
+                        <Form.Control
+                          type="number"
+                          placeholder="Giá (VND)"
+                          value={variantForm.price}
+                          onChange={(e) =>
+                            setVariantForm({
+                              ...variantForm,
+                              price: e.target.value,
+                            })
+                          }
+                        />
+                      </Col>
+                      <Col md={3}>
+                        <Form.Control
+                          type="number"
+                          placeholder="Tồn"
+                          value={variantForm.stock}
+                          onChange={(e) =>
+                            setVariantForm({
+                              ...variantForm,
+                              stock: e.target.value,
+                            })
+                          }
+                        />
+                      </Col>
+                      <Col md={6}>
+                        <Form.Control
+                          placeholder="RAM (vd: 8GB)"
+                          value={variantForm.ram}
+                          onChange={(e) =>
+                            setVariantForm({
+                              ...variantForm,
+                              ram: e.target.value,
+                            })
+                          }
+                        />
+                      </Col>
+                      <Col md={6}>
+                        <Form.Control
+                          placeholder="ROM (vd: 128GB)"
+                          value={variantForm.rom}
+                          onChange={(e) =>
+                            setVariantForm({
+                              ...variantForm,
+                              rom: e.target.value,
+                            })
+                          }
+                        />
+                      </Col>
+                    </Row>
+
+                    <div className="mt-2 text-end">
+                      <Button
+                        size="sm"
+                        variant="outline-primary"
+                        onClick={handleCreateVariant}
+                      >
+                        Thêm biến thể
+                      </Button>
+                    </div>
+                  </Form.Group>
+                )}
+
+                <Form.Group className="mb-3">
                   <Form.Check
                     type="switch"
                     label={
@@ -785,7 +1041,7 @@ const ProductManage = () => {
         centered
       >
         <Modal.Header closeButton className="bg-warning text-dark">
-          <Modal.Title>Xác nhận xóa</Modal.Title>
+          <Modal.Title>Xác nhẨn xóa</Modal.Title>
         </Modal.Header>
         <Modal.Body>Bạn có chắc muốn xóa sản phẩm này không?</Modal.Body>
         <Modal.Footer>
@@ -796,7 +1052,7 @@ const ProductManage = () => {
             Hủy
           </Button>
           <Button variant="danger" onClick={handleConfirmDelete}>
-            Xác nhận
+            Xác nhẨn
           </Button>
         </Modal.Footer>
       </Modal>

@@ -1,17 +1,25 @@
 const db = require("../models");
-const fs = require("fs");
 const { Op } = require("sequelize");
 const { getLuckyColorsByYear } = require("../utils/fortuneUtils");
 
-const createProduct = async (data) => {
+const createProduct = async (data, imageRecords = []) => {
+  const t = await db.sequelize.transaction();
   try {
     const newData = { ...data };
-    if (data.image && data.image.path) {
-      newData.image = fs.readFileSync(data.image.path);
+    const product = await db.Product.create(newData, { transaction: t });
+
+    if (imageRecords.length > 0) {
+      const records = imageRecords.map((img) => ({
+        ...img,
+        productId: product.id,
+      }));
+      await db.ProductImage.bulkCreate(records, { transaction: t });
     }
-    const product = await db.Product.create(newData);
+
+    await t.commit();
     return { errCode: 0, product };
   } catch (e) {
+    await t.rollback();
     console.error("Error creating product:", e);
     return { errCode: 1, errMessage: e.message };
   }
@@ -48,10 +56,27 @@ const getProductById = async (id) => {
       include: [
         { model: db.Category, as: "category" },
         { model: db.Brand, as: "brand" },
+        {
+          model: db.ProductImage,
+          as: "images",
+          attributes: ["id", "imageUrl", "isPrimary"],
+        },
+        {
+          model: db.ProductVariant,
+          as: "variants",
+          attributes: ["id", "sku", "price", "stock", "isActive", "attributes", "imageUrl"],
+        },
       ],
     });
 
     if (!product) return { errCode: 1, errMessage: "Product not found" };
+
+    const images = Array.isArray(product.images)
+      ? [...product.images].sort((a, b) => {
+          if (a.isPrimary === b.isPrimary) return a.id - b.id;
+          return a.isPrimary ? -1 : 1;
+        })
+      : [];
 
     return {
       errCode: 0,
@@ -59,6 +84,11 @@ const getProductById = async (id) => {
         ...product.toJSON(),
         image: product.image || null,
         sold: product.sold || 0,
+        images: images.map((i) => ({
+          id: i.id,
+          imageUrl: i.imageUrl,
+          isPrimary: i.isPrimary,
+        })),
       },
     };
   } catch (e) {
@@ -67,18 +97,37 @@ const getProductById = async (id) => {
   }
 };
 
-const updateProduct = async (id, data) => {
+const updateProduct = async (id, data, imageRecords = []) => {
+  const t = await db.sequelize.transaction();
   try {
-    const product = await db.Product.findByPk(id);
-    if (!product) return { errCode: 1, errMessage: "Product not found" };
+    const product = await db.Product.findByPk(id, { transaction: t });
+    if (!product) {
+      await t.rollback();
+      return { errCode: 1, errMessage: "Product not found" };
+    }
     const updatedData = { ...data };
-    if (data.image && data.image.path) {
-      updatedData.image = fs.readFileSync(data.image.path);
+
+    const updatedProduct = await product.update(updatedData, { transaction: t });
+
+    if (imageRecords.length > 0) {
+      if (imageRecords.some((i) => i.isPrimary)) {
+        await db.ProductImage.update(
+          { isPrimary: false },
+          { where: { productId: id }, transaction: t }
+        );
+      }
+
+      const records = imageRecords.map((img) => ({
+        ...img,
+        productId: updatedProduct.id,
+      }));
+      await db.ProductImage.bulkCreate(records, { transaction: t });
     }
 
-    const updatedProduct = await product.update(updatedData);
+    await t.commit();
     return { errCode: 0, product: updatedProduct };
   } catch (e) {
+    await t.rollback();
     console.error("Error updating product:", e);
     return { errCode: 1, errMessage: e.message };
   }

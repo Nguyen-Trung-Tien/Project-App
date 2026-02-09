@@ -18,7 +18,7 @@ module.exports = {
       userId: {
         type: Sequelize.INTEGER,
         allowNull: true,
-        references: { model: "Users", key: "id" },
+        // references: { model: "Users", key: "id" },
         onUpdate: "CASCADE",
         onDelete: "SET NULL",
       },
@@ -34,7 +34,7 @@ module.exports = {
           "processing",
           "shipped",
           "delivered",
-          "cancelled" // khách hủy đơn
+          "cancelled", // khách hủy đơn
         ),
         defaultValue: "pending",
       },
@@ -77,7 +77,7 @@ module.exports = {
         allowNull: false,
         type: Sequelize.DATE,
         defaultValue: Sequelize.literal(
-          "CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"
+          "CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP",
         ),
       },
     });
