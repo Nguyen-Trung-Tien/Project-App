@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo, useCallback } from "react";
+﻿import React, { useEffect, useState, useCallback } from "react";
 import { Container, Card, Button, Badge, Spinner } from "react-bootstrap";
 import { Eye } from "react-bootstrap-icons";
 import { useNavigate } from "react-router-dom";
@@ -6,31 +6,10 @@ import { useSelector } from "react-redux";
 import { getOrdersByUserId } from "../../api/orderApi";
 import AppPagination from "../../components/Pagination/Pagination";
 import { getImage } from "../../utils/decodeImage";
+import { paymentStatusMap, statusMap } from "../../utils/StatusMap";
+import { StatusBadge } from "../../utils/StatusBadge";
+import ClickableText from "../../components/ClickableText/ClickableText";
 import "./OrderHistory.scss";
-
-const statusVariants = {
-  pending: "warning",
-  confirmed: "info",
-  processing: "primary",
-  shipped: "primary",
-  delivered: "success",
-  cancelled: "danger",
-};
-
-const paymentStatus = {
-  unpaid: { label: "Chưa thanh toán", variant: "secondary" },
-  paid: { label: "Đã thanh toán", variant: "success" },
-  refunded: { label: "Đã hoàn tiền", variant: "info" },
-};
-
-const statusLabels = {
-  pending: "Chờ xử lý",
-  confirmed: "Đã xác nhận",
-  processing: "Đang xử lý",
-  shipped: "Đang giao",
-  delivered: "Đã giao",
-  cancelled: "Đã hủy",
-};
 
 const OrderHistoryPage = () => {
   const navigate = useNavigate();
@@ -66,7 +45,7 @@ const OrderHistoryPage = () => {
   const formatDate = (dateStr) =>
     dateStr ? new Date(dateStr).toLocaleDateString("vi-VN") : "-";
 
-  const filteredOrders = useMemo(() => orders, [orders]);
+  const filteredOrders = orders;
 
   return (
     <Container className="py-3 order-history-page">
@@ -82,22 +61,16 @@ const OrderHistoryPage = () => {
           <Spinner animation="border" variant="primary" />
         </div>
       ) : filteredOrders.length === 0 ? (
-        <div className="text-center text-muted py-5">
-          Bạn chưa có đơn hàng nào.
-        </div>
+        <div className="text-center text-muted py-5">Bạn chưa có đơn hàng nào.</div>
       ) : (
         filteredOrders.map((o) => (
           <Card key={o.id} className="mb-3 shadow-sm">
             <Card.Body>
-              {/* Header */}
               <div className="d-flex justify-content-between align-items-center mb-2">
-                <div className="fw-bold">{"Sản phẩm"}</div>
-                <div className="text-muted small">
-                  {formatDate(o.createdAt)}
-                </div>
+                <div className="fw-bold">Sản phẩm</div>
+                <div className="text-muted small">{formatDate(o.createdAt)}</div>
               </div>
 
-              {/* Products */}
               {o.orderItems?.map((i) => {
                 const p = i.product;
                 return (
@@ -110,12 +83,12 @@ const OrderHistoryPage = () => {
                       className="rounded"
                     />
                     <div className="flex-grow-1">
-                      <div
+                      <ClickableText
                         className="fw-semibold product-name"
                         onClick={() => navigate(`/orders-detail/${o.id}`)}
                       >
                         {p?.name || i.productName}
-                      </div>
+                      </ClickableText>
                       <div className="text-muted small">SL: {i.quantity}</div>
                       <div className="d-flex align-items-center gap-2">
                         {p?.discount > 0 && (
@@ -123,34 +96,24 @@ const OrderHistoryPage = () => {
                             {formatCurrency(p.price)}
                           </small>
                         )}
-                        <span className="fw-semibold text-danger">
-                          {formatCurrency(i.price)}
-                        </span>
-                        {p?.discount > 0 && (
-                          <Badge bg="danger">-{p.discount}%</Badge>
-                        )}
+                        <span className="fw-semibold text-danger">{formatCurrency(i.price)}</span>
+                        {p?.discount > 0 && <Badge bg="danger">-{p.discount}%</Badge>}
                       </div>
                     </div>
                   </div>
                 );
               })}
 
-              {/* Footer */}
               <div className="d-flex justify-content-between align-items-center mt-3">
                 <div>
-                  <Badge bg={statusVariants[o.status]} className="me-2">
-                    {statusLabels[o.status]}
-                  </Badge>
-                  <Badge bg={paymentStatus[o.paymentStatus]?.variant}>
-                    {paymentStatus[o.paymentStatus]?.label}
-                  </Badge>
+                  <span className="me-2">
+                    <StatusBadge map={statusMap} status={o.status} />
+                  </span>
+                  <StatusBadge map={paymentStatusMap} status={o.paymentStatus} />
                 </div>
-                <div className="fw-bold text-success">
-                  {formatCurrency(o.totalPrice)}
-                </div>
+                <div className="fw-bold text-success">{formatCurrency(o.totalPrice)}</div>
               </div>
 
-              {/* Actions */}
               <div className="d-flex gap-2 mt-2 flex-wrap">
                 <Button
                   size="sm"
@@ -160,19 +123,13 @@ const OrderHistoryPage = () => {
                   <Eye className="me-1" /> Chi tiết
                 </Button>
                 {o.status === "delivered" && (
-                  <>
-                    <Button
-                      size="sm"
-                      className="btn-primary"
-                      onClick={() =>
-                        navigate(
-                          `/product-detail/${o.orderItems[0]?.product?.id}`,
-                        )
-                      }
-                    >
-                      Đánh giá
-                    </Button>
-                  </>
+                  <Button
+                    size="sm"
+                    className="btn-primary"
+                    onClick={() => navigate(`/product-detail/${o.orderItems[0]?.product?.id}`)}
+                  >
+                    Đánh giá
+                  </Button>
                 )}
               </div>
             </Card.Body>
@@ -180,7 +137,6 @@ const OrderHistoryPage = () => {
         ))
       )}
 
-      {/* Pagination */}
       {totalPages > 1 && (
         <div className="mt-3 d-flex justify-content-center">
           <AppPagination

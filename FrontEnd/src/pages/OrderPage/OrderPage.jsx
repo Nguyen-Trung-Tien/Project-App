@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo, useCallback } from "react";
+﻿import { useEffect, useState, useMemo, useCallback } from "react";
 import {
   Container,
   Button,
@@ -27,6 +27,9 @@ import { getOrdersByUserId, updateOrderStatus } from "../../api/orderApi";
 import AppPagination from "../../components/Pagination/Pagination";
 import "./OrderPage.scss";
 import { getImage } from "../../utils/decodeImage";
+import { statusMap, paymentStatusMap } from "../../utils/StatusMap";
+import { StatusBadge } from "../../utils/StatusBadge";
+import ClickableText from "../../components/ClickableText/ClickableText";
 
 const STATUS_TABS = [
   { key: "pending", label: "Chờ xử lý" },
@@ -36,6 +39,7 @@ const STATUS_TABS = [
   { key: "delivered", label: "Đã giao" },
   { key: "cancelled", label: "Đã hủy" },
 ];
+
 const STATUS_ICONS = {
   pending: <Hourglass size={16} />,
   confirmed: <CheckCircle size={16} />,
@@ -44,6 +48,7 @@ const STATUS_ICONS = {
   delivered: <BoxSeam size={16} />,
   cancelled: <XCircle size={16} />,
 };
+
 const STATUS_COLORS = {
   pending: "#f0ad4e",
   confirmed: "#5bc0de",
@@ -51,29 +56,6 @@ const STATUS_COLORS = {
   shipped: "#5a5a5a",
   delivered: "#5cb85c",
   cancelled: "#d9534f",
-};
-const statusVariants = {
-  pending: "warning",
-  confirmed: "info",
-  processing: "primary",
-  shipped: "primary",
-  delivered: "success",
-  cancelled: "danger",
-};
-
-const statusLabels = {
-  pending: "Chờ xử lý",
-  confirmed: "Đã xác nhận",
-  processing: "Đang xử lý",
-  shipped: "Đang giao",
-  delivered: "Đã giao",
-  cancelled: "Đã hủy",
-};
-
-const paymentStatus = {
-  unpaid: { label: "Chưa thanh toán", variant: "secondary" },
-  paid: { label: "Đã thanh toán", variant: "success" },
-  refunded: { label: "Đã hoàn tiền", variant: "info" },
 };
 
 const OrderPage = () => {
@@ -102,24 +84,15 @@ const OrderPage = () => {
           (counts[order.status] || 0) + (order.orderItems?.length || 0);
       }
     });
-    counts[""] = orders.reduce(
-      (sum, o) => sum + (o.orderItems?.length || 0),
-      0,
-    );
+
+    counts[""] = orders.reduce((sum, o) => sum + (o.orderItems?.length || 0), 0);
     return counts;
   }, [orders]);
 
-  // Fetch orders
   const fetchOrders = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await getOrdersByUserId(
-        token,
-        user.id,
-        page,
-        limit,
-        activeTab,
-      );
+      const res = await getOrdersByUserId(token, user.id, page, limit, activeTab);
       if (res?.errCode === 0) {
         setOrders(res.data || []);
         setTotalPages(res.pagination?.totalPages || 1);
@@ -140,15 +113,12 @@ const OrderPage = () => {
     }
   }, [fetchOrders, user?.id, token]);
 
-  // Reset page khi đổi tab
   const handleTabSelect = (k) => {
     setActiveTab(k);
     setPage(1);
   };
 
-  const filteredOrders = orders.filter(
-    (o) => !activeTab || o.status === activeTab,
-  );
+  const filteredOrders = orders.filter((o) => !activeTab || o.status === activeTab);
 
   const handleReceiveOrder = async (id) => {
     setReceivingId(id);
@@ -202,7 +172,6 @@ const OrderPage = () => {
         </Button>
       </div>
 
-      {/* TABS */}
       <Tabs activeKey={activeTab} onSelect={handleTabSelect} justify>
         {STATUS_TABS.map((tab) => (
           <Tab
@@ -221,9 +190,7 @@ const OrderPage = () => {
               >
                 {STATUS_ICONS[tab.key]}
                 {tab.label}
-                {["pending", "confirmed", "processing", "shipped"].includes(
-                  tab.key,
-                ) &&
+                {["pending", "confirmed", "processing", "shipped"].includes(tab.key) &&
                   productCounts[tab.key] > 0 && (
                     <Badge
                       pill
@@ -244,7 +211,6 @@ const OrderPage = () => {
         ))}
       </Tabs>
 
-      {/* LIST ORDERS */}
       {loading ? (
         <div className="text-center py-5">
           <Spinner animation="border" variant="primary" />
@@ -255,15 +221,13 @@ const OrderPage = () => {
             filteredOrders.map((o) => (
               <Card key={o.id} className="mb-3 shadow-sm">
                 <Card.Body>
-                  {/* HEADER */}
                   <div className="d-flex justify-content-between align-items-center mb-2">
-                    <div className="fw-bold">{"Sản phẩm"}</div>
+                    <div className="fw-bold">Sản phẩm</div>
                     <div className="text-muted small">
                       {new Date(o.createdAt).toLocaleDateString("vi-VN")}
                     </div>
                   </div>
 
-                  {/* PRODUCTS */}
                   {o.orderItems?.map((i) => {
                     const p = i.product;
                     return (
@@ -276,15 +240,13 @@ const OrderPage = () => {
                           className="rounded"
                         />
                         <div className="flex-grow-1">
-                          <div
+                          <ClickableText
                             className="fw-semibold product-name"
                             onClick={() => navigate(`/orders-detail/${o.id}`)}
                           >
                             {p?.name || i.productName}
-                          </div>
-                          <div className="text-muted small">
-                            SL: {i.quantity}
-                          </div>
+                          </ClickableText>
+                          <div className="text-muted small">SL: {i.quantity}</div>
                           <div className="d-flex align-items-center gap-2">
                             {p?.discount > 0 && (
                               <small className="text-decoration-line-through text-muted">
@@ -294,31 +256,23 @@ const OrderPage = () => {
                             <span className="fw-semibold text-danger">
                               {formatCurrency(i.price)}
                             </span>
-                            {p?.discount > 0 && (
-                              <Badge bg="danger">-{p.discount}%</Badge>
-                            )}
+                            {p?.discount > 0 && <Badge bg="danger">-{p.discount}%</Badge>}
                           </div>
                         </div>
                       </div>
                     );
                   })}
 
-                  {/* FOOTER */}
                   <div className="d-flex justify-content-between align-items-center mt-3">
                     <div>
-                      <Badge bg={statusVariants[o.status]} className="me-2">
-                        {statusLabels[o.status]}
-                      </Badge>
-                      <Badge bg={paymentStatus[o.paymentStatus]?.variant}>
-                        {paymentStatus[o.paymentStatus]?.label}
-                      </Badge>
+                      <span className="me-2">
+                        <StatusBadge map={statusMap} status={o.status} />
+                      </span>
+                      <StatusBadge map={paymentStatusMap} status={o.paymentStatus} />
                     </div>
-                    <div className="fw-bold text-success">
-                      {formatCurrency(o.totalPrice)}
-                    </div>
+                    <div className="fw-bold text-success">{formatCurrency(o.totalPrice)}</div>
                   </div>
 
-                  {/* ACTION BUTTONS */}
                   <div className="d-flex gap-2 mt-2 flex-wrap">
                     <Button
                       size="sm"
@@ -354,19 +308,13 @@ const OrderPage = () => {
                       </Button>
                     )}
                     {o.status === "delivered" && (
-                      <>
-                        <Button
-                          size="sm"
-                          className="btn-orange"
-                          onClick={() =>
-                            navigate(
-                              `/product-detail/${o.orderItems[0]?.product?.id}`,
-                            )
-                          }
-                        >
-                          Đánh giá
-                        </Button>
-                      </>
+                      <Button
+                        size="sm"
+                        className="btn-orange"
+                        onClick={() => navigate(`/product-detail/${o.orderItems[0]?.product?.id}`)}
+                      >
+                        Đánh giá
+                      </Button>
                     )}
                   </div>
                 </Card.Body>
@@ -378,7 +326,6 @@ const OrderPage = () => {
         </div>
       )}
 
-      {/* PAGINATION */}
       {totalPages > 1 && (
         <div className="mt-3 d-flex justify-content-center">
           <AppPagination
@@ -390,12 +337,7 @@ const OrderPage = () => {
         </div>
       )}
 
-      {/* CANCEL MODAL */}
-      <Modal
-        show={showCancelModal}
-        onHide={() => setShowCancelModal(false)}
-        centered
-      >
+      <Modal show={showCancelModal} onHide={() => setShowCancelModal(false)} centered>
         <Modal.Header closeButton>
           <Modal.Title>Xác nhận hủy đơn</Modal.Title>
         </Modal.Header>
@@ -404,11 +346,7 @@ const OrderPage = () => {
           <Button variant="secondary" onClick={() => setShowCancelModal(false)}>
             Đóng
           </Button>
-          <Button
-            variant="danger"
-            onClick={handleCancelOrder}
-            disabled={cancelling}
-          >
+          <Button variant="danger" onClick={handleCancelOrder} disabled={cancelling}>
             {cancelling ? <Spinner animation="border" size="sm" /> : "Hủy đơn"}
           </Button>
         </Modal.Footer>
